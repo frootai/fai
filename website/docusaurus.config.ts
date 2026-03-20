@@ -55,7 +55,7 @@ const config: Config = {
     announcementBar: {
       id: "frootai_mcp",
       content:
-        '🔌 <b>FrootAI MCP Server</b> — Add AI architecture knowledge to your agent: <code>git clone</code> → <code>npm install</code> → connect. <a href="https://github.com/gitpavleenbali/frootai/tree/main/mcp-server">Setup Guide →</a>',
+        '🔌 <b>FrootAI MCP Server</b> — Add AI architecture knowledge to your agent: <code>git clone</code> → <code>npm install</code> → connect. <a href="/frootai/setup-guide">Setup Guide →</a>',
       backgroundColor: "#0a0a0f",
       textColor: "#e0e0e0",
       isCloseable: true,
@@ -116,7 +116,8 @@ const config: Config = {
           title: "Ecosystem",
           items: [
             { label: "🔌 MCP Server", href: "https://github.com/gitpavleenbali/frootai/tree/main/mcp-server" },
-            { label: "📦 MCP Server", href: "https://github.com/gitpavleenbali/frootai/tree/main/mcp-server" },
+            { label: "📦 FROOT Packages", to: "/packages" },
+            { label: "📖 Setup Guide", to: "/setup-guide" },
             { label: "Azure Wiki", href: "https://gitpavleenbali.github.io/azure-wiki/" },
           ],
         },

@@ -649,6 +649,62 @@ Fine-tuning teaches HOW to respond, not WHAT to know.
   }
 );
 
+// ── Tool: get_froot_overview ───────────────────────────────────────
+
+server.tool(
+  "get_froot_overview",
+  "Get a complete overview of the FROOT framework — all 5 layers, 17 modules, what each layer covers, and how they connect. Use when asked 'what is FrootAI' or 'show me the framework'.",
+  {},
+  async () => {
+    const overview = `# FrootAI — The FROOT Framework Overview
+
+## From Root to Fruit: 5 Layers of AI Architecture Knowledge
+
+### ⛰️ BEDROCK — Infrastructure
+AI Landing Zones · GPU Compute · Networking · Security · Identity
+*The foundation everything grows from*
+
+### 🌱 F — FOUNDATIONS (The Roots)
+- **F1**: GenAI Foundations — Transformers, tokens, parameters, attention
+- **F2**: LLM Landscape — GPT, Claude, Llama, model selection
+- **F3**: AI Glossary A–Z — 200+ terms defined
+*The vocabulary of AI*
+
+### 🪵 R — REASONING (The Trunk)
+- **R1**: Prompt Engineering — System messages, few-shot, CoT, grounding
+- **R2**: RAG Architecture — Chunking, embeddings, vector search, reranking
+- **R3**: Deterministic AI — Hallucination reduction, evaluation, guardrails
+*How to make AI think well*
+
+### 🌿 O — ORCHESTRATION (The Branches)
+- **O1**: Semantic Kernel — Plugins, planners, memory, SK vs LangChain
+- **O2**: AI Agents — Planning, tool use, multi-agent, Agent Framework
+- **O3**: MCP & Tools — Model Context Protocol, function calling, A2A
+*Connecting AI into intelligent systems*
+
+### 🍃 O — OPERATIONS (The Leaves)
+- **O4**: Azure AI Platform — AI Foundry, Model Catalog, Landing Zones
+- **O5**: AI Infrastructure — GPU compute, Container Apps, AKS, serving
+- **O6**: Copilot Ecosystem — M365 Copilot, Copilot Studio, low-code
+*Running AI in production at scale*
+
+### 🍎 T — TRANSFORMATION (The Fruit)
+- **T1**: Fine-Tuning — LoRA, QLoRA, RLHF, DPO, MLOps
+- **T2**: Responsible AI — Content safety, red teaming, guardrails
+- **T3**: Production Patterns — Multi-agent hosting, API gateway, cost control
+*Turning AI into real-world impact*
+
+---
+**The Open Glue**: FrootAI removes silos between infrastructure, platform, and application teams.
+**Website**: https://gitpavleenbali.github.io/frootai/
+**MCP**: 6 tools · 200+ terms · 7 architecture patterns`;
+
+    return {
+      content: [{ type: "text", text: overview }],
+    };
+  }
+);
+
 // ── Resources: Module listing ──────────────────────────────────────
 
 server.resource(
@@ -670,7 +726,7 @@ The telescope and the microscope for AI architecture.
 🍎 T — Transformation (The Fruit): Fine-Tuning, Responsible AI, Production Patterns
 
 17 modules | 200+ AI terms | Architecture patterns for every scenario
-https://gitpavleenbali.github.io/azure-wiki/froot-ai`,
+https://gitpavleenbali.github.io/frootai/`,
       },
     ],
   })
