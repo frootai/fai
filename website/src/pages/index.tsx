@@ -61,20 +61,25 @@ function HeroBanner(): JSX.Element {
         <img src="/frootai/img/aifroot-logo.svg" alt="FrootAI" className={styles.heroLogo} />
         <p className={styles.heroLabel}>From Root ⇄ Fruit</p>
         <h1 className={styles.heroTitle}>FrootAI</h1>
-        <p style={{ fontSize: "0.88rem", fontStyle: "italic", color: "var(--ifm-color-emphasis-500)", margin: "0 auto 4px", letterSpacing: "0.01em" }}>
+        <p style={{ fontSize: "0.88rem", fontStyle: "italic", color: "var(--ifm-color-emphasis-500)", margin: "0 auto 6px", letterSpacing: "0.01em" }}>
           From a single token to a production agent fleet
         </p>
-        <p style={{ fontSize: "0.82rem", fontStyle: "italic", color: "var(--ifm-color-emphasis-400)", margin: "0 auto 12px" }}>
-          Infra ⇄ Apps
+        <p style={{ fontSize: "0.82rem", color: "var(--ifm-color-emphasis-400)", margin: "0 auto 10px", letterSpacing: "0.02em" }}>
+          Infra ⇄ Platform ⇄ Apps
         </p>
         <p className={styles.heroAcronym}>
           AI <span className={styles.heroAcronymF}>F</span>oundations · <span className={styles.heroAcronymR}>R</span>easoning · <span className={styles.heroAcronymO1}>O</span>rchestration · <span className={styles.heroAcronymO2}>O</span>perations · <span className={styles.heroAcronymT}>T</span>ransformation
         </p>
 
-        {/* Mission statement — concise, impactful */}
-        <div style={{ maxWidth: "640px", margin: "16px auto 8px", padding: "14px 24px", borderRadius: "14px", border: "1px solid rgba(16, 185, 129, 0.2)", background: "linear-gradient(135deg, rgba(16, 185, 129, 0.04), rgba(99, 102, 241, 0.04))" }}>
-          <p style={{ fontSize: "0.84rem", color: "var(--ifm-color-emphasis-600)", lineHeight: 1.6, margin: 0, textAlign: "center" }}>
-            🎯 <strong>The open glue</strong> that binds infra ⇄ platform ⇄ apps — a power kit for infrastructure people to master the AI and agentic ecosystem. Proper design from day one. No more silos.
+        {/* Mission mantra */}
+        <p style={{ fontSize: "1.15rem", fontWeight: 800, letterSpacing: "-0.01em", margin: "16px auto 12px", textAlign: "center", background: "linear-gradient(135deg, #10b981, #06b6d4, #6366f1)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+          Know the roots. Ship the fruit.
+        </p>
+
+        {/* Mission statement — one line */}
+        <div style={{ maxWidth: "620px", margin: "0 auto 8px", padding: "12px 24px", borderRadius: "14px", border: "1px solid rgba(16, 185, 129, 0.2)", background: "linear-gradient(135deg, rgba(16, 185, 129, 0.04), rgba(99, 102, 241, 0.04))" }}>
+          <p style={{ fontSize: "0.82rem", color: "var(--ifm-color-emphasis-600)", lineHeight: 1.55, margin: 0, textAlign: "center" }}>
+            🎯 The open glue — a power kit for infrastructure and platform people to master and bridge the gap with AI, agents, and the agentic ecosystem.
           </p>
         </div>
 
