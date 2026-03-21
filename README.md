@@ -31,28 +31,45 @@
 https://gitpavleenbali.github.io/frootai/
 ```
 
-### Add to your AI agent (MCP)
+### Install the MCP Server (npm)
 
 ```bash
-git clone https://github.com/gitpavleenbali/frootai.git
-cd frootai/mcp-server
-npm install
+# Zero-install — run directly
+npx frootai-mcp
+
+# Or install globally
+npm install -g frootai-mcp
 ```
+
+**npm**: [npmjs.com/package/frootai-mcp](https://www.npmjs.com/package/frootai-mcp)
 
 Then add to your MCP config:
 
 ```json
 {
   "mcpServers": {
-    "frootai": {
-      "command": "node",
-      "args": ["/path/to/frootai/mcp-server/index.js"]
-    }
+    "frootai": { "command": "npx", "args": ["frootai-mcp"] }
   }
 }
 ```
 
 Works with: **Claude Desktop** · **VS Code / GitHub Copilot** · **Cursor** · **Windsurf** · **Azure AI Foundry** · any MCP client
+
+### Install the VS Code Extension
+
+```bash
+# From VS Code Marketplace
+code --install-extension pavleenbali.frootai
+```
+
+Or search **"FrootAI"** in VS Code Extensions (Ctrl+Shift+X).
+
+**Marketplace**: [marketplace.visualstudio.com → pavleenbali.frootai](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
+
+**What you get:**
+- Sidebar with Solution Plays, FROOT Modules, MCP Tools
+- Commands: Look Up Term, Search Knowledge, Init DevKit, Architecture Patterns
+- Status bar integration
 
 ---
 

@@ -309,6 +309,36 @@ export default function FrootAIPage(): JSX.Element {
           </div>
         </section>
 
+        {/* ── Get FrootAI: npm + VS Code Extension ── */}
+        <section className={styles.lensSection}>
+          <h2 className={styles.sectionTitle}>Get FrootAI</h2>
+          <p className={styles.sectionSub}>Two ways to integrate — choose based on your workflow</p>
+          <div className={styles.lensGrid}>
+            <div className={styles.lensCard} style={{ borderColor: "rgba(16, 185, 129, 0.3)" }}>
+              <div className={styles.lensEmoji}>📦</div>
+              <h3 className={styles.lensTitle}>npm: MCP Server</h3>
+              <ul className={styles.lensList}>
+                <li><strong>What:</strong> 6-tool MCP server with 17 modules + 200+ terms</li>
+                <li><strong>For:</strong> Adding AI knowledge to any agent (Claude, Copilot, Cursor)</li>
+                <li><strong>Install:</strong> <code>npx frootai-mcp</code></li>
+                <li><strong>Config:</strong> One JSON line in your MCP settings</li>
+                <li><a href="https://www.npmjs.com/package/frootai-mcp" target="_blank" style={{ color: "#10b981", fontWeight: 600 }}>→ npmjs.com/package/frootai-mcp</a></li>
+              </ul>
+            </div>
+            <div className={styles.lensCard} style={{ borderColor: "rgba(99, 102, 241, 0.3)" }}>
+              <div className={styles.lensEmoji}>💻</div>
+              <h3 className={styles.lensTitle}>VS Code Extension</h3>
+              <ul className={styles.lensList}>
+                <li><strong>What:</strong> Sidebar with 20 solution plays, modules, MCP tools</li>
+                <li><strong>For:</strong> Browsing, searching, DevKit init right in your editor</li>
+                <li><strong>Install:</strong> Search "FrootAI" in VS Code Extensions</li>
+                <li><strong>Commands:</strong> Look Up Term, Search Knowledge, Init DevKit</li>
+                <li><a href="https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai" target="_blank" style={{ color: "#6366f1", fontWeight: 600 }}>→ VS Code Marketplace</a></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* ── Learning Paths ── */}
         <section className={styles.paths}>
           <h2 className={styles.sectionTitle}>Learning Paths</h2>
