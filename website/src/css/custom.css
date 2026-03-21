@@ -701,12 +701,17 @@ div[class*="announcementBar"] kbd {
 /*  GLOBAL MOBILE — prevent horizontal scroll, touch-friendly          */
 /* ================================================================== */
 
+*, *::before, *::after {
+  box-sizing: border-box !important;
+}
+
 html, body {
   overflow-x: hidden !important;
   max-width: 100vw !important;
+  width: 100% !important;
 }
 
-.main-wrapper, [class*="docMainContainer"], article {
+.main-wrapper, [class*="docMainContainer"], article, main {
   max-width: 100% !important;
   overflow-x: hidden !important;
 }
@@ -717,9 +722,10 @@ article table {
   max-width: 100%;
 }
 
-article pre {
+article pre, code {
   max-width: 100%;
   overflow-x: auto;
+  word-break: break-word;
 }
 
 article .mermaid {
@@ -727,13 +733,60 @@ article .mermaid {
   overflow-x: auto;
 }
 
-/* Touch-friendly tap targets */
+/* Force ALL inline-styled divs to respect viewport */
+div[style] {
+  max-width: 100% !important;
+  overflow-x: hidden;
+}
+
+/* Force ALL grids to wrap on small screens */
 @media (max-width: 768px) {
+  /* Touch-friendly tap targets */
   a, button {
     min-height: 44px;
-    min-width: 44px;
   }
+
   .navbar__link {
     padding: 8px 12px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Force all CSS grid containers to single column on mobile */
+  div[style*="grid-template-columns"],
+  div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Force all flex rows to wrap */
+  div[style*="display: flex"],
+  div[style*='display:"flex"'],
+  div[style*="display:flex"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* Reduce padding on all page containers */
+  div[style*="padding: \"40px"],
+  div[style*="padding:\"40px"] {
+    padding: 20px 12px 40px !important;
+  }
+
+  /* Code blocks scroll rather than overflow */
+  pre, code {
+    font-size: 0.72rem !important;
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+  }
+
+  /* Reduce font sizes for readability */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.2rem !important; }
+  h3 { font-size: 1rem !important; }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  div[style*="grid-template-columns"],
+  div[style*="gridTemplateColumns"] {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }

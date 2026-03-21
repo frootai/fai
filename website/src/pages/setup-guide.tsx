@@ -3,10 +3,10 @@ import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
 
 const codeStyle: React.CSSProperties = {
-  display: "block", padding: "16px 20px", borderRadius: "12px", fontSize: "0.82rem",
+  display: "block", padding: "12px 16px", borderRadius: "12px", fontSize: "0.78rem",
   fontFamily: "var(--ifm-font-family-monospace)", background: "rgba(16, 185, 129, 0.04)",
-  border: "1px solid rgba(16, 185, 129, 0.12)", lineHeight: "1.8", marginBottom: "16px",
-  overflowX: "auto", whiteSpace: "pre",
+  border: "1px solid rgba(16, 185, 129, 0.12)", lineHeight: "1.7", marginBottom: "16px",
+  overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word" as any, maxWidth: "100%",
 };
 
 const cardStyle: React.CSSProperties = {
