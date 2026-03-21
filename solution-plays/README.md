@@ -1,49 +1,28 @@
 # 🎯 FrootAI Solution Plays
 
-> **One command. Complete AI solution. Pre-tuned. Evaluated.**
-> Each solution play is a deployable package: infrastructure + AI configuration + agent instructions + evaluation pipeline.
+> **20 solution plays. Each with 🛠️ DevKit + 🎛️ TuneKit. All audited.**
 
----
+| # | Solution | Status | Complexity |
+|---|---------|--------|-----------|
+| 01 | [Enterprise RAG Q&A](./01-enterprise-rag/) | ✅ Ready | Medium |
+| 02 | [AI Landing Zone](./02-ai-landing-zone/) | ✅ Ready | Foundation |
+| 03 | [Deterministic Agent](./03-deterministic-agent/) | ✅ Ready | Medium |
+| 04 | [Call Center Voice AI](./04-call-center-voice-ai/) | 🔧 Skeleton | High |
+| 05 | [IT Ticket Resolution](./05-it-ticket-resolution/) | 🔧 Skeleton | Medium |
+| 06 | [Document Intelligence](./06-document-intelligence/) | 🔧 Skeleton | Medium |
+| 07 | [Multi-Agent Service](./07-multi-agent-service/) | 🔧 Skeleton | High |
+| 08 | [Copilot Studio Bot](./08-copilot-studio-bot/) | 🔧 Skeleton | Low |
+| 09 | [AI Search Portal](./09-ai-search-portal/) | 🔧 Skeleton | Medium |
+| 10 | [Content Moderation](./10-content-moderation/) | 🔧 Skeleton | Low |
+| 11 | [Landing Zone Advanced](./11-ai-landing-zone-advanced/) | 🔧 Skeleton | High |
+| 12 | [Model Serving AKS](./12-model-serving-aks/) | 🔧 Skeleton | High |
+| 13 | [Fine-Tuning Workflow](./13-fine-tuning-workflow/) | 🔧 Skeleton | High |
+| 14 | [AI Gateway](./14-cost-optimized-ai-gateway/) | 🔧 Skeleton | Medium |
+| 15 | [Multi-Modal DocProc](./15-multi-modal-docproc/) | 🔧 Skeleton | Medium |
+| 16 | [Copilot Teams Extension](./16-copilot-teams-extension/) | 🔧 Skeleton | Medium |
+| 17 | [AI Observability](./17-ai-observability/) | 🔧 Skeleton | Medium |
+| 18 | [Prompt Management](./18-prompt-management/) | 🔧 Skeleton | Medium |
+| 19 | [Edge AI Phi-4](./19-edge-ai-phi4/) | 🔧 Skeleton | High |
+| 20 | [Anomaly Detection](./20-anomaly-detection/) | 🔧 Skeleton | High |
 
-## Available Solution Plays
-
-| # | Solution | Complexity | What It Deploys | Status |
-|---|---------|-----------|----------------|--------|
-| 01 | [Enterprise RAG Q&A](./01-enterprise-rag/) | Medium | RAG pipeline with AI Search + OpenAI + Container App | ✅ Ready |
-| 02 | [AI Landing Zone](./02-ai-landing-zone/) | Foundation | VNet + Private Endpoints + RBAC + GPU + AI Services | ✅ Ready |
-| 03 | [Deterministic Agent](./03-deterministic-agent/) | Medium | Reliable agent with temp=0, structured output, guardrails | ✅ Ready |
-
-## Coming Soon
-
-| # | Solution | Status |
-|---|---------|--------|
-| 04 | Call Center Voice AI | 🔜 Phase 2 |
-| 05 | IT Ticket Resolution | 🔜 Phase 2 |
-| 06 | Document Intelligence Pipeline | 🔜 Phase 2 |
-| 07 | Multi-Agent Customer Service | 🔜 Phase 2 |
-| 08–20 | [See full roadmap](../ROADMAP.md) | 🔜 Phase 2–3 |
-
-## How Solution Plays Work
-
-```
-solution-plays/01-enterprise-rag/
-├── README.md           ← Overview + architecture diagram
-├── agent.md            ← Agent personality + rules + examples
-├── config/
-│   ├── openai.json     ← Model + temperature + top-k (pre-tuned)
-│   ├── search.json     ← Index + retrieval + reranking config
-│   └── chunking.json   ← Chunk size + overlap + strategy
-├── infra/
-│   └── main.bicep      ← One-click Azure deployment
-├── evaluation/
-│   ├── test-set.jsonl  ← 100 test questions with ground truth
-│   └── eval.py         ← Automated quality scoring
-└── mcp/
-    └── index.js        ← Solution-specific MCP tools
-```
-
-**The power**: An infra person reviews the config files, adjusts knobs if needed, runs `azd up`, and gets a production AI solution — with the AI parameters already tuned by architects.
-
----
-
-> **FrootAI** — Know the roots. Ship the fruit.
+Each play ships with **🛠️ DevKit** (developer velocity) + **🎛️ TuneKit** (AI fine-tuning).
