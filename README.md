@@ -1,10 +1,11 @@
-# 🌳 FrootAI — From Root to Fruit
+# 🌳 FrootAI — Know the Roots. Ship the Fruit.
 
-> **The open glue that binds infrastructure, platform, and application for AI architecture.**
-> From a single token to a production agent fleet.
+> A power kit for infrastructure and platform people to master and bridge the gap with AI applications, agents, and the agentic ecosystem.
+> From a single token to a production agent fleet · Infra ⇄ Platform ⇄ Apps
 
 [![Website](https://img.shields.io/badge/Website-FrootAI-10b981?style=for-the-badge&logo=docusaurus)](https://gitpavleenbali.github.io/frootai/)
-[![MCP Server](https://img.shields.io/badge/MCP_Server-5_Tools-6366f1?style=for-the-badge)](./mcp-server/)
+[![MCP Server](https://img.shields.io/badge/MCP_Server-6_Tools-6366f1?style=for-the-badge)](./mcp-server/)
+[![Solution Plays](https://img.shields.io/badge/Solution_Plays-3_Ready-7c3aed?style=for-the-badge)](./solution-plays/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
 
 ---
@@ -13,12 +14,11 @@
 
 **FrootAI** = AI **F**oundations · **R**easoning · **O**rchestration · **O**perations · **T**ransformation
 
-It's three things in one:
-
 | | What | For Whom |
 |---|------|----------|
-| 🎓 | **17 knowledge modules** covering AI architecture end-to-end | Cloud Architects, AI Engineers, CSAs |
-| 🔌 | **MCP Server** — add to any AI agent as a callable skill set | Agent builders, Copilot developers |
+| 🎯 | **Solution Plays** — pre-tuned, deployable AI solutions (RAG, agents, landing zones) | Infra & platform engineers |
+| 📖 | **17 knowledge modules** covering AI architecture end-to-end | Cloud Architects, CSAs |
+| 🔌 | **MCP Server** — 6 tools, add to any AI agent as a callable skill set | Agent builders, developers |
 | 🔗 | **The open glue** — removes silos between infra, platform, and app teams | Everyone |
 
 ---
@@ -80,7 +80,7 @@ graph TB
 
 ---
 
-## MCP Server — 5 Tools
+## MCP Server — 6 Tools
 
 | Tool | What It Does |
 |------|-------------|
@@ -89,10 +89,24 @@ graph TB
 | `lookup_term` | Look up any of 200+ AI/ML terms |
 | `search_knowledge` | Full-text search across all modules |
 | `get_architecture_pattern` | 7 pre-built decision guides |
+| `get_froot_overview` | Complete FROOT framework summary |
 
-**Architecture patterns:** `rag_pipeline` · `agent_hosting` · `model_selection` · `cost_optimization` · `deterministic_ai` · `multi_agent` · `fine_tuning_decision`
+[📖 Full MCP documentation →](./mcp-server/README.md) · [📖 Setup Guide →](https://gitpavleenbali.github.io/frootai/setup-guide)
 
-[📖 Full MCP documentation →](./mcp-server/README.md)
+---
+
+## 🎯 Solution Plays
+
+Pre-tuned, deployable AI solutions — infra + AI config + agent instructions + evaluation.
+
+| # | Solution | What It Deploys | Status |
+|---|---------|----------------|--------|
+| 01 | [Enterprise RAG Q&A](./solution-plays/01-enterprise-rag/) | AI Search + OpenAI + Container App (pre-tuned) | ✅ Ready |
+| 02 | [AI Landing Zone](./solution-plays/02-ai-landing-zone/) | VNet + PE + RBAC + GPU + AI Services | ✅ Ready |
+| 03 | [Deterministic Agent](./solution-plays/03-deterministic-agent/) | Reliable agent with temp=0, guardrails, eval | ✅ Ready |
+| 04–20 | [See roadmap](./ROADMAP.md) | Call center, IT tickets, multi-agent, and more | 🔜 Coming |
+
+[📖 All Solution Plays →](./solution-plays/) · [📖 Roadmap →](./ROADMAP.md)
 
 ---
 

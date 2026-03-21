@@ -1,0 +1,30 @@
+{
+  "index_name": "enterprise-rag-index",
+  "search_type": "hybrid",
+  "vector_config": {
+    "algorithm": "hnsw",
+    "metric": "cosine",
+    "ef_construction": 400,
+    "ef_search": 500,
+    "m": 4
+  },
+  "semantic_config": {
+    "enabled": true,
+    "reranker": "rerankerv2",
+    "query_language": "en-us"
+  },
+  "retrieval": {
+    "top_k": 5,
+    "relevance_threshold": 0.78,
+    "hybrid_weights": {
+      "vector": 0.6,
+      "keyword": 0.4
+    }
+  },
+  "_comments": {
+    "search_type": "hybrid outperforms vector-only or keyword-only by 15-25%",
+    "top_k": "5 chunks provides enough context without noise. Increase to 10 for broad topics.",
+    "relevance_threshold": "0.78 filters irrelevant matches. Lower to 0.65 for recall-focused use cases.",
+    "hybrid_weights": "60/40 vector/keyword works for most enterprise docs. Flip to 40/60 for highly structured data."
+  }
+}

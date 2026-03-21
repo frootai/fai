@@ -11,12 +11,12 @@
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#6366f1', 'lineColor': '#818cf8', 'background': 'transparent'}}}%%
 graph TB
-    FRUIT["🍎 FRUIT<br/><b>Applications · Agents · Copilots</b><br/><i>Fine-tuning · Safety · Production</i>"]
-    LEAVES["🍃 LEAVES<br/><b>Azure AI · Hosting · Copilot</b><br/><i>Landing Zones · GPU · Endpoints</i>"]
-    BRANCHES["🌿 BRANCHES<br/><b>Semantic Kernel · Agents · MCP</b><br/><i>Tools · Orchestration · A2A</i>"]
-    TRUNK["🪵 TRUNK<br/><b>Prompts · RAG · Grounding</b><br/><i>Determinism · Evaluation · Retrieval</i>"]
-    ROOTS["🌱 ROOTS<br/><b>Tokens · Parameters · Models</b><br/><i>Transformers · Embeddings · Glossary</i>"]
-    BEDROCK["⛰️ BEDROCK<br/><b>Infrastructure · AI Landing Zones</b><br/><i>GPU · Networking · Security · Identity</i>"]
+    FRUIT["🍎 FRUIT<br/>Apps · Agents · Copilots"]
+    LEAVES["🍃 LEAVES<br/>Azure AI · Hosting"]
+    BRANCHES["🌿 BRANCHES<br/>SK · Agents · MCP"]
+    TRUNK["🪵 TRUNK<br/>Prompts · RAG"]
+    ROOTS["🌱 ROOTS<br/>Tokens · Models"]
+    BEDROCK["⛰️ BEDROCK<br/>Infra · Landing Zones"]
 
     BEDROCK --> ROOTS --> TRUNK --> BRANCHES --> LEAVES --> FRUIT
 

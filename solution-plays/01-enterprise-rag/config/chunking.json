@@ -1,0 +1,18 @@
+{
+  "chunking": {
+    "strategy": "semantic",
+    "chunk_size_tokens": 512,
+    "chunk_overlap_tokens": 51,
+    "max_chunks_per_doc": 200
+  },
+  "embedding": {
+    "model": "text-embedding-3-large",
+    "dimensions": 3072
+  },
+  "_comments": {
+    "strategy": "semantic = split by paragraph/section boundaries. Use 'fixed' for uniform chunks.",
+    "chunk_size_tokens": "512 balances specificity and context. Use 256 for precise QA, 1024 for summaries.",
+    "chunk_overlap_tokens": "10% overlap prevents info loss at chunk boundaries.",
+    "dimensions": "3072 for maximum quality. Use 1536 for cost savings (minor quality loss)."
+  }
+}
