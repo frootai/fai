@@ -253,12 +253,15 @@ npm install`}
         </div>
 
         {/* ── CTA ── */}
-        <div style={{ textAlign: "center", marginTop: "40px" }}>
-          <Link to="/packages" style={{ display: "inline-block", padding: "14px 36px", borderRadius: "12px", background: "linear-gradient(135deg, #10b981, #06b6d4)", color: "#fff", fontWeight: 700, textDecoration: "none", marginRight: "12px" }}>
-            📦 Browse FROOT Packages
+        <div style={{ textAlign: "center", marginTop: "40px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", padding: "6px 0" }}>
+          <Link to="/ecosystem" className="glow-btn glow-btn-devkit" style={{ padding: "10px 24px", fontSize: "0.85rem" }}>
+            🔗 Back to Ecosystem
           </Link>
-          <Link to="https://github.com/gitpavleenbali/frootai" style={{ display: "inline-block", padding: "14px 36px", borderRadius: "12px", background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontWeight: 700, textDecoration: "none" }}>
-            ⭐ Star on GitHub
+          <Link to="/mcp-tooling" className="glow-btn glow-btn-github" style={{ padding: "10px 24px", fontSize: "0.85rem" }}>
+            📦 MCP Server
+          </Link>
+          <Link to="/" className="glow-btn glow-btn-tunekit" style={{ padding: "10px 24px", fontSize: "0.85rem" }}>
+            🌳 Back to FrootAI
           </Link>
         </div>
       </div>

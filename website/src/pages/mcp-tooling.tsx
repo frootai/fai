@@ -8,18 +8,25 @@ export default function MCPToolingPage(): JSX.Element {
     <Layout title="MCP Tooling — FrootAI" description="Add FrootAI to your AI agent. 6 tools, 17 modules, 200+ terms. npx frootai-mcp.">
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px 80px" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>🔌 MCP Tooling</h1>
-          <p style={{ fontSize: "0.95rem", color: "var(--ifm-color-emphasis-500)", maxWidth: "600px", margin: "0 auto" }}>
-            Add FrootAI to any AI agent. 6 tools, 17 modules, 200+ terms. Less tokens, zero hallucination, open economics.
+          <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>🔌 FrootAI MCP Server</h1>
+          <p style={{ fontSize: "0.95rem", color: "var(--ifm-color-emphasis-500)", maxWidth: "640px", margin: "0 auto" }}>
+            Add AI <span style={{ color: "#10b981", fontWeight: 600 }}>Infra</span>, <span style={{ color: "#06b6d4", fontWeight: 600 }}>Platform</span>, and <span style={{ color: "#7c3aed", fontWeight: 600 }}>Application</span> Knowledge to Your Agent
           </p>
         </div>
 
-        {/* Install */}
-        <div style={{ padding: "24px", borderRadius: "14px", border: "2px solid rgba(16, 185, 129, 0.3)", background: "rgba(16, 185, 129, 0.04)", textAlign: "center", marginBottom: "32px" }}>
-          <div style={{ fontWeight: 800, fontSize: "1.1rem", marginBottom: "8px" }}>📦 Install from npm</div>
-          <code style={{ fontSize: "1rem", padding: "8px 24px", borderRadius: "10px", background: "rgba(16, 185, 129, 0.1)" }}>npx frootai-mcp</code>
-          <div style={{ fontSize: "0.78rem", color: "var(--ifm-color-emphasis-400)", marginTop: "8px" }}>
-            or <code>npm install -g frootai-mcp</code> · <a href="https://www.npmjs.com/package/frootai-mcp" target="_blank" style={{ color: "#10b981" }}>npmjs.com/package/frootai-mcp</a>
+        {/* Install — compact modern card */}
+        <div style={{ display: "flex", gap: "12px", marginBottom: "32px", flexWrap: "wrap", justifyContent: "center" }}>
+          <div style={{ flex: "1 1 220px", maxWidth: "320px", padding: "16px 20px", borderRadius: "14px", border: "2px solid rgba(16, 185, 129, 0.3)", background: "rgba(16, 185, 129, 0.04)", textAlign: "center" }}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#10b981", marginBottom: "6px" }}>Quick Run</div>
+            <code style={{ fontSize: "0.9rem", padding: "6px 16px", borderRadius: "8px", background: "rgba(16, 185, 129, 0.1)" }}>npx frootai-mcp</code>
+          </div>
+          <div style={{ flex: "1 1 220px", maxWidth: "320px", padding: "16px 20px", borderRadius: "14px", border: "2px solid rgba(99, 102, 241, 0.3)", background: "rgba(99, 102, 241, 0.04)", textAlign: "center" }}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6366f1", marginBottom: "6px" }}>Install Global</div>
+            <code style={{ fontSize: "0.9rem", padding: "6px 16px", borderRadius: "8px", background: "rgba(99, 102, 241, 0.1)" }}>npm i -g frootai-mcp</code>
+          </div>
+          <div style={{ flex: "1 1 220px", maxWidth: "320px", padding: "16px 20px", borderRadius: "14px", border: "2px solid rgba(124, 58, 237, 0.3)", background: "rgba(124, 58, 237, 0.04)", textAlign: "center" }}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#7c3aed", marginBottom: "6px" }}>npm Registry</div>
+            <a href="https://www.npmjs.com/package/frootai-mcp" target="_blank" style={{ fontSize: "0.82rem", color: "#7c3aed", fontWeight: 600 }}>npmjs.com/package/frootai-mcp →</a>
           </div>
         </div>
 
@@ -85,12 +92,22 @@ export default function MCPToolingPage(): JSX.Element {
           ))}
         </div>
 
-        <div style={{ textAlign: "center" }}>
-          <Link to="/setup-guide" className={styles.glowPill} style={{ "--pill-color": "#10b981", display: "inline-block", marginRight: "12px" } as React.CSSProperties}>
-            📖 Full Setup Guide
+        {/* Setup Guide tile + Back */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "14px", marginBottom: "24px", padding: "6px 0" }}>
+          <Link to="/setup-guide" className={styles.glowCard} style={{ "--glow-color": "#10b981", display: "block" } as React.CSSProperties}>
+            <div style={{ fontSize: "1.8rem", marginBottom: "4px" }}>📖</div>
+            <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>Full Setup Guide</div>
+            <div style={{ fontSize: "0.72rem", color: "#10b981" }}>Step-by-step MCP config</div>
           </Link>
-          <Link to="/" className={styles.glowPill} style={{ "--pill-color": "#f59e0b", display: "inline-block" } as React.CSSProperties}>
-            🌳 Back to FrootAI
+          <Link to="/ecosystem" className={styles.glowCard} style={{ "--glow-color": "#6366f1", display: "block" } as React.CSSProperties}>
+            <div style={{ fontSize: "1.8rem", marginBottom: "4px" }}>🔗</div>
+            <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>Back to Ecosystem</div>
+            <div style={{ fontSize: "0.72rem", color: "#6366f1" }}>Explore the full toolkit</div>
+          </Link>
+          <Link to="/" className={styles.glowCard} style={{ "--glow-color": "#f59e0b", display: "block" } as React.CSSProperties}>
+            <div style={{ fontSize: "1.8rem", marginBottom: "4px" }}>🌳</div>
+            <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>Back to FrootAI</div>
+            <div style={{ fontSize: "0.72rem", color: "#f59e0b" }}>Home page</div>
           </Link>
         </div>
       </div>

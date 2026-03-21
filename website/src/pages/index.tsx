@@ -168,11 +168,15 @@ export default function FrootAIPage(): JSX.Element {
 
         {/* ═══ 6. CTA ═══ */}
         <section className={styles.lensSection}>
-          <h2 className={styles.sectionTitle}>FrootAI — The BIY AI Kit</h2>
-          <p className={styles.sectionSub}>For Infrastructure, Platform, and Application Teams</p>
+          <h2 className={styles.sectionTitle}>
+            FrootAI — The <span style={{ color: "#10b981" }}>B</span>uild <span style={{ color: "#06b6d4" }}>I</span>t <span style={{ color: "#7c3aed" }}>Y</span>ourself AI Kit
+          </h2>
+          <p className={styles.sectionSub}>
+            For <span style={{ color: "#10b981", fontWeight: 700 }}>I</span>nfrastructure, <span style={{ color: "#06b6d4", fontWeight: 700 }}>P</span>latform, and <span style={{ color: "#7c3aed", fontWeight: 700 }}>A</span>pplication Teams
+          </p>
           <div className={styles.ctaSection}>
             <p style={{ fontSize: "0.78rem", fontStyle: "italic", color: "var(--ifm-color-emphasis-400)", textAlign: "center", margin: "0 auto 16px" }}>
-              Infrastructure are the roots. Platform is the trunk. Application is the fruit.
+              <span style={{ color: "#10b981" }}>Infrastructure</span> are the roots. <span style={{ color: "#06b6d4" }}>Platform</span> is the trunk. <span style={{ color: "#7c3aed" }}>Application</span> is the fruit.
             </p>
             <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", padding: "6px 0" }}>
               {[
