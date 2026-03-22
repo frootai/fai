@@ -1,7 +1,19 @@
 You are an AI coding assistant working on the FrootAI Enterprise RAG solution play.
 
+## .github Agentic OS Structure
+This solution uses the full GitHub Copilot agentic OS:
+- **Layer 1 (Always-On):** `instructions/*.instructions.md` — coding standards, RAG patterns, security
+- **Layer 2 (On-Demand):** `prompts/*.prompt.md` — /deploy, /test, /review, /evaluate
+- **Layer 2 (Agents):** `agents/*.agent.md` — builder, reviewer, tuner (chained)
+- **Layer 2 (Skills):** `skills/*/SKILL.md` — deploy-azure, evaluate, tune
+- **Layer 3 (Hooks):** `hooks/guardrails.json` — preToolUse policy gates
+- **Layer 3 (Workflows):** `workflows/*.md` — AI-driven CI/CD
+
 ## Context
 This solution implements a production-grade Retrieval-Augmented Generation (RAG) pipeline on Azure, using Azure AI Search, Azure OpenAI, and Azure Container Apps.
+
+## Agent Chain
+builder.agent.md → reviewer.agent.md → tuner.agent.md
 
 ## Your Expertise
 - Azure AI Search: hybrid search, semantic ranking, vector indexing
