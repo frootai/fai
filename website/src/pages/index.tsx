@@ -128,7 +128,7 @@ export default function FrootAIPage(): JSX.Element {
               </Link>
             ))}
             {/* Open Source tile → links to /enterprise */}
-            <Link to="/enterprise" className={styles.glowCard} style={{ "--glow-color": "#00C853" } as React.CSSProperties}>
+            <Link to="/community" className={styles.glowCard} style={{ "--glow-color": "#00C853" } as React.CSSProperties}>
               <div style={{ fontSize: "1.8rem", marginBottom: "4px" }}>🌱</div>
               <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>100% Open Source</div>
               <div style={{ fontSize: "0.72rem", color: "#00C853" }}>MIT License — Star on GitHub</div>
@@ -186,12 +186,12 @@ export default function FrootAIPage(): JSX.Element {
             </p>
             <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", padding: "6px 0" }}>
               {[
-                { label: "📚 FAI Learning Hub", to: "/enterprise", color: "#f59e0b" },
+                { label: "📚 FAI Learning Hub", to: "/learning-hub", color: "#f59e0b" },
                 { label: "🔗 Ecosystem Overview", to: "/ecosystem", color: "#0ea5e9" },
                 { label: "💻 VS Code Extension", to: "/vscode-extension", color: "#6366f1" },
                 { label: "🔌 MCP Server", to: "/mcp-tooling", color: "#10b981" },
                 { label: "✨ FAI Agent", to: "/chatbot", color: "#f59e0b" },
-                { label: "🌱 Open Source Community", to: "/enterprise", color: "#00C853" },
+                { label: "🌱 Open Source Community", to: "/community", color: "#00C853" },
                 { label: "🛠️ Developer Center", to: "/dev-hub", color: "#7c3aed" },
                 { label: "⭐ Star on GitHub", to: "https://github.com/gitpavleenbali/frootai", color: "#eab308" },
               ].map((link) => (

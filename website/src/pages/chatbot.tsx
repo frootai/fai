@@ -39,6 +39,20 @@ export default function ChatbotPage(): JSX.Element {
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [history]);
 
+  // Simple markdown to HTML for clickable links + formatting
+  const renderMd = (text: string) => {
+    let html = text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#f59e0b;text-decoration:underline;" target="_blank">$1</a>')
+      .replace(/`([^`]+)`/g, '<code style="background:rgba(245,158,11,0.1);padding:2px 6px;border-radius:4px;font-size:0.8rem;">$1</code>')
+      .replace(/^### (.+)$/gm, '<h4 style="margin:8px 0 4px;font-size:0.9rem;font-weight:700;">$1</h4>')
+      .replace(/^## (.+)$/gm, '<h3 style="margin:10px 0 4px;font-size:0.95rem;font-weight:700;">$1</h3>')
+      .replace(/^- (.+)$/gm, '• $1')
+      .replace(/^(\d+)\. (.+)$/gm, '$1. $2')
+      .replace(/\n/g, '<br/>');
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  };
+
   const send = async (text?: string) => {
     const message = text || msg;
     if (!message.trim() || loading) return;
@@ -54,7 +68,7 @@ export default function ChatbotPage(): JSX.Element {
 
   return (
     <Layout title="FAI Agent - FrootAI" description="AI-powered architecture guide. Grounded in 20 solution plays, 16 MCP tools, 18 knowledge modules. Powered by Azure OpenAI GPT-4.1.">
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "32px 20px 60px" }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 20px 60px" }}>
 
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <div style={{ display: "inline-block", padding: "3px 14px", borderRadius: "20px", background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,179,8,0.08))", border: "1px solid rgba(245,158,11,0.3)", fontSize: "0.65rem", color: "#f59e0b", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "8px" }}>
@@ -70,8 +84,8 @@ export default function ChatbotPage(): JSX.Element {
           <div style={{ flex: 1, padding: "20px", overflowY: "auto", maxHeight: "550px" }}>
             {history.map((m, i) => (
               <div key={i} style={{ marginBottom: "14px", display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
-                <div style={{ maxWidth: "85%", padding: "12px 16px", borderRadius: m.role === "user" ? "14px 14px 4px 14px" : "14px 14px 14px 4px", background: m.role === "user" ? "rgba(245,158,11,0.12)" : "rgba(99,102,241,0.08)", border: `1px solid ${m.role === "user" ? "rgba(245,158,11,0.25)" : "rgba(99,102,241,0.15)"}`, whiteSpace: "pre-wrap", fontSize: "0.84rem", lineHeight: 1.65 }}>
-                  {m.text}
+                <div style={{ maxWidth: "80%", padding: "12px 16px", borderRadius: m.role === "user" ? "14px 14px 4px 14px" : "14px 14px 14px 4px", background: m.role === "user" ? "rgba(245,158,11,0.12)" : "rgba(99,102,241,0.08)", border: `1px solid ${m.role === "user" ? "rgba(245,158,11,0.25)" : "rgba(99,102,241,0.15)"}`, fontSize: "0.84rem", lineHeight: 1.65 }}>
+                  {m.role === "assistant" ? renderMd(m.text) : m.text}
                 </div>
               </div>
             ))}
@@ -104,9 +118,9 @@ export default function ChatbotPage(): JSX.Element {
         </div>
 
         <div style={{ marginTop: "16px", textAlign: "center", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link to="/configurator" className={styles.glowPill} style={{ "--pill-color": "#f59e0b" } as React.CSSProperties}>Solution Configurator</Link>
-          <Link to="/feature-spec" className={styles.glowPill} style={{ "--pill-color": "#6366f1" } as React.CSSProperties}>Feature Spec</Link>
-          <Link to="/solution-plays" className={styles.glowPill} style={{ "--pill-color": "#7c3aed" } as React.CSSProperties}>Solution Plays</Link>
+          <Link to="/" className={styles.glowPill} style={{ "--pill-color": "#f59e0b" } as React.CSSProperties}>Back to FrootAI</Link>
+          <Link to="/configurator" className={styles.glowPill} style={{ "--pill-color": "#6366f1" } as React.CSSProperties}>Solution Configurator</Link>
+          <Link to="/ecosystem" className={styles.glowPill} style={{ "--pill-color": "#7c3aed" } as React.CSSProperties}>FAI Ecosystem</Link>
         </div>
       </div>
     </Layout>
