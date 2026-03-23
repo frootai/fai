@@ -196,9 +196,6 @@ export default function SolutionPlaysPage(): JSX.Element {
             </div>
             <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>Tune AI without being an AI specialist.</p>
           </div>
-            </div>
-            <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>Every knob pre-calibrated for production.</p>
-          </div>
         </div>
 
         <p style={{ fontSize: "0.78rem", color: "var(--ifm-color-emphasis-400)", textAlign: "center", marginBottom: "24px" }}>
