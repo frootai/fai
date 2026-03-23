@@ -207,7 +207,7 @@ const glossary = loadGlossary(modules);
 
 const server = new McpServer({
   name: "frootai",
-  version: "1.0.0",
+  version: "2.0.0",
 });
 
 // ── Tool: list_modules ─────────────────────────────────────────────
@@ -226,7 +226,7 @@ server.tool(
       content: [
         {
           type: "text",
-          text: `FrootAI Knowledge Base — 17 Modules\n${"═".repeat(45)}\n\n${result.join("\n\n")}\n\n📋 Reference\n  REF: Quick Reference Cards\n  QUIZ: Quiz & Assessment\n\nUse get_module to read any module. Use search_knowledge to search across all modules.`,
+          text: `FrootAI Knowledge Base — 18 Modules\n${"═".repeat(45)}\n\n${result.join("\n\n")}\n\n📋 Reference\n  REF: Quick Reference Cards\n  QUIZ: Quiz & Assessment\n\nUse get_module to read any module. Use search_knowledge to search across all modules.\n\n🔌 Live tools: fetch_azure_docs, fetch_external_mcp, list_community_plays, get_github_agentic_os`,
         },
       ],
     };
@@ -242,7 +242,7 @@ server.tool(
     module_id: z
       .string()
       .describe(
-        "Module ID: F1 (GenAI Foundations), F2 (LLMs), F3 (Glossary), R1 (Prompts), R2 (RAG), R3 (Deterministic AI), O1 (Semantic Kernel), O2 (Agents), O3 (MCP/Tools), O4 (Azure AI), O5 (Infra), O6 (Copilot), T1 (Fine-Tuning), T2 (Responsible AI), T3 (Production)"
+        "Module ID: F1 (GenAI Foundations), F2 (LLMs), F3 (Glossary), F4 (.github Agentic OS), R1 (Prompts), R2 (RAG), R3 (Deterministic AI), O1 (Semantic Kernel), O2 (Agents), O3 (MCP/Tools), O4 (Azure AI), O5 (Infra), O6 (Copilot), T1 (Fine-Tuning), T2 (Responsible AI), T3 (Production)"
       ),
     section: z
       .string()
@@ -654,7 +654,7 @@ Fine-tuning teaches HOW to respond, not WHAT to know.
 
 server.tool(
   "get_froot_overview",
-  "Get a complete overview of the FROOT framework — all 5 layers, 17 modules, what each layer covers, and how they connect. Use when asked 'what is FrootAI' or 'show me the framework'.",
+  "Get a complete overview of the FROOT framework — all 5 layers, 18 modules, what each layer covers, and how they connect. Use when asked 'what is FrootAI' or 'show me the framework'.",
   {},
   async () => {
     const overview = `# FrootAI — The FROOT Framework Overview
@@ -669,6 +669,7 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 - **F1**: GenAI Foundations — Transformers, tokens, parameters, attention
 - **F2**: LLM Landscape — GPT, Claude, Llama, model selection
 - **F3**: AI Glossary A–Z — 200+ terms defined
+- **F4**: .github Agentic OS — 7 primitives, 4 layers, agent-native repos
 *The vocabulary of AI*
 
 ### 🪵 R — REASONING (The Trunk)
@@ -698,10 +699,323 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 ---
 **The Open Glue**: FrootAI removes silos between infrastructure, platform, and application teams.
 **Website**: https://gitpavleenbali.github.io/frootai/
-**MCP**: 6 tools · 200+ terms · 7 architecture patterns`;
+**MCP v2**: 10 tools (6 static + 4 live) · 200+ terms · 7 architecture patterns · 20 solution plays`;
 
     return {
       content: [{ type: "text", text: overview }],
+    };
+  }
+);
+
+// ════════════════════════════════════════════════════════════════════
+// LIVE TOOLS (v2) — Network-enabled, graceful degradation
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * Helper: fetch with timeout and graceful degradation
+ */
+async function safeFetch(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.text();
+  } catch (err) {
+    clearTimeout(timeout);
+    return null; // graceful degradation — caller handles null
+  }
+}
+
+// ── Tool: fetch_azure_docs ─────────────────────────────────────────
+
+server.tool(
+  "fetch_azure_docs",
+  "Fetch latest Azure documentation for a specific service or topic. Uses Microsoft Learn REST API. Returns curated summary. Falls back to static knowledge if offline.",
+  {
+    service: z.string().describe("Azure service name or topic (e.g., 'azure-openai', 'ai-search', 'container-apps', 'ai-foundry', 'content-safety')"),
+  },
+  async ({ service }) => {
+    const searchTerm = encodeURIComponent(`Azure ${service} documentation`);
+    const url = `https://learn.microsoft.com/api/search?search=${searchTerm}&locale=en-us&%24top=5&facet=category`;
+
+    const body = await safeFetch(url);
+    if (body) {
+      try {
+        const data = JSON.parse(body);
+        const results = (data.results || []).slice(0, 5);
+        if (results.length > 0) {
+          const formatted = results.map((r, i) =>
+            `${i + 1}. **${r.title}**\n   ${r.description || 'No description'}\n   🔗 ${r.url}`
+          ).join("\n\n");
+          return {
+            content: [{
+              type: "text",
+              text: `## Azure Documentation: ${service}\n*Live from Microsoft Learn*\n\n${formatted}\n\n---\n*Fetched live. For deeper architecture guidance, use get_module or get_architecture_pattern.*`,
+            }],
+          };
+        }
+      } catch { /* fall through to static */ }
+    }
+
+    // Graceful degradation: suggest static modules
+    const relevant = Object.values(modules)
+      .filter(m => m.content.toLowerCase().includes(service.toLowerCase()))
+      .slice(0, 3)
+      .map(m => `  - ${m.id}: ${m.title}`)
+      .join("\n");
+
+    return {
+      content: [{
+        type: "text",
+        text: `## Azure Documentation: ${service}\n*Offline — using static knowledge*\n\n⚠️ Could not reach Microsoft Learn API. Here are relevant FrootAI modules:\n\n${relevant || "  No matching modules. Try search_knowledge."}\n\nUse search_knowledge query="${service}" for detailed content from the bundled knowledge base.`,
+      }],
+    };
+  }
+);
+
+// ── Tool: fetch_external_mcp ───────────────────────────────────────
+
+server.tool(
+  "fetch_external_mcp",
+  "Search for external MCP servers from public registries. Find MCP servers for specific tools, services, or capabilities. Falls back to curated list if offline.",
+  {
+    query: z.string().describe("What kind of MCP server you're looking for (e.g., 'github', 'database', 'slack', 'jira', 'azure')"),
+  },
+  async ({ query }) => {
+    // Try mcp.so registry
+    const searchUrl = `https://api.mcp.so/api/servers?q=${encodeURIComponent(query)}&limit=8`;
+    const body = await safeFetch(searchUrl);
+
+    if (body) {
+      try {
+        const data = JSON.parse(body);
+        const servers = (data.servers || data.data || data || []).slice(0, 8);
+        if (Array.isArray(servers) && servers.length > 0) {
+          const formatted = servers.map((s, i) =>
+            `${i + 1}. **${s.name || s.title || 'Unknown'}**\n   ${s.description || ''}\n   ${s.url || s.homepage || ''}`
+          ).join("\n\n");
+          return {
+            content: [{
+              type: "text",
+              text: `## External MCP Servers: "${query}"\n*Live from MCP registry*\n\n${formatted}\n\n---\n*Install with: npx <package-name> or add to your mcp.json*`,
+            }],
+          };
+        }
+      } catch { /* fall through */ }
+    }
+
+    // Curated fallback list
+    const curatedServers = {
+      github: { name: "@modelcontextprotocol/server-github", desc: "GitHub repos, issues, PRs" },
+      filesystem: { name: "@modelcontextprotocol/server-filesystem", desc: "Local file system access" },
+      postgres: { name: "@modelcontextprotocol/server-postgres", desc: "PostgreSQL database queries" },
+      slack: { name: "@modelcontextprotocol/server-slack", desc: "Slack channels and messages" },
+      memory: { name: "@modelcontextprotocol/server-memory", desc: "Persistent memory for agents" },
+      puppeteer: { name: "@modelcontextprotocol/server-puppeteer", desc: "Browser automation" },
+      azure: { name: "frootai-mcp", desc: "AI architecture knowledge for Azure (this server!)" },
+      brave: { name: "@modelcontextprotocol/server-brave-search", desc: "Web search via Brave" },
+    };
+
+    const matches = Object.entries(curatedServers)
+      .filter(([k, v]) => k.includes(query.toLowerCase()) || v.desc.toLowerCase().includes(query.toLowerCase()))
+      .map(([k, v]) => `- **${v.name}** — ${v.desc}`)
+      .join("\n");
+
+    return {
+      content: [{
+        type: "text",
+        text: `## External MCP Servers: "${query}"\n*Offline — showing curated list*\n\n${matches || "No curated servers match. Try a broader search."}\n\n🔗 Browse more at: https://mcp.so · https://smithery.ai\n\nFor FrootAI's own MCP: npx frootai-mcp`,
+      }],
+    };
+  }
+);
+
+// ── Tool: list_community_plays ─────────────────────────────────────
+
+server.tool(
+  "list_community_plays",
+  "List FrootAI solution plays from the GitHub repository. Shows all 20 plays with status. Falls back to static list if offline.",
+  {
+    filter: z.string().optional().describe("Filter by keyword (e.g., 'rag', 'agent', 'landing-zone')"),
+  },
+  async ({ filter }) => {
+    // Try live from GitHub API
+    const apiUrl = "https://api.github.com/repos/gitpavleenbali/frootai/contents/solution-plays";
+    const body = await safeFetch(apiUrl);
+
+    let plays = [];
+    if (body) {
+      try {
+        const data = JSON.parse(body);
+        plays = data
+          .filter(d => d.type === "dir")
+          .map(d => d.name)
+          .filter(name => !filter || name.toLowerCase().includes(filter.toLowerCase()));
+      } catch { /* fall through */ }
+    }
+
+    if (plays.length > 0) {
+      const formatted = plays.map((p, i) =>
+        `${i + 1}. **${p}**\n   🔗 https://github.com/gitpavleenbali/frootai/tree/main/solution-plays/${p}`
+      ).join("\n");
+      return {
+        content: [{
+          type: "text",
+          text: `## FrootAI Solution Plays\n*Live from GitHub*\n\n${formatted}\n\n---\n**Each play ships with:** .github Agentic OS (19 files) + DevKit + TuneKit\n🌐 https://gitpavleenbali.github.io/frootai/solution-plays`,
+        }],
+      };
+    }
+
+    // Static fallback
+    const staticPlays = [
+      "01-enterprise-rag", "02-ai-landing-zone", "03-deterministic-agent",
+      "04-call-center-voice-ai", "05-it-ticket-resolution", "06-document-intelligence",
+      "07-multi-agent-service", "08-copilot-studio-bot", "09-ai-search-portal",
+      "10-content-moderation", "11-ai-landing-zone-advanced", "12-model-serving-aks",
+      "13-fine-tuning-workflow", "14-cost-optimized-ai-gateway", "15-multi-modal-docproc",
+      "16-copilot-teams-extension", "17-ai-observability", "18-prompt-management",
+      "19-edge-ai-phi4", "20-anomaly-detection",
+    ].filter(p => !filter || p.includes(filter?.toLowerCase() || ""));
+
+    const formatted = staticPlays.map((p, i) => `${i + 1}. **${p}**`).join("\n");
+    return {
+      content: [{
+        type: "text",
+        text: `## FrootAI Solution Plays\n*Offline — showing bundled list*\n\n${formatted}\n\n---\n**20 plays** · Each with .github Agentic OS + DevKit + TuneKit\n🌐 https://gitpavleenbali.github.io/frootai/solution-plays`,
+      }],
+    };
+  }
+);
+
+// ── Tool: get_github_agentic_os ────────────────────────────────────
+
+server.tool(
+  "get_github_agentic_os",
+  "Get guidance on GitHub Copilot's .github folder agentic OS — the 7 primitives across 4 layers. Returns the FrootAI-authored reference guide. Use for questions about instructions, prompts, agents, skills, hooks, workflows, or plugins.",
+  {
+    primitive: z.enum([
+      "overview", "instructions", "prompts", "agents", "skills", "hooks", "workflows", "plugins"
+    ]).optional().default("overview").describe("Which primitive to explain (or 'overview' for all)"),
+  },
+  async ({ primitive = "overview" }) => {
+    const guides = {
+      overview: `## .github Agentic OS — Overview
+
+7 primitives across 4 layers:
+
+**Layer 1 — Always-On Context**
+  1. Instructions (.github/copilot-instructions.md + instructions/*.instructions.md)
+     → Passive memory, applies to every prompt
+
+**Layer 2 — On-Demand Capabilities**
+  2. Prompt Files (.github/prompts/*.prompt.md) → Slash commands
+  3. Custom Agents (.github/agents/*.agent.md) → Specialist personas with MCP
+  4. Skills (.github/skills/<name>/SKILL.md) → Self-contained folded logic
+
+**Layer 3 — Enforcement & Automation**
+  5. Hooks (.github/hooks/*.json) → preToolUse/postToolUse/errorOccurred
+  6. Agentic Workflows (.github/workflows/*.md) → AI-driven CI/CD
+
+**Layer 4 — Distribution**
+  7. Plugins → Bundle agents + skills + commands for marketplace
+
+FrootAI ships 19 files per solution play × 20 plays = 380 agentic OS files.
+📖 Full module: get_module module_id=F4`,
+
+      instructions: `## Primitive 1: Instructions
+**Files:** .github/copilot-instructions.md + .github/instructions/*.instructions.md
+**Layer:** 1 — Always-On Context
+**Trigger:** Every prompt (automatic)
+
+Passive memory that applies to every Copilot interaction. Use modular files for domain separation:
+- azure-coding.instructions.md — Azure SDK patterns, managed identity
+- <play>-patterns.instructions.md — Solution-specific rules
+- security.instructions.md — Secrets, PII, access control
+
+Best practice: keep short, specific, use bullet points, reference real files.`,
+
+      prompts: `## Primitive 2: Prompt Files
+**Files:** .github/prompts/*.prompt.md
+**Layer:** 2 — On-Demand
+**Trigger:** User types slash command (e.g., /deploy)
+
+Slash commands for specific tasks:
+- /deploy — deployment runbook with pre-flight checks
+- /test — run test suite with quality thresholds
+- /review — code review checklist with severity levels
+- /evaluate — RAG quality evaluation pipeline
+
+Each prompt defines: Steps, Prerequisites, Expected Output, Rollback.`,
+
+      agents: `## Primitive 3: Custom Agents
+**Files:** .github/agents/*.agent.md
+**Layer:** 2 — On-Demand
+**Trigger:** Agent invocation or handoff
+
+Specialist personas with own tools and MCP servers. Agent chain:
+  builder.agent.md → reviewer.agent.md → tuner.agent.md
+
+Each agent defines: Role, Tools, MCP Servers, Rules, Handoff target.
+Key: agents have MCP server bindings — they can query external knowledge.`,
+
+      skills: `## Primitive 4: Skills
+**Files:** .github/skills/<name>/SKILL.md + scripts
+**Layer:** 2 — On-Demand
+**Trigger:** Progressively loaded when relevant
+
+Self-contained folders with instructions + scripts + references.
+Copilot reads SKILL.md description first, loads full content only when relevant.
+- deploy-azure/ — Bicep validation + az deployment
+- evaluate/ — RAG quality scoring pipeline
+- tune/ — TuneKit config validation`,
+
+      hooks: `## Primitive 5: Hooks
+**Files:** .github/hooks/*.json
+**Layer:** 3 — Enforcement
+**Trigger:** Lifecycle events (preToolUse, postToolUse, errorOccurred)
+
+Deterministic policy gates:
+- preToolUse: Block secrets in code, warn on guardrail changes
+- postToolUse: Audit logging to .github/audit.log
+- errorOccurred: Suggest troubleshooting on deployment failure
+
+No LLM judgment — pure deterministic enforcement.`,
+
+      workflows: `## Primitive 6: Agentic Workflows
+**Files:** .github/workflows/*.md → compiled to YAML GitHub Actions
+**Layer:** 3 — Automation
+**Trigger:** PR events, pushes, schedules
+
+Natural language automation compiled to GitHub Actions:
+- ai-review.md — PR review: validate configs + run eval + post findings
+- ai-deploy.md — Deployment: staging → smoke test → production (approval gate)
+
+Permissions: read-only unless explicitly elevated.`,
+
+      plugins: `## Primitive 7: Plugins
+**Files:** plugin.json manifest
+**Layer:** 4 — Distribution
+**Trigger:** Install from repo or marketplace
+
+Bundle agents + skills + commands into distributable packages:
+{
+  "plugin": "frootai-enterprise-rag",
+  "agents": ["builder", "reviewer", "tuner"],
+  "skills": ["deploy-azure", "evaluate", "tune"],
+  "prompts": ["deploy", "test", "review", "evaluate"]
+}
+
+Two modes: self-hosted (your repo) or marketplace (public).`,
+    };
+
+    const guide = guides[primitive] || guides.overview;
+    return {
+      content: [{
+        type: "text",
+        text: `${guide}\n\n---\n*Source: FrootAI Module F4 — .github Agentic OS*\n📖 Full module: get_module module_id=F4`,
+      }],
     };
   }
 );
@@ -716,17 +1030,16 @@ server.resource(
       {
         uri: "frootai://overview",
         mimeType: "text/plain",
-        text: `FrootAI — From Root to Fruit
+        text: `FrootAI v2 — From Root to Fruit
 The open glue that binds infrastructure, platform, and application.
-The telescope and the microscope for AI architecture.
 
-🌱 F — Foundations (The Roots): GenAI Foundations, LLM Landscape, AI Glossary A-Z
-🪵 R — Reasoning (The Trunk): Prompt Engineering, RAG Architecture, Deterministic AI
-🌿 O — Orchestration (The Branches): Semantic Kernel, AI Agents, MCP/Tools
-🏗️ O — Operations (The Canopy): Azure AI Platform, Infrastructure, Copilot
-🍎 T — Transformation (The Fruit): Fine-Tuning, Responsible AI, Production Patterns
+🌱 F — Foundations: GenAI Foundations, LLM Landscape, AI Glossary A-Z, .github Agentic OS
+🪵 R — Reasoning: Prompt Engineering, RAG Architecture, Deterministic AI
+🌿 O — Orchestration: Semantic Kernel, AI Agents, MCP/Tools
+🏗️ O — Operations: Azure AI Platform, Infrastructure, Copilot
+🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
-17 modules | 200+ AI terms | Architecture patterns for every scenario
+18 modules | 200+ AI terms | 10 tools (6 static + 4 live) | 20 solution plays
 https://gitpavleenbali.github.io/frootai/`,
       },
     ],
