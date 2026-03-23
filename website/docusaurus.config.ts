@@ -98,6 +98,7 @@ const config: Config = {
             { to: "/partners", label: "🤝 Partner Integrations" },
             { to: "/marketplace", label: "🏪 Plugin Marketplace" },
             { to: "/enterprise", label: "🌱 Open Source Community" },
+            { to: "/adoption", label: "📊 Ecosystem Adoption" },
           ],
         },
         {

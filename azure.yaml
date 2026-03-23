@@ -1,0 +1,20 @@
+# ─────────────────────────────────────────────────────────────────────
+# FrootAI — Azure Developer CLI (azd) Configuration
+# ─────────────────────────────────────────────────────────────────────
+# Deploy the full FrootAI solution with: azd up
+# Deploy a single play with: ./scripts/deploy-play.sh 01
+#
+# Prerequisites:
+#   - Azure CLI (az) authenticated with Managed Identity or az login
+#   - Azure Developer CLI (azd) installed
+#   - Bicep CLI (bundled with az)
+# ─────────────────────────────────────────────────────────────────────
+
+name: frootai
+metadata:
+  template: frootai-solution-play
+services:
+  play:
+    project: .
+    language: bicep
+    host: containerapp
