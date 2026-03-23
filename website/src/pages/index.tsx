@@ -112,9 +112,13 @@ export default function FrootAIPage(): JSX.Element {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "14px", padding: "6px 0" }}>
             {[
               { to: "/vscode-extension", icon: "💻", title: "VS Code Extension", sub: "For you (the human)", color: "#6366f1" },
-              { to: "/mcp-tooling", icon: "📦", title: "MCP Server (npm)", sub: "For your agent (the AI)", color: "#10b981" },
+              { to: "/mcp-tooling", icon: "📦", title: "MCP Server (npm)", sub: "16 tools for your agent", color: "#10b981" },
               { to: "/solution-plays", icon: "🎯", title: "Solution Plays", sub: "DevKit + TuneKit", color: "#7c3aed" },
-              { to: "/packages", icon: "🧩", title: "FROOT Packages", sub: "Downloadable LEGO blocks", color: "#06b6d4" },
+              { to: "/configurator", icon: "⚙️", title: "Solution Configurator", sub: "3 questions → your play", color: "#f59e0b" },
+              { to: "/partners", icon: "🤝", title: "Partner Integrations", sub: "ServiceNow, Salesforce, SAP", color: "#06b6d4" },
+              { to: "/marketplace", icon: "🏪", title: "Plugin Marketplace", sub: "Discover & share plugins", color: "#ec4899" },
+              { to: "/chatbot", icon: "🤖", title: "AI Assistant", sub: "Ask which play to use", color: "#00C853" },
+              { to: "/enterprise", icon: "🎓", title: "Learn & Certify", sub: "Workshops & certification", color: "#f97316" },
             ].map((card) => (
               <Link key={card.title} to={card.to} className={styles.glowCard} style={{ "--glow-color": card.color } as React.CSSProperties}>
                 <div style={{ fontSize: "1.8rem", marginBottom: "4px" }}>{card.icon}</div>
@@ -122,11 +126,11 @@ export default function FrootAIPage(): JSX.Element {
                 <div style={{ fontSize: "0.72rem", color: card.color }}>{card.sub}</div>
               </Link>
             ))}
-            {/* Coming Soon tile */}
-            <div style={{ padding: "18px", borderRadius: "14px", border: "2px dashed rgba(245, 158, 11, 0.3)", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", opacity: 0.7 }}>
-              <div style={{ fontSize: "1.8rem", marginBottom: "4px" }}>🔮</div>
-              <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>New Feature</div>
-              <div style={{ fontSize: "0.72rem", color: "#f59e0b" }}>Coming Soon</div>
+            {/* Powered by open source */}
+            <div style={{ padding: "18px", borderRadius: "14px", border: "2px dashed rgba(0, 200, 83, 0.3)", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+              <div style={{ fontSize: "1.8rem", marginBottom: "4px" }}>🌱</div>
+              <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>100% Open Source</div>
+              <div style={{ fontSize: "0.72rem", color: "#00C853" }}>MIT License — Free Forever</div>
             </div>
           </div>
         </section>
@@ -182,9 +186,13 @@ export default function FrootAIPage(): JSX.Element {
             <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", padding: "6px 0" }}>
               {[
                 { label: "🎓 AI Knowledge Hub", to: "/docs/", color: "#f59e0b" },
-                { label: "🔗 Ecosystem", to: "/ecosystem", color: "#10b981" },
                 { label: "🎯 Solution Plays", to: "/solution-plays", color: "#7c3aed" },
-                { label: "📦 Packages", to: "/packages", color: "#06b6d4" },
+                { label: "⚙️ Solution Configurator", to: "/configurator", color: "#10b981" },
+                { label: "🤖 AI Assistant", to: "/chatbot", color: "#00C853" },
+                { label: "🤝 Partners", to: "/partners", color: "#06b6d4" },
+                { label: "🏪 Marketplace", to: "/marketplace", color: "#ec4899" },
+                { label: "🎓 Learn & Certify", to: "/enterprise", color: "#f97316" },
+                { label: "📦 Packages", to: "/packages", color: "#6366f1" },
                 { label: "⭐ Star on GitHub", to: "https://github.com/gitpavleenbali/frootai", color: "#f59e0b" },
               ].map((link) => (
                 <Link key={link.label} to={link.to} className={styles.glowPill} style={{ "--pill-color": link.color } as React.CSSProperties}

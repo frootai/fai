@@ -32,7 +32,7 @@ const tiers: Tier[] = [
   },
   {
     label: "Enterprise",
-    price: "Contact Us",
+    price: "Coming Soon",
     color: "#7c3aed",
     highlight: true,
     features: [
@@ -70,13 +70,13 @@ export default function EnterprisePage(): JSX.Element {
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>🏢 Enterprise & Certification</h1>
           <p style={{ fontSize: "0.95rem", color: "var(--ifm-color-emphasis-500)", maxWidth: "640px", margin: "0 auto" }}>
-            Production-grade support for teams that run FrootAI at scale, plus a certification program to validate your expertise.
+            FrootAI is 100% open source. Free forever for the community. Enterprise tier coming later.
           </p>
         </div>
 
-        {/* ── Pricing Comparison ── */}
+        {/* ── Plans ── */}
         <section style={{ marginBottom: "56px" }}>
-          <h2 style={{ fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px", textAlign: "center" }}>💰 Plans & Pricing</h2>
+          <h2 style={{ fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px", textAlign: "center" }}>🌱 Open Source — Free for Everyone</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "24px" }}>
             {tiers.map((t) => (
               <div
@@ -179,11 +179,11 @@ export default function EnterprisePage(): JSX.Element {
           <h2 style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: "20px" }}>Ready to Level Up?</h2>
           <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
             <Link
-              href="https://www.linkedin.com/in/pavleenbali/"
+              to="/setup-guide"
               className={styles.glowPill}
               style={{ "--pill-color": "#7c3aed", display: "inline-block" } as React.CSSProperties}
             >
-              Contact Us →
+              Get Started Free →
             </Link>
             <Link
               to="/solution-plays"

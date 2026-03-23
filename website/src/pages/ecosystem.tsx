@@ -90,10 +90,11 @@ export default function EcosystemPage(): JSX.Element {
               <h3 style={{ fontSize: "1.05rem", fontWeight: 800, textAlign: "center", marginBottom: "4px" }}>VS Code Extension</h3>
               <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6366f1", textAlign: "center", marginBottom: "12px" }}>For you (the human)</p>
               <ul style={{ fontSize: "0.82rem", lineHeight: 1.7, paddingLeft: "16px" }}>
-                <li>Sidebar: 20 solution plays, 18 modules, 13 MCP tools</li>
+                <li>Sidebar: 20 solution plays, 18 modules, 16 MCP tools</li>
                 <li>Search 200+ AI terms instantly</li>
-                <li>Init DevKit → copies agent.md + MCP to your project</li>
-                <li>7 commands via Ctrl+Shift+P</li>
+                <li>Init DevKit → copies .github Agentic OS (19 files) to your project</li>
+                <li>13 commands via Ctrl+Shift+P</li>
+                <li>Cached downloads — works offline after first use</li>
               </ul>
               <div style={{ textAlign: "center", marginTop: "16px" }}>
                 <Link to="/vscode-extension" className={styles.glowPill} style={{ "--pill-color": "#6366f1", display: "inline-block" } as React.CSSProperties}>
@@ -101,6 +102,27 @@ export default function EcosystemPage(): JSX.Element {
                 </Link>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* New Platform Features */}
+        <section style={{ marginBottom: "48px" }}>
+          <h2 style={{ fontSize: "1.3rem", fontWeight: 700, marginBottom: "4px" }}>✨ New Platform Features</h2>
+          <p style={{ fontSize: "0.82rem", color: "var(--ifm-color-emphasis-500)", marginBottom: "16px" }}>Growing the ecosystem with intelligence, community, and partnerships</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "12px" }}>
+            {[
+              { to: "/configurator", icon: "⚙️", title: "Solution Configurator", sub: "3 questions → recommended play", color: "#f59e0b" },
+              { to: "/chatbot", icon: "🤖", title: "AI Assistant", sub: "Ask which play to use", color: "#00C853" },
+              { to: "/partners", icon: "🤝", title: "Partner Integrations", sub: "ServiceNow, Salesforce, SAP MCP", color: "#06b6d4" },
+              { to: "/marketplace", icon: "🏪", title: "Plugin Marketplace", sub: "Discover & share .github plugins", color: "#ec4899" },
+              { to: "/enterprise", icon: "🎓", title: "Learn & Certify", sub: "Workshops + certification", color: "#f97316" },
+            ].map((card) => (
+              <Link key={card.title} to={card.to} className={styles.glowCard} style={{ "--glow-color": card.color } as React.CSSProperties}>
+                <div style={{ fontSize: "1.5rem", marginBottom: "4px" }}>{card.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: "0.82rem" }}>{card.title}</div>
+                <div style={{ fontSize: "0.7rem", color: card.color }}>{card.sub}</div>
+              </Link>
+            ))}
           </div>
         </section>
 

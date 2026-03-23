@@ -76,19 +76,37 @@ const config: Config = {
           label: "FAI Knowledge Hub",
         },
         {
-          to: "/ecosystem",
-          label: "FAI Ecosystem",
+          type: "dropdown",
+          label: "FAI Solutions",
           position: "left",
+          items: [
+            { to: "/solution-plays", label: "🎯 Solution Plays (20)" },
+            { to: "/configurator", label: "⚙️ Solution Configurator" },
+            { to: "/user-guide", label: "📖 User Guides" },
+            { to: "/packages", label: "📦 Packages" },
+          ],
         },
         {
-          to: "/solution-plays",
-          label: "FAI Solution Plays",
+          type: "dropdown",
+          label: "FAI Platform",
           position: "left",
+          items: [
+            { to: "/ecosystem", label: "🔗 Ecosystem Overview" },
+            { to: "/mcp-tooling", label: "🔌 MCP Server (16 tools)" },
+            { to: "/vscode-extension", label: "🖥️ VS Code Extension" },
+            { to: "/setup-guide", label: "📋 Setup Guide" },
+          ],
         },
         {
-          to: "/packages",
-          label: "FAI Packages",
+          type: "dropdown",
+          label: "FAI Community",
           position: "left",
+          items: [
+            { to: "/partners", label: "🤝 Partner Integrations" },
+            { to: "/marketplace", label: "🏪 Plugin Marketplace" },
+            { to: "/enterprise", label: "🎓 Enterprise & Certification" },
+            { to: "/chatbot", label: "🤖 AI Assistant" },
+          ],
         },
         {
           href: "https://github.com/gitpavleenbali/frootai",
