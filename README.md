@@ -18,7 +18,7 @@
 |---|------|----------|
 | 🎯 | **Solution Plays** — pre-tuned, deployable AI solutions (RAG, agents, landing zones) | Infra & platform engineers |
 | 📖 | **18 knowledge modules** covering AI architecture end-to-end | Cloud Architects, CSAs |
-| 🔌 | **MCP Server** — 6 tools, add to any AI agent as a callable skill set | Agent builders, developers |
+| 🔌 | **MCP Server** — 13 tools (6 static + 4 live + 3 agent chain), add to any AI agent as a callable skill set | Agent builders, developers |
 | 🔗 | **The open glue** — removes silos between infra, platform, and app teams | Everyone |
 
 ---
