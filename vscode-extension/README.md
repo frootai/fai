@@ -47,27 +47,28 @@ When you run **Init DevKit**, FrootAI copies the complete .github Agentic OS to 
 | **Layer 3** | `hooks/guardrails.json` | preToolUse policy gates (block secrets in code) |
 | **Layer 3** | `workflows/*.md` | AI-driven CI: review PRs, deploy to Azure |
 | **+** | `agent.md` + `.vscode/mcp.json` + `plugin.json` | Co-coder context + MCP auto-connect + plugin manifest |
+| **+** | `infra/main.bicep` + `infra/parameters.json` | Azure infrastructure templates (Bicep IaC) |
 
-**19 files from one command. Your coding agent is instantly solution-aware.**
+**21+ files from one command. Code + infrastructure + agentic OS.**
 
 ---
 
 ## ⚙️ TuneKit — What Gets Initialized
 
-When you run **Init TuneKit**, FrootAI copies production AI configuration:
+When you run **Init TuneKit**, FrootAI copies AI fine-tuning configuration (NO infra — that's in DevKit):
 
 | File | What It Controls |
-|------|-----------------|
-| `config/openai.json` | temperature, top-k, max_tokens, model, JSON schema |
-| `config/guardrails.json` | blocked topics, PII filters, abstention rules |
-| `config/search.json` | hybrid weights, reranking, relevance thresholds |
-| `config/chunking.json` | chunk size, overlap, strategy |
-| `infra/main.bicep` | One-click Azure deploy (Bicep IaC) |
-| `infra/parameters.json` | Environment-specific knobs |
+|------|------------------|
+| `config/openai.json` | temperature, top-k, top-p, max_tokens, model, JSON schema |
+| `config/guardrails.json` | blocked topics, PII filters, abstention rules, toxicity |
+| `config/search.json` | hybrid weights, semantic ranking, relevance thresholds |
+| `config/chunking.json` | chunk size, token overlap, strategy, indexing |
+| `config/agents.json` | Agent behavior tuning: personas, handoff, tool permissions |
+| `config/model-comparison.json` | Model selection guide: cost vs quality, benchmarks |
 | `evaluation/test-set.jsonl` | Ground-truth test cases |
-| `evaluation/eval.py` | Automated quality scoring |
+| `evaluation/eval.py` | Automated quality scoring (groundedness, relevance, fluency) |
 
-**Pre-tuned by architects. Review, adjust, deploy, validate.**
+**Infra teams can tune AI without being AI specialists.**
 
 ---
 
@@ -76,7 +77,7 @@ When you run **Init TuneKit**, FrootAI copies production AI configuration:
 | Panel | What's Inside |
 |-------|-------------|
 | **🎯 Solution Plays (20)** | Click → action menu · Right-click → Init DevKit/TuneKit |
-| **🔌 MCP Tools (10)** | Right-click → Install/Start MCP Server |
+| **🔌 MCP Tools (13)** | Left-click → action menu · Right-click → Install/Start/Configure |
 | **Φ Knowledge Hub (18)** | Click → read module in rich webview panel |
 | **📖 AI Glossary (200+)** | Click → read term definition in webview |
 

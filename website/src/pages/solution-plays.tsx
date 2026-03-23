@@ -175,24 +175,27 @@ export default function SolutionPlaysPage(): JSX.Element {
           {/* DevKit */}
           <div style={{ padding: "20px", borderRadius: "16px", border: "2px solid rgba(6, 182, 212, 0.25)", background: "rgba(6, 182, 212, 0.03)", textAlign: "center" }}>
             <div style={{ fontSize: "1.8rem", marginBottom: "6px" }}>🛠️</div>
-            <h3 style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "10px" }}>DevKit — Velocity</h3>
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "10px" }}>DevKit — Build + Deploy</h3>
             <div style={{ textAlign: "left", fontSize: "0.78rem", lineHeight: 1.7 }}>
               <div><strong style={{ color: "#06b6d4" }}>agent.md</strong> — solution-aware co-coder</div>
-              <div><strong style={{ color: "#06b6d4" }}>instructions.md</strong> — prompts, guardrails</div>
-              <div><strong style={{ color: "#06b6d4" }}>MCP server</strong> — query while coding</div>
-              <div><strong style={{ color: "#06b6d4" }}>plugins</strong> — reusable functions</div>
+              <div><strong style={{ color: "#06b6d4" }}>instructions</strong> — prompts, guardrails</div>
+              <div><strong style={{ color: "#06b6d4" }}>infra/</strong> — Bicep IaC templates</div>
+              <div><strong style={{ color: "#06b6d4" }}>MCP + plugins</strong> — tools + functions</div>
             </div>
-            <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>Your agent knows the solution before you code.</p>
+            <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>Code + infrastructure in one kit.</p>
           </div>
           {/* TuneKit */}
           <div style={{ padding: "20px", borderRadius: "16px", border: "2px solid rgba(124, 58, 237, 0.25)", background: "rgba(124, 58, 237, 0.03)", textAlign: "center" }}>
             <div style={{ fontSize: "1.8rem", marginBottom: "6px" }}>🎛️</div>
-            <h3 style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "10px" }}>TuneKit — Ship It</h3>
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "10px" }}>TuneKit — AI Fine-Tuning</h3>
             <div style={{ textAlign: "left", fontSize: "0.78rem", lineHeight: 1.7 }}>
-              <div><strong style={{ color: "#7c3aed" }}>config/*.json</strong> — pre-tuned AI knobs</div>
-              <div><strong style={{ color: "#7c3aed" }}>infra/main.bicep</strong> — one-click deploy</div>
-              <div><strong style={{ color: "#7c3aed" }}>evaluation/</strong> — test + score</div>
-              <div><strong style={{ color: "#7c3aed" }}>guardrails</strong> — safety, PII, abstention</div>
+              <div><strong style={{ color: "#7c3aed" }}>config/*.json</strong> — temp, top-k, models</div>
+              <div><strong style={{ color: "#7c3aed" }}>agents.json</strong> — agent behavior tuning</div>
+              <div><strong style={{ color: "#7c3aed" }}>model-comparison</strong> — cost vs quality</div>
+              <div><strong style={{ color: "#7c3aed" }}>evaluation/</strong> — test + score + ship</div>
+            </div>
+            <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>Tune AI without being an AI specialist.</p>
+          </div>
             </div>
             <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>Every knob pre-calibrated for production.</p>
           </div>

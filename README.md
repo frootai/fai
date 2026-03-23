@@ -114,10 +114,10 @@ graph TB
 
 | Component | Who Uses It | What It Does |
 |-----------|------------|-------------|
-| **VS Code Extension** | You (human) | Browse plays, search terms, init DevKit from sidebar |
-| **MCP Server (npm)** | Your AI agent | Copilot/Claude calls 13 tools (6 static + 4 live) |
-| **DevKit (.github/)** | Your co-coder | 7 primitives: instructions, prompts, agents, skills, hooks, workflows |
-| **TuneKit (config/)** | Platform team | Pre-tuned AI configs + evaluation pipeline |
+| **VS Code Extension** | You (human) | Browse plays, search terms, init DevKit/TuneKit, auto-chain agents |
+| **MCP Server (npm)** | Your AI agent | Copilot/Claude calls 13 tools (6 static + 4 live + 3 agent chain) |
+| **DevKit (.github/ + infra/)** | Developer | .github Agentic OS + Bicep infrastructure + co-coder context |
+| **TuneKit (config/ + eval/)** | Platform team | AI parameter tuning: temperature, models, guardrails, evaluation |
 
 ### .github Agentic OS (per Solution Play)
 
