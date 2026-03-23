@@ -121,7 +121,7 @@ export default function FrootAIPage(): JSX.Element {
               { to: "/partners", icon: "🤝", title: "Partner Integrations", sub: "ServiceNow, Salesforce, SAP", color: "#06b6d4" },
               { to: "/chatbot", icon: "🤖", title: "AI Assistant", sub: "Ask which play to use", color: "#00C853" },
               { to: "/packages", icon: "🧩", title: "FROOT Packages", sub: "Downloadable LEGO blocks", color: "#8b5cf6" },
-              { to: "/ecosystem", icon: "🔗", title: "Ecosystem Overview", sub: "Full platform map", color: "#0ea5e9" },
+
               { to: "/setup-guide", icon: "📚", title: "Setup Guide", sub: "Get started in 5 minutes", color: "#f97316" },
             ].map((card) => (
               <Link key={card.title} to={card.to} className={styles.glowCard} style={{ "--glow-color": card.color } as React.CSSProperties}>

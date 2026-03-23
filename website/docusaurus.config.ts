@@ -70,16 +70,11 @@ const config: Config = {
       },
       items: [
         {
-          type: "docSidebar",
-          sidebarId: "frootSidebar",
-          position: "left",
-          label: "FAI Knowledge Hub",
-        },
-        {
           type: "dropdown",
           label: "FAI Solutions",
           position: "left",
           items: [
+            { to: "/ecosystem", label: "🔗 Ecosystem Overview" },
             { to: "/configurator", label: "⚙️ Solution Configurator" },
             { to: "/solution-plays", label: "🎯 Solution Plays (20)" },
             { to: "/user-guide", label: "📖 User Guides" },
@@ -91,7 +86,6 @@ const config: Config = {
           label: "FAI Platform",
           position: "left",
           items: [
-            { to: "/ecosystem", label: "🔗 Ecosystem Overview" },
             { to: "/vscode-extension", label: "🖥️ VS Code Extension" },
             { to: "/mcp-tooling", label: "🔌 MCP Server (16 tools)" },
             { to: "/setup-guide", label: "📋 Setup Guide" },
@@ -108,9 +102,15 @@ const config: Config = {
           ],
         },
         {
-          to: "/enterprise",
+          type: "dropdown",
           label: "FAI Learning Hub",
           position: "left",
+          items: [
+            { type: "docSidebar" as const, sidebarId: "frootSidebar", label: "📚 Knowledge Modules (18)" },
+            { to: "/docs/F3-AI-Glossary-AZ", label: "📖 AI Glossary (200+ terms)" },
+            { href: "https://github.com/gitpavleenbali/frootai/tree/main/workshops", label: "🎓 Workshop Materials" },
+            { to: "/docs/Quiz-Assessment", label: "📝 Quiz & Assessment" },
+          ],
         },
         {
           to: "/chatbot",
