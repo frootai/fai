@@ -304,8 +304,9 @@ class McpToolProvider {
     return MCP_TOOLS.map((t) => {
       const item = new vscode.TreeItem(`🔌 ${t.name}`, vscode.TreeItemCollapsibleState.None);
       item.description = t.desc;
-      item.tooltip = `MCP Tool: ${t.name}\n${t.desc}\n\nRight-click for:\n• Install MCP Server (npm/npx/config)\n• Start MCP Server (terminal)\n\nnpx frootai-mcp`;
+      item.tooltip = `MCP Tool: ${t.name}\n${t.desc}\n\nLeft-click: action menu\nRight-click: Install / Start / Configure`;
       item.contextValue = "mcpTool";
+      item.command = { command: "frootai.mcpToolAction", title: "MCP Action", arguments: [t] };
       return item;
     });
   }
@@ -840,6 +841,33 @@ function activate(context) {
       if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
       fs.writeFileSync(path.join(configDir, "mcp.json"), JSON.stringify(mcpConfig, null, 2), "utf-8");
       vscode.window.showInformationMessage("✅ .vscode/mcp.json created! FrootAI MCP auto-connects when you reload VS Code.");
+    })
+  );
+
+  // ── Command: MCP Tool Action (left-click action picker) ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.mcpToolAction", async (tool) => {
+      const action = await vscode.window.showQuickPick([
+        { label: "$(package) Install MCP Server globally", description: "npm install -g frootai-mcp", value: "install" },
+        { label: "$(play) Start MCP Server (npx)", description: "Launch in terminal — 10 tools ready", value: "start" },
+        { label: "$(gear) Configure MCP for this workspace", description: "Add .vscode/mcp.json — auto-connects", value: "config" },
+        { label: "$(globe) Open npm page", description: "npmjs.com/package/frootai-mcp", value: "npm" },
+        { label: "$(book) Open setup guide", description: "Full MCP setup documentation", value: "guide" },
+      ], { placeHolder: `🔌 ${tool.name} — ${tool.desc}` });
+
+      if (!action) return;
+
+      if (action.value === "install") {
+        vscode.commands.executeCommand("frootai.installMcpServer");
+      } else if (action.value === "start") {
+        vscode.commands.executeCommand("frootai.startMcpServer");
+      } else if (action.value === "config") {
+        vscode.commands.executeCommand("frootai.configureMcp");
+      } else if (action.value === "npm") {
+        vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
+      } else if (action.value === "guide") {
+        vscode.env.openExternal(vscode.Uri.parse("https://gitpavleenbali.github.io/frootai/setup-guide"));
+      }
     })
   );
 
