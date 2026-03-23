@@ -822,6 +822,27 @@ function activate(context) {
     })
   );
 
+  // ── Command: Configure MCP (add .vscode/mcp.json) ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.configureMcp", () => {
+      const wsFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (!wsFolder) { vscode.window.showWarningMessage("Open a folder first."); return; }
+      const mcpConfig = {
+        servers: {
+          frootai: {
+            type: "stdio",
+            command: "npx",
+            args: ["frootai-mcp"]
+          }
+        }
+      };
+      const configDir = path.join(wsFolder, ".vscode");
+      if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(path.join(configDir, "mcp.json"), JSON.stringify(mcpConfig, null, 2), "utf-8");
+      vscode.window.showInformationMessage("✅ .vscode/mcp.json created! FrootAI MCP auto-connects when you reload VS Code.");
+    })
+  );
+
   // ── Status Bar ──
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBar.text = "$(tree-view-icon) FrootAI";
