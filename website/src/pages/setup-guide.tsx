@@ -178,7 +178,7 @@ npm install`}
               <li>Below the agent instructions, click <strong>Tools → Add Tool</strong></li>
               <li>Select <strong>MCP</strong> from the tool type dropdown</li>
               <li>Point to the FrootAI MCP server (run locally via VS Code terminal or expose as endpoint)</li>
-              <li>The 5 FrootAI tools will appear in your agent's tool list</li>
+              <li>The 10 FrootAI tools will appear in your agent's tool list</li>
             </ol>
             <p style={{ fontSize: "0.82rem", color: "var(--ifm-color-emphasis-400)" }}>
               <strong>Tip:</strong> Run the MCP server in your VS Code terminal (<code>cd mcp-server && node index.js</code>), then connect from Foundry. VS Code acts as the bridge.
@@ -225,6 +225,10 @@ npm install`}
               { name: "search_knowledge", params: "query (string), max_results? (1–10)", returns: "Ranked matching sections across modules" },
               { name: "get_architecture_pattern", params: "scenario (enum)", returns: "Pre-built decision guide with recommendations" },
               { name: "get_froot_overview", params: "none", returns: "Complete FROOT framework summary" },
+              { name: "fetch_azure_docs", params: "service (string)", returns: "Live Azure docs from Microsoft Learn (falls back to static)" },
+              { name: "fetch_external_mcp", params: "query (string)", returns: "MCP servers from registries (falls back to curated list)" },
+              { name: "list_community_plays", params: "filter? (string)", returns: "20 solution plays from GitHub (falls back to bundled list)" },
+              { name: "get_github_agentic_os", params: "primitive? (enum)", returns: ".github agentic OS guide per primitive" },
             ].map((tool) => (
               <tr key={tool.name} style={{ borderBottom: "1px solid var(--ifm-color-emphasis-100)" }}>
                 <td style={{ padding: "10px 12px", fontFamily: "var(--ifm-font-family-monospace)", color: "#10b981", fontWeight: 600 }}>{tool.name}</td>
@@ -285,7 +289,7 @@ npm install`}
             {[
               { icon: "📋", title: "Solution Plays", desc: "Browse all 20 plays. Click to open README or folder." },
               { icon: "📖", title: "FROOT Modules", desc: "18 modules grouped by FROOT layer." },
-              { icon: "🔌", title: "MCP Tools", desc: "See all 6 MCP tools at a glance." },
+              { icon: "🔌", title: "MCP Tools", desc: "See all 10 MCP tools at a glance." },
             ].map(p => (
               <div key={p.title} style={{ padding: "12px", borderRadius: "10px", border: "1px solid var(--ifm-color-emphasis-200)", textAlign: "center" }}>
                 <div style={{ fontSize: "1.2rem", marginBottom: "4px" }}>{p.icon}</div>

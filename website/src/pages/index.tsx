@@ -136,7 +136,7 @@ export default function FrootAIPage(): JSX.Element {
           {[
             { num: "18+", label: "Modules", color: "#10b981" },
             { num: "20", label: "Solution Plays", color: "#06b6d4" },
-            { num: "6", label: "MCP Tools", color: "#6366f1" },
+            { num: "10", label: "MCP Tools", color: "#6366f1" },
             { num: "200+", label: "AI Terms", color: "#7c3aed" },
           ].map((s) => (
             <div key={s.label} style={{ textAlign: "center" }}>

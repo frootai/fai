@@ -5,7 +5,7 @@ import styles from "./index.module.css";
 
 export default function MCPToolingPage(): JSX.Element {
   return (
-    <Layout title="MCP Tooling — FrootAI" description="Add FrootAI to your AI agent. 6 tools, 18 modules, 200+ terms. npx frootai-mcp.">
+    <Layout title="MCP Tooling — FrootAI" description="Add FrootAI to your AI agent. 10 tools (6 static + 4 live), 18 modules, 200+ terms. npx frootai-mcp.">
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px 80px" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>🔌 FrootAI MCP Server</h1>
@@ -77,15 +77,16 @@ export default function MCPToolingPage(): JSX.Element {
         </div>
 
         {/* Tools */}
-        <h2 style={{ fontSize: "1.2rem", fontWeight: 700, textAlign: "center", marginBottom: "16px" }}>Tools Agent Receives</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "12px", marginBottom: "32px" }}>
+        <h2 style={{ fontSize: "1.2rem", fontWeight: 700, textAlign: "center", marginBottom: "4px" }}>Tools Agent Receives</h2>
+        <p style={{ fontSize: "0.75rem", color: "var(--ifm-color-emphasis-400)", textAlign: "center", marginBottom: "16px" }}>6 static (bundled knowledge) + 4 live (network-enabled, graceful fallback)</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "12px", marginBottom: "16px" }}>
           {[
-            { name: "list_modules", desc: "Browse 18 modules by FROOT layer", icon: "📋" },
-            { name: "get_module", desc: "Read any module content (F1–T3)", icon: "📖" },
-            { name: "lookup_term", desc: "200+ AI/ML term definitions", icon: "🔍" },
-            { name: "search_knowledge", desc: "Full-text search all modules", icon: "🔎" },
-            { name: "get_architecture_pattern", desc: "7 pre-built decision guides", icon: "🏗️" },
-            { name: "get_froot_overview", desc: "Complete FROOT framework summary", icon: "🌳" },
+            { name: "list_modules", desc: "Browse 18 modules by FROOT layer", icon: "📋", kind: "static" },
+            { name: "get_module", desc: "Read any module content (F1–T3)", icon: "📖", kind: "static" },
+            { name: "lookup_term", desc: "200+ AI/ML term definitions", icon: "🔍", kind: "static" },
+            { name: "search_knowledge", desc: "Full-text search all modules", icon: "🔎", kind: "static" },
+            { name: "get_architecture_pattern", desc: "7 pre-built decision guides", icon: "🏗️", kind: "static" },
+            { name: "get_froot_overview", desc: "Complete FROOT framework summary", icon: "🌳", kind: "static" },
           ].map((t) => (
             <div key={t.name} style={{ padding: "16px", borderRadius: "12px", border: "1px solid var(--ifm-color-emphasis-200)", textAlign: "center" }}>
               <div style={{ fontSize: "1.5rem", marginBottom: "4px" }}>{t.icon}</div>
@@ -93,12 +94,22 @@ export default function MCPToolingPage(): JSX.Element {
               <div style={{ fontSize: "0.75rem", color: "var(--ifm-color-emphasis-500)", marginTop: "4px" }}>{t.desc}</div>
             </div>
           ))}
-          {/* Coming Soon tile */}
-          <div style={{ padding: "16px", borderRadius: "12px", border: "2px dashed rgba(245, 158, 11, 0.3)", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", opacity: 0.7 }}>
-            <div style={{ fontSize: "1.5rem", marginBottom: "4px" }}>🔮</div>
-            <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "#f59e0b" }}>Coming Soon</div>
-            <div style={{ fontSize: "0.75rem", color: "var(--ifm-color-emphasis-400)", marginTop: "4px" }}>New tools growing</div>
-          </div>
+        </div>
+        <h3 style={{ fontSize: "1rem", fontWeight: 700, textAlign: "center", marginBottom: "12px", color: "#f59e0b" }}>🔔 Live Tools (v2 — network-enabled)</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "12px", marginBottom: "32px" }}>
+          {[
+            { name: "fetch_azure_docs", desc: "Search Microsoft Learn for Azure docs", icon: "☁️" },
+            { name: "fetch_external_mcp", desc: "Find MCP servers from registries", icon: "🔌" },
+            { name: "list_community_plays", desc: "List 20 solution plays from GitHub", icon: "🎯" },
+            { name: "get_github_agentic_os", desc: ".github 7 primitives guide", icon: "🧠" },
+          ].map((t) => (
+            <div key={t.name} style={{ padding: "16px", borderRadius: "12px", border: "1px solid rgba(245, 158, 11, 0.25)", background: "rgba(245, 158, 11, 0.03)", textAlign: "center" }}>
+              <div style={{ fontSize: "1.5rem", marginBottom: "4px" }}>{t.icon}</div>
+              <div style={{ fontSize: "0.8rem", fontFamily: "var(--ifm-font-family-monospace)", fontWeight: 600, color: "#f59e0b" }}>{t.name}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--ifm-color-emphasis-500)", marginTop: "4px" }}>{t.desc}</div>
+              <div style={{ fontSize: "0.62rem", color: "var(--ifm-color-emphasis-400)", marginTop: "2px", fontStyle: "italic" }}>Falls back to static if offline</div>
+            </div>
+          ))}
         </div>
 
         {/* Nav buttons */}
