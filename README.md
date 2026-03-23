@@ -1,11 +1,12 @@
-# 🌳 FrootAI — Know the Roots. Ship the Fruit.
+# 🌳 FrootAI — From the Roots to the Fruits.
 
-> A power kit for infrastructure and platform people to master and bridge the gap with AI applications, agents, and the agentic ecosystem.
-> From a single token to a production agent fleet · Infra ⇄ Platform ⇄ Apps
+> The open glue binding Infrastructure, Platform & Application teams with the GenAI ecosystem.
+> A power kit for infrastructure, platform, and application teams to master and bridge the gap between AI Infra, AI Platform, and the AI Application/Agentic Ecosystem.
 
-[![Website](https://img.shields.io/badge/Website-FrootAI-10b981?style=for-the-badge&logo=docusaurus)](https://gitpavleenbali.github.io/frootai/)
-[![MCP Server](https://img.shields.io/badge/MCP_Server-6_Tools-6366f1?style=for-the-badge)](./mcp-server/)
-[![Solution Plays](https://img.shields.io/badge/Solution_Plays-3_Ready-7c3aed?style=for-the-badge)](./solution-plays/)
+[![VS Code Installs](https://img.shields.io/visual-studio-marketplace/i/pavleenbali.frootai?style=for-the-badge&logo=visualstudiocode&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
+[![npm Downloads](https://img.shields.io/npm/dw/frootai-mcp?style=for-the-badge&logo=npm&label=npm)](https://www.npmjs.com/package/frootai-mcp)
+[![GitHub Stars](https://img.shields.io/github/stars/gitpavleenbali/frootai?style=for-the-badge&logo=github)](https://github.com/gitpavleenbali/frootai)
+[![Build](https://img.shields.io/github/actions/workflow/status/gitpavleenbali/frootai/deploy.yml?style=for-the-badge&label=Build)](https://github.com/gitpavleenbali/frootai/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
 
 ---

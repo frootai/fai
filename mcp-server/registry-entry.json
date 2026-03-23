@@ -1,0 +1,142 @@
+{
+  "$schema": "https://registry.mcp.dev/schema/v1/entry.json",
+  "name": "frootai-mcp",
+  "displayName": "FrootAI — AI Architecture Knowledge Engine",
+  "version": "2.2.0",
+  "description": "AI architecture knowledge engine — 16 tools, 18 modules, 200+ terms. The open glue for infrastructure, platform, and application teams building AI solutions on Azure.",
+  "longDescription": "FrootAI MCP Server provides curated AI architecture knowledge as callable agent tools. Instead of burning tokens searching the internet, agents call FrootAI to get precise definitions, architecture patterns, model comparisons, cost estimates, and guided build→review→tune workflows. Covers the full AI stack: tokens → models → RAG → agents → production operations.",
+  "author": {
+    "name": "Pavleen Bali",
+    "url": "https://linkedin.com/in/pavleenbali",
+    "github": "gitpavleenbali"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitpavleenbali/frootai"
+  },
+  "homepage": "https://gitpavleenbali.github.io/frootai",
+  "documentation": "https://gitpavleenbali.github.io/frootai/setup-guide",
+  "install": {
+    "npm": "npx frootai-mcp",
+    "global": "npm install -g frootai-mcp"
+  },
+  "transport": "stdio",
+  "runtime": "node",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "categories": [
+    "ai-architecture",
+    "azure",
+    "knowledge-base",
+    "agents",
+    "mcp",
+    "devops",
+    "cloud-infrastructure"
+  ],
+  "tags": [
+    "ai", "architecture", "azure", "llm", "rag", "agents", "mcp",
+    "semantic-kernel", "copilot", "openai", "knowledge", "glossary",
+    "infrastructure", "platform-engineering", "cost-optimization",
+    "model-selection", "solution-plays", "devkit", "tunekit"
+  ],
+  "compatibility": {
+    "clients": [
+      "claude-desktop",
+      "vscode-copilot",
+      "cursor",
+      "windsurf",
+      "azure-ai-foundry",
+      "continue-dev"
+    ],
+    "protocols": ["MCP/1.0", "A2A/1.0"]
+  },
+  "tools": {
+    "count": 16,
+    "static": [
+      {
+        "name": "list_modules",
+        "description": "Browse all 18 FROOT knowledge modules organized by layer (Foundations → Reasoning → Orchestration → Operations → Transformation)"
+      },
+      {
+        "name": "get_module",
+        "description": "Read any knowledge module content by ID (F1–F4, R1–R3, O1–O3, O4–O6, T1–T3)"
+      },
+      {
+        "name": "lookup_term",
+        "description": "Look up any of 200+ AI/ML terms with precise definitions, context, and related terms"
+      },
+      {
+        "name": "search_knowledge",
+        "description": "Full-text search across all 18 modules — returns ranked results with excerpts"
+      },
+      {
+        "name": "get_architecture_pattern",
+        "description": "7 pre-built architecture decision guides: RAG, agents, model selection, infra, cost, security, evaluation"
+      },
+      {
+        "name": "get_froot_overview",
+        "description": "Complete FROOT framework summary — all layers, modules, and how they connect"
+      }
+    ],
+    "live": [
+      {
+        "name": "fetch_azure_docs",
+        "description": "Search Microsoft Learn for Azure service documentation — returns relevant excerpts with links"
+      },
+      {
+        "name": "fetch_external_mcp",
+        "description": "Find MCP servers from public registries — discover tools your agent can add"
+      },
+      {
+        "name": "list_community_plays",
+        "description": "List 20 solution plays from FrootAI GitHub — each with description, status, and link"
+      },
+      {
+        "name": "get_github_agentic_os",
+        "description": ".github Agentic OS guide — 7 primitives, 4 layers, file structure for AI-first repos"
+      }
+    ],
+    "agent_chain": [
+      {
+        "name": "agent_build",
+        "description": "Builder agent guidance — scaffolding, DevKit generation, and handoff to reviewer"
+      },
+      {
+        "name": "agent_review",
+        "description": "Reviewer agent — security, cost, compliance, and architecture validation checks"
+      },
+      {
+        "name": "agent_tune",
+        "description": "Tuner agent — production readiness: temperature, guardrails, evaluation, monitoring"
+      }
+    ],
+    "ai_ecosystem": [
+      {
+        "name": "get_model_catalog",
+        "description": "Azure AI model catalog — GPT-4o, GPT-4o-mini, o1, o3, DeepSeek, Phi, Llama with pricing and capabilities"
+      },
+      {
+        "name": "get_azure_pricing",
+        "description": "Monthly cost estimates for AI solution architectures — compute, storage, AI services, networking"
+      },
+      {
+        "name": "compare_models",
+        "description": "Side-by-side model comparison for a specific use case — latency, cost, quality, context window"
+      }
+    ]
+  },
+  "knowledge": {
+    "modules": 18,
+    "terms": 200,
+    "bundledSize": "682 KB",
+    "framework": "FROOT (Foundations · Reasoning · Orchestration · Operations · Transformation)"
+  },
+  "metrics": {
+    "tokenEfficiency": "90% reduction vs internet search — curated knowledge, no noise",
+    "responseLatency": "<100ms for static tools, <2s for live tools",
+    "solutionPlays": 20,
+    "architecturePatterns": 7
+  }
+}
