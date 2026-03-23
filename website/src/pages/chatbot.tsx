@@ -52,7 +52,7 @@ export default function ChatbotPage(): JSX.Element {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<Array<{role: string; text: string}>>([
-    { role: "assistant", text: "Welcome! I'm your **open glue** for binding **Infra**, **Platform** & **Application** with the Agentic Ecosystem.\n\n> \ud83d\udd90\ufe0f **New here?** Try [\ud83d\udd90\ufe0f Hi FAI](/hi-fai) — our 5-minute quickstart guide to go from zero to your first AI solution.\n\nOr ask me about any of the **20 solution plays**, the **MCP server**, **VS Code extension**, or how to get started." }
+    { role: "assistant", text: "Hi, I'm **FAI**. Ready to make your journey **frootful**? 🌱\n\n> 🖐️ **New here?** Try [Hi FAI](/hi-fai) — our 5-minute quickstart guide." }
   ]);
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [history]);
@@ -131,32 +131,23 @@ export default function ChatbotPage(): JSX.Element {
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "48px 24px 80px", width: "100%" }}>
 
         {/* ═══ HERO HEADER ═══ */}
-        <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <div style={{ display: "inline-block", padding: "3px 14px", borderRadius: "20px", background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,179,8,0.08))", border: "1px solid rgba(245,158,11,0.3)", fontSize: "0.65rem", color: "#f59e0b", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>
-            Powered by Azure OpenAI GPT-4.1
-          </div>
-          <h1 style={{ fontSize: "2.2rem", fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg, #f59e0b 0%, #eab308 40%, #f97316 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
+          <h1 style={{ fontSize: "2.2rem", fontWeight: 800, margin: "0", background: "linear-gradient(135deg, #f59e0b 0%, #eab308 40%, #f97316 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
             ✨ FAI Agent
           </h1>
-          <p style={{ color: "var(--ifm-color-emphasis-500)", fontSize: "0.88rem", margin: "0 0 6px", fontWeight: 500 }}>
-            Your open glue for binding <span style={{ color: "#10b981", fontWeight: 700 }}>Infrastructure</span>, <span style={{ color: "#06b6d4", fontWeight: 700 }}>Platform</span> & <span style={{ color: "#7c3aed", fontWeight: 700 }}>Application</span> with the Agentic Ecosystem
-          </p>
-          <p style={{ color: "var(--ifm-color-emphasis-400)", fontSize: "0.72rem", margin: 0, fontStyle: "italic" }}>
-            From the Roots to the Fruits — grounded in 20 plays, 16 MCP tools, 18 modules
-          </p>
         </div>
 
-        {/* ═══ CHAT CONTAINER ═══ */}
-        <div style={{ border: "1px solid rgba(245,158,11,0.25)", borderRadius: "20px", background: "linear-gradient(180deg, rgba(26,26,46,0.7) 0%, rgba(15,15,30,0.8) 100%)", display: "flex", flexDirection: "column", minHeight: "480px", boxShadow: "0 8px 32px rgba(245,158,11,0.06), 0 0 80px rgba(99,102,241,0.03)" }}>
+        {/* ═══ CHAT CONTAINER (glassmorphism) ═══ */}
+        <div style={{ border: "1px solid rgba(245,158,11,0.15)", borderRadius: "24px", background: "rgba(20,20,40,0.45)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", display: "flex", flexDirection: "column", minHeight: "520px", boxShadow: "0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
 
           {/* Messages */}
-          <div style={{ flex: 1, padding: "24px", overflowY: "auto", maxHeight: "560px" }}>
+          <div style={{ flex: 1, padding: "24px", overflowY: "auto", maxHeight: "600px" }}>
             {history.map((m, i) => (
               <div key={i} style={{ marginBottom: "16px", display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-start", gap: "10px" }}>
                 {m.role === "assistant" && (
                   <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(99,102,241,0.15))", border: "1px solid rgba(245,158,11,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", flexShrink: 0, marginTop: "2px" }}>✨</div>
                 )}
-                <div style={{ maxWidth: "80%", padding: "14px 18px", borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px", background: m.role === "user" ? "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(234,179,8,0.06))" : "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(124,58,237,0.04))", border: `1px solid ${m.role === "user" ? "rgba(245,158,11,0.25)" : "rgba(99,102,241,0.15)"}`, fontSize: "0.84rem", lineHeight: 1.7 }}>
+                <div style={{ maxWidth: "85%", padding: "14px 18px", borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px", background: m.role === "user" ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.03)", border: `1px solid ${m.role === "user" ? "rgba(245,158,11,0.15)" : "rgba(255,255,255,0.06)"}`, backdropFilter: "blur(8px)", fontSize: "0.84rem", lineHeight: 1.7 }}>
                   {m.role === "assistant" ? renderMd(m.text) : m.text}
                 </div>
               </div>
@@ -191,12 +182,12 @@ export default function ChatbotPage(): JSX.Element {
           )}
 
           {/* Input */}
-          <div style={{ padding: "14px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: "10px", alignItems: "flex-end" }}>
-            <textarea value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder="Ask FAI Agent anything about FrootAI..." rows={1} style={{ flex: 1, padding: "14px 18px", borderRadius: "12px", border: "1px solid rgba(245,158,11,0.2)", background: "rgba(0,0,0,0.3)", color: "#e0e0e0", fontSize: "0.85rem", outline: "none", transition: "border-color 0.2s", resize: "none", overflow: "hidden", minHeight: "48px", maxHeight: "160px", lineHeight: "1.5", fontFamily: "inherit" }} disabled={loading}
-              onFocus={e => e.currentTarget.style.borderColor = "rgba(245,158,11,0.5)"}
-              onBlur={e => e.currentTarget.style.borderColor = "rgba(245,158,11,0.2)"}
+          <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", gap: "10px", alignItems: "flex-end" }}>
+            <textarea value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder="Ask anything..." rows={1} style={{ flex: 1, padding: "14px 18px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", backdropFilter: "blur(8px)", color: "#e0e0e0", fontSize: "0.85rem", outline: "none", transition: "border-color 0.2s, background 0.2s", resize: "none", overflow: "hidden", minHeight: "48px", maxHeight: "160px", lineHeight: "1.5", fontFamily: "inherit" }} disabled={loading}
+              onFocus={e => { e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
+              onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
               onInput={e => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 160) + "px"; }} />
-            <button onClick={() => send()} disabled={loading} style={{ padding: "14px 28px", borderRadius: "12px", background: loading ? "#333" : "linear-gradient(135deg, #6366f1, #7c3aed)", color: loading ? "#666" : "#fff", border: "none", fontWeight: 700, cursor: loading ? "default" : "pointer", fontSize: "0.85rem", transition: "all 0.2s", boxShadow: loading ? "none" : "0 4px 12px rgba(99,102,241,0.3)", whiteSpace: "nowrap" }}>{loading ? "..." : "Ask ✨"}</button>
+            <button onClick={() => send()} disabled={loading} style={{ padding: "14px 28px", borderRadius: "14px", background: loading ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #6366f1, #7c3aed)", color: loading ? "#555" : "#fff", border: "none", fontWeight: 700, cursor: loading ? "default" : "pointer", fontSize: "0.85rem", transition: "all 0.2s", boxShadow: loading ? "none" : "0 4px 16px rgba(99,102,241,0.3)", whiteSpace: "nowrap" }}>{loading ? "..." : "Ask ✨"}</button>
           </div>
         </div>
 
