@@ -115,7 +115,7 @@ const config: Config = {
         },
         {
           type: "dropdown",
-          label: "FAI Developer Center",
+          label: "FAI Developer Hub",
           position: "left",
           items: [
             { to: "/dev-hub", label: "🛠️ Developer Center" },
