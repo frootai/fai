@@ -974,6 +974,6 @@ log_experiment(variant, response, user_rating)
 
 ---
 
-> **Previous Module:** [Module 7 — Semantic Kernel & AI Orchestration](./07-Semantic-Kernel.md)
+> **Previous Module:** [Module 7 — Semantic Kernel & AI Orchestration](./Semantic-Kernel.md)
 
-> **Next Module:** [Module 9 — AI Infrastructure for Architects](./09-AI-Infrastructure.md)
+> **Next Module:** [Module 9 — AI Infrastructure for Architects](./AI-Infrastructure.md)

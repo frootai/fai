@@ -1470,8 +1470,8 @@ Semantic Kernel itself adds zero cost. The orchestration framework is free. All 
 
 ## Next Module
 
-Continue to **[Module 8: Prompt Engineering Mastery](./08-Prompt-Engineering.md)** -- learn how to craft system messages, use few-shot examples, chain-of-thought prompting, structured output, and function calling patterns. The quality of your prompts determines the quality of everything Semantic Kernel orchestrates.
+Continue to **[Module 8: Prompt Engineering Mastery](./Prompt-Engineering.md)** -- learn how to craft system messages, use few-shot examples, chain-of-thought prompting, structured output, and function calling patterns. The quality of your prompts determines the quality of everything Semantic Kernel orchestrates.
 
 ---
 
-> **Module 7 of 12** | [Back to AI Nexus Index](./README.md) | [Previous: AI Agents Deep Dive](./06-AI-Agents-Deep-Dive.md) | [Next: Prompt Engineering Mastery](./08-Prompt-Engineering.md)
+> **Module 7 of 12** | [Back to AI Nexus Index](./README.md) | [Previous: AI Agents Deep Dive](./AI-Agents-Deep-Dive.md) | [Next: Prompt Engineering Mastery](./Prompt-Engineering.md)

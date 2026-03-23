@@ -3,8 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": { "value": "eastus2" },
-    "environmentName": { "value": "ai-prod" },
-    "openaiModelName": { "value": "gpt-4o" },
-    "enableGpuQuota": { "value": false }
+    "environment": { "value": "dev" },
+    "vnetAddressPrefix": { "value": "10.0.0.0/16" }
   }
 }

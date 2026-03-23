@@ -1534,4 +1534,4 @@ Where:
 
 ---
 
-> **Next Module:** [Module 6: AI Agents Deep Dive](./06-AI-Agents-Deep-Dive.md) — understand how AI agents use tools, plan multi-step tasks, maintain memory, and integrate with the Microsoft Agent Framework and AutoGen.
+> **Next Module:** [Module 6: AI Agents Deep Dive](./AI-Agents-Deep-Dive.md) — understand how AI agents use tools, plan multi-step tasks, maintain memory, and integrate with the Microsoft Agent Framework and AutoGen.

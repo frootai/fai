@@ -1065,4 +1065,4 @@ graph TB
 
 ---
 
-> **Next:** [Module 2: LLM Landscape](./02-LLM-Landscape.md) — Understand the major model families (GPT, Claude, Llama, Gemini, Phi), how to compare them with benchmarks, and how to choose the right model for your workload.
+> **Next:** [Module 2: LLM Landscape](./LLM-Landscape.md) — Understand the major model families (GPT, Claude, Llama, Gemini, Phi), how to compare them with benchmarks, and how to choose the right model for your workload.

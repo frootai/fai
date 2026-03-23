@@ -969,7 +969,7 @@ All services communicate over private endpoints within a hub-and-spoke VNET topo
 
 ## What Is Next
 
-In **[Module 10: Responsible AI — Ethics, Safety & Governance](./10-Responsible-AI-Safety.md)**, we shift from infrastructure to responsibility. You will learn about AI fairness, transparency, content safety, and governance frameworks — the principles that ensure your AI infrastructure serves users ethically and complies with regulations. Infrastructure without governance is a liability; governance without infrastructure is theory.
+In **[Module 10: Responsible AI — Ethics, Safety & Governance](./Responsible-AI-Safety.md)**, we shift from infrastructure to responsibility. You will learn about AI fairness, transparency, content safety, and governance frameworks — the principles that ensure your AI infrastructure serves users ethically and complies with regulations. Infrastructure without governance is a liability; governance without infrastructure is theory.
 
 ---
 

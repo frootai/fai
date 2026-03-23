@@ -797,10 +797,10 @@ An often-overlooked factor: models generate tokens sequentially, so the bottlene
 
 ## What's Next
 
-You now have the map of the model landscape. In **[Module 3: Azure AI Foundry](./03-Azure-AI-Foundry.md)**, you will learn how to actually deploy, manage, and operationalize these models on Azure -- the Model Catalog, endpoint types, prompt flow, evaluation, and fine-tuning workflows.
+You now have the map of the model landscape. In **[Module 3: Azure AI Foundry](./Azure-AI-Foundry.md)**, you will learn how to actually deploy, manage, and operationalize these models on Azure -- the Model Catalog, endpoint types, prompt flow, evaluation, and fine-tuning workflows.
 
 ---
 
 :::tip Quick Navigation
-**Previous:** [Module 1: GenAI Foundations](./01-GenAI-Foundations.md) | **Next:** [Module 3: Azure AI Foundry](./03-Azure-AI-Foundry.md) | **Home:** [AI Nexus Index](./README.md)
+**Previous:** [Module 1: GenAI Foundations](./GenAI-Foundations.md) | **Next:** [Module 3: Azure AI Foundry](./Azure-AI-Foundry.md) | **Home:** [AI Nexus Index](./README.md)
 :::

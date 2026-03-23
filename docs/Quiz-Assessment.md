@@ -738,9 +738,9 @@ User Input --> [Content Safety: Prompt Shield] --> [LLM] --> [Content Safety: Ou
 
 | Score | Level | What to Do Next |
 |-------|-------|----------------|
-| 0-8 | **Beginner** | Start with [Module 1: GenAI Foundations](./01-GenAI-Foundations.md) and [Module 2: LLM Landscape](./02-LLM-Landscape.md). Build your foundation before diving into advanced topics. |
+| 0-8 | **Beginner** | Start with [Module 1: GenAI Foundations](./GenAI-Foundations.md) and [Module 2: LLM Landscape](./LLM-Landscape.md). Build your foundation before diving into advanced topics. |
 | 9-15 | **Intermediate** | You have solid awareness. Identify which sections you struggled with and re-read the corresponding modules. Pay special attention to RAG (Module 5) and Agents (Module 6) — these are the most common customer conversation topics. |
-| 16-21 | **Advanced** | You are ready for customer-facing AI architecture discussions. Use the [Quick Reference Cards](./11-Quick-Reference-Cards.md) to keep key facts at your fingertips during engagements. |
+| 16-21 | **Advanced** | You are ready for customer-facing AI architecture discussions. Use the [Quick Reference Cards](./Quick-Reference-Cards.md) to keep key facts at your fingertips during engagements. |
 | 22-25 | **Expert** | You can lead AI architecture design sessions and whiteboard complex RAG and agent topologies. Consider mentoring colleagues through this curriculum. |
 
 ---
@@ -754,5 +754,5 @@ User Input --> [Content Safety: Prompt Shield] --> [LLM] --> [Content Safety: Ou
 
 ---
 
-> **Previous Module:** [Module 11 — Quick Reference Cards](./11-Quick-Reference-Cards.md)
+> **Previous Module:** [Module 11 — Quick Reference Cards](./Quick-Reference-Cards.md)
 > **Back to Overview:** [AI Nexus README](./README.md)

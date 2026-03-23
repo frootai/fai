@@ -790,5 +790,5 @@ graph TD
 ---
 
 :::info Next Module
-Continue to **[Module 5: RAG Architecture Deep Dive](./05-RAG-Architecture.md)** — learn how Retrieval-Augmented Generation works, from chunking strategies and embedding models to Azure AI Search integration and reranking pipelines. RAG is the pattern that makes Copilots (and custom AI applications) factually grounded.
+Continue to **[Module 5: RAG Architecture Deep Dive](./RAG-Architecture.md)** — learn how Retrieval-Augmented Generation works, from chunking strategies and embedding models to Azure AI Search integration and reranking pipelines. RAG is the pattern that makes Copilots (and custom AI applications) factually grounded.
 :::

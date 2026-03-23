@@ -1022,4 +1022,4 @@ After completing this module, audit your current AI deployments against the guar
 
 ---
 
-> **Next Module:** [Module 11: Quick Reference Cards](./11-Quick-Reference-Cards.md) — one-page cheat sheets for every key concept covered in AI Nexus, from tokens to guardrails to model selection.
+> **Next Module:** [Module 11: Quick Reference Cards](./Quick-Reference-Cards.md) — one-page cheat sheets for every key concept covered in AI Nexus, from tokens to guardrails to model selection.

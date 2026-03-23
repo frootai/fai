@@ -1418,4 +1418,4 @@ graph TD
 
 ---
 
-> **Next Module:** [Module 7: Semantic Kernel & Orchestration](./07-Semantic-Kernel.md) — dive into the SDK that powers Microsoft's agent and AI orchestration ecosystem, including plugins, planners, memory connectors, and how Semantic Kernel compares to LangChain.
+> **Next Module:** [Module 7: Semantic Kernel & Orchestration](./Semantic-Kernel.md) — dive into the SDK that powers Microsoft's agent and AI orchestration ecosystem, including plugins, planners, memory connectors, and how Semantic Kernel compares to LangChain.

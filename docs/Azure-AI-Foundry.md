@@ -756,6 +756,6 @@ For organizations running multi-cloud AI strategies:
 
 You now understand the platform where AI applications are built and deployed. In the next module, we explore the **consumer-facing side of Microsoft's AI strategy** -- the Copilot ecosystem that sits on top of this platform.
 
-**Next:** [Module 4: Microsoft Copilot Ecosystem](./04-Copilot-Ecosystem.md) -- M365 Copilot, Copilot Studio, Copilot Actions, GitHub Copilot, Copilot for Azure, and the extensibility model that connects them all.
+**Next:** [Module 4: Microsoft Copilot Ecosystem](./Copilot-Ecosystem.md) -- M365 Copilot, Copilot Studio, Copilot Actions, GitHub Copilot, Copilot for Azure, and the extensibility model that connects them all.
 
-**Previous:** [Module 2: LLM Landscape](./02-LLM-Landscape.md)
+**Previous:** [Module 2: LLM Landscape](./LLM-Landscape.md)

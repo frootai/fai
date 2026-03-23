@@ -1,4 +1,12 @@
 {
+  "_comments": {
+    "purpose": "Deterministic Agent — AI model configuration for reliable, repeatable outputs",
+    "temperature": "Set to 0.0 for maximum determinism. Never increase above 0.1 for this play.",
+    "top_p": "1.0 with temperature=0 gives fully deterministic sampling",
+    "seed": "Fixed seed (42) ensures reproducibility across runs. Change only if A/B testing.",
+    "max_tokens": "500 tokens is sufficient for structured JSON responses. Increase for longer outputs.",
+    "response_format": "Strict JSON schema forces the model to output valid, structured data every time. The schema defines: answer, confidence, citations, verified."
+  },
   "model": "gpt-4o",
   "temperature": 0.0,
   "top_p": 1.0,
