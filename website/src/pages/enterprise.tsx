@@ -63,14 +63,17 @@ const certSections = [
 /* ------------------------------------------------------------------ */
 export default function EnterprisePage(): JSX.Element {
   return (
-    <Layout title="Enterprise & Certification — FrootAI" description="Enterprise support tiers, pricing, and the FrootAI Certified Architect program.">
+    <Layout title="Open Source Community & FAI Learn Hub — FrootAI" description="FrootAI is open source, free forever. Come build the community. FAI Learn Hub for certification.">
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px 80px" }}>
 
         {/* ── Header ── */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>🏢 Enterprise & Certification</h1>
+          <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>🌱 Open Source Community</h1>
           <p style={{ fontSize: "0.95rem", color: "var(--ifm-color-emphasis-500)", maxWidth: "640px", margin: "0 auto" }}>
-            FrootAI is 100% open source. Free forever for the community. Enterprise tier coming later.
+            Come build the community. Empower each other. Be the open glue for infrastructure, platform, and application teams.
+          </p>
+          <p style={{ fontSize: "0.85rem", color: "#00C853", fontWeight: 600, marginTop: "8px" }}>
+            Open Source · Free Forever · MIT License · Built by the community, for the community.
           </p>
         </div>
 
