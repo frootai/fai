@@ -49,18 +49,21 @@ export default function VSCodeExtensionPage(): JSX.Element {
         <h2 style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: "16px" }}>Commands (Ctrl+Shift+P)</h2>
         <div style={{ marginBottom: "32px" }}>
           {[
-            { cmd: "FrootAI: Look Up AI Term", desc: "Type any AI/ML term → jumps to definition in glossary" },
-            { cmd: "FrootAI: Search Knowledge Base", desc: "Full-text search across all 18 docs → QuickPick results" },
-            { cmd: "FrootAI: Initialize DevKit", desc: "Full .github Agentic OS (19 files) + agent.md + MCP + plugin.json" },
-            { cmd: "FrootAI: Initialize Hooks", desc: "Copy guardrails.json (preToolUse policy gates) to your project" },
-            { cmd: "FrootAI: Initialize Prompts", desc: "Copy 4 slash commands (/deploy, /test, /review, /evaluate)" },
-            { cmd: "FrootAI: Open Solution Play", desc: "Opens a play's README. Offers to open the full folder" },
-            { cmd: "FrootAI: Show Architecture Pattern", desc: "Pick from 7 patterns: RAG, agents, hosting, cost, etc." },
-            { cmd: "FrootAI: Open Setup Guide", desc: "Opens the setup guide on the website" },
-            { cmd: "FrootAI: Browse Solution Plays", desc: "Opens the solution plays page on the website" },
+            { cmd: "FrootAI: Initialize DevKit", desc: "Full .github Agentic OS (19 files) + agent.md + MCP + plugin.json", hot: true },
+            { cmd: "FrootAI: Initialize TuneKit", desc: "config/*.json + infra/main.bicep + evaluation/ — AI tuning for production", hot: true },
+            { cmd: "FrootAI: Install MCP Server", desc: "Install globally, run via npx, or add .vscode/mcp.json config", hot: true },
+            { cmd: "FrootAI: Start MCP Server", desc: "Launch frootai-mcp in terminal (10 tools: 6 static + 4 live)", hot: true },
+            { cmd: "FrootAI: Initialize Hooks", desc: "Copy guardrails.json (preToolUse policy gates) to your project", hot: false },
+            { cmd: "FrootAI: Initialize Prompts", desc: "Copy 4 slash commands (/deploy, /test, /review, /evaluate)", hot: false },
+            { cmd: "FrootAI: Look Up AI Term", desc: "200+ terms — inline popup with rich definition", hot: false },
+            { cmd: "FrootAI: Search Knowledge Base", desc: "Full-text search across 18 bundled modules", hot: false },
+            { cmd: "FrootAI: Open Solution Play", desc: "View play in rich webview panel (standalone)", hot: false },
+            { cmd: "FrootAI: Show Architecture Pattern", desc: "7 decision guides: RAG, agents, hosting, cost", hot: false },
+            { cmd: "FrootAI: Open Setup Guide", desc: "Opens the setup guide on the website", hot: false },
+            { cmd: "FrootAI: Browse Solution Plays", desc: "Opens the solution plays page", hot: false },
           ].map((c) => (
-            <div key={c.cmd} style={{ padding: "10px 16px", borderRadius: "8px", border: "1px solid var(--ifm-color-emphasis-100)", marginBottom: "6px", display: "flex", gap: "12px", alignItems: "center" }}>
-              <code style={{ fontSize: "0.78rem", fontWeight: 600, color: "#6366f1", whiteSpace: "nowrap" }}>{c.cmd}</code>
+            <div key={c.cmd} style={{ padding: "10px 16px", borderRadius: "8px", border: c.hot ? "1px solid rgba(16,185,129,0.3)" : "1px solid var(--ifm-color-emphasis-100)", background: c.hot ? "rgba(16,185,129,0.03)" : "transparent", marginBottom: "6px", display: "flex", gap: "12px", alignItems: "center" }}>
+              <code style={{ fontSize: "0.78rem", fontWeight: 600, color: c.hot ? "#10b981" : "#6366f1", whiteSpace: "nowrap" }}>{c.cmd}</code>
               <span style={{ fontSize: "0.78rem", color: "var(--ifm-color-emphasis-500)" }}>{c.desc}</span>
             </div>
           ))}

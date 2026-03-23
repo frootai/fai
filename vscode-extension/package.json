@@ -2,7 +2,7 @@
   "name": "frootai",
   "displayName": "FrootAI — From the Roots to the Fruits",
   "description": "The open glue binding Infrastructure, Platform & Application teams with the GenAI ecosystem. Standalone engine: 18 modules, 200+ terms, 20 solution plays, 10 MCP tools — works from any workspace.",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "publisher": "pavleenbali",
   "engines": {
     "vscode": "^1.85.0"
@@ -102,6 +102,18 @@
       {
         "command": "frootai.initPrompts",
         "title": "FrootAI: Initialize Prompt Files (slash commands)"
+      },
+      {
+        "command": "frootai.initTuneKit",
+        "title": "FrootAI: Initialize TuneKit (config + evaluation + infra)"
+      },
+      {
+        "command": "frootai.installMcpServer",
+        "title": "FrootAI: Install MCP Server (npm)"
+      },
+      {
+        "command": "frootai.startMcpServer",
+        "title": "FrootAI: Start MCP Server"
       }
     ],
     "menus": {
@@ -110,6 +122,23 @@
           "command": "frootai.browseSolutionPlays",
           "when": "view == frootai.solutionPlays",
           "group": "navigation"
+        },
+        {
+          "command": "frootai.installMcpServer",
+          "when": "view == frootai.mcpTools",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "frootai.installMcpServer",
+          "when": "view == frootai.mcpTools",
+          "group": "inline"
+        },
+        {
+          "command": "frootai.startMcpServer",
+          "when": "view == frootai.mcpTools",
+          "group": "inline"
         }
       ]
     },

@@ -700,10 +700,109 @@ function activate(context) {
     })
   );
 
+  // ── Command: Init TuneKit (config + evaluation + infra) ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.initTuneKit", async () => {
+      const wsFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (!wsFolder) { vscode.window.showWarningMessage("Open a folder first."); return; }
+
+      const plays = SOLUTION_PLAYS.map(p => ({ label: `${p.icon} ${p.id} — ${p.name}`, description: p.status, value: p }));
+      const pick = await vscode.window.showQuickPick(plays, { placeHolder: "Initialize TuneKit from which solution play?" });
+      if (!pick) return;
+
+      const tuneKitFiles = [
+        "config/openai.json",
+        "config/guardrails.json",
+        "config/search.json",
+        "config/chunking.json",
+        "infra/main.bicep",
+        "infra/parameters.json",
+        "evaluation/test-set.jsonl",
+        "evaluation/eval.py",
+      ];
+
+      let copied = 0;
+      for (const f of tuneKitFiles) {
+        // Try local first
+        const localPath = root ? path.join(root, "solution-plays", pick.value.dir, f) : null;
+        if (localPath && fs.existsSync(localPath)) {
+          const dstPath = path.join(wsFolder, f);
+          const dir = path.dirname(dstPath);
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          fs.copyFileSync(localPath, dstPath);
+          copied++;
+        } else {
+          // Download from GitHub
+          try {
+            const content = await downloadFromGitHub(`solution-plays/${pick.value.dir}/${f}`);
+            const dstPath = path.join(wsFolder, f);
+            const dir = path.dirname(dstPath);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(dstPath, content, "utf-8");
+            copied++;
+          } catch { /* file may not exist for this play */ }
+        }
+      }
+      vscode.window.showInformationMessage(
+        `✅ TuneKit initialized for ${pick.value.name}! ${copied} files copied:\n` +
+        `• config/*.json (AI parameters)\n• infra/ (Bicep IaC)\n• evaluation/ (test set + scoring)`
+      );
+    })
+  );
+
+  // ── Command: Install MCP Server ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.installMcpServer", async () => {
+      const choice = await vscode.window.showQuickPick([
+        { label: "$(package) Install globally", description: "npm install -g frootai-mcp", value: "global" },
+        { label: "$(play) Run directly (npx)", description: "npx frootai-mcp — zero install", value: "npx" },
+        { label: "$(gear) Add to .vscode/mcp.json", description: "Configure MCP for this workspace", value: "config" },
+      ], { placeHolder: "How do you want to set up the FrootAI MCP Server?" });
+      if (!choice) return;
+
+      if (choice.value === "global") {
+        const terminal = vscode.window.createTerminal("FrootAI MCP Install");
+        terminal.sendText("npm install -g frootai-mcp");
+        terminal.show();
+        vscode.window.showInformationMessage("Installing frootai-mcp globally. After install, run: frootai-mcp");
+      } else if (choice.value === "npx") {
+        const terminal = vscode.window.createTerminal("FrootAI MCP Server");
+        terminal.sendText("npx frootai-mcp");
+        terminal.show();
+      } else if (choice.value === "config") {
+        const wsFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        if (!wsFolder) { vscode.window.showWarningMessage("Open a folder first."); return; }
+        const mcpConfig = {
+          servers: {
+            frootai: {
+              type: "stdio",
+              command: "npx",
+              args: ["frootai-mcp"]
+            }
+          }
+        };
+        const configDir = path.join(wsFolder, ".vscode");
+        if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
+        fs.writeFileSync(path.join(configDir, "mcp.json"), JSON.stringify(mcpConfig, null, 2), "utf-8");
+        vscode.window.showInformationMessage("✅ MCP config added to .vscode/mcp.json. Reload VS Code to activate.");
+      }
+    })
+  );
+
+  // ── Command: Start MCP Server ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.startMcpServer", () => {
+      const terminal = vscode.window.createTerminal("FrootAI MCP Server");
+      terminal.sendText("npx frootai-mcp");
+      terminal.show();
+      vscode.window.showInformationMessage("🔌 FrootAI MCP Server starting... 10 tools (6 static + 4 live).");
+    })
+  );
+
   // ── Status Bar ──
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBar.text = "$(tree-view-icon) FrootAI v3";
-  statusBar.tooltip = `FrootAI — From the Roots to the Fruits\n${knowledgeLoaded ? `${Object.keys(KNOWLEDGE.modules).length} modules · ${Object.keys(GLOSSARY).length} terms` : "Knowledge loading..."}`;
+  statusBar.text = "$(tree-view-icon) FrootAI";
+  statusBar.tooltip = `FrootAI — From the Roots to the Fruits\n${knowledgeLoaded ? `${Object.keys(KNOWLEDGE.modules).length} modules · ${Object.keys(GLOSSARY).length} terms · 10 MCP tools` : "Knowledge loading..."}`;
   statusBar.command = "frootai.browseSolutionPlays";
   statusBar.show();
   context.subscriptions.push(statusBar);
