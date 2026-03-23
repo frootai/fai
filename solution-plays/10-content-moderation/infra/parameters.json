@@ -1,1 +1,11 @@
-{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#","parameters":{"location":{"value":"eastus2"}}}
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "value": "eastus2" },
+    "environment": { "value": "dev" },
+    "projectName": { "value": "frootai-10" },
+    "openAiModelName": { "value": "gpt-4o" },
+    "publisherEmail": { "value": "admin@frootai.com" }
+  }
+}
