@@ -207,7 +207,7 @@ const glossary = loadGlossary(modules);
 
 const server = new McpServer({
   name: "frootai",
-  version: "2.0.0",
+  version: "2.1.0",
 });
 
 // ── Tool: list_modules ─────────────────────────────────────────────
@@ -1015,6 +1015,156 @@ Two modes: self-hosted (your repo) or marketplace (public).`,
       content: [{
         type: "text",
         text: `${guide}\n\n---\n*Source: FrootAI Module F4 — .github Agentic OS*\n📖 Full module: get_module module_id=F4`,
+      }],
+    };
+  }
+);
+
+// ════════════════════════════════════════════════════════════════════
+// AGENT TOOLS — Auto-chain: Build → Review → Tune (in-chat flow)
+// ════════════════════════════════════════════════════════════════════
+
+server.tool(
+  "agent_build",
+  "BUILDER AGENT — Use when the user wants to BUILD or CREATE something. Returns building guidelines based on FrootAI best practices, then suggests review. Triggers the Build → Review → Tune chain.",
+  {
+    task: z.string().describe("What the user wants to build (e.g., 'IT ticket classification API', 'RAG pipeline', 'agent hosting')"),
+  },
+  async ({ task }) => {
+    // Search knowledge for relevant patterns
+    const queryLower = task.toLowerCase();
+    const relevant = [];
+    for (const mod of Object.values(modules)) {
+      for (const section of mod.sections) {
+        const text = (section.title + " " + section.content).toLowerCase();
+        if (queryLower.split(/\s+/).some(w => w.length > 3 && text.includes(w))) {
+          relevant.push({ title: section.title, module: mod.title, preview: section.content.substring(0, 300) });
+          if (relevant.length >= 3) break;
+        }
+      }
+      if (relevant.length >= 3) break;
+    }
+
+    const patterns = relevant.map(r => `**${r.title}** (${r.module})\n${r.preview}`).join("\n\n");
+
+    return {
+      content: [{
+        type: "text",
+        text: `## 🛠️ Builder Agent — ${task}
+
+### Architecture Guidance
+${patterns || "No specific patterns found. Following general Azure + AI best practices."}
+
+### Building Rules (from FrootAI DevKit)
+1. **Use config/*.json** for all AI parameters — never hardcode temperature, thresholds, etc.
+2. **Use Managed Identity** for Azure authentication — no API keys in code
+3. **Include error handling** with retry + exponential backoff + Application Insights logging
+4. **Follow .github/instructions/*.instructions.md** for coding standards
+5. **Output structured JSON** where applicable (use schemas from config/openai.json)
+6. **Apply guardrails** from config/guardrails.json (PII, toxicity, off-topic)
+
+### Recommended Azure Services
+Based on "${task}": ${relevant.length > 0 ? "See patterns above for specific service recommendations." : "Use Container Apps for hosting, Azure OpenAI for AI, AI Search for retrieval, Key Vault for secrets."}
+
+---
+
+💡 **Next step:** After building, ask me to **review your code** — I'll check for security, quality, and Azure best practices.
+Say: *"Review this code"* or *"Check my implementation for issues"*`,
+      }],
+    };
+  }
+);
+
+server.tool(
+  "agent_review",
+  "REVIEWER AGENT — Use when the user wants to REVIEW or CHECK code. Provides a security + quality review checklist, then suggests tuning. Part of the Build → Review → Tune chain.",
+  {
+    context: z.string().optional().describe("Optional: what was built or what to review (e.g., 'the IT ticket classification API')"),
+  },
+  async ({ context }) => {
+    return {
+      content: [{
+        type: "text",
+        text: `## 🔍 Reviewer Agent${context ? ` — ${context}` : ""}
+
+### Security Checklist
+- [ ] **No secrets in code** — API keys, connection strings must be in Key Vault
+- [ ] **Managed Identity** for all Azure service-to-service auth
+- [ ] **Input validation** — sanitize user inputs for injection (SQL, prompt, command)
+- [ ] **Content Safety** — Azure Content Safety applied to inputs AND outputs
+- [ ] **PII handling** — mask/redact before logging or storing
+
+### Quality Checklist
+- [ ] **Error handling** — try/catch with retry + exponential backoff on all Azure calls
+- [ ] **Logging** — Application Insights with correlation IDs
+- [ ] **Config from files** — temperature, thresholds, prompts from config/*.json (not hardcoded)
+- [ ] **Temperature ≤ 0.3** for factual responses (check config/openai.json)
+- [ ] **Evaluation** — test cases exist in evaluation/test-set.jsonl
+
+### Azure Best Practices
+- [ ] **Private endpoints** on all data services (Storage, AI Search, OpenAI, Cosmos)
+- [ ] **Resource tags** — environment, project, owner, cost-center on all resources
+- [ ] **Bicep idempotent** — infra/main.bicep can be re-run safely
+
+### Severity Guide
+🔴 **Critical** — security vulnerability or data leak → must fix before merge
+🟡 **Warning** — missing best practice or performance issue → should fix
+🟢 **Suggestion** — code style or minor improvement → nice to have
+
+---
+
+💡 **Next step:** After reviewing, ask me to **tune your configuration** for production.
+Say: *"Validate my config for production"* or *"Is my TuneKit ready?"*`,
+      }],
+    };
+  }
+);
+
+server.tool(
+  "agent_tune",
+  "TUNER AGENT — Use when the user wants to TUNE, VALIDATE, or check PRODUCTION READINESS. Validates TuneKit configuration. Final step in Build → Review → Tune chain.",
+  {
+    context: z.string().optional().describe("Optional: what solution or config to validate"),
+  },
+  async ({ context }) => {
+    return {
+      content: [{
+        type: "text",
+        text: `## 🎛️ Tuner Agent — Production Readiness${context ? ` for ${context}` : ""}
+
+### Config Validation Checklist
+| File | Check | Expected |
+|------|-------|----------|
+| config/openai.json | temperature | ≤ 0.3 for factual, ≤ 0.7 for conversational |
+| config/openai.json | max_tokens | 500–4000 (not unlimited) |
+| config/openai.json | model | Specific model name (not "latest") |
+| config/guardrails.json | blocked_topics | Non-empty array |
+| config/guardrails.json | pii_filter | true |
+| config/guardrails.json | abstention | "I don't know" response configured |
+| infra/main.bicep | Valid | az bicep build passes |
+| infra/main.bicep | Tags | environment + project + owner on all resources |
+| infra/parameters.json | Region set | Production region (not "eastus" default) |
+| evaluation/test-set.jsonl | Has cases | ≥ 10 test cases with ground truth |
+| evaluation/eval.py | Runnable | python eval.py --test-set test-set.jsonl works |
+
+### Production Readiness Verdict
+Review the checklist above against your actual files. If all checks pass:
+
+✅ **READY FOR PRODUCTION** — Deploy with confidence.
+
+If any checks fail:
+⚠️ **NEEDS TUNING** — Fix the failing items, then re-validate.
+
+### Tuning Knobs (in order of impact)
+1. **temperature** → Lower = more deterministic, higher = more creative
+2. **top_k / threshold** → Retrieval quality for RAG pipelines
+3. **guardrails** → Safety net for production
+4. **evaluation** → Quality gate before shipping
+
+---
+
+🚀 **Ready to deploy?** Use the **/deploy** slash command or ask: *"Deploy this to Azure"*
+📖 The deploy skill in .github/skills/deploy-azure/ has the full runbook.`,
       }],
     };
   }
