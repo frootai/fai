@@ -255,16 +255,22 @@ frootai/
 │   ├── agent-card.json      A2A protocol Agent Card
 │   ├── build-knowledge.js   Bundle generator
 │   └── package.json         npm config
-├── vscode-extension/      ← VS Code extension (v0.9.0)
+├── vscode-extension/      ← VS Code extension (v0.9.2)
 │   ├── src/extension.js     13 commands, standalone engine, cached downloads
 │   ├── knowledge.json       Bundled knowledge (682 KB)
 │   └── package.json         Marketplace config
-├── website/               ← Docusaurus site (13 pages)
-│   ├── src/pages/           chatbot, configurator, partners, marketplace, enterprise + 8 core
+├── website/               ← Docusaurus site (17 pages)
+│   ├── src/pages/           chatbot, configurator, partners, marketplace, dev-hub, adoption + core
 │   ├── docusaurus.config.ts
 │   └── sidebars.ts
-├── infra-registry/        ← Reusable Bicep modules (coming soon)
+├── scripts/               ← Automation scripts (Bash + PowerShell)
+│   ├── deploy-play.sh/.ps1  Deploy any play end-to-end (infra + config + eval)
+│   ├── rebuild-knowledge.sh/.ps1  Rebuild knowledge.json from docs/
+│   └── export-skills.sh/.ps1  Export FROOT modules as .github/skills/
+├── sdk/                   ← Integration SDK guide (embed FrootAI in your platform)
+├── infra-registry/        ← Reusable Bicep modules + Azure Verified Modules
 ├── workshops/             ← Workshop materials for conference talks
+├── azure.yaml             ← azd up configuration for solution plays
 ├── .github/workflows/     ← CI/CD pipelines
 │   ├── deploy.yml           Auto-deploy website to GitHub Pages
 │   └── validate-plays.yml   Matrix CI: validates all 20 plays

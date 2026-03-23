@@ -459,4 +459,65 @@ Each primitive is independent but they strengthen each other. An agent with rule
 
 ---
 
+## Scripts & Automation
+
+### deploy-play.sh / deploy-play.ps1
+
+Deploy any solution play end-to-end (infra + config + eval).
+
+**Usage:**
+```bash
+./scripts/deploy-play.sh <play-number> [--resource-group <rg>] [--skip-eval]
+```
+
+| Parameter | Description | Required |
+|-----------|-------------|----------|
+| `play-number` | Play number (01-20) | Yes |
+| `--resource-group` | Azure resource group name | No (uses default) |
+| `--skip-eval` | Skip evaluation step | No |
+
+### rebuild-knowledge.sh / rebuild-knowledge.ps1
+
+Rebuild knowledge.json from docs/ and sync to VS Code extension.
+
+**Usage:**
+```bash
+./scripts/rebuild-knowledge.sh [--publish]
+```
+
+### export-skills.sh / export-skills.ps1
+
+Export FROOT modules as `.github/skills/` folders for GitHub Copilot.
+
+**Usage:**
+```bash
+./scripts/export-skills.sh <module-id>   # e.g., F1, R2, O3
+./scripts/export-skills.sh --all          # export all 16 modules
+```
+
+### auto-update.js (MCP Server)
+
+Knowledge auto-refresh module. Checks if knowledge.json is older than 7 days and fetches latest from GitHub.
+
+```javascript
+import { getLatestKnowledge } from './auto-update.js';
+const knowledge = await getLatestKnowledge();
+```
+
+## Azure Integration
+
+### azure.yaml
+
+Configuration for `azd up` deployment. Place in the root of any solution play.
+
+### registry-entry.json
+
+MCP ecosystem registry entry for FrootAI. Located at `mcp-server/registry-entry.json`.
+
+### agent-card.json
+
+A2A (Agent-to-Agent) protocol card. Located at `mcp-server/agent-card.json`.
+
+---
+
 > **Next**: [Admin Guide](./admin-guide) · [User Guide](./user-guide-complete) · [Architecture Overview](./architecture-overview)

@@ -240,6 +240,42 @@ FrootAI follows the **no API keys** principle:
 
 ---
 
+## Deployment Automation
+
+### One-Command Deployment
+
+Deploy any solution play end-to-end:
+
+```bash
+./scripts/deploy-play.sh <play-number> --resource-group <rg-name>
+```
+
+Prerequisites: Azure CLI logged in, resource group created, Bicep installed.
+
+### Knowledge Management
+
+Rebuild knowledge bundle after updating docs/:
+```bash
+./scripts/rebuild-knowledge.sh          # rebuild only
+./scripts/rebuild-knowledge.sh --publish # rebuild + npm publish
+```
+
+### Skill Export
+
+Export FROOT modules as GitHub Copilot skills:
+```bash
+./scripts/export-skills.sh --all
+```
+
+### azd Integration
+
+FrootAI supports Azure Developer CLI:
+```bash
+azd up  # deploys using azure.yaml configuration
+```
+
+---
+
 ## 8. Troubleshooting
 
 ### 8.1 Common Issues

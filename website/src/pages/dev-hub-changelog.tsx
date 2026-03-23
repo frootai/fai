@@ -15,6 +15,23 @@ interface Release {
 
 const releases: Release[] = [
   {
+    version: "v2.3.0",
+    date: "March 23, 2026",
+    title: "Value Engine + Vision Complete",
+    color: "#00C853",
+    changes: [
+      "Section F: Strategic value engine — MCP registry entry, SDK integration guide, adoption dashboard",
+      "Section F: Professional README badges (VS Code installs, npm downloads, GitHub stars, build status)",
+      "Section F: Public adoption page (/adoption) — ecosystem health, stats, use cases, integration points",
+      "Section G: One-command deploy — azure.yaml + scripts/deploy-play.sh|.ps1 (infra + config + eval)",
+      "Section G: Living packages — mcp-server/auto-update.js (knowledge auto-fetch from GitHub, 7-day TTL)",
+      "Section G: Knowledge rebuild — scripts/rebuild-knowledge.sh|.ps1 (rebuild + sync + optional publish)",
+      "Section G: Skill exporter — scripts/export-skills.sh|.ps1 (any FROOT module as .github/skills/)",
+      "FAI Developer Hub — Developer Center, Feature Spec (A-Z), Admin/User/Contributor Guide, API Reference, Architecture, Changelog",
+      "17 website pages total, 5 wiki docs in sidebar, full pre-push checklist with Developer Hub docs",
+    ],
+  },
+  {
     version: "v2.2.0",
     date: "March 23, 2026",
     title: "Ecosystem Sprint",

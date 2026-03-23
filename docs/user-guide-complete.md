@@ -293,6 +293,45 @@ Optimize parameters based on review findings and evaluation results. Adjusts tem
 
 ---
 
+## Deploying a Solution Play
+
+Deploy any play with one command:
+
+```bash
+# Deploy play 01 (Enterprise RAG)
+./scripts/deploy-play.sh 01 --resource-group rg-frootai-dev
+
+# Deploy play 05 (IT Ticket Resolution) without evaluation
+./scripts/deploy-play.sh 05 --resource-group rg-frootai --skip-eval
+```
+
+The script: validates the play structure → deploys Azure infra via Bicep → copies config files → runs evaluation.
+
+## Exporting FROOT Knowledge as Copilot Skills
+
+Make any FROOT module available as a GitHub Copilot skill:
+
+```bash
+# Export a single module
+./scripts/export-skills.sh F1
+
+# Export all 16 modules
+./scripts/export-skills.sh --all
+```
+
+This creates `.github/skills/<module-id>/SKILL.md` + `README.md` that Copilot reads automatically.
+
+## Knowledge Auto-Update
+
+The MCP server can auto-refresh its knowledge:
+- Bundled knowledge.json is checked every 7 days
+- If stale, fetches latest from GitHub automatically
+- Falls back to bundled version if offline
+
+To manually rebuild: `./scripts/rebuild-knowledge.sh`
+
+---
+
 ## 8. FAQ
 
 **Q: Does FrootAI require an internet connection?**
