@@ -129,6 +129,12 @@ const config: Config = {
           ],
         },
         {
+          to: "/hi-fai",
+          label: "🖐️ Hi FAI",
+          position: "right",
+          className: "navbar__item--hifai-glow",
+        },
+        {
           to: "/chatbot",
           label: "✨ FAI Agent",
           position: "right",

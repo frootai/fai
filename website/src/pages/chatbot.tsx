@@ -52,7 +52,7 @@ export default function ChatbotPage(): JSX.Element {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<Array<{role: string; text: string}>>([
-    { role: "assistant", text: "Welcome! I'm your **open glue** for binding **Infra**, **Platform** & **Application** with the Agentic Ecosystem.\n\nAsk me about any of the **20 solution plays**, the **MCP server**, **VS Code extension**, or how to get started." }
+    { role: "assistant", text: "Welcome! I'm your **open glue** for binding **Infra**, **Platform** & **Application** with the Agentic Ecosystem.\n\n> \ud83d\udd90\ufe0f **New here?** Try [\ud83d\udd90\ufe0f Hi FAI](/hi-fai) — our 5-minute quickstart guide to go from zero to your first AI solution.\n\nOr ask me about any of the **20 solution plays**, the **MCP server**, **VS Code extension**, or how to get started." }
   ]);
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [history]);
@@ -191,11 +191,12 @@ export default function ChatbotPage(): JSX.Element {
           )}
 
           {/* Input */}
-          <div style={{ padding: "14px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: "10px" }}>
-            <input value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder="Ask FAI Agent anything about FrootAI..." style={{ flex: 1, padding: "14px 18px", borderRadius: "12px", border: "1px solid rgba(245,158,11,0.2)", background: "rgba(0,0,0,0.3)", color: "#e0e0e0", fontSize: "0.85rem", outline: "none", transition: "border-color 0.2s" }} disabled={loading}
+          <div style={{ padding: "14px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: "10px", alignItems: "flex-end" }}>
+            <textarea value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder="Ask FAI Agent anything about FrootAI..." rows={1} style={{ flex: 1, padding: "14px 18px", borderRadius: "12px", border: "1px solid rgba(245,158,11,0.2)", background: "rgba(0,0,0,0.3)", color: "#e0e0e0", fontSize: "0.85rem", outline: "none", transition: "border-color 0.2s", resize: "none", overflow: "hidden", minHeight: "48px", maxHeight: "160px", lineHeight: "1.5", fontFamily: "inherit" }} disabled={loading}
               onFocus={e => e.currentTarget.style.borderColor = "rgba(245,158,11,0.5)"}
-              onBlur={e => e.currentTarget.style.borderColor = "rgba(245,158,11,0.2)"} />
-            <button onClick={() => send()} disabled={loading} style={{ padding: "14px 28px", borderRadius: "12px", background: loading ? "#333" : "linear-gradient(135deg, #f59e0b, #eab308)", color: loading ? "#666" : "#000", border: "none", fontWeight: 700, cursor: loading ? "default" : "pointer", fontSize: "0.85rem", transition: "all 0.2s", boxShadow: loading ? "none" : "0 4px 12px rgba(245,158,11,0.2)" }}>{loading ? "..." : "Ask ✨"}</button>
+              onBlur={e => e.currentTarget.style.borderColor = "rgba(245,158,11,0.2)"}
+              onInput={e => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 160) + "px"; }} />
+            <button onClick={() => send()} disabled={loading} style={{ padding: "14px 28px", borderRadius: "12px", background: loading ? "#333" : "linear-gradient(135deg, #6366f1, #7c3aed)", color: loading ? "#666" : "#fff", border: "none", fontWeight: 700, cursor: loading ? "default" : "pointer", fontSize: "0.85rem", transition: "all 0.2s", boxShadow: loading ? "none" : "0 4px 12px rgba(99,102,241,0.3)", whiteSpace: "nowrap" }}>{loading ? "..." : "Ask ✨"}</button>
           </div>
         </div>
 
