@@ -132,9 +132,18 @@ export default function ChatbotPage(): JSX.Element {
 
         {/* ═══ HERO HEADER ═══ */}
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <h1 style={{ fontSize: "2.2rem", fontWeight: 800, margin: "0", background: "linear-gradient(135deg, #f59e0b 0%, #eab308 40%, #f97316 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+          <div style={{ display: "inline-block", padding: "3px 14px", borderRadius: "20px", background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,179,8,0.08))", border: "1px solid rgba(245,158,11,0.3)", fontSize: "0.65rem", color: "#f59e0b", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>
+            Powered by Azure OpenAI GPT-4.1
+          </div>
+          <h1 style={{ fontSize: "2.2rem", fontWeight: 800, margin: "0 0 6px", background: "linear-gradient(135deg, #f59e0b 0%, #eab308 40%, #f97316 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
             ✨ FAI Agent
           </h1>
+          <p style={{ color: "var(--ifm-color-emphasis-500)", fontSize: "0.88rem", margin: "0 0 4px", fontWeight: 500 }}>
+            Your open glue for binding <span style={{ color: "#10b981", fontWeight: 700 }}>Infrastructure</span>, <span style={{ color: "#06b6d4", fontWeight: 700 }}>Platform</span> & <span style={{ color: "#7c3aed", fontWeight: 700 }}>Application</span> with the Agentic Ecosystem
+          </p>
+          <p style={{ color: "var(--ifm-color-emphasis-400)", fontSize: "0.72rem", margin: 0, fontStyle: "italic" }}>
+            From the Roots to the Fruits
+          </p>
         </div>
 
         {/* ═══ CHAT CONTAINER (glassmorphism) ═══ */}
