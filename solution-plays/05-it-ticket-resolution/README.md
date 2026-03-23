@@ -1,50 +1,59 @@
 # Solution Play 05: IT Ticket Resolution
 
-> **Complexity:** Medium | **Status:** Skeleton
-> Auto-classify, route, and resolve IT tickets  Logic Apps + AI Foundry + ServiceNow MCP.
-
----
+> **Complexity:** Medium | **Status:** ✅ Ready
+> AI-powered IT support — auto-classify, route, and resolve tickets with Azure OpenAI + Logic Apps.
 
 ## Architecture
 
 ```mermaid
 graph LR
-    A[Input] --> B[Processing]
-    B --> C[AI Model]
-    C --> D[Output]
+    TKT[Incoming Ticket] --> LA[Logic Apps<br/>Orchestrator]
+    LA --> LLM[Azure OpenAI<br/>GPT-4o]
+    LLM --> CLASS[Classify &<br/>Prioritize]
+    CLASS --> ROUTE[Auto-Route<br/>or Resolve]
+    ROUTE --> KB[AI Search<br/>Knowledge Base]
+    ROUTE --> TEAMS[Teams<br/>Notification]
+    LLM --> LOG[App Insights]
 ```
 
----
+## Azure Services
 
-## DevKit
+| Service | Purpose |
+|---------|---------|
+| Azure Logic Apps | Ticket ingestion and workflow orchestration |
+| Azure OpenAI Service | Classification, summarization, resolution suggestions |
+| Azure AI Search | Knowledge base retrieval for known solutions |
+| Azure Service Bus | Ticket queue and priority routing |
+| Azure Container Apps | Host the resolution agent API |
 
-Download the DevKit to empower your co-coder for this solution.
+## DevKit (.github Agentic OS)
 
-| File | Purpose |
-|------|---------|
-| agent.md | Agent personality + rules |
-| instructions.md | System prompts + guardrails |
-| .github/copilot-instructions.md | IDE coding context |
-| .vscode/mcp.json | MCP auto-connect |
-| mcp/index.js | Solution-specific tools |
-| plugins/ | Reusable functions |
+This play includes the full .github Agentic OS (19 files):
+- **Layer 1:** copilot-instructions.md + 3 modular instruction files
+- **Layer 2:** 4 slash commands + 3 chained agents (builder → reviewer → tuner)
+- **Layer 3:** 3 skill folders (deploy-azure, evaluate, tune)
+- **Layer 4:** guardrails.json + 2 agentic workflows
+- **Infrastructure:** infra/main.bicep + parameters.json
 
----
+Run `Ctrl+Shift+P` → **FrootAI: Init DevKit** in VS Code.
 
-## TuneKit
+## TuneKit (AI Configuration)
 
-Download the TuneKit to fine-tune AI for production.
+| Config File | What It Controls |
+|-------------|-----------------|
+| config/openai.json | Model parameters, temperature for ticket classification |
+| config/guardrails.json | PII masking, escalation thresholds, auto-close rules |
+| config/agents.json | Agent behavior — confidence cutoffs, retry logic |
+| config/model-comparison.json | Model selection: GPT-4o vs GPT-4o-mini for cost |
 
-| Config | What It Controls |
-|--------|-----------------|
-| config/openai.json | Model + generation parameters |
-| config/guardrails.json | Safety + business rules |
-| infra/main.bicep | Azure resources |
-| evaluation/ | Test set + scoring |
+Run `Ctrl+Shift+P` → **FrootAI: Init TuneKit** in VS Code.
 
-Infra: Logic Apps  Azure OpenAI  ServiceNow MCP  Container Apps
-Tuning: Classification prompts, routing rules, confidence thresholds
+## Quick Start
 
----
+1. Install: `code --install-extension pavleenbali.frootai`
+2. Init DevKit → 19 .github files + infra
+3. Init TuneKit → AI configs + evaluation
+4. Open Copilot Chat → ask to build this solution
+5. Use /review → /deploy → ship
 
-> **FrootAI Solution Play 05**  DevKit builds it. TuneKit ships it.
+> **FrootAI Solution Play 05** — DevKit builds it. TuneKit ships it.

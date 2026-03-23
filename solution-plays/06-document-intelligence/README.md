@@ -1,50 +1,61 @@
-# Solution Play 06: Document Intelligence Pipeline
+# Solution Play 06: Document Intelligence
 
-> **Complexity:** Medium | **Status:** Skeleton
-> Extract, classify, and structure document data  Blob + Doc Intelligence + OpenAI.
-
----
+> **Complexity:** Medium | **Status:** ✅ Ready
+> Extract, classify, and index documents — Azure Document Intelligence + AI Search + OpenAI.
 
 ## Architecture
 
 ```mermaid
 graph LR
-    A[Input] --> B[Processing]
-    B --> C[AI Model]
-    C --> D[Output]
+    DOC[Upload Document] --> DI[Document<br/>Intelligence]
+    DI --> CHUNK[Chunking<br/>Pipeline]
+    CHUNK --> IDX[AI Search<br/>Indexer]
+    IDX --> SEARCH[AI Search<br/>Hybrid Query]
+    SEARCH --> LLM[Azure OpenAI<br/>GPT-4o]
+    LLM --> RESP[Structured<br/>Response]
+    DOC --> BLOB[Blob Storage]
 ```
 
----
+## Azure Services
 
-## DevKit
+| Service | Purpose |
+|---------|---------|
+| Azure AI Document Intelligence | OCR, layout analysis, and field extraction |
+| Azure AI Search | Index and retrieve extracted document content |
+| Azure OpenAI Service | Summarization and Q&A over documents |
+| Azure Blob Storage | Store uploaded documents and processed outputs |
+| Azure Container Apps | Host the document processing pipeline |
 
-Download the DevKit to empower your co-coder for this solution.
+## DevKit (.github Agentic OS)
 
-| File | Purpose |
-|------|---------|
-| agent.md | Agent personality + rules |
-| instructions.md | System prompts + guardrails |
-| .github/copilot-instructions.md | IDE coding context |
-| .vscode/mcp.json | MCP auto-connect |
-| mcp/index.js | Solution-specific tools |
-| plugins/ | Reusable functions |
+This play includes the full .github Agentic OS (19 files):
+- **Layer 1:** copilot-instructions.md + 3 modular instruction files
+- **Layer 2:** 4 slash commands + 3 chained agents (builder → reviewer → tuner)
+- **Layer 3:** 3 skill folders (deploy-azure, evaluate, tune)
+- **Layer 4:** guardrails.json + 2 agentic workflows
+- **Infrastructure:** infra/main.bicep + parameters.json
 
----
+Run `Ctrl+Shift+P` → **FrootAI: Init DevKit** in VS Code.
 
-## TuneKit
+## TuneKit (AI Configuration)
 
-Download the TuneKit to fine-tune AI for production.
+| Config File | What It Controls |
+|-------------|-----------------|
+| config/openai.json | Model parameters for document Q&A and summarization |
+| config/guardrails.json | PII redaction, document retention, access controls |
+| config/agents.json | Agent behavior tuning for extraction accuracy |
+| config/model-comparison.json | Model selection guide for document tasks |
+| config/search.json | Retrieval settings — hybrid ratio, top-k, reranker |
+| config/chunking.json | Chunk size, overlap, semantic vs fixed splitting |
 
-| Config | What It Controls |
-|--------|-----------------|
-| config/openai.json | Model + generation parameters |
-| config/guardrails.json | Safety + business rules |
-| infra/main.bicep | Azure resources |
-| evaluation/ | Test set + scoring |
+Run `Ctrl+Shift+P` → **FrootAI: Init TuneKit** in VS Code.
 
-Infra: Blob Storage  Document Intelligence  Azure OpenAI  Cosmos DB
-Tuning: Extraction prompts, confidence thresholds, field schemas
+## Quick Start
 
----
+1. Install: `code --install-extension pavleenbali.frootai`
+2. Init DevKit → 19 .github files + infra
+3. Init TuneKit → AI configs + evaluation
+4. Open Copilot Chat → ask to build this solution
+5. Use /review → /deploy → ship
 
-> **FrootAI Solution Play 06**  DevKit builds it. TuneKit ships it.
+> **FrootAI Solution Play 06** — DevKit builds it. TuneKit ships it.

@@ -1,50 +1,59 @@
 # Solution Play 04: Call Center Voice AI
 
-> **Complexity:** High | **Status:** Skeleton
-> Voice-enabled customer service  Communication Services + AI Speech + OpenAI Agent.
-
----
+> **Complexity:** High | **Status:** ✅ Ready
+> Voice-enabled customer service — Azure Communication Services + AI Speech + OpenAI agent orchestration.
 
 ## Architecture
 
 ```mermaid
 graph LR
-    A[Input] --> B[Processing]
-    B --> C[AI Model]
-    C --> D[Output]
+    CALL[Inbound Call] --> ACS[Communication<br/>Services]
+    ACS --> STT[AI Speech<br/>Speech-to-Text]
+    STT --> LLM[Azure OpenAI<br/>GPT-4o]
+    LLM --> TTS[AI Speech<br/>Text-to-Speech]
+    TTS --> ACS
+    LLM --> SAFE[Content Safety]
+    LLM --> LOG[App Insights]
 ```
 
----
+## Azure Services
 
-## DevKit
+| Service | Purpose |
+|---------|---------|
+| Azure Communication Services | Voice call routing and telephony |
+| Azure AI Speech | Real-time speech-to-text and text-to-speech |
+| Azure OpenAI Service | Intent detection and response generation |
+| Azure AI Content Safety | Filter harmful content in real-time |
+| Azure Container Apps | Host the voice agent orchestrator |
 
-Download the DevKit to empower your co-coder for this solution.
+## DevKit (.github Agentic OS)
 
-| File | Purpose |
-|------|---------|
-| agent.md | Agent personality + rules |
-| instructions.md | System prompts + guardrails |
-| .github/copilot-instructions.md | IDE coding context |
-| .vscode/mcp.json | MCP auto-connect |
-| mcp/index.js | Solution-specific tools |
-| plugins/ | Reusable functions |
+This play includes the full .github Agentic OS (19 files):
+- **Layer 1:** copilot-instructions.md + 3 modular instruction files
+- **Layer 2:** 4 slash commands + 3 chained agents (builder → reviewer → tuner)
+- **Layer 3:** 3 skill folders (deploy-azure, evaluate, tune)
+- **Layer 4:** guardrails.json + 2 agentic workflows
+- **Infrastructure:** infra/main.bicep + parameters.json
 
----
+Run `Ctrl+Shift+P` → **FrootAI: Init DevKit** in VS Code.
 
-## TuneKit
+## TuneKit (AI Configuration)
 
-Download the TuneKit to fine-tune AI for production.
+| Config File | What It Controls |
+|-------------|-----------------|
+| config/openai.json | Model selection, temperature, response length for voice |
+| config/guardrails.json | PII redaction, call recording consent, profanity filter |
+| config/agents.json | Agent behavior tuning — escalation triggers, hold music |
+| config/model-comparison.json | Model selection: GPT-4o vs GPT-4o-mini for latency |
 
-| Config | What It Controls |
-|--------|-----------------|
-| config/openai.json | Model + generation parameters |
-| config/guardrails.json | Safety + business rules |
-| infra/main.bicep | Azure resources |
-| evaluation/ | Test set + scoring |
+Run `Ctrl+Shift+P` → **FrootAI: Init TuneKit** in VS Code.
 
-Infra: Communication Services  AI Speech  Azure OpenAI  Container Apps
-Tuning: Speech config, grounding prompts, fallback chains, voice personality
+## Quick Start
 
----
+1. Install: `code --install-extension pavleenbali.frootai`
+2. Init DevKit → 19 .github files + infra
+3. Init TuneKit → AI configs + evaluation
+4. Open Copilot Chat → ask to build this solution
+5. Use /review → /deploy → ship
 
-> **FrootAI Solution Play 04**  DevKit builds it. TuneKit ships it.
+> **FrootAI Solution Play 04** — DevKit builds it. TuneKit ships it.

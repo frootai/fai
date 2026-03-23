@@ -30,7 +30,7 @@ graph TB
 
 </div>
 
-> **Modules:** 17 | **Duration:** 16–22 hours | **Level:** Beginner → Expert
+> **Modules:** 18 | **Duration:** 16–22 hours | **Level:** Beginner → Expert
 > **Audience:** Cloud Architects, AI Engineers, Platform Engineers, DevOps, CSAs
 > **Scope:** Everything AI — from a single token to a production agent fleet
 > **Last Updated:** March 2026
@@ -408,18 +408,35 @@ FrootAI is not just documentation — it's a **programmable knowledge base**. Co
 {
   "mcpServers": {
     "frootai": {
-      "command": "node",
-      "args": ["mcp-server/index.js"]
+      "command": "npx",
+      "args": ["frootai-mcp"]
     }
   }
 }
 ```
 
-**5 tools available:** `list_modules` · `get_module` · `lookup_term` · `search_knowledge` · `get_architecture_pattern`
+**16 tools:** 6 static (knowledge) + 4 live (Azure docs, MCP registries) + 3 agent chain (build → review → tune) + 3 AI ecosystem (model catalog, pricing, compare)
 
-See [mcp-server/README.md](../mcp-server/README.md) for full setup instructions.
+See [mcp-server/README.md](../mcp-server/README.md) for full setup.
 
 ---
 
-> **FrootAI** — *The open glue for AI architecture. From root to fruit.*
+## 🖥️ FrootAI VS Code Extension
+
+Standalone engine — works from any workspace, no clone needed:
+
+```
+Ctrl+Shift+X → Search "FrootAI" → Install
+```
+
+**13 commands:** Init DevKit (.github Agentic OS), Init TuneKit, Auto-Chain Agents, MCP Install/Start/Configure, Search Knowledge, Look Up AI Term, and more.
+
+**4 sidebar panels:** Solution Plays (20) · MCP Tools (16) · Knowledge Hub (18 modules) · AI Glossary (200+ terms)
+
+See [VS Code Extension →](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
+
+---
+
+> **FrootAI v2.2** — *The open glue for AI architecture. From the roots to the fruits.*
+> 18 modules · 16 MCP tools · 20 solution plays · 200+ AI terms
 > Built with 🌳 by [Pavleen Bali](https://linkedin.com/in/pavleenbali) for the Azure community.

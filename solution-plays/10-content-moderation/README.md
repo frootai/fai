@@ -1,50 +1,58 @@
 # Solution Play 10: Content Moderation Pipeline
 
-> **Complexity:** Low | **Status:** Skeleton
-> Filter harmful content in text and images  AI Content Safety + APIM + Functions.
-
----
+> **Complexity:** Low | **Status:** ✅ Ready
+> Filter harmful content in text and images — Azure AI Content Safety + API Management + Functions.
 
 ## Architecture
 
 ```mermaid
 graph LR
-    A[Input] --> B[Processing]
-    B --> C[AI Model]
-    C --> D[Output]
+    REQ[Content Request] --> APIM[API Management<br/>Gateway]
+    APIM --> FUNC[Azure Functions<br/>Processor]
+    FUNC --> SAFE[AI Content<br/>Safety]
+    SAFE --> TEXT[Text Analysis<br/>Hate/Violence]
+    SAFE --> IMG[Image Analysis<br/>Adult/Gore]
+    FUNC --> RESULT[Allow / Block<br/>Decision]
+    FUNC --> LOG[App Insights]
 ```
 
----
+## Azure Services
 
-## DevKit
+| Service | Purpose |
+|---------|---------|
+| Azure AI Content Safety | Detect harmful text and image content |
+| Azure API Management | Rate limiting, auth, and API gateway |
+| Azure Functions | Serverless content processing pipeline |
+| Azure App Insights | Logging moderation decisions and metrics |
 
-Download the DevKit to empower your co-coder for this solution.
+## DevKit (.github Agentic OS)
 
-| File | Purpose |
-|------|---------|
-| agent.md | Agent personality + rules |
-| instructions.md | System prompts + guardrails |
-| .github/copilot-instructions.md | IDE coding context |
-| .vscode/mcp.json | MCP auto-connect |
-| mcp/index.js | Solution-specific tools |
-| plugins/ | Reusable functions |
+This play includes the full .github Agentic OS (19 files):
+- **Layer 1:** copilot-instructions.md + 3 modular instruction files
+- **Layer 2:** 4 slash commands + 3 chained agents (builder → reviewer → tuner)
+- **Layer 3:** 3 skill folders (deploy-azure, evaluate, tune)
+- **Layer 4:** guardrails.json + 2 agentic workflows
+- **Infrastructure:** infra/main.bicep + parameters.json
 
----
+Run `Ctrl+Shift+P` → **FrootAI: Init DevKit** in VS Code.
 
-## TuneKit
+## TuneKit (AI Configuration)
 
-Download the TuneKit to fine-tune AI for production.
+| Config File | What It Controls |
+|-------------|-----------------|
+| config/openai.json | Model parameters for custom category classifiers |
+| config/guardrails.json | Severity thresholds, custom blocklists, action rules |
+| config/agents.json | Agent behavior for moderation review workflows |
+| config/model-comparison.json | Model selection for custom classifiers |
 
-| Config | What It Controls |
-|--------|-----------------|
-| config/openai.json | Model + generation parameters |
-| config/guardrails.json | Safety + business rules |
-| infra/main.bicep | Azure resources |
-| evaluation/ | Test set + scoring |
+Run `Ctrl+Shift+P` → **FrootAI: Init TuneKit** in VS Code.
 
-Infra: Content Safety  API Management  Azure Functions
-Tuning: Severity levels, custom categories, blocklists, action rules
+## Quick Start
 
----
+1. Install: `code --install-extension pavleenbali.frootai`
+2. Init DevKit → 19 .github files + infra
+3. Init TuneKit → AI configs + evaluation
+4. Open Copilot Chat → ask to build this solution
+5. Use /review → /deploy → ship
 
-> **FrootAI Solution Play 10**  DevKit builds it. TuneKit ships it.
+> **FrootAI Solution Play 10** — DevKit builds it. TuneKit ships it.

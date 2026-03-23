@@ -1,39 +1,59 @@
-# Solution Play 17: AI Observability Dashboard
+# Solution Play 17: AI Observability
 
-> **Complexity:** Medium | **Status:** Skeleton
-> Monitor AI workloads with custom KQL queries, quality alerts, and workbooks.
+> **Complexity:** Medium | **Status:** ✅ Ready
+> Full-stack AI monitoring — App Insights + Log Analytics + custom dashboards for LLM metrics.
 
 ## Architecture
 
 ```mermaid
 graph LR
-    A[Input] --> B[Process] --> C[AI] --> D[Output]
+    APP[AI Application] --> SDK[App Insights<br/>SDK]
+    SDK --> AI[Application<br/>Insights]
+    AI --> LA[Log Analytics<br/>KQL Queries]
+    AI --> DASH[Azure Dashboard<br/>Workbooks]
+    AI --> ALERT[Alert Rules<br/>Notifications]
+    APP --> OTEL[OpenTelemetry<br/>Collector]
+    OTEL --> AI
 ```
 
-## DevKit
+## Azure Services
 
-Infra: Application Insights  Log Analytics  Azure Monitor  Workbooks
+| Service | Purpose |
+|---------|---------|
+| Azure Application Insights | Distributed tracing and LLM telemetry |
+| Azure Log Analytics | KQL queries for token usage and latency |
+| Azure Monitor Workbooks | Interactive dashboards for AI metrics |
+| Azure Monitor Alerts | Threshold and anomaly-based alerting |
+| Azure Container Apps | Host the AI application under observation |
 
-| File | Purpose |
-|------|---------|
-| agent.md | Agent personality |
-| instructions.md | System prompts |
-| .github/copilot-instructions.md | IDE context |
-| .vscode/mcp.json | MCP auto-connect |
-| mcp/index.js | Solution tools |
-| plugins/ | Reusable functions |
+## DevKit (.github Agentic OS)
 
-## TuneKit
+This play includes the full .github Agentic OS (19 files):
+- **Layer 1:** copilot-instructions.md + 3 modular instruction files
+- **Layer 2:** 4 slash commands + 3 chained agents (builder → reviewer → tuner)
+- **Layer 3:** 3 skill folders (deploy-azure, evaluate, tune)
+- **Layer 4:** guardrails.json + 2 agentic workflows
+- **Infrastructure:** infra/main.bicep + parameters.json
 
-Tuning: KQL queries, alert thresholds, quality metrics, dashboards
+Run `Ctrl+Shift+P` → **FrootAI: Init DevKit** in VS Code.
 
-| Config | What |
-|--------|------|
-| config/openai.json | AI parameters |
-| config/guardrails.json | Safety rules |
-| infra/main.bicep | Azure resources |
-| evaluation/ | Test + scoring |
+## TuneKit (AI Configuration)
 
----
+| Config File | What It Controls |
+|-------------|-----------------|
+| config/openai.json | Telemetry sampling, trace verbosity, model tags |
+| config/guardrails.json | Alert thresholds, cost ceilings, SLA targets |
+| config/agents.json | Agent behavior for automated incident triage |
+| config/model-comparison.json | Model performance baselines for monitoring |
 
-> DevKit builds. TuneKit ships.
+Run `Ctrl+Shift+P` → **FrootAI: Init TuneKit** in VS Code.
+
+## Quick Start
+
+1. Install: `code --install-extension pavleenbali.frootai`
+2. Init DevKit → 19 .github files + infra
+3. Init TuneKit → AI configs + evaluation
+4. Open Copilot Chat → ask to build this solution
+5. Use /review → /deploy → ship
+
+> **FrootAI Solution Play 17** — DevKit builds it. TuneKit ships it.

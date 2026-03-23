@@ -1,50 +1,60 @@
-# Solution Play 09: AI-Powered Search Portal
+# Solution Play 09: AI Search Portal
 
-> **Complexity:** Medium | **Status:** Skeleton
-> Enterprise search with hybrid + semantic ranking  AI Search + Web App + OpenAI.
-
----
+> **Complexity:** Medium | **Status:** ✅ Ready
+> Enterprise search portal — Azure AI Search + hybrid retrieval + OpenAI-powered answers.
 
 ## Architecture
 
 ```mermaid
 graph LR
-    A[Input] --> B[Processing]
-    B --> C[AI Model]
-    C --> D[Output]
+    USER[Search Query] --> WEB[Web App<br/>Search Portal]
+    WEB --> SEARCH[AI Search<br/>Hybrid + Semantic]
+    SEARCH --> IDX[Index<br/>Documents]
+    IDX --> BLOB[Blob Storage]
+    WEB --> LLM[Azure OpenAI<br/>GPT-4o]
+    LLM --> ANS[Generated<br/>Answer]
 ```
 
----
+## Azure Services
 
-## DevKit
+| Service | Purpose |
+|---------|---------|
+| Azure AI Search | Hybrid + semantic search with vector indexing |
+| Azure OpenAI Service | Generate natural language answers from results |
+| Azure App Service | Host the search portal web application |
+| Azure Blob Storage | Store source documents for indexing |
+| Azure AI Content Safety | Filter search results and generated answers |
 
-Download the DevKit to empower your co-coder for this solution.
+## DevKit (.github Agentic OS)
 
-| File | Purpose |
-|------|---------|
-| agent.md | Agent personality + rules |
-| instructions.md | System prompts + guardrails |
-| .github/copilot-instructions.md | IDE coding context |
-| .vscode/mcp.json | MCP auto-connect |
-| mcp/index.js | Solution-specific tools |
-| plugins/ | Reusable functions |
+This play includes the full .github Agentic OS (19 files):
+- **Layer 1:** copilot-instructions.md + 3 modular instruction files
+- **Layer 2:** 4 slash commands + 3 chained agents (builder → reviewer → tuner)
+- **Layer 3:** 3 skill folders (deploy-azure, evaluate, tune)
+- **Layer 4:** guardrails.json + 2 agentic workflows
+- **Infrastructure:** infra/main.bicep + parameters.json
 
----
+Run `Ctrl+Shift+P` → **FrootAI: Init DevKit** in VS Code.
 
-## TuneKit
+## TuneKit (AI Configuration)
 
-Download the TuneKit to fine-tune AI for production.
+| Config File | What It Controls |
+|-------------|-----------------|
+| config/openai.json | Answer generation model, temperature, max tokens |
+| config/guardrails.json | Content filtering, result ranking, access scoping |
+| config/agents.json | Agent behavior for search refinement |
+| config/model-comparison.json | Model selection for answer generation |
+| config/search.json | Hybrid ratio, top-k, semantic reranker, filters |
+| config/chunking.json | Document chunk size, overlap, splitting strategy |
 
-| Config | What It Controls |
-|--------|-----------------|
-| config/openai.json | Model + generation parameters |
-| config/guardrails.json | Safety + business rules |
-| infra/main.bicep | Azure resources |
-| evaluation/ | Test set + scoring |
+Run `Ctrl+Shift+P` → **FrootAI: Init TuneKit** in VS Code.
 
-Infra: AI Search  App Service  Azure OpenAI  Blob Storage
-Tuning: Hybrid weights, semantic config, scoring profiles, filters
+## Quick Start
 
----
+1. Install: `code --install-extension pavleenbali.frootai`
+2. Init DevKit → 19 .github files + infra
+3. Init TuneKit → AI configs + evaluation
+4. Open Copilot Chat → ask to build this solution
+5. Use /review → /deploy → ship
 
-> **FrootAI Solution Play 09**  DevKit builds it. TuneKit ships it.
+> **FrootAI Solution Play 09** — DevKit builds it. TuneKit ships it.
