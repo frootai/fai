@@ -64,17 +64,25 @@ export default function SetupGuidePage(): JSX.Element {
         <h3 style={h3Style}>Option A: npm (Recommended — zero clone)</h3>
         <div style={codeStyle}>
 {`# Run directly (no install needed)
-npx frootai-mcp
+npx frootai-mcp@latest
 
 # OR install globally
-npm install -g frootai-mcp
+npm install -g frootai-mcp@latest
 frootai-mcp`}
         </div>
         <p style={{ fontSize: "0.85rem", color: "var(--ifm-color-emphasis-500)" }}>
-          Published on <a href="https://www.npmjs.com/package/frootai-mcp" target="_blank">npmjs.com/package/frootai-mcp</a> — 664KB knowledge base bundled inside. Works from anywhere.
+          Published on <a href="https://www.npmjs.com/package/frootai-mcp" target="_blank">npmjs.com/package/frootai-mcp</a> — 682KB knowledge base bundled inside. Works from anywhere.
         </p>
 
-        <h3 style={h3Style}>Option B: From GitHub (for development)</h3>
+        <h3 style={h3Style}>Option B: Docker (no Node.js needed)</h3>
+        <div style={codeStyle}>
+{`docker run -i ghcr.io/gitpavleenbali/frootai-mcp`}
+        </div>
+        <p style={{ fontSize: "0.85rem", color: "var(--ifm-color-emphasis-500)" }}>
+          Published on <a href="https://github.com/gitpavleenbali/frootai/pkgs/container/frootai-mcp" target="_blank">GitHub Container Registry</a> — same 22 tools, runs anywhere Docker runs.
+        </p>
+
+        <h3 style={h3Style}>Option C: From GitHub (for development)</h3>
         <div style={codeStyle}>
 {`# Clone the repository
 git clone https://github.com/gitpavleenbali/frootai.git

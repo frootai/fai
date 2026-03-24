@@ -87,8 +87,8 @@ Get it: VS Code Extension → click play → "Init DevKit"
 \`config/openai.json\` (temperature, model, max_tokens) · \`config/guardrails.json\` (blocked topics, PII filter) · \`config/agents.json\` (agent behavior) · \`config/model-comparison.json\` (cost vs quality) · \`evaluation/eval.py\` (automated scoring) · \`evaluation/test-set.jsonl\` (test cases)
 Get it: VS Code Extension → click play → "Init TuneKit"
 
-## MCP SERVER — 22 tools (frootai-mcp@3.0.1)
-Install: \`npx frootai-mcp\` | Setup: add to .vscode/mcp.json
+## MCP SERVER — 22 tools (frootai-mcp@3.0.2)
+Install: \`npx frootai-mcp@latest\` | Docker: \`docker run -i ghcr.io/gitpavleenbali/frootai-mcp\` | Setup: .vscode/mcp.json
 **Static(6)**: list_modules, get_module, lookup_term, search_knowledge, get_architecture_pattern, get_froot_overview
 **Live(4)**: fetch_azure_docs, fetch_external_mcp, list_community_plays, get_github_agentic_os
 **Chain(3)**: agent_build → agent_review → agent_tune (guided workflow)

@@ -8,14 +8,19 @@
 
 ## Quick Start
 
+**npm** (recommended):
 ```bash
-npx frootai-mcp
+npx frootai-mcp@latest
 ```
 
-Or install globally:
-
+**Install globally:**
 ```bash
-npm i -g frootai-mcp && frootai-mcp
+npm i -g frootai-mcp@latest && frootai-mcp
+```
+
+**Docker:**
+```bash
+docker run -i ghcr.io/gitpavleenbali/frootai-mcp
 ```
 
 ### Connect to Your AI Agent
@@ -27,7 +32,13 @@ npm i -g frootai-mcp && frootai-mcp
 
 **Claude Desktop / Cursor**:
 ```json
-{ "mcpServers": { "frootai": { "command": "npx", "args": ["frootai-mcp"] } } }
+{ "mcpServers": { "frootai": { "command": "npx", "args": ["frootai-mcp@latest"] } } }
+```
+
+**Docker** (`.vscode/mcp.json`):
+```json
+{ "servers": { "frootai": { "type": "stdio", "command": "docker", "args": ["run", "-i", "ghcr.io/gitpavleenbali/frootai-mcp"] } } }
+```
 ```
 
 ---

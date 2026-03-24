@@ -32,24 +32,27 @@
 https://frootai.dev
 ```
 
-### Install the MCP Server (npm)
+### Install the MCP Server
 
 ```bash
-# Zero-install — run directly
-npx frootai-mcp
+# npm (recommended)
+npx frootai-mcp@latest
 
 # Or install globally
-npm install -g frootai-mcp
+npm install -g frootai-mcp@latest
+
+# Docker (no Node.js needed)
+docker run -i ghcr.io/gitpavleenbali/frootai-mcp
 ```
 
-**npm**: [npmjs.com/package/frootai-mcp](https://www.npmjs.com/package/frootai-mcp)
+**npm**: [npmjs.com/package/frootai-mcp](https://www.npmjs.com/package/frootai-mcp) · **Docker**: [ghcr.io/gitpavleenbali/frootai-mcp](https://github.com/gitpavleenbali/frootai/pkgs/container/frootai-mcp)
 
 Then add to your MCP config:
 
 ```json
 {
   "mcpServers": {
-    "frootai": { "command": "npx", "args": ["frootai-mcp"] }
+    "frootai": { "command": "npx", "args": ["frootai-mcp@latest"] }
   }
 }
 ```

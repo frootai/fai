@@ -943,8 +943,9 @@ function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.installMcpServer", async () => {
       const choice = await vscode.window.showQuickPick([
-        { label: "$(package) Install globally", description: "npm install -g frootai-mcp@latest", value: "global" },
+        { label: "$(package) Install globally (npm)", description: "npm install -g frootai-mcp@latest", value: "global" },
         { label: "$(play) Run directly (npx)", description: "npx frootai-mcp@latest — always fresh", value: "npx" },
+        { label: "$(symbol-container) Docker", description: "docker run -i ghcr.io/gitpavleenbali/frootai-mcp", value: "docker" },
         { label: "$(gear) Add to .vscode/mcp.json", description: "Configure MCP for this workspace", value: "config" },
       ], { placeHolder: "How do you want to set up the FrootAI MCP Server?" });
       if (!choice) return;
@@ -958,6 +959,11 @@ function activate(context) {
         const terminal = vscode.window.createTerminal("FrootAI MCP Server");
         terminal.sendText("npx --yes frootai-mcp@latest");
         terminal.show();
+      } else if (choice.value === "docker") {
+        const terminal = vscode.window.createTerminal("FrootAI MCP Docker");
+        terminal.sendText("docker run -i ghcr.io/gitpavleenbali/frootai-mcp");
+        terminal.show();
+        vscode.window.showInformationMessage("🐳 Starting FrootAI MCP via Docker. 22 tools ready.");
       } else if (choice.value === "config") {
         const wsFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
         if (!wsFolder) { vscode.window.showWarningMessage("Open a folder first."); return; }

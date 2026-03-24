@@ -1,0 +1,7 @@
+node_modules
+.git
+*.vsix
+*.zip
+README.md
+LICENSE
+build-knowledge.js
