@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import styles from "./index.module.css";
 
 const CHAT_API_URL = "https://frootai-chatbot-api.azurewebsites.net/api/chat";
+const STREAM_API_URL = "https://frootai-chatbot-api.azurewebsites.net/api/chat/stream";
 const BASE = "/frootai"; // GitHub Pages base path
 const USE_FALLBACK = true;
 
@@ -114,11 +115,48 @@ export default function ChatbotPage(): JSX.Element {
     if (!message.trim() || loading) return;
     const newH = [...history, { role: "user", text: message }];
     setHistory(newH); setMsg(""); setLoading(true);
+
+    // Add placeholder for streaming assistant message
+    const streamH = [...newH, { role: "assistant", text: "" }];
+    setHistory(streamH);
+
     try {
-      const res = await fetch(CHAT_API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, history: newH.slice(-10).map(m => ({ role: m.role, content: m.text })) }) });
-      if (res.ok) { const d = await res.json(); setHistory([...newH, { role: "assistant", text: d.reply }]); }
-      else throw new Error("API " + res.status);
-    } catch { setHistory([...newH, { role: "assistant", text: USE_FALLBACK ? getFallback(message) : "Could not reach AI service. Try: npx frootai-mcp" }]); }
+      const res = await fetch(STREAM_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, history: newH.slice(-10).map(m => ({ role: m.role, content: m.text })) }),
+      });
+
+      if (!res.ok || !res.body) throw new Error("API " + res.status);
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ") && line !== "data: [DONE]") {
+            try {
+              const json = JSON.parse(line.slice(6));
+              if (json.content) {
+                accumulated += json.content;
+                setHistory([...newH, { role: "assistant", text: accumulated }]);
+              }
+            } catch {}
+          }
+        }
+      }
+
+      // If streaming produced nothing, use fallback
+      if (!accumulated) throw new Error("Empty stream");
+    } catch {
+      setHistory([...newH, { role: "assistant", text: USE_FALLBACK ? getFallback(message) : "Could not reach AI service. Try: npx frootai-mcp" }]);
+    }
     finally { setLoading(false); }
   };
 
