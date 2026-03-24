@@ -131,6 +131,26 @@ const MCP_TOOLS = [
     docs: "Invokes the Reviewer agent persona. Reviews architecture and code for: security, performance, cost, compliance, and best practices. Suggests calling agent_tune next.\n\n**Input:** `context` (string) — what to review\n**Output:** Review findings + suggestion to call agent_tune" },
   { name: "agent_tune", desc: "🔗 Chain — Tuner agent guidance", type: "chain",
     docs: "Invokes the Tuner agent persona. Provides AI parameter tuning guidance: temperature, top-k, chunk sizes, model selection, guardrails configuration. Terminal step in the agent chain.\n\n**Input:** `context` (string) — what to tune\n**Output:** Tuning recommendations for production" },
+  // ── Ecosystem Tools (3) ──
+  { name: "get_model_catalog", desc: "🌐 Ecosystem — Browse Azure AI model catalog", type: "ecosystem",
+    docs: "Returns the Azure AI model catalog with GPT, Claude, Llama, Phi, Mistral models. Includes capabilities, pricing tiers, hosted/managed options, and recommended use cases.\n\n**Input:** `filter` (string, optional) — filter by provider or capability\n**Output:** Array of models with metadata\n**Example:** `get_model_catalog({filter: 'code'})` → models optimized for code generation" },
+  { name: "get_azure_pricing", desc: "🌐 Ecosystem — Azure AI service pricing", type: "ecosystem",
+    docs: "Returns current pricing for 25+ Azure AI services: OpenAI models, AI Search, Cognitive Services, App Service tiers. Includes per-unit costs, free tiers, and cost optimization tips.\n\n**Input:** `service` (string, optional) — specific service name\n**Output:** Pricing table with tiers and rates\n**Example:** `get_azure_pricing({service: 'openai'})` → GPT-4o pricing per 1K tokens" },
+  { name: "compare_models", desc: "🌐 Ecosystem — Compare AI models side-by-side", type: "ecosystem",
+    docs: "Compares two or more AI models across dimensions: cost, latency, context window, capabilities, and recommended scenarios. Helps pick the right model for a use case.\n\n**Input:** `models` (string[]) — model names to compare\n**Output:** Comparison matrix\n**Example:** `compare_models({models: ['gpt-4o', 'gpt-4o-mini']})` → side-by-side comparison" },
+  // ── Compute Tools (6) ──
+  { name: "semantic_search_plays", desc: "🧮 Compute — Semantic search across 20 plays", type: "compute",
+    docs: "Performs keyword + semantic search across all 20 solution plays. Matches against play names, descriptions, services used, and architecture patterns. Returns ranked results with relevance scores.\n\n**Input:** `query` (string) — what to search for\n**Output:** Ranked matches with play ID, name, relevance, and excerpts\n**Example:** `semantic_search_plays({query: 'voice AI'})` → Play 04 (Call Center Voice AI) ranked first" },
+  { name: "estimate_cost", desc: "🧮 Compute — Estimate monthly Azure cost", type: "compute",
+    docs: "Calculates estimated monthly Azure costs for any solution play at different scales (small/medium/large). Uses real Azure retail pricing for 25+ services. Returns itemized cost breakdown.\n\n**Input:** `playNumber` (number), `scale` (string: 'small'|'medium'|'large')\n**Output:** Itemized cost breakdown with totals\n**Example:** `estimate_cost({playNumber: 1, scale: 'medium'})` → ~$850/mo breakdown" },
+  { name: "validate_config", desc: "🧮 Compute — Validate config files", type: "compute",
+    docs: "Validates FrootAI config files (openai.json, guardrails.json, routing.json) against production best practices. Checks for security issues, missing fields, suboptimal settings.\n\n**Input:** `configType` (string), `config` (object)\n**Output:** Array of findings: 🔴 Critical / 🟡 Warning / 🟢 Good\n**Example:** `validate_config({configType: 'openai', config: {...}})` → [{severity: 'warning', message: 'temperature > 0.3'}]" },
+  { name: "compare_plays", desc: "🧮 Compute — Compare solution plays", type: "compute",
+    docs: "Compares two or more solution plays side-by-side across dimensions: complexity, cost, services used, team size, and deployment time. Great for choosing between similar approaches.\n\n**Input:** `playIds` (number[]) — play numbers to compare\n**Output:** Comparison matrix with recommendations\n**Example:** `compare_plays({playIds: [1, 9]})` → RAG Q&A vs AI Search Portal comparison" },
+  { name: "generate_architecture_diagram", desc: "🧮 Compute — Generate Mermaid diagrams", type: "compute",
+    docs: "Generates Mermaid.js architecture diagrams for any solution play. Includes Azure services, data flows, and integration points. Renders in VS Code preview.\n\n**Input:** `playNumber` (number), `style` (string: 'flowchart'|'sequence'|'c4')\n**Output:** Mermaid diagram code\n**Example:** `generate_architecture_diagram({playNumber: 5})` → IT Ticket Resolution flowchart" },
+  { name: "embedding_playground", desc: "🧮 Compute — Experiment with embeddings", type: "compute",
+    docs: "Interactive playground for text embeddings. Compute similarity between texts, visualize embedding dimensions, and understand how vector search works under the hood.\n\n**Input:** `texts` (string[]) — texts to embed and compare\n**Output:** Similarity matrix + dimension analysis\n**Example:** `embedding_playground({texts: ['RAG pipeline', 'search system']})` → similarity: 0.87" },
 ];
 
 // ─── Webview Panel: Render Modules as Rich HTML ────────────────────
@@ -406,6 +426,8 @@ class McpToolProvider {
       { label: "📦 Static Tools (6)", type: "static", icon: "database" },
       { label: "⛅ Live Tools (4)", type: "live", icon: "cloud" },
       { label: "🔗 Agent Chain (3)", type: "chain", icon: "link" },
+      { label: "🌐 Ecosystem Tools (3)", type: "ecosystem", icon: "globe" },
+      { label: "🧮 Compute Tools (6)", type: "compute", icon: "beaker" },
     ];
     const items = [];
     for (const g of groups) {
