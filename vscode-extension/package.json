@@ -1,8 +1,8 @@
 {
   "name": "frootai",
   "displayName": "FrootAI — From the Roots to the Fruits",
-  "description": "The open glue binding Infrastructure, Platform & Application teams with the GenAI ecosystem. Standalone engine: 18 modules, 200+ terms, 20 solution plays, 13 MCP tools — works from any workspace.",
-  "version": "0.9.2",
+  "description": "The open glue binding Infrastructure, Platform & Application teams with the GenAI ecosystem. Standalone engine: 18 modules, 200+ terms, 20 solution plays, 22 MCP tools — works from any workspace.",
+  "version": "1.0.0",
   "publisher": "pavleenbali",
   "engines": {
     "vscode": "^1.85.0"
@@ -55,7 +55,7 @@
         },
         {
           "id": "frootai.mcpTools",
-          "name": "🔌 MCP Tools (16)",
+          "name": "🔌 MCP Tools (22)",
           "visibility": "collapsed"
         },
         {
@@ -126,6 +126,14 @@
       {
         "command": "frootai.autoChainAgents",
         "title": "FrootAI: Auto-Chain Agents (Build → Review → Tune)"
+      },
+      {
+        "command": "frootai.quickCostEstimate",
+        "title": "FrootAI: Quick Cost Estimate"
+      },
+      {
+        "command": "frootai.validateConfig",
+        "title": "FrootAI: Validate Config"
       }
     ],
     "menus": {

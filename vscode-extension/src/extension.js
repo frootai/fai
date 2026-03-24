@@ -4,8 +4,9 @@ const fs = require("fs");
 const https = require("https");
 
 // ════════════════════════════════════════════════════════════════════
-// FrootAI VS Code Extension v3 — Standalone Engine
+// FrootAI VS Code Extension v1.0 — Standalone Engine
 // From the Roots to the Fruits. The Open Glue for GenAI.
+// 22 MCP tools · 18 modules · 200+ terms · 20 solution plays
 // Works from ANY workspace — no clone needed.
 // ════════════════════════════════════════════════════════════════════
 
@@ -470,7 +471,7 @@ class GlossaryProvider {
 // ─── Activate ──────────────────────────────────────────────────────
 
 function activate(context) {
-  console.log("FrootAI v3 Standalone Engine activated");
+  console.log("FrootAI v1.0 Standalone Engine activated");
 
   // B1: Initialize cache directory for offline downloaded plays
   _cacheDir = context.globalStorageUri.fsPath;
@@ -983,7 +984,7 @@ function activate(context) {
       const terminal = vscode.window.createTerminal("FrootAI MCP Server");
       terminal.sendText("npx frootai-mcp");
       terminal.show();
-      vscode.window.showInformationMessage("🔌 FrootAI MCP Server starting... 13 tools (6 static + 4 live).");
+      vscode.window.showInformationMessage("🔌 FrootAI MCP Server starting... 22 tools (6 static + 4 live + 3 chain + 3 ecosystem + 6 compute).");
     })
   );
 
@@ -1014,7 +1015,7 @@ function activate(context) {
       const picks = [
         { label: "$(info) View Tool Documentation", description: `Read ${tool.name} docs in VS Code`, value: "docs" },
         { label: "$(package) Install MCP Server globally", description: "npm install -g frootai-mcp", value: "install" },
-        { label: "$(play) Start MCP Server (npx)", description: "Launch in terminal — 13 tools ready", value: "start" },
+        { label: "$(play) Start MCP Server (npx)", description: "Launch in terminal — 22 tools ready", value: "start" },
         { label: "$(gear) Configure MCP for this workspace", description: "Add .vscode/mcp.json — auto-connects", value: "config" },
         { label: "$(globe) Open npm page", description: "npmjs.com/package/frootai-mcp", value: "npm" },
         { label: "$(book) Open setup guide", description: "Full MCP setup documentation", value: "guide" },
@@ -1033,7 +1034,7 @@ function activate(context) {
           <hr/>
           <div style="white-space:pre-wrap;line-height:1.6;">${(tool.docs || "No documentation available.").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code style='background:#333;padding:2px 6px;border-radius:3px;'>$1</code>").replace(/\n/g, "<br/>")}</div>
           <hr/>
-          <p style="opacity:0.5;">Part of <strong>frootai-mcp@2.1.1</strong> — 13 tools (6 static + 4 live + 3 agent chain)</p>
+          <p style="opacity:0.5;">Part of <strong>frootai-mcp@3.0.1</strong> — 22 tools (6 static + 4 live + 3 chain + 3 ecosystem + 6 compute)</p>
           <p style="opacity:0.5;">Install: <code>npm install -g frootai-mcp</code> | Run: <code>npx frootai-mcp</code></p>
         `;
         const panel = vscode.window.createWebviewPanel("frootai.mcpDocs", `MCP: ${tool.name}`, vscode.ViewColumn.One, {});
@@ -1048,6 +1049,210 @@ function activate(context) {
         vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
       } else if (action.value === "guide") {
         vscode.env.openExternal(vscode.Uri.parse("https://frootai.devsetup-guide"));
+      }
+    })
+  );
+
+      } else if (action.value === "config") {
+        vscode.commands.executeCommand("frootai.configureMcp");
+      } else if (action.value === "npm") {
+        vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
+      } else if (action.value === "guide") {
+        vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/setup-guide"));
+      }
+    })
+  );
+
+  // ── Command: Quick Cost Estimate ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.quickCostEstimate", async () => {
+      // Pick a solution play
+      const playPick = await vscode.window.showQuickPick(
+        SOLUTION_PLAYS.map(p => ({ label: `${p.icon} ${p.id} — ${p.name}`, value: p.id })),
+        { placeHolder: "💰 Select a Solution Play to estimate costs" }
+      );
+      if (!playPick) return;
+
+      // Pick scale
+      const scalePick = await vscode.window.showQuickPick([
+        { label: "🟢 Small", description: "Dev/PoC — minimal resources", value: "small" },
+        { label: "🟡 Medium", description: "Production — standard resources", value: "medium" },
+        { label: "🔴 Large", description: "Enterprise — high availability", value: "large" },
+      ], { placeHolder: "Select deployment scale" });
+      if (!scalePick) return;
+
+      const playNum = parseInt(playPick.value);
+      const scale = scalePick.value;
+
+      // Service pricing (mirrors MCP server)
+      const SVC_PRICING = {
+        "Azure OpenAI (GPT-4o)": { small: 50, medium: 200, large: 800 },
+        "Azure OpenAI (GPT-4o-mini)": { small: 10, medium: 50, large: 200 },
+        "Azure AI Search (Basic)": { small: 75, medium: 75, large: 75 },
+        "Azure AI Search (Standard)": { small: 250, medium: 250, large: 750 },
+        "App Service (B1)": { small: 13, medium: 13, large: 13 },
+        "App Service (P1v3)": { small: 80, medium: 80, large: 160 },
+        "Cosmos DB (Serverless)": { small: 5, medium: 25, large: 100 },
+        "Azure Functions (Consumption)": { small: 0, medium: 5, large: 20 },
+        "Azure Storage (Blob)": { small: 2, medium: 10, large: 50 },
+        "Application Insights": { small: 0, medium: 10, large: 50 },
+        "Azure Key Vault": { small: 1, medium: 1, large: 3 },
+        "API Management (Consumption)": { small: 3, medium: 3, large: 3 },
+        "API Management (Standard)": { small: 680, medium: 680, large: 1360 },
+        "Container Apps": { small: 10, medium: 50, large: 200 },
+        "AKS (System)": { small: 0, medium: 0, large: 0 },
+        "AKS (D4s node)": { small: 140, medium: 280, large: 560 },
+        "Azure SQL (Basic)": { small: 5, medium: 5, large: 5 },
+        "Azure SQL (Standard S1)": { small: 30, medium: 30, large: 60 },
+        "Virtual Network": { small: 0, medium: 0, large: 0 },
+        "Azure Front Door": { small: 35, medium: 35, large: 108 },
+        "Azure Communication Services": { small: 5, medium: 20, large: 100 },
+        "Speech Services": { small: 10, medium: 50, large: 200 },
+        "Content Safety": { small: 0, medium: 15, large: 75 },
+        "Document Intelligence": { small: 10, medium: 50, large: 200 },
+        "Logic Apps": { small: 5, medium: 25, large: 100 },
+      };
+
+      // Play-to-services mapping (top plays)
+      const PLAY_SERVICES = {
+        1: ["Azure OpenAI (GPT-4o)", "Azure AI Search (Basic)", "App Service (B1)", "Azure Storage (Blob)", "Application Insights", "Azure Key Vault"],
+        2: ["Virtual Network", "Azure Key Vault", "Application Insights", "Azure Storage (Blob)"],
+        3: ["Azure OpenAI (GPT-4o-mini)", "Azure Functions (Consumption)", "Azure Key Vault", "Application Insights"],
+        4: ["Azure OpenAI (GPT-4o)", "Speech Services", "Azure Communication Services", "App Service (B1)", "Application Insights"],
+        5: ["Azure OpenAI (GPT-4o-mini)", "Azure Functions (Consumption)", "Logic Apps", "Azure Storage (Blob)", "Application Insights"],
+        6: ["Document Intelligence", "Azure OpenAI (GPT-4o)", "Azure Storage (Blob)", "Cosmos DB (Serverless)", "Application Insights"],
+        7: ["Azure OpenAI (GPT-4o)", "Container Apps", "Cosmos DB (Serverless)", "Azure Key Vault", "Application Insights"],
+        8: ["Azure OpenAI (GPT-4o-mini)", "App Service (B1)", "Azure Storage (Blob)", "Application Insights"],
+        9: ["Azure AI Search (Standard)", "Azure OpenAI (GPT-4o)", "App Service (P1v3)", "Azure Storage (Blob)", "Application Insights"],
+        10: ["Content Safety", "Azure OpenAI (GPT-4o-mini)", "Azure Functions (Consumption)", "Application Insights"],
+        11: ["Virtual Network", "Azure Key Vault", "Application Insights", "Azure Storage (Blob)", "Azure Front Door"],
+        12: ["AKS (System)", "AKS (D4s node)", "Container Apps", "Azure Key Vault", "Application Insights"],
+        13: ["Azure OpenAI (GPT-4o)", "Azure Storage (Blob)", "Azure Functions (Consumption)", "Application Insights"],
+        14: ["API Management (Consumption)", "Azure OpenAI (GPT-4o)", "Azure Key Vault", "Application Insights"],
+        15: ["Document Intelligence", "Azure OpenAI (GPT-4o)", "Azure Storage (Blob)", "Cosmos DB (Serverless)", "Application Insights"],
+        16: ["Azure OpenAI (GPT-4o-mini)", "App Service (B1)", "Azure Storage (Blob)", "Application Insights"],
+        17: ["Application Insights", "Azure Functions (Consumption)", "Azure Storage (Blob)", "Cosmos DB (Serverless)"],
+        18: ["Azure OpenAI (GPT-4o-mini)", "Cosmos DB (Serverless)", "Azure Functions (Consumption)", "Application Insights"],
+        19: ["Azure OpenAI (GPT-4o-mini)", "Container Apps", "Azure Storage (Blob)", "Application Insights"],
+        20: ["Azure OpenAI (GPT-4o)", "Azure Functions (Consumption)", "Cosmos DB (Serverless)", "Application Insights"],
+      };
+
+      const services = PLAY_SERVICES[playNum] || PLAY_SERVICES[1];
+      let total = 0;
+      const lines = [];
+      for (const svc of services) {
+        const price = SVC_PRICING[svc]?.[scale] || 0;
+        total += price;
+        lines.push(`| ${svc} | $${price}/mo |`);
+      }
+
+      const play = SOLUTION_PLAYS.find(p => parseInt(p.id) === playNum);
+      const mdContent = `# 💰 Cost Estimate: ${play?.icon || ""} ${play?.name || "Play " + playNum}\n\n` +
+        `**Scale:** ${scalePick.label}\n\n` +
+        `| Service | Monthly Cost |\n|---|---|\n${lines.join("\n")}\n\n` +
+        `**Estimated Total: ~$${total}/month**\n\n` +
+        `---\n_Generated by FrootAI Compute Engine · [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/)_`;
+
+      const panel = vscode.window.createWebviewPanel("frootai.costEstimate", `Cost: ${play?.name || "Play " + playNum}`, vscode.ViewColumn.One, {});
+      panel.webview.html = markdownToHtml(mdContent, `Cost Estimate: ${play?.name}`);
+    })
+  );
+
+  // ── Command: Validate Config ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.validateConfig", async () => {
+      const wsFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (!wsFolder) { vscode.window.showWarningMessage("Open a folder first to validate config files."); return; }
+
+      // Find config files
+      const configDir = path.join(wsFolder, "config");
+      const configs = [];
+      if (fs.existsSync(configDir)) {
+        for (const file of fs.readdirSync(configDir)) {
+          if (file.endsWith(".json")) configs.push({ label: `config/${file}`, path: path.join(configDir, file), file });
+        }
+      }
+      // Also check root-level config files
+      for (const f of ["openai.json", "guardrails.json", "routing.json"]) {
+        const p = path.join(wsFolder, f);
+        if (fs.existsSync(p) && !configs.find(c => c.file === f)) configs.push({ label: f, path: p, file: f });
+      }
+
+      if (configs.length === 0) {
+        vscode.window.showWarningMessage("No config/*.json files found. Create config/openai.json to get started.");
+        return;
+      }
+
+      const pick = await vscode.window.showQuickPick(
+        configs.map(c => ({ label: `📄 ${c.label}`, description: "Validate against best practices", value: c })),
+        { placeHolder: "🔍 Select a config file to validate" }
+      );
+      if (!pick) return;
+
+      const configPath = pick.value.path;
+      const fileName = pick.value.file;
+      let config;
+      try {
+        config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+      } catch (e) {
+        vscode.window.showErrorMessage(`Failed to parse ${fileName}: ${e.message}`);
+        return;
+      }
+
+      // Run validations
+      const findings = [];
+      const addFinding = (severity, message) => findings.push({ severity, message });
+
+      if (fileName.includes("openai")) {
+        // OpenAI config validation
+        if (!config.model) addFinding("🔴", "Missing 'model' field — must specify deployment model");
+        if (config.temperature !== undefined && config.temperature > 0.3) addFinding("🟡", `temperature=${config.temperature} — consider ≤0.3 for deterministic output`);
+        if (config.temperature !== undefined && config.temperature === 0) addFinding("🟢", "temperature=0 — fully deterministic ✓");
+        if (!config.max_tokens) addFinding("🟡", "Missing 'max_tokens' — set a limit to control costs");
+        if (config.max_tokens && config.max_tokens > 4000) addFinding("🟡", `max_tokens=${config.max_tokens} — high value increases cost`);
+        if (config.api_key || config.apiKey) addFinding("🔴", "API key found in config! Use Managed Identity or Key Vault instead");
+        if (config.endpoint && !config.endpoint.includes("openai.azure.com")) addFinding("🟡", "Endpoint doesn't look like Azure OpenAI");
+        if (!config.system_prompt && !config.systemPrompt) addFinding("🟡", "No system_prompt — consider adding one for consistent behavior");
+        if (config.response_format?.type === "json_object") addFinding("🟢", "JSON mode enabled — structured output ✓");
+      } else if (fileName.includes("guardrails")) {
+        // Guardrails validation
+        if (!config.blocked_topics && !config.blockedTopics) addFinding("🟡", "No blocked_topics — consider adding content filters");
+        if (!config.pii_filter && !config.piiFilter) addFinding("🟡", "No PII filter — consider enabling for compliance");
+        if (!config.max_input_length && !config.maxInputLength) addFinding("🟡", "No max_input_length — vulnerable to prompt injection via long inputs");
+        if (config.pii_filter === true || config.piiFilter === true) addFinding("🟢", "PII filter enabled ✓");
+        if (config.content_safety || config.contentSafety) addFinding("🟢", "Content safety configured ✓");
+      } else if (fileName.includes("routing")) {
+        // Routing validation
+        if (!config.default_model && !config.defaultModel) addFinding("🟡", "No default_model — requests may fail without fallback");
+        if (config.retry_policy || config.retryPolicy) addFinding("🟢", "Retry policy configured ✓");
+        if (!config.timeout) addFinding("🟡", "No timeout — long-running requests may hang");
+      } else {
+        addFinding("🟢", `File parsed successfully — ${Object.keys(config).length} top-level keys found`);
+      }
+
+      if (findings.length === 0) {
+        findings.push({ severity: "🟢", message: "All checks passed — config looks good!" });
+      }
+
+      const criticals = findings.filter(f => f.severity === "🔴").length;
+      const warnings = findings.filter(f => f.severity === "🟡").length;
+      const goods = findings.filter(f => f.severity === "🟢").length;
+
+      const mdContent = `# 🔍 Config Validation: ${fileName}\n\n` +
+        `**Summary:** ${criticals} critical · ${warnings} warnings · ${goods} good\n\n` +
+        findings.map(f => `- ${f.severity} ${f.message}`).join("\n") +
+        `\n\n---\n_Validated by FrootAI Compute Engine · [Best Practices](https://frootai.dev/ai-nexus/responsible-ai-safety)_`;
+
+      const panel = vscode.window.createWebviewPanel("frootai.validateConfig", `Validate: ${fileName}`, vscode.ViewColumn.One, {});
+      panel.webview.html = markdownToHtml(mdContent, `Config Validation: ${fileName}`);
+
+      // Also show notification
+      if (criticals > 0) {
+        vscode.window.showWarningMessage(`🔴 ${criticals} critical finding(s) in ${fileName}! Open panel for details.`);
+      } else if (warnings > 0) {
+        vscode.window.showInformationMessage(`🟡 ${warnings} warning(s) in ${fileName}. Open panel for details.`);
+      } else {
+        vscode.window.showInformationMessage(`🟢 ${fileName} — all checks passed!`);
       }
     })
   );
@@ -1125,7 +1330,7 @@ function activate(context) {
   // ── Status Bar ──
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBar.text = "$(tree-view-icon) FrootAI";
-  statusBar.tooltip = `FrootAI — From the Roots to the Fruits\n${knowledgeLoaded ? `${Object.keys(KNOWLEDGE.modules).length} modules · ${Object.keys(GLOSSARY).length} terms · 13 MCP tools` : "Knowledge loading..."}`;
+  statusBar.tooltip = `FrootAI — From the Roots to the Fruits\n${knowledgeLoaded ? `${Object.keys(KNOWLEDGE.modules).length} modules · ${Object.keys(GLOSSARY).length} terms · 22 MCP tools` : "Knowledge loading..."}`;
   statusBar.command = "frootai.browseSolutionPlays";
   statusBar.show();
   context.subscriptions.push(statusBar);
