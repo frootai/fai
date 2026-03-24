@@ -210,8 +210,8 @@ Monitor at: `https://github.com/gitpavleenbali/frootai/actions`
 ### 6.3 Website Deploy Health
 
 After deploy, verify:
-- Homepage loads: `https://gitpavleenbali.github.io/frootai/`
-- Docs render: `https://gitpavleenbali.github.io/frootai/docs/`
+- Homepage loads: `https://frootai.dev`
+- Docs render: `https://frootai.dev/docs/`
 - No console errors in browser DevTools
 
 ---

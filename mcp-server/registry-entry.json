@@ -15,8 +15,8 @@
     "type": "git",
     "url": "https://github.com/gitpavleenbali/frootai"
   },
-  "homepage": "https://gitpavleenbali.github.io/frootai",
-  "documentation": "https://gitpavleenbali.github.io/frootai/setup-guide",
+  "homepage": "https://frootai.dev",
+  "documentation": "https://frootai.dev/setup-guide",
   "install": {
     "npm": "npx frootai-mcp",
     "global": "npm install -g frootai-mcp"

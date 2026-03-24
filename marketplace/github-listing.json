@@ -25,7 +25,7 @@
   "artifacts": {
     "npm_package": "frootai-mcp@2.2.0",
     "vscode_extension": "pavleenbali.frootai@0.9.0",
-    "website": "https://gitpavleenbali.github.io/frootai"
+    "website": "https://frootai.dev"
   },
   "features": [
     "20 pre-packaged AI solution plays (RAG, agents, landing zones, observability)",

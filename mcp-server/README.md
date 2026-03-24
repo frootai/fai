@@ -91,10 +91,10 @@ No clipboard. No commands. Pure conversation.
 
 ## Links
 
-- **Website**: https://gitpavleenbali.github.io/frootai/
+- **Website**: https://frootai.dev
 - **GitHub**: https://github.com/gitpavleenbali/frootai
 - **VS Code Extension**: https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai
-- **Setup Guide**: https://gitpavleenbali.github.io/frootai/setup-guide
+- **Setup Guide**: https://frootai.dev/setup-guide
 
 ---
 

@@ -698,7 +698,7 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 
 ---
 **The Open Glue**: FrootAI removes silos between infrastructure, platform, and application teams.
-**Website**: https://gitpavleenbali.github.io/frootai/
+**Website**: https://frootai.dev
 **MCP v2**: 10 tools (6 static + 4 live) · 200+ terms · 7 architecture patterns · 20 solution plays`;
 
     return {
@@ -863,7 +863,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: `## FrootAI Solution Plays\n*Live from GitHub*\n\n${formatted}\n\n---\n**Each play ships with:** .github Agentic OS (19 files) + DevKit + TuneKit\n🌐 https://gitpavleenbali.github.io/frootai/solution-plays`,
+          text: `## FrootAI Solution Plays\n*Live from GitHub*\n\n${formatted}\n\n---\n**Each play ships with:** .github Agentic OS (19 files) + DevKit + TuneKit\n🌐 https://frootai.dev/solution-plays`,
         }],
       };
     }
@@ -883,7 +883,7 @@ server.tool(
     return {
       content: [{
         type: "text",
-        text: `## FrootAI Solution Plays\n*Offline — showing bundled list*\n\n${formatted}\n\n---\n**20 plays** · Each with .github Agentic OS + DevKit + TuneKit\n🌐 https://gitpavleenbali.github.io/frootai/solution-plays`,
+        text: `## FrootAI Solution Plays\n*Offline — showing bundled list*\n\n${formatted}\n\n---\n**20 plays** · Each with .github Agentic OS + DevKit + TuneKit\n🌐 https://frootai.dev/solution-plays`,
       }],
     };
   }
@@ -1358,7 +1358,7 @@ The open glue that binds infrastructure, platform, and application.
 🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
 18 modules | 200+ AI terms | 16 tools (6 static + 4 live + 3 chain + 3 AI ecosystem) | 20 solution plays
-https://gitpavleenbali.github.io/frootai/`,
+https://frootai.dev`,
       },
     ],
   })

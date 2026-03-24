@@ -241,7 +241,7 @@ function markdownToHtml(markdown, title) {
   <hr>
   <p style="font-size:0.72rem;color:#555;">
     <strong>FrootAI</strong> — From the Roots to the Fruits · 
-    <a href="https://gitpavleenbali.github.io/frootai/">Website</a> · 
+    <a href="https://frootai.dev">Website</a> · 
     <a href="https://github.com/gitpavleenbali/frootai">GitHub</a>
   </p>
 </body>
@@ -507,7 +507,7 @@ function activate(context) {
           vscode.env.openExternal(vscode.Uri.parse(`https://github.com/gitpavleenbali/frootai/tree/main/solution-plays/${play.dir}`));
         }
       } else if (action.value === "userguide") {
-        vscode.env.openExternal(vscode.Uri.parse(`https://gitpavleenbali.github.io/frootai/user-guide?play=${play.id}`));
+        vscode.env.openExternal(vscode.Uri.parse(`https://frootai.devuser-guide?play=${play.id}`));
       } else if (action.value === "devkit") {
         vscode.commands.executeCommand("frootai.initDevKit", play);
       } else if (action.value === "tunekit") {
@@ -543,14 +543,14 @@ function activate(context) {
         }
       }
       // Fallback: website
-      vscode.env.openExternal(vscode.Uri.parse(`https://gitpavleenbali.github.io/frootai/docs/${mod.file.replace('.md', '')}`));
+      vscode.env.openExternal(vscode.Uri.parse(`https://frootai.devdocs/${mod.file.replace('.md', '')}`));
     })
   );
 
   // ── Command: Browse Solution Plays (website) ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.browseSolutionPlays", () => {
-      vscode.env.openExternal(vscode.Uri.parse("https://gitpavleenbali.github.io/frootai/solution-plays"));
+      vscode.env.openExternal(vscode.Uri.parse("https://frootai.devsolution-plays"));
     })
   );
 
@@ -657,7 +657,7 @@ function activate(context) {
   // ── Command: Open Setup Guide ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.openSetupGuide", () => {
-      vscode.env.openExternal(vscode.Uri.parse("https://gitpavleenbali.github.io/frootai/setup-guide"));
+      vscode.env.openExternal(vscode.Uri.parse("https://frootai.devsetup-guide"));
     })
   );
 
@@ -680,7 +680,7 @@ function activate(context) {
       if (KNOWLEDGE?.modules?.T3) {
         createModuleWebview(context, "T3-pattern", `🏗️ ${pick.label}`, KNOWLEDGE.modules.T3.content);
       } else {
-        vscode.env.openExternal(vscode.Uri.parse("https://gitpavleenbali.github.io/frootai/docs/T3-Production-Patterns"));
+        vscode.env.openExternal(vscode.Uri.parse("https://frootai.devdocs/T3-Production-Patterns"));
       }
     })
   );
@@ -1025,7 +1025,7 @@ function activate(context) {
       } else if (action.value === "npm") {
         vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
       } else if (action.value === "guide") {
-        vscode.env.openExternal(vscode.Uri.parse("https://gitpavleenbali.github.io/frootai/setup-guide"));
+        vscode.env.openExternal(vscode.Uri.parse("https://frootai.devsetup-guide"));
       }
     })
   );

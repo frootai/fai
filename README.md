@@ -29,7 +29,7 @@
 ### Read the docs
 
 ```
-https://gitpavleenbali.github.io/frootai/
+https://frootai.dev
 ```
 
 ### Install the MCP Server (npm)
@@ -218,7 +218,7 @@ graph TB
 | `get_azure_pricing` | Monthly cost estimates for AI solution architectures |
 | `compare_models` | Side-by-side model comparison for a specific use case |
 
-[📖 Full MCP documentation →](./mcp-server/README.md) · [📖 Setup Guide →](https://gitpavleenbali.github.io/frootai/setup-guide)
+[📖 Full MCP documentation →](./mcp-server/README.md) · [📖 Setup Guide →](https://frootai.dev/setup-guide)
 
 ---
 
@@ -300,11 +300,11 @@ frootai/
 
 | Page | URL | What It Does |
 |------|-----|-------------|
-| **AI Assistant** | [/chatbot](https://gitpavleenbali.github.io/frootai/chatbot) | Ask which play to use, compare models, estimate costs |
-| **Configurator** | [/configurator](https://gitpavleenbali.github.io/frootai/configurator) | 3-question wizard → personalized play recommendation |
-| **Partners** | [/partners](https://gitpavleenbali.github.io/frootai/partners) | MCP integrations: ServiceNow, Salesforce, SAP, Datadog |
-| **Marketplace** | [/marketplace](https://gitpavleenbali.github.io/frootai/marketplace) | Decentralized plugin marketplace for .github Agentic OS |
-| **Enterprise** | [/enterprise](https://gitpavleenbali.github.io/frootai/enterprise) | Enterprise support + FrootAI Certified Architect program |
+| **AI Assistant** | [/chatbot](https://frootai.dev/chatbot) | Ask which play to use, compare models, estimate costs |
+| **Configurator** | [/configurator](https://frootai.dev/configurator) | 3-question wizard → personalized play recommendation |
+| **Partners** | [/partners](https://frootai.dev/partners) | MCP integrations: ServiceNow, Salesforce, SAP, Datadog |
+| **Marketplace** | [/marketplace](https://frootai.dev/marketplace) | Decentralized plugin marketplace for .github Agentic OS |
+| **Enterprise** | [/enterprise](https://frootai.dev/enterprise) | Enterprise support + FrootAI Certified Architect program |
 
 ---
 

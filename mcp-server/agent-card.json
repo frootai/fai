@@ -7,7 +7,7 @@
   "url": "https://frootai-mcp.azurewebsites.net",
   "provider": {
     "name": "FrootAI",
-    "url": "https://gitpavleenbali.github.io/frootai"
+    "url": "https://frootai.dev"
   },
   "protocols": ["MCP/1.0", "A2A/1.0"],
   "capabilities": {

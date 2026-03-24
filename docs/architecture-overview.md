@@ -343,7 +343,7 @@ graph LR
     end
 
     subgraph Targets["Deployment Targets"]
-        GHP["GitHub Pages<br/>gitpavleenbali.github.io/frootai"]
+        GHP["GitHub Pages<br/>frootai.dev"]
         NPM["npm Registry<br/>npmjs.com/package/frootai-mcp"]
         VSCM["VS Code Marketplace<br/>pavleenbali.frootai"]
     end
@@ -362,7 +362,7 @@ graph LR
 
 | Target | Artifact | Trigger | URL |
 |---|---|---|---|
-| **GitHub Pages** | Static site | Push to `main` (website/) | `gitpavleenbali.github.io/frootai/` |
+| **GitHub Pages** | Static site | Push to `main` (website/) | `frootai.dev` |
 | **npm Registry** | Node.js package | Release tag (`v*`) | `npmjs.com/package/frootai-mcp` |
 | **VS Code Marketplace** | VSIX extension | Release tag (`v*`) | `marketplace.visualstudio.com` |
 | **GitHub Releases** | Release notes + assets | Release tag (`v*`) | `github.com/gitpavleenbali/frootai/releases` |

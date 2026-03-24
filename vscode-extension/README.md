@@ -131,11 +131,11 @@ code --install-extension pavleenbali.frootai
 
 ## Links
 
-- **Website**: https://gitpavleenbali.github.io/frootai/
+- **Website**: https://frootai.dev
 - **GitHub**: https://github.com/gitpavleenbali/frootai
 - **MCP Server (npm)**: https://www.npmjs.com/package/frootai-mcp
-- **Setup Guide**: https://gitpavleenbali.github.io/frootai/setup-guide
-- **Example User Guide**: https://gitpavleenbali.github.io/frootai/user-guide-05
+- **Setup Guide**: https://frootai.dev/setup-guide
+- **Example User Guide**: https://frootai.dev/user-guide-05
 
 ---
 
@@ -154,7 +154,7 @@ Here's how to use FrootAI to build Solution Play 05 (IT Ticket Resolution):
 
 **Result:** Production-ready IT ticket resolution — classified, routed, deployed. No AI specialist needed.
 
-📖 [Full User Guide for Play 05 →](https://gitpavleenbali.github.io/frootai/user-guide-05)
+[📖 Full User Guide for Play 05 →](https://frootai.dev/user-guide-05)
 
 ---
 

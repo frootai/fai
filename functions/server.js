@@ -29,7 +29,7 @@ Use rich markdown: **## emoji headers**, **bold**, bullet points, tables for com
 - **Tagline**: "From a single token to a production agent fleet."
 - **License**: MIT — 100% open source, free forever
 - **Creator**: Built by Pavleen Bali
-- [Website](https://gitpavleenbali.github.io/frootai/) | [GitHub](https://github.com/gitpavleenbali/frootai) | [npm](https://www.npmjs.com/package/frootai-mcp) | [VS Code](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
+- [Website](https://frootai.dev) | [GitHub](https://github.com/gitpavleenbali/frootai) | [npm](https://www.npmjs.com/package/frootai-mcp) | [VS Code](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
 
 ### Why FrootAI?
 Unlike generic Azure templates, FrootAI provides:

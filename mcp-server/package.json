@@ -37,7 +37,7 @@
     "type": "git",
     "url": "https://github.com/gitpavleenbali/frootai"
   },
-  "homepage": "https://gitpavleenbali.github.io/frootai/",
+  "homepage": "https://frootai.dev",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0"
   },
