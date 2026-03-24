@@ -1048,16 +1048,6 @@ function activate(context) {
       } else if (action.value === "npm") {
         vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
       } else if (action.value === "guide") {
-        vscode.env.openExternal(vscode.Uri.parse("https://frootai.devsetup-guide"));
-      }
-    })
-  );
-
-      } else if (action.value === "config") {
-        vscode.commands.executeCommand("frootai.configureMcp");
-      } else if (action.value === "npm") {
-        vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
-      } else if (action.value === "guide") {
         vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/setup-guide"));
       }
     })
