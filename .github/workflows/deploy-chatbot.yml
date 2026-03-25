@@ -12,6 +12,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      HAS_AZURE_SECRET: ${{ secrets.AZURE_CHATBOT_PUBLISH_PROFILE }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,11 +30,13 @@ jobs:
         run: zip -r ../deploy.zip . -x "node_modules/.cache/*"
 
       - name: Deploy to Azure App Service
-        if: ${{ env.HAS_SECRET == 'true' }}
+        if: env.HAS_AZURE_SECRET != ''
         uses: azure/webapps-deploy@v3
         with:
           app-name: frootai-chatbot-api
           package: deploy.zip
           publish-profile: ${{ secrets.AZURE_CHATBOT_PUBLISH_PROFILE }}
-        env:
-          HAS_SECRET: ${{ secrets.AZURE_CHATBOT_PUBLISH_PROFILE != '' }}
+
+      - name: Skip deploy (no secret configured)
+        if: env.HAS_AZURE_SECRET == ''
+        run: echo "⚠️ Skipping Azure deploy — AZURE_CHATBOT_PUBLISH_PROFILE secret not configured. Add it in repo Settings → Secrets."
