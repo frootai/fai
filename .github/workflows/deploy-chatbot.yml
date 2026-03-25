@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: functions
-        run: npm ci --production
+        run: npm install --omit=dev
 
       - name: Create deployment package
         working-directory: functions
