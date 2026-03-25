@@ -103,16 +103,16 @@ article p {
   order: 11 !important;
 }
 
-/* The search container: small purple pill */
+/* The search container: pill shape matching Hi FAI / FAI Agent */
 .navbar__search {
-  background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(167,139,250,0.10)) !important;
-  border: 1px solid rgba(124,58,237,0.45) !important;
+  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(167,139,250,0.08)) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
   border-radius: 10px !important;
-  height: 32px !important;
-  width: 32px !important;
-  min-width: 32px !important;
-  max-width: 32px !important;
-  padding: 0 !important;
+  height: auto !important;
+  width: auto !important;
+  min-width: unset !important;
+  max-width: unset !important;
+  padding: 6px 14px !important;
   margin: 0 4px !important;
   display: flex !important;
   align-items: center !important;
@@ -121,18 +121,27 @@ article p {
   transition: all 0.3s ease !important;
   overflow: visible !important;
   order: 5 !important;
-  box-sizing: border-box !important;
+  cursor: pointer !important;
+  text-shadow: 0 0 8px rgba(124,58,237,0.2);
 }
 .navbar__search:hover {
-  background: linear-gradient(135deg, rgba(124,58,237,0.28), rgba(167,139,250,0.18)) !important;
-  border-color: rgba(124,58,237,0.65) !important;
-  box-shadow: 0 0 14px rgba(124,58,237,0.3) !important;
+  background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(167,139,250,0.15)) !important;
+  border-color: rgba(124,58,237,0.6) !important;
+  box-shadow: 0 0 20px rgba(124,58,237,0.3), 0 0 40px rgba(124,58,237,0.1) !important;
   transform: translateY(-1px) !important;
 }
 
-/* Hide plugin spinner and SVG icons */
-.navbar__search [class*="loadingRing"],
-.navbar__search svg { display: none !important; }
+/* Spinner: invisible but CLICKABLE */
+.navbar__search [class*="loadingRing"] {
+  opacity: 0 !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  cursor: pointer !important;
+  z-index: 5 !important;
+}
+.navbar__search svg { opacity: 0 !important; width: 0 !important; height: 0 !important; position: absolute !important; }
 
 /* Inner container */
 .navbar__search [class*="searchBarContainer"] {
@@ -140,54 +149,75 @@ article p {
   background: transparent !important; border: none !important;
 }
 
-/* Input: invisible, full-size clickable area */
+/* Input: hidden but NOT blocking clicks — let JS handle activation */
 .navbar__search input,
 .navbar__search input[type="search"] {
   background: transparent !important;
   border: none !important; outline: none !important; box-shadow: none !important;
   color: transparent !important; font-size: 1px !important;
-  width: 100% !important; height: 100% !important;
+  width: 0 !important; height: 0 !important;
   padding: 0 !important; margin: 0 !important;
-  cursor: pointer !important;
-  position: absolute !important; inset: 0 !important; z-index: 2 !important;
   -webkit-appearance: none !important;
+  position: absolute !important;
 }
 .navbar__search input::placeholder { color: transparent !important; }
 .navbar__search input::-webkit-search-cancel-button { display: none !important; }
 
-/* Lens emoji centered */
+/* Lens emoji as visible label text */
 .navbar__search::after {
-  content: "\1F50D" !important;
+  content: "🔍" !important;
   font-size: 13px !important;
   pointer-events: none !important;
   z-index: 1 !important;
 }
 
-/* EXPANDED: when user clicks and types */
+/* FOCUSED: pill glows, no size change */
 .navbar__search:focus-within {
-  width: 200px !important; min-width: 200px !important; max-width: 200px !important;
-  background: rgba(12,12,22,0.96) !important;
   border-color: rgba(124,58,237,0.7) !important;
-  box-shadow: 0 0 20px rgba(124,58,237,0.35) !important;
-  padding: 0 6px 0 28px !important;
-}
-.navbar__search:focus-within::after {
-  position: absolute !important; left: 8px !important; top: 50% !important;
-  transform: translateY(-50%) !important;
-}
-.navbar__search:focus-within input,
-.navbar__search:focus-within input[type="search"] {
-  color: #e0e0e0 !important; font-size: 0.82rem !important;
-  cursor: text !important; position: relative !important;
-  padding: 0 4px !important;
-}
-.navbar__search:focus-within input::placeholder {
-  color: rgba(167,139,250,0.35) !important;
+  box-shadow: 0 0 20px rgba(124,58,237,0.4), 0 0 40px rgba(124,58,237,0.1) !important;
 }
 
-/* Dark dropdown for results */
+/* Dropdown: input floats BELOW pill, aligned RIGHT so it stays within viewport */
+.navbar__search:focus-within input,
+.navbar__search:focus-within input[type="search"] {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  left: auto !important;
+  width: 280px !important;
+  height: 38px !important;
+  background: rgba(10,10,22,0.97) !important;
+  border: 1px solid rgba(124,58,237,0.5) !important;
+  border-radius: 10px !important;
+  color: #e0e0e0 !important;
+  font-size: 0.85rem !important;
+  padding: 0 14px !important;
+  cursor: text !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 16px rgba(124,58,237,0.15) !important;
+  z-index: 200 !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-appearance: none !important;
+}
+.navbar__search:focus-within input::placeholder {
+  color: rgba(167,139,250,0.4) !important;
+}
+
+/* Results: below the input, right-aligned to stay in viewport */
 [class*="suggestions_"], [class*="suggestion_"], [class*="searchResult"],
-.navbar__search ul { background: rgba(10,10,20,0.98) !important; border: 1px solid rgba(124,58,237,0.12) !important; border-radius: 8px !important; }
+.navbar__search ul {
+  background: rgba(10,10,20,0.98) !important;
+  border: 1px solid rgba(124,58,237,0.12) !important;
+  border-radius: 10px !important;
+  position: absolute !important;
+  top: calc(100% + 50px) !important;
+  right: 0 !important;
+  left: auto !important;
+  width: 280px !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  z-index: 200 !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6) !important;
+}
 [class*="suggestion_"]:hover, [class*="suggestion_"][class*="cursor"] { background: rgba(124,58,237,0.12) !important; }
 
 /* Mobile */

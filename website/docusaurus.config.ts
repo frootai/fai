@@ -264,6 +264,10 @@ const config: Config = {
   } satisfies Preset.ThemeConfig,
 
   plugins: [],
+
+  clientModules: [
+    "./src/clientModules/searchClick.js",
+  ],
 };
 
 export default config;
