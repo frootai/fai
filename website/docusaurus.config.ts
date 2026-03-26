@@ -179,9 +179,16 @@ const config: Config = {
           className: "navbar__item--agent-glow",
         },
         {
+          href: "#search-fai",
+          label: "🔍 Search FAI",
+          position: "right",
+          className: "navbar__item--search-link",
+        },
+        {
           href: "https://github.com/gitpavleenbali/frootai",
           label: "GitHub",
           position: "right",
+          className: "navbar__item--github-link",
         },
       ],
     },

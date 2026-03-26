@@ -130,13 +130,8 @@ export default function SearchBarWrapper() {
     return scored.slice(0, 10);
   }, []);
 
-  // Handle pill click — toggle on/off
-  const handleOpen = useCallback(async (openMode = 'search') => {
-    // If already open, close it (toggle behavior)
-    if (isOpen) {
-      setIsOpen(false);
-      return;
-    }
+  // ── OPEN: position dropdown and show it ──
+  const doOpen = useCallback(async (openMode) => {
     if (btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       const mobile = window.innerWidth <= 996;
@@ -149,10 +144,17 @@ export default function SearchBarWrapper() {
     setMode(openMode);
     setIsOpen(true);
     if (openMode === 'search') {
-      const idx = await loadIndex();
-      setTimeout(() => inputRef.current?.focus(), 100);
+      await loadIndex();
+      setTimeout(() => inputRef.current?.focus(), 120);
     }
   }, [loadIndex]);
+
+  // ── PILL CLICK: open if closed, do nothing if already open ──
+  const handlePillClick = useCallback(() => {
+    if (!isOpen) {
+      doOpen(window.innerWidth <= 996 ? 'menu' : 'search');
+    }
+  }, [isOpen, doOpen]);
 
   // Handle typing
   const handleInput = useCallback((e) => {
@@ -188,19 +190,40 @@ export default function SearchBarWrapper() {
     if (!isOpen) { setQuery(''); setResults([]); setMode('menu'); }
   }, [isOpen]);
 
-  // Switch to search mode from the menu
+  // Switch to search mode from within the ⚡ menu
   const openSearch = useCallback(async () => {
     setMode('search');
-    const idx = await loadIndex();
-    setTimeout(() => inputRef.current?.focus(), 100);
+    await loadIndex();
+    setTimeout(() => inputRef.current?.focus(), 120);
   }, [loadIndex]);
+
+  // Listen for clicks on sidebar "Search FAI" link (href="#search-fai")
+  useEffect(() => {
+    const handler = (e) => {
+      const link = e.target.closest('a[href*="search-fai"]');
+      if (link) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Close sidebar first
+        const closeBtn = document.querySelector('.navbar-sidebar__close');
+        if (closeBtn) closeBtn.click();
+        // Force close any existing dropdown, then reopen fresh as search
+        setIsOpen(false);
+        setTimeout(() => {
+          doOpen('search');
+        }, 350); // Wait for sidebar animation to finish
+      }
+    };
+    document.addEventListener('click', handler, true); // capture phase
+    return () => document.removeEventListener('click', handler, true);
+  }, [doOpen]);
 
   return (
     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', order: 5 }}>
       {/* Single pill button — on mobile shows ⚡, on desktop shows 🔍 */}
       <button
         ref={btnRef}
-        onClick={() => handleOpen(isMobile ? 'menu' : 'search')}
+        onClick={handlePillClick}
         aria-label={isMobile ? 'FAI Menu' : 'Search'}
         style={{
           background: 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(167,139,250,0.08))',
@@ -292,15 +315,31 @@ export default function SearchBarWrapper() {
                 onClick={openSearch}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '10px', width: '100%',
-                  padding: '12px 14px', borderRadius: '10px',
+                  padding: '12px 14px', borderRadius: '10px', marginBottom: '6px',
                   background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(167,139,250,0.06))',
                   border: '1px solid rgba(124,58,237,0.3)',
                   color: '#a78bfa', fontWeight: 700, fontSize: '0.88rem',
                   cursor: 'pointer', textAlign: 'left',
                 }}
               >
-                <span style={{ fontSize: '1.2rem' }}>🔍</span> Search FrootAI
+                <span style={{ fontSize: '1.2rem' }}>🔍</span> Search FAI
               </button>
+              <a
+                href="https://github.com/gitpavleenbali/frootai"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '12px 14px', borderRadius: '10px',
+                  background: 'linear-gradient(135deg, rgba(236,72,153,0.12), rgba(219,39,119,0.06))',
+                  border: '1px solid rgba(236,72,153,0.3)',
+                  color: '#ec4899', fontWeight: 700, fontSize: '0.88rem',
+                  textDecoration: 'none', transition: 'all 0.2s',
+                }}
+              >
+                <span style={{ fontSize: '1.2rem' }}>📦</span> GitHub
+              </a>
             </div>
           )}
 

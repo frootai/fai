@@ -572,12 +572,26 @@ article .mermaid {
 /*  MOBILE SIDEBAR — header alignment fix                              */
 /* ================================================================== */
 
-/* Align logo, title, color toggle and X button on the same line */
+/* Align logo, title and X button on the same baseline */
 .navbar-sidebar__brand {
   display: flex !important;
   align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 16px !important;
+  min-height: 52px !important;
+}
+
+/* Hamburger toggle inside sidebar header — vertically centered */
+.navbar-sidebar__brand .navbar__toggle {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Logo + title — vertically centered on same line */
+.navbar-sidebar__brand .navbar__brand {
+  display: flex !important;
+  align-items: center !important;
   gap: 8px !important;
-  padding: 12px 16px !important;
 }
 
 /* Color mode toggle hidden everywhere — dark theme only */
@@ -1021,7 +1035,7 @@ div[style] {
 .navbar__items:not(.navbar__items--right) {
   flex: 1 1 0 !important;
   min-width: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;  /* MUST be visible for dropdown menus */
 }
 
 /* Right section: pills — NEVER shrinks, NEVER wraps */
@@ -1045,10 +1059,11 @@ div[style] {
 
 @media (max-width: 996px) {
 
-  /* ── HIDE Hi FAI, FAI Agent, GitHub, color toggle from top bar ── */
-  /* All accessible via ⚡ menu (SearchBar) or hamburger sidebar    */
+  /* Hide Hi FAI, FAI Agent, Search FAI, GitHub from top bar on mobile */
   .navbar__items--right > .navbar__item--hifai-glow,
   .navbar__items--right > .navbar__item--agent-glow,
+  .navbar__items--right > .navbar__item--search-link,
+  .navbar__items--right > .navbar__item--github-link,
   .navbar__items--right > a[href*="github"],
   .navbar__items--right > [class*="colorMode"],
   .navbar__items--right > [class*="toggle"],
@@ -1089,6 +1104,95 @@ div[style] {
     display: none !important;
   }
 
+  /* ── SIDEBAR: add Search + GitHub below FAI Agent ── */
+
+  /* Style Search FAI in sidebar — purple */
+  .navbar-sidebar .navbar__item--search-link {
+    overflow: visible !important;
+    text-indent: 0 !important;
+    width: 160px !important;
+    min-width: 160px !important;
+    max-width: 180px !important;
+    height: auto !important;
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 4px 12px !important;
+    white-space: nowrap !important;
+    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(167,139,250,0.06)) !important;
+    border: 1px solid rgba(124,58,237,0.3) !important;
+    color: #a78bfa !important;
+    text-decoration: none !important;
+    transition: all 0.25s ease !important;
+    cursor: pointer !important;
+  }
+  .navbar-sidebar .navbar__item--search-link:hover {
+    background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(167,139,250,0.12)) !important;
+    border-color: rgba(124,58,237,0.5) !important;
+    box-shadow: 0 0 16px rgba(124,58,237,0.25) !important;
+    color: #c4b5fd !important;
+  }
+
+  /* Style GitHub in sidebar — magenta */
+  .navbar-sidebar .navbar__item--github-link {
+    overflow: visible !important;
+    text-indent: 0 !important;
+    width: 160px !important;
+    min-width: 160px !important;
+    max-width: 180px !important;
+    height: auto !important;
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 4px 12px !important;
+    white-space: nowrap !important;
+    background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(219,39,119,0.06)) !important;
+    border: 1px solid rgba(236,72,153,0.3) !important;
+    color: #ec4899 !important;
+    text-decoration: none !important;
+    transition: all 0.25s ease !important;
+  }
+  .navbar-sidebar .navbar__item--github-link:hover {
+    background: linear-gradient(135deg, rgba(236,72,153,0.25), rgba(219,39,119,0.12)) !important;
+    border-color: rgba(236,72,153,0.5) !important;
+    box-shadow: 0 0 16px rgba(236,72,153,0.25) !important;
+    color: #f472b6 !important;
+  }
+
+  /* ── SIDEBAR: dropdown expand arrows visible ── */
+  .navbar-sidebar .menu__link--sublist-caret::after,
+  .navbar-sidebar .dropdown > .navbar__link::after {
+    display: inline-block !important;
+    content: "▸" !important;
+    font-size: 0.8rem !important;
+    margin-left: auto !important;
+    padding-left: 8px !important;
+    opacity: 0.4 !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    border: none !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  .navbar-sidebar .dropdown--show > .navbar__link::after,
+  .navbar-sidebar .menu__link--sublist-caret[aria-expanded="true"]::after {
+    content: "▾" !important;
+    opacity: 0.7 !important;
+  }
+
+  /* Hide Search FAI + GitHub from top nav bar — they're in sidebar */
+  .navbar__items--right > .navbar__item--github-link,
+  .navbar__items--right > .navbar__item--search-link {
+    display: none !important;
+  }
+
   /* ── SIDEBAR cleanup ── */
   .navbar-sidebar__back {
     display: none !important;
@@ -1103,6 +1207,15 @@ div[style] {
 
 /* ── Extra-small phones: no special overrides needed ── */
 /* Hi FAI & FAI Agent are in ⚡ menu, only 1 pill on navbar */
+
+/* Hide Search FAI from desktop navbar — 🔍 pill already handles search */
+.navbar__item--search-link {
+  display: none !important;
+}
+/* But show it inside the sidebar */
+.navbar-sidebar .navbar__item--search-link {
+  display: inline-flex !important;
+}
 
 /* Navbar brand + title should never shrink */
 .navbar__brand {
