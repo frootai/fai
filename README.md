@@ -9,6 +9,7 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/gitpavleenbali/frootai/deploy.yml?style=for-the-badge&label=Website)](https://github.com/gitpavleenbali/frootai/actions/workflows/deploy.yml)
 [![Docker](https://img.shields.io/github/actions/workflow/status/gitpavleenbali/frootai/docker-publish.yml?style=for-the-badge&label=Docker&logo=docker)](https://github.com/gitpavleenbali/frootai/actions/workflows/docker-publish.yml)
 [![npm Version](https://img.shields.io/npm/v/frootai-mcp?style=for-the-badge&logo=npm&label=MCP)](https://www.npmjs.com/package/frootai-mcp)
+[![Uptime](https://img.shields.io/github/actions/workflow/status/gitpavleenbali/frootai/uptime.yml?style=for-the-badge&label=Uptime&logo=statuspage)](https://github.com/gitpavleenbali/frootai/actions/workflows/uptime.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
 
 ---
@@ -20,13 +21,21 @@
 | | What | For Whom |
 |---|------|----------|
 | 🎯 | **Solution Plays** — pre-tuned, deployable AI solutions (RAG, agents, landing zones) | Infra & platform engineers |
-| 📖 | **18 knowledge modules** covering AI architecture end-to-end | Cloud Architects, CSAs |
+| 📖 | **16 knowledge modules** covering AI architecture end-to-end | Cloud Architects, CSAs |
 | 🔌 | **MCP Server** — 22 tools (6 static + 4 live + 3 agent chain + 3 AI ecosystem + 6 compute), add to any AI agent as a callable skill set | Agent builders, developers |
 | 🔗 | **The open glue** — removes silos between infra, platform, and app teams | Everyone |
 
 ---
 
 ## Quick Start
+
+### Scaffold a new project (CLI)
+
+```bash
+npx frootai init
+```
+
+3 questions → scaffolds .vscode/mcp.json + agents + configs in one command.
 
 ### Read the docs
 
@@ -45,6 +54,16 @@ npm install -g frootai-mcp@latest
 
 # Docker (no Node.js needed)
 docker run -i ghcr.io/gitpavleenbali/frootai-mcp
+```
+
+### CLI Commands
+
+```bash
+npx frootai init                          # Interactive project scaffolding
+npx frootai search "RAG architecture"     # Search knowledge base
+npx frootai cost enterprise-rag --scale prod  # Cost estimate
+npx frootai validate                      # Check project structure
+npx frootai doctor                        # Health check
 ```
 
 **npm**: [npmjs.com/package/frootai-mcp](https://www.npmjs.com/package/frootai-mcp) · **Docker**: [ghcr.io/gitpavleenbali/frootai-mcp](https://github.com/gitpavleenbali/frootai/pkgs/container/frootai-mcp)
@@ -191,7 +210,7 @@ graph TB
 
 | Tool | What It Does |
 |------|-------------|
-| `list_modules` | Browse all 18 modules by FROOT layer |
+| `list_modules` | Browse all 16 modules by FROOT layer |
 | `get_module` | Read any module content (F1–T3, F4) |
 | `lookup_term` | Look up any of 200+ AI/ML terms |
 | `search_knowledge` | Full-text search across all modules |
@@ -248,13 +267,13 @@ Pre-tuned, deployable AI solutions — infra + AI config + agent instructions + 
 
 ```
 frootai/
-├── docs/                  ← 18 knowledge modules (markdown)
+├── docs/                  ← 16 knowledge modules (markdown)
 │   ├── README.md           FROOT framework overview
 │   ├── GenAI-Foundations.md  F1
 │   ├── LLM-Landscape.md     F2
-│   ├── ...                   (all 18 modules)
+│   ├── ...                   (all 16 modules)
 │   └── T3-Production-Patterns.md  T3
-├── mcp-server/            ← MCP server (npm: frootai-mcp@3.0.1)
+├── mcp-server/            ← MCP server (npm: frootai-mcp@3.1.2)
 │   ├── index.js             22 tools (6 static + 4 live + 3 chain + 3 AI ecosystem + 6 compute)
 │   ├── knowledge.json       Bundled knowledge (682 KB, 18 modules)
 │   ├── agent-card.json      A2A protocol Agent Card
@@ -336,5 +355,5 @@ MIT — use it, extend it, embed it, ship it. See [LICENSE](./LICENSE).
 ---
 
 > **FrootAI v3** — *The open glue for AI architecture. From the roots to the fruits.*
-> 18 modules · 22 MCP tools · 20 solution plays · 200+ AI terms
+> 16 modules · 22 MCP tools · 20 solution plays · 200+ AI terms
 > Built by the [FrootAI community](https://github.com/gitpavleenbali/frootai)

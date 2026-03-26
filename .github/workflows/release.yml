@@ -1,0 +1,75 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'mcp-v*'
+      - 'ext-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine release info
+        id: info
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "$TAG" == mcp-v* ]]; then
+            VERSION="${TAG#mcp-v}"
+            echo "title=FrootAI MCP Server v${VERSION}" >> $GITHUB_OUTPUT
+            echo "component=mcp" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" == ext-v* ]]; then
+            VERSION="${TAG#ext-v}"
+            echo "title=FrootAI VS Code Extension v${VERSION}" >> $GITHUB_OUTPUT
+            echo "component=ext" >> $GITHUB_OUTPUT
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog entry
+        id: changelog
+        run: |
+          VERSION="${{ steps.info.outputs.version }}"
+          if [ -f CHANGELOG.md ]; then
+            # Extract the section for this version
+            ENTRY=$(sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | head -n -1)
+            if [ -n "$ENTRY" ]; then
+              echo "body<<EOF" >> $GITHUB_OUTPUT
+              echo "$ENTRY" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.info.outputs.title }}
+          body: |
+            ${{ steps.changelog.outputs.body || 'See CHANGELOG.md for details.' }}
+
+            ---
+
+            **Install:**
+            ```bash
+            # MCP Server
+            npx frootai-mcp@${{ steps.info.outputs.version }}
+
+            # VS Code Extension
+            code --install-extension pavleenbali.frootai
+
+            # Docker
+            docker run -i ghcr.io/gitpavleenbali/frootai-mcp:${{ steps.info.outputs.version }}
+            ```
+
+            **Links:**
+            - [npm](https://www.npmjs.com/package/frootai-mcp)
+            - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
+            - [Docker](https://github.com/gitpavleenbali/frootai/pkgs/container/frootai-mcp)
+            - [Website](https://frootai.dev)
+          generate_release_notes: true

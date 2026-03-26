@@ -1,0 +1,26 @@
+{
+  "name": "frootai",
+  "version": "0.0.0",
+  "private": true,
+  "description": "FrootAI™ — From the Roots to the Fruits. Monorepo for MCP server, VS Code extension, website, and CLI.",
+  "scripts": {
+    "validate": "node scripts/validate-consistency.js",
+    "sync": "node scripts/sync-content.js",
+    "validate:fix": "node scripts/validate-consistency.js --fix",
+    "release": "node scripts/release.js",
+    "release:dry": "node scripts/release.js --dry-run",
+    "release:mcp": "node scripts/release.js --target mcp",
+    "release:ext": "node scripts/release.js --target ext",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitpavleenbali/frootai"
+  },
+  "license": "MIT"
+}

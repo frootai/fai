@@ -1,0 +1,2 @@
+node scripts/sync-content.js
+node scripts/validate-consistency.js

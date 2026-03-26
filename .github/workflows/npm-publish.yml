@@ -35,3 +35,10 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish notification
+        if: success()
+        run: |
+          PKG_VERSION=$(node -p "require('./mcp-server/package.json').version")
+          echo "::notice::✅ frootai-mcp@${PKG_VERSION} published to npm successfully!"
+          echo "📦 Package: https://www.npmjs.com/package/frootai-mcp/v/${PKG_VERSION}"
