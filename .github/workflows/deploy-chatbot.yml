@@ -1,4 +1,4 @@
-name: Deploy FAI Agent Chatbot
+name: Deploy Agent FAI Chatbot
 
 on:
   push:

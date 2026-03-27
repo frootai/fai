@@ -415,7 +415,7 @@ FrootAI is not just documentation — it's a **programmable knowledge base**. Co
 }
 ```
 
-**16 tools:** 6 static (knowledge) + 4 live (Azure docs, MCP registries) + 3 agent chain (build → review → tune) + 3 AI ecosystem (model catalog, pricing, compare)
+**22 tools:** 6 static (knowledge) + 4 live (Azure docs, MCP registries) + 3 agent chain (build → review → tune) + 3 AI ecosystem (model catalog, pricing, compare) + 6 compute
 
 See [mcp-server/README.md](../mcp-server/README.md) for full setup.
 
@@ -429,14 +429,14 @@ Standalone engine — works from any workspace, no clone needed:
 Ctrl+Shift+X → Search "FrootAI" → Install
 ```
 
-**13 commands:** Init DevKit (.github Agentic OS), Init TuneKit, Auto-Chain Agents, MCP Install/Start/Configure, Search Knowledge, Look Up AI Term, and more.
+**17 commands:** Init DevKit (.github Agentic OS), Init TuneKit, Init SpecKit, Auto-Chain Agents, MCP Install/Start/Configure, Search Knowledge, Look Up AI Term, and more.
 
-**4 sidebar panels:** Solution Plays (20) · MCP Tools (16) · Knowledge Hub (18 modules) · AI Glossary (200+ terms)
+**4 sidebar panels:** Solution Plays (20) · MCP Tools (22) · Knowledge Hub (18 modules) · AI Glossary (200+ terms)
 
 See [VS Code Extension →](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
 
 ---
 
 > **FrootAI v2.2** — *The open glue for AI architecture. From the roots to the fruits.*
-> 18 modules · 16 MCP tools · 20 solution plays · 200+ AI terms
+> 18 modules · 22 MCP tools · 20 solution plays · 200+ AI terms
 > Built with 🌳 by the [FrootAI community](https://github.com/gitpavleenbali/frootai) for the Azure community.
