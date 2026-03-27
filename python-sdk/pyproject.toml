@@ -1,11 +1,11 @@
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "frootai"
-version = "3.2.0"
-description = "FrootAI SDK — The open glue for AI architecture. Programmatic access to 22 MCP tools, 20 solution plays, 18 knowledge modules."
+version = "3.3.0"
+description = "FrootAI SDK — The open glue for AI architecture. Offline access to 16 knowledge modules, 20 solution plays, cost estimation, evaluation, and A/B testing."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "Pavleen Bali", email = "pavleenbali@frootai.dev"}]
@@ -22,7 +22,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 keywords = ["frootai", "ai", "architecture", "azure", "mcp", "agents", "rag", "sdk"]
-dependencies = ["httpx>=0.25.0"]
+dependencies = []
 
 [project.urls]
 Homepage = "https://frootai.dev"
@@ -35,3 +35,6 @@ frootai = "frootai.cli:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["frootai*"]
+
+[tool.setuptools.package-data]
+frootai = ["knowledge.json"]

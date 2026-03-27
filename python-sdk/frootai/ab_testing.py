@@ -1,10 +1,18 @@
 """FrootAI Prompt A/B Testing Framework.
 
 Run prompt experiments across variants, measure quality, pick winners.
+Requires a model_fn callback for actual LLM inference.
 
 Usage:
     from frootai.ab_testing import PromptExperiment, PromptVariant
-    
+
+    def my_model(system_prompt: str, query: str) -> str:
+        # Call Azure OpenAI, local model, etc.
+        return openai_client.chat(system_prompt=system_prompt, query=query)
+
+    def my_scorer(query: str, response: str) -> dict[str, float]:
+        return {"groundedness": 4.5, "relevance": 4.0}
+
     experiment = PromptExperiment(
         name="rag-system-prompt-v2",
         variants=[
@@ -14,16 +22,19 @@ Usage:
         ],
         metrics=["groundedness", "relevance", "latency"],
     )
-    
-    results = experiment.run(test_queries=["What is RAG?", "Explain embeddings"])
+
+    results = experiment.run(
+        test_queries=["What is RAG?", "Explain embeddings"],
+        model_fn=my_model,
+        scorer_fn=my_scorer,
+    )
     winner = experiment.pick_winner(results)
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Callable
 import json
 import time
-import random
 
 
 @dataclass
@@ -31,7 +42,7 @@ class PromptVariant:
     """A single prompt variant in an A/B test."""
     name: str
     system_prompt: str
-    weight: float = 1.0  # Traffic allocation weight
+    weight: float = 1.0
 
 
 @dataclass
@@ -47,7 +58,7 @@ class ExperimentResult:
 @dataclass
 class PromptExperiment:
     """A/B testing experiment for prompt variants.
-    
+
     Attributes:
         name: Experiment identifier
         variants: List of prompt variants to test
@@ -57,39 +68,65 @@ class PromptExperiment:
     variants: list[PromptVariant]
     metrics: list[str] = field(default_factory=lambda: ["groundedness", "relevance", "coherence"])
 
-    def run(self, test_queries: list[str], rounds: int = 1) -> list[ExperimentResult]:
-        """Run the experiment (stub — wire to your LLM endpoint)."""
+    def run(
+        self,
+        test_queries: list[str],
+        model_fn: Callable[[str, str], str],
+        scorer_fn: Optional[Callable[[str, str], dict[str, float]]] = None,
+        rounds: int = 1,
+    ) -> list[ExperimentResult]:
+        """Run the experiment using provided model and scorer functions.
+
+        Args:
+            test_queries: Questions to test each variant against.
+            model_fn: Callable(system_prompt, query) -> response string.
+            scorer_fn: Optional Callable(query, response) -> {metric: score}.
+                        If not provided, only latency is measured.
+            rounds: Number of rounds to repeat (for statistical stability).
+        """
         results = []
         for _ in range(rounds):
             for query in test_queries:
                 for variant in self.variants:
-                    start = time.time()
-                    # Stub: replace with actual LLM call
-                    response = f"[{variant.name}] Response to: {query}"
-                    latency = (time.time() - start) * 1000
+                    start = time.perf_counter()
+                    response = model_fn(variant.system_prompt, query)
+                    latency = (time.perf_counter() - start) * 1000
+
+                    scores = {}
+                    if scorer_fn is not None:
+                        scores = scorer_fn(query, response)
+                    scores["latency_ms"] = round(latency, 1)
 
                     result = ExperimentResult(
                         variant=variant.name,
                         query=query,
                         response=response,
-                        latency_ms=latency,
-                        scores={m: round(random.uniform(3.0, 5.0), 2) for m in self.metrics},
+                        latency_ms=round(latency, 1),
+                        scores=scores,
                     )
                     results.append(result)
         return results
 
     def pick_winner(self, results: list[ExperimentResult]) -> str:
-        """Pick the best variant based on average scores."""
+        """Pick the best variant based on average scores (excluding latency)."""
         variant_scores: dict[str, list[float]] = {}
         for r in results:
             if r.variant not in variant_scores:
                 variant_scores[r.variant] = []
-            avg = sum(r.scores.values()) / max(len(r.scores), 1)
-            variant_scores[r.variant].append(avg)
+            quality_scores = {k: v for k, v in r.scores.items() if k != "latency_ms"}
+            if quality_scores:
+                avg = sum(quality_scores.values()) / len(quality_scores)
+                variant_scores[r.variant].append(avg)
 
-        averages = {v: sum(s) / len(s) for v, s in variant_scores.items()}
-        winner = max(averages, key=averages.get)
-        return winner
+        if not variant_scores or all(len(v) == 0 for v in variant_scores.values()):
+            # Fall back to lowest latency if no quality scores
+            latencies: dict[str, list[float]] = {}
+            for r in results:
+                latencies.setdefault(r.variant, []).append(r.latency_ms)
+            return min(latencies, key=lambda v: sum(latencies[v]) / len(latencies[v]))
+
+        averages = {v: sum(s) / len(s) for v, s in variant_scores.items() if s}
+        return max(averages, key=averages.get)
 
     def summary(self, results: list[ExperimentResult]) -> str:
         """Generate experiment summary."""
@@ -99,18 +136,21 @@ class PromptExperiment:
             variant_data.setdefault(r.variant, []).append(r)
 
         for variant, data in variant_data.items():
-            avg_scores = {}
-            for m in self.metrics:
-                avg_scores[m] = sum(r.scores.get(m, 0) for r in data) / len(data)
-            avg_latency = sum(r.latency_ms for r in data) / len(data)
+            avg_scores: dict[str, float] = {}
+            all_metrics = set()
+            for r in data:
+                all_metrics.update(r.scores.keys())
+            for m in sorted(all_metrics):
+                vals = [r.scores[m] for r in data if m in r.scores]
+                if vals:
+                    avg_scores[m] = sum(vals) / len(vals)
             lines.append(f"\n  Variant: {variant}")
             lines.append(f"  Samples: {len(data)}")
             for m, s in avg_scores.items():
                 lines.append(f"    {m}: {s:.2f}")
-            lines.append(f"    latency: {avg_latency:.0f}ms")
 
         winner = self.pick_winner(results)
-        lines.append(f"\n  🏆 Winner: {winner}")
+        lines.append(f"\n  Winner: {winner}")
         return "\n".join(lines)
 
     def to_json(self) -> str:
