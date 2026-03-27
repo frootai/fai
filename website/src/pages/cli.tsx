@@ -89,10 +89,37 @@ export default function CLIPage(): JSX.Element {
           </p>
         </div>
 
+        {/* --- scaffold --- */}
+        <div style={cardStyle}>
+          <h3 style={h3Style}>📐 <code>frootai scaffold &lt;play&gt;</code></h3>
+          <p style={{ fontSize: "0.88rem" }}>One-command play scaffold. Creates all 5 FROOT kits + froot.json manifest.</p>
+          <pre style={codeStyle}>{`$ npx frootai scaffold 01-enterprise-rag
+# or shorthand:
+$ npx frootai scaffold play-01
+
+  🌳 FrootAI™ CLI v3.1.2
+
+  Scaffolding play: 01-enterprise-rag
+
+  ✅ Play scaffolded: 01-enterprise-rag
+
+  Files created:
+  .vscode/mcp.json             ← MCP auto-connect
+  .github/agents/              ← Builder + Reviewer + Tuner
+  .github/instructions/        ← 5 WAF instruction files
+  config/                      ← OpenAI + Search + Guardrails
+  evaluation/                  ← Eval config + thresholds
+  spec/play-spec.json          ← SpecKit (WAF alignment)
+  froot.json                   ← Play manifest (5 kits)`}</pre>
+          <p style={{ fontSize: "0.82rem" }}>
+            Auto-detects existing projects and merges files. Includes <strong>froot.json</strong> manifest linking all 5 kits.
+          </p>
+        </div>
+
         {/* --- search --- */}
         <div style={cardStyle}>
           <h3 style={h3Style}>🔍 <code>frootai search &lt;query&gt;</code></h3>
-          <p style={{ fontSize: "0.88rem" }}>Search the FrootAI knowledge base (16 FROOT modules) from the terminal.</p>
+          <p style={{ fontSize: "0.88rem" }}>Search the FrootAI knowledge base (18 FROOT modules) from the terminal.</p>
           <pre style={codeStyle}>{`$ npx frootai search "RAG architecture"
 
   Searching: "RAG architecture"

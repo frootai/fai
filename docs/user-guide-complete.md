@@ -309,19 +309,33 @@ Runs 17 checks across 6 pillars and shows per-pillar scores + failing items.
 
 ## 6c. Using the CLI
 
-The FrootAI CLI (`npx frootai`) provides 6 commands for terminal-based workflows.
+The FrootAI CLI (`npx frootai`) provides 8 commands for terminal-based workflows.
 
 ### Commands
 
 | Command | What it does |
 |---|---|
-| `npx frootai init` | Scaffold a new project with DevKit + SpecKit + WAF instructions |
+| `npx frootai init` | Interactive project scaffolding (auto-detects existing projects) |
+| `npx frootai scaffold <play>` | One-command play scaffold (e.g. `scaffold play-01`) |
 | `npx frootai search <query>` | Search across 18 knowledge modules |
 | `npx frootai cost <service>` | Estimate Azure AI service costs |
 | `npx frootai validate` | Run consistency checks across your project |
 | `npx frootai validate --waf` | WAF alignment scorecard (6 pillars, 17 checks) |
 | `npx frootai doctor` | Health check: Node.js, npm, VS Code, MCP config |
 | `npx frootai help` | Show all available commands |
+
+### Scaffold Command
+
+One-command play scaffolding — creates all 5 FROOT kits + froot.json manifest:
+
+```bash
+npx frootai scaffold 01-enterprise-rag
+# or shorthand:
+npx frootai scaffold play-01
+```
+
+Creates: `.github/agents/`, config/, spec/, evaluation/, froot.json, WAF instructions.
+Auto-detects existing projects and merges files alongside yours.
 
 ---
 

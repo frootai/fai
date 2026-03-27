@@ -57,6 +57,9 @@ switch (command) {
   case 'init':
     await cmdInit();
     break;
+  case 'scaffold':
+    await cmdScaffold(args[1]);
+    break;
   case 'search':
     cmdSearch(args.slice(1).join(' '));
     break;
@@ -92,6 +95,16 @@ switch (command) {
 async function cmdInit() {
   banner();
   console.log(`${c.cyan}  Let's set up your FrootAI-powered project!${c.reset}\n`);
+
+  // Auto-detect existing project
+  const hasExisting = existsSync('package.json') || existsSync('.github') || existsSync('infra');
+  if (hasExisting) {
+    console.log(`${c.yellow}  📂 Existing project detected — will merge FrootAI files alongside yours.${c.reset}`);
+    if (existsSync('package.json')) console.log(`${c.dim}    Found: package.json${c.reset}`);
+    if (existsSync('.github')) console.log(`${c.dim}    Found: .github/${c.reset}`);
+    if (existsSync('infra')) console.log(`${c.dim}    Found: infra/${c.reset}`);
+    console.log('');
+  }
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   const ask = (q) => new Promise(r => rl.question(q, r));
@@ -208,7 +221,7 @@ Review all code changes against:
 `);
 
   writeIfNotExists(join(projectDir, '.github/agents/tuner.agent.md'), `---
-description: "Tuner agent — validates configs, runs evaluations, ensures production readiness"
+description: "Tuner agent — validates configs, runs evaluations, checks WAF alignment"
 tools:
   - frootai
 ---
@@ -217,7 +230,12 @@ tools:
 Validate:
 - config/*.json values are production-appropriate
 - Evaluation thresholds are met
+- WAF alignment: run \\\`npx frootai validate --waf\\\` and ensure all 6 pillars pass
 - Cost estimates are within budget
+
+## WAF Check
+Before shipping, verify all 6 pillars:
+1. Reliability  2. Security  3. Cost  4. Operations  5. Performance  6. Responsible AI
 `);
 
   // Copilot instructions
@@ -363,6 +381,29 @@ build/
   console.log(`  ${c.green}cd ${projectName}${c.reset}`);
   console.log(`  ${c.green}code .${c.reset}              ← FrootAI MCP auto-connects`);
   console.log(`  ${c.green}@builder ${c.dim}in Copilot Chat to start building${c.reset}\n`);
+
+  // froot.json manifest
+  writeIfNotExists(join(projectDir, 'froot.json'), JSON.stringify({
+    frootai: VERSION, play: playId, scale,
+    kits: {
+      devkit: { files: ['.github/agents/', '.github/instructions/', '.github/copilot-instructions.md', '.vscode/mcp.json'] },
+      tunekit: { files: ['config/openai.json', 'config/search.json', 'config/guardrails.json', 'evaluation/'] },
+      speckit: { files: ['spec/project-spec.json'] },
+      infrakit: { files: ['infra/'] },
+      evalkit: { files: ['evaluation/'] },
+    },
+    waf: true,
+  }, null, 2));
+
+  // Post-scaffold welcome
+  console.log(`${c.cyan}  ┌──────────────────────────────────────────────────────┐${c.reset}`);
+  console.log(`${c.cyan}  │  🌳 Welcome to FrootAI!                              │${c.reset}`);
+  console.log(`${c.cyan}  │                                                      │${c.reset}`);
+  console.log(`${c.cyan}  │  Your project is WAF-aligned from day one.           │${c.reset}`);
+  console.log(`${c.cyan}  │  Run ${c.green}npx frootai validate --waf${c.cyan} to check scores.    │${c.reset}`);
+  console.log(`${c.cyan}  │                                                      │${c.reset}`);
+  console.log(`${c.cyan}  │  It's simply Frootful. 🌱                            │${c.reset}`);
+  console.log(`${c.cyan}  └──────────────────────────────────────────────────────┘${c.reset}\n`);
 }
 
 // ═══════════════════════════════════════════════════
@@ -677,6 +718,142 @@ function cmdDoctor() {
 }
 
 // ═══════════════════════════════════════════════════
+// SCAFFOLD — One-command play scaffold
+// ═══════════════════════════════════════════════════
+async function cmdScaffold(playArg) {
+  banner();
+
+  const allPlays = [
+    '01-enterprise-rag', '02-ai-landing-zone', '03-deterministic-agent',
+    '04-call-center-voice-ai', '05-it-ticket-resolution', '06-document-intelligence',
+    '07-multi-agent-service', '08-copilot-studio-bot', '09-ai-search-portal',
+    '10-content-moderation', '11-ai-landing-zone-advanced', '12-model-serving-aks',
+    '13-fine-tuning-workflow', '14-cost-optimized-ai-gateway', '15-multi-modal-docproc',
+    '16-copilot-teams-extension', '17-ai-observability', '18-prompt-management',
+    '19-edge-ai-phi4', '20-anomaly-detection',
+  ];
+
+  if (!playArg) {
+    console.log(`${c.yellow}  Usage: frootai scaffold <play-id>${c.reset}`);
+    console.log(`${c.dim}  Example: frootai scaffold 01-enterprise-rag${c.reset}`);
+    console.log(`${c.dim}  Example: frootai scaffold play-01${c.reset}\n`);
+    console.log(`${c.bold}  Available plays:${c.reset}`);
+    allPlays.forEach(p => console.log(`${c.dim}    ${p}${c.reset}`));
+    return;
+  }
+
+  // Resolve play ID from shorthand like "play-01" or "01"
+  let playId = playArg;
+  const numMatch = playArg.match(/(?:play-?)?(\d+)/i);
+  if (numMatch) {
+    const num = numMatch[1].padStart(2, '0');
+    playId = allPlays.find(p => p.startsWith(num + '-')) || playArg;
+  }
+
+  if (!allPlays.includes(playId)) {
+    console.log(`${c.red}  Unknown play: ${playArg}${c.reset}`);
+    console.log(`${c.dim}  Run "frootai scaffold" to see available plays.${c.reset}`);
+    return;
+  }
+
+  const projectName = playId;
+  console.log(`${c.cyan}  Scaffolding play: ${playId}${c.reset}\n`);
+
+  // Auto-detect existing project
+  const hasPackageJson = existsSync('package.json');
+  const hasBicep = existsSync('infra/main.bicep');
+  const hasGithub = existsSync('.github');
+  if (hasPackageJson || hasBicep || hasGithub) {
+    console.log(`${c.yellow}  Detected existing project — merging FrootAI files alongside existing ones.${c.reset}`);
+    if (hasPackageJson) console.log(`${c.dim}    Found: package.json${c.reset}`);
+    if (hasBicep) console.log(`${c.dim}    Found: infra/main.bicep${c.reset}`);
+    if (hasGithub) console.log(`${c.dim}    Found: .github/${c.reset}`);
+    console.log('');
+  }
+
+  // Create dirs
+  const dirs = ['.vscode', '.github/agents', '.github/instructions', '.github/prompts', 'config', 'evaluation', 'infra', 'spec'];
+  for (const d of dirs) mkdirSync(d, { recursive: true });
+
+  // Core files
+  writeIfNotExists('.vscode/mcp.json', JSON.stringify({ servers: { frootai: { type: 'stdio', command: 'npx', args: ['-y', `frootai-mcp@${VERSION}`] } } }, null, 2));
+
+  writeIfNotExists('.github/agents/builder.agent.md', `---\ndescription: "Builder agent — implements features following FrootAI architecture patterns"\ntools:\n  - frootai\n---\n# Builder Agent\n\nYou are a builder agent for a ${playId} solution.\nUse the FrootAI MCP server for architecture patterns, cost estimates, and best practices.\n`);
+  writeIfNotExists('.github/agents/reviewer.agent.md', `---\ndescription: "Reviewer agent — reviews code for security, quality, Azure best practices"\ntools:\n  - frootai\n---\n# Reviewer Agent\n\nReview all code changes against:\n- Security (OWASP Top 10)\n- Azure best practices (Well-Architected Framework)\n- Config compliance (config/*.json)\n`);
+  writeIfNotExists('.github/agents/tuner.agent.md', `---\ndescription: "Tuner agent — validates configs, runs evaluations, checks WAF alignment"\ntools:\n  - frootai\n---\n# Tuner Agent\n\nValidate:\n- config/*.json values are production-appropriate\n- Evaluation thresholds are met\n- WAF alignment: run \\\`npx frootai validate --waf\\\` and ensure all 6 pillars pass\n- Cost estimates are within budget\n\n## WAF Check\nBefore shipping, verify:\n1. Reliability: retry policies, health probes\n2. Security: managed identity, private endpoints, no API keys\n3. Cost: right-sized SKUs, token budgets\n4. Operations: diagnostics, CI/CD, agent definitions\n5. Performance: caching, streaming, connection pooling\n6. Responsible AI: content safety, guardrails, grounding\n`);
+
+  writeIfNotExists('.github/copilot-instructions.md', `# ${playId}\n\n## Agent Workflow\n1. **Build**: Implement using config/ values and FrootAI MCP\n2. **Review**: Self-review against reviewer.agent.md\n3. **Tune**: Verify configs + WAF alignment (npx frootai validate --waf)\n`);
+
+  writeIfNotExists('config/openai.json', JSON.stringify({ model: 'gpt-4o-mini', temperature: 0.1, max_tokens: 4096, api_version: '2025-01-01-preview' }, null, 2));
+  writeIfNotExists('config/guardrails.json', JSON.stringify({ max_tokens_per_request: 4096, blocked_categories: ['hate', 'violence', 'self-harm', 'sexual'], pii_detection: true, grounding_check: true }, null, 2));
+  writeIfNotExists('config/search.json', JSON.stringify({ service: 'azure-ai-search', index: `${playId}-index`, semantic_config: 'default', top_k: 5, min_score: 0.75 }, null, 2));
+  writeIfNotExists('evaluation/eval-config.json', JSON.stringify({ metrics: ['groundedness', 'relevance', 'coherence', 'fluency'], thresholds: { groundedness: 4.0, relevance: 4.0, coherence: 4.0, fluency: 4.0 }, dataset: 'evaluation/test-data.jsonl' }, null, 2));
+
+  // SpecKit — play-spec.json
+  const specData = {
+    name: playId, version: '0.1.0', play: playId,
+    architecture: { pattern: playId.includes('rag') ? 'rag' : playId.includes('agent') ? 'agent' : playId.includes('landing') ? 'infrastructure' : 'custom' },
+    waf_alignment: {
+      reliability: { score: 0, status: 'unchecked' },
+      security: { score: 0, status: 'unchecked' },
+      cost_optimization: { score: 0, status: 'unchecked' },
+      operational_excellence: { score: 0, status: 'unchecked' },
+      performance_efficiency: { score: 0, status: 'unchecked' },
+      responsible_ai: { score: 0, status: 'unchecked' },
+    },
+    evaluation: { thresholds: { groundedness: 4.0, relevance: 4.0 } },
+  };
+  writeIfNotExists('spec/play-spec.json', JSON.stringify(specData, null, 2));
+
+  // WAF instructions
+  writeIfNotExists('.github/instructions/waf-security.instructions.md', `---\napplyTo: "**/*.{ts,js,py,bicep,json}"\n---\n# Security\n- Use Managed Identity for all Azure service auth\n- Store secrets in Azure Key Vault\n- Enable content safety on all AI endpoints\n`);
+  writeIfNotExists('.github/instructions/waf-reliability.instructions.md', `---\napplyTo: "**/*.{ts,js,py,bicep,json}"\n---\n# Reliability\n- Retry all external API calls (3 retries, exponential backoff)\n- Expose /health endpoint on every service\n`);
+  writeIfNotExists('.github/instructions/waf-cost-optimization.instructions.md', `---\napplyTo: "**/*.{ts,js,py,bicep,json}"\n---\n# Cost Optimization\n- Use GPT-4o-mini for dev, GPT-4o for prod\n- Set token budgets in guardrails.json\n- Enable autoscaling where supported\n`);
+  writeIfNotExists('.github/instructions/waf-performance-efficiency.instructions.md', `---\napplyTo: "**/*.{ts,js,py,bicep,json}"\n---\n# Performance\n- Enable response caching for repeated queries\n- Use streaming for real-time responses\n- Set appropriate top_k values in search config\n`);
+  writeIfNotExists('.github/instructions/waf-responsible-ai.instructions.md', `---\napplyTo: "**/*.{ts,js,py,bicep,json}"\n---\n# Responsible AI\n- Enable Azure Content Safety on all endpoints\n- Validate groundedness of AI responses\n- Monitor for bias and fairness\n`);
+
+  // froot.json — play manifest
+  const frootManifest = {
+    frootai: VERSION, play: playId,
+    kits: {
+      devkit: { files: ['.github/agents/', '.github/instructions/', '.github/copilot-instructions.md', '.vscode/mcp.json'] },
+      tunekit: { files: ['config/openai.json', 'config/search.json', 'config/guardrails.json', 'evaluation/'] },
+      speckit: { files: ['spec/play-spec.json'] },
+      infrakit: { files: ['infra/'] },
+      evalkit: { files: ['evaluation/'] },
+    },
+    waf: true,
+  };
+  writeIfNotExists('froot.json', JSON.stringify(frootManifest, null, 2));
+
+  // Print summary
+  console.log(`${c.green}  ✅ Play scaffolded: ${playId}${c.reset}\n`);
+  console.log(`  ${c.bold}Files created:${c.reset}`);
+  console.log(`${c.dim}  .vscode/mcp.json             ← MCP auto-connect`);
+  console.log(`  .github/agents/              ← Builder + Reviewer + Tuner`);
+  console.log(`  .github/instructions/        ← 5 WAF instruction files`);
+  console.log(`  config/                      ← OpenAI + Search + Guardrails`);
+  console.log(`  evaluation/                  ← Eval config + thresholds`);
+  console.log(`  spec/play-spec.json          ← SpecKit (WAF alignment)`);
+  console.log(`  froot.json                   ← Play manifest (5 kits)${c.reset}\n`);
+
+  // ─── Post-scaffold welcome ───
+  console.log(`${c.cyan}  ┌─────────────────────────────────────────────────────┐${c.reset}`);
+  console.log(`${c.cyan}  │  🌳 Welcome to FrootAI!                             │${c.reset}`);
+  console.log(`${c.cyan}  │                                                     │${c.reset}`);
+  console.log(`${c.cyan}  │  Your project is WAF-aligned from day one.          │${c.reset}`);
+  console.log(`${c.cyan}  │  Run ${c.green}npx frootai validate --waf${c.cyan} to check scores.   │${c.reset}`);
+  console.log(`${c.cyan}  │                                                     │${c.reset}`);
+  console.log(`${c.cyan}  │  Quick start:                                       │${c.reset}`);
+  console.log(`${c.cyan}  │    ${c.green}code .${c.cyan}          ← MCP auto-connects             │${c.reset}`);
+  console.log(`${c.cyan}  │    ${c.green}@builder${c.cyan}        ← Start building in Copilot     │${c.reset}`);
+  console.log(`${c.cyan}  │    ${c.green}@tuner${c.cyan}          ← Validate WAF + configs        │${c.reset}`);
+  console.log(`${c.cyan}  │                                                     │${c.reset}`);
+  console.log(`${c.cyan}  │  It's simply Frootful. 🌱                           │${c.reset}`);
+  console.log(`${c.cyan}  └─────────────────────────────────────────────────────┘${c.reset}\n`);
+}
+
+// ═══════════════════════════════════════════════════
 // HELP
 // ═══════════════════════════════════════════════════
 function cmdHelp() {
@@ -684,6 +861,7 @@ function cmdHelp() {
   console.log(`${c.bold}  Usage:${c.reset} frootai <command> [options]\n`);
   console.log(`${c.bold}  Commands:${c.reset}`);
   console.log(`    ${c.green}init${c.reset}              Interactive project scaffolding`);
+  console.log(`    ${c.green}scaffold${c.reset} <play>    One-command play scaffold (e.g. play-01)`);
   console.log(`    ${c.green}search${c.reset} <query>     Search FrootAI knowledge base`);
   console.log(`    ${c.green}cost${c.reset} [play]        Cost estimate (--scale dev|prod)`);
   console.log(`    ${c.green}validate${c.reset}           Check project structure + configs`);
@@ -693,6 +871,8 @@ function cmdHelp() {
   console.log(`    ${c.green}help${c.reset}               Show this help\n`);
   console.log(`${c.bold}  Examples:${c.reset}`);
   console.log(`    ${c.dim}npx frootai init${c.reset}`);
+  console.log(`    ${c.dim}npx frootai scaffold 01-enterprise-rag${c.reset}`);
+  console.log(`    ${c.dim}npx frootai scaffold play-01${c.reset}`);
   console.log(`    ${c.dim}npx frootai search "RAG architecture"${c.reset}`);
   console.log(`    ${c.dim}npx frootai cost enterprise-rag --scale prod${c.reset}`);
   console.log(`    ${c.dim}npx frootai validate --waf${c.reset}`);

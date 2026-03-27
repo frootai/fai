@@ -118,6 +118,8 @@ function PlayCard({ play }: { play: typeof plays[0] }): JSX.Element {
           <div style={{ display: "flex", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
             <span style={{ fontSize: "0.68rem", padding: "2px 8px", borderRadius: "8px", background: isReady ? "rgba(16,185,129,0.1)" : "rgba(245,158,11,0.1)", color: isReady ? "#10b981" : "#f59e0b", fontWeight: 600 }}>{play.status}</span>
             <span style={{ fontSize: "0.68rem", padding: "2px 8px", borderRadius: "8px", background: "rgba(99,102,241,0.1)", color: "#6366f1", fontWeight: 600 }}>{play.cx}</span>
+            <span style={{ fontSize: "0.68rem", padding: "2px 8px", borderRadius: "8px", background: "rgba(16,185,129,0.08)", color: "#10b981", fontWeight: 600 }}>✅ WAF-Aligned</span>
+            <span style={{ fontSize: "0.68rem", padding: "2px 8px", borderRadius: "8px", background: "rgba(245,158,11,0.08)", color: "#f59e0b", fontWeight: 600 }}>📐 SpecKit</span>
           </div>
           <p style={{ fontSize: "0.82rem", color: "var(--ifm-color-emphasis-500)", lineHeight: 1.5, margin: "0 0 8px" }}>{play.desc}</p>
           <div style={{ fontSize: "0.72rem", color: "var(--ifm-color-emphasis-400)", marginBottom: "4px" }}><strong>Infra:</strong> {play.infra}</div>
