@@ -566,16 +566,19 @@ export default function FeatureSpecPage(): JSX.Element {
             What's next for FrootAI. The roadmap is community-driven — upvote features on GitHub Issues or submit your own ideas.
           </p>
           <FeatureTable rows={[
-            { feature: "Full AI Chatbot", desc: "OpenAI-powered assistant replacing preview keyword matching with real LLM responses", status: "🔜 Coming Soon", link: "/chatbot", linkLabel: "Preview →" },
+            { feature: "Full AI Chatbot", desc: "OpenAI-powered assistant with 682KB grounded knowledge, 20 play search, cost estimates", status: "✅ Shipped", link: "/chatbot", linkLabel: "Try Agent FAI →" },
+            { feature: "Solution Play Scaffold", desc: "One-command project scaffolding: npx frootai scaffold <play> — creates 5 FROOT kits + froot.json", status: "✅ Shipped", link: "/cli", linkLabel: "CLI Docs →" },
+            { feature: "Cost Estimator", desc: "CLI cost command + REST API /api/cost — estimate Azure AI costs per play and scale", status: "✅ Shipped", link: "/api-docs", linkLabel: "API Docs →" },
+            { feature: "WAF Alignment Scorecard", desc: "npx frootai validate --waf — 6 pillar, 17 check WAF scorecard per project", status: "✅ Shipped", link: "/cli", linkLabel: "CLI Docs →" },
+            { feature: "Docker Multi-Arch", desc: "ghcr.io/gitpavleenbali/frootai-mcp — amd64 + arm64, same 22 tools, Kubernetes-ready", status: "✅ Shipped", link: "/docker", linkLabel: "Docker →" },
+            { feature: "REST API", desc: "5 HTTP endpoints: chat, search, cost, health, OpenAPI spec — 60 req/min rate limit", status: "✅ Shipped", link: "/api-docs", linkLabel: "API Docs →" },
             { feature: "One-Click Plugin Install", desc: "Install community plugins directly from Marketplace into your workspace", status: "🔜 Coming Soon", link: "/marketplace", linkLabel: "Marketplace →" },
             { feature: "Agent Evaluation Dashboard", desc: "Visual dashboard for eval scores, trends, and quality gate status", status: "🔜 Coming Soon", link: "/docs/architecture-overview", linkLabel: "Architecture →" },
             { feature: "Multi-Language MCP", desc: "Python and Go MCP server implementations alongside Node.js", status: "🔜 Coming Soon", link: "/mcp-tooling", linkLabel: "MCP →" },
             { feature: "Foundry Agent Hosting", desc: "One-click deploy solution plays as hosted Foundry agents", status: "🔜 Coming Soon", link: "/setup-guide", linkLabel: "Setup →" },
             { feature: "Prompt A/B Testing", desc: "Built-in A/B testing framework for prompt variants across environments", status: "🔜 Coming Soon", link: "/solution-plays", linkLabel: "Plays →" },
-            { feature: "Cost Dashboard", desc: "Real-time Azure cost tracking per solution play deployment", status: "🔜 Coming Soon", link: "/mcp-tooling", linkLabel: "MCP →" },
             { feature: "Enterprise SSO", desc: "Entra ID integration for team-based access control", status: "🔜 Coming Soon", link: "/enterprise", linkLabel: "Enterprise →" },
             { feature: "Telemetry & Analytics", desc: "App Insights integration for MCP usage analytics and play adoption metrics", status: "🔜 Coming Soon", link: "/docs/admin-guide", linkLabel: "Admin Guide →" },
-            { feature: "Solution Play Templates", desc: "GitHub template repos for instant project scaffolding", status: "🔜 Coming Soon", link: "/solution-plays", linkLabel: "Plays →" },
           ]} />
         </section>
 
@@ -587,7 +590,7 @@ export default function FeatureSpecPage(): JSX.Element {
           border: "1px solid var(--ifm-color-emphasis-200)", background: "var(--ifm-background-surface-color)",
         }}>
           <p style={{ fontSize: "0.78rem", color: "var(--ifm-color-emphasis-400)", marginBottom: "16px" }}>
-            Last updated: March 24, 2026 &nbsp;|&nbsp; Version 3.0.0 &nbsp;|&nbsp; FrootAI — Complete Feature Specification
+            Last updated: March 27, 2026 &nbsp;|&nbsp; Version 3.2.0 &nbsp;|&nbsp; FrootAI — Complete Feature Specification
           </p>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
             {[
