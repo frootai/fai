@@ -638,3 +638,25 @@ html, body {
   transform: translateY(-1px);
   text-decoration: none !important;
 }
+
+/* ═══ Mobile Responsive — Hero Section ═══ */
+@media (max-width: 768px) {
+  .hero {
+    padding: 0 16px 40px;
+  }
+  .heroLogo {
+    width: 260px;
+    height: 260px;
+    margin-bottom: -80px;
+  }
+  .heroTitle {
+    font-size: 2.4rem;
+  }
+  .heroLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+  }
+  .heroSubLabel {
+    font-size: 0.75rem;
+  }
+}
