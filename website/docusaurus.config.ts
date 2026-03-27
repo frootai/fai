@@ -63,19 +63,19 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: "img/aifroot-logo.svg",
+    image: "img/frootai-og.png",
 
     metadata: [
       { name: "description", content: "FrootAI — The open glue for AI architecture. 22 MCP tools, 20 solution plays, 18 knowledge modules. From the roots to the fruits." },
       { property: "og:title", content: "FrootAI — From the Roots to the Fruits" },
       { property: "og:description", content: "The open glue binding Infrastructure, Platform & Application teams with the GenAI ecosystem. 22 MCP tools, 20 solution plays, VS Code extension." },
-      { property: "og:image", content: "https://frootai.dev/img/aifroot-logo.svg" },
+      { property: "og:image", content: "https://frootai.dev/img/frootai-og.png" },
       { property: "og:url", content: "https://frootai.dev" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "FrootAI — From the Roots to the Fruits" },
       { name: "twitter:description", content: "22 MCP tools, 20 solution plays, 18 knowledge modules. The open glue for AI architecture." },
-      { name: "twitter:image", content: "https://frootai.dev/img/aifroot-logo.svg" },
+      { name: "twitter:image", content: "https://frootai.dev/img/frootai-og.png" },
     ],
 
     headTags: [
@@ -103,7 +103,7 @@ const config: Config = {
       title: "FrootAI",
       logo: {
         alt: "FrootAI",
-        src: "img/aifroot-logo.svg",
+        src: "img/frootai-logo.png",
         href: "/",
       },
       items: [

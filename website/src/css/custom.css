@@ -137,6 +137,12 @@ article p {
   box-shadow: none;
 }
 
+.navbar__logo img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
 .navbar__title {
   font-weight: 700;
   font-size: 1.05rem;

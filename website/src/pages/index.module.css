@@ -36,10 +36,11 @@
 }
 
 .heroLogo {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 4px 20px rgba(16, 185, 129, 0.3));
+  width: 380px;
+  height: 380px;
+  object-fit: contain;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 6px 28px rgba(16, 185, 129, 0.35));
   animation: logoFloat 4s ease-in-out infinite;
 }
 

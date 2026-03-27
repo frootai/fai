@@ -79,7 +79,7 @@ export default function FrootAIPage(): JSX.Element {
       {/* ═══ 1. HERO ═══ */}
       <div className={styles.hero}>
         <div className={styles.heroInner}>
-          <img src="/img/aifroot-logo.svg" alt="FrootAI" className={styles.heroLogo} />
+          <img src="/img/frootai-logo.png" alt="FrootAI" className={styles.heroLogo} />
 
           <h1 className={styles.heroTitle}>FrootAI</h1>
 
