@@ -126,6 +126,7 @@ const config: Config = {
             { to: "/vscode-extension", label: "🖥️ VS Code Extension" },
             { to: "/mcp-tooling", label: "🔌 MCP Server (22 tools)" },
             { to: "/cli", label: "⚡ CLI (npx frootai)" },
+            { to: "/docker", label: "🐳 Docker Image" },
             { to: "/setup-guide", label: "📋 Setup Guide" },
           ],
         },

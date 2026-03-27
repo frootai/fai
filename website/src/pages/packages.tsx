@@ -424,6 +424,33 @@ export default function PackagesPage(): JSX.Element {
           </div>
         )}
 
+        {/* ── FROOT Kits — Modular Building Blocks ── */}
+        <div style={{ marginTop: "48px", marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "1.4rem", fontWeight: 800, textAlign: "center", marginBottom: "4px" }}>🧰 FROOT Kits — Modular Building Blocks</h2>
+          <p style={{ fontSize: "0.82rem", color: "var(--ifm-color-emphasis-500)", textAlign: "center", marginBottom: "20px" }}>
+            Every solution play ships with these 5 kits. Mix and match for your architecture.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: "14px" }}>
+            {[
+              { icon: "🛠️", name: "DevKit", files: "19 files", desc: ".github Agentic OS — agent.md, instructions, prompts, skills, hooks, workflows, plugins", color: "#06b6d4", waf: true },
+              { icon: "🎛️", name: "TuneKit", files: "5 configs", desc: "AI fine-tuning — openai.json, search.json, chunking.json, guardrails.json, evaluation/", color: "#7c3aed", waf: true },
+              { icon: "📐", name: "SpecKit", files: "spec/", desc: "Architecture specs — play-spec.json, WAF alignment, evaluation thresholds", color: "#f59e0b", waf: true },
+              { icon: "🏗️", name: "InfraKit", files: "infra/", desc: "Bicep templates — main.bicep, modules/, parameters, private endpoints", color: "#10b981", waf: true },
+              { icon: "📊", name: "EvalKit", files: "evaluation/", desc: "Evaluation framework — eval.py, metrics, benchmarks, CI integration", color: "#ec4899", waf: true },
+            ].map((kit) => (
+              <div key={kit.name} style={{ padding: "18px", borderRadius: "14px", border: `2px solid ${kit.color}33`, background: `${kit.color}08`, textAlign: "center" }}>
+                <div style={{ fontSize: "1.6rem", marginBottom: "6px" }}>{kit.icon}</div>
+                <div style={{ fontWeight: 800, fontSize: "0.9rem", marginBottom: "2px" }}>{kit.name}</div>
+                <div style={{ fontSize: "0.68rem", fontWeight: 600, color: kit.color, marginBottom: "8px" }}>{kit.files}</div>
+                <p style={{ fontSize: "0.75rem", color: "var(--ifm-color-emphasis-500)", lineHeight: 1.5, margin: "0 0 8px" }}>{kit.desc}</p>
+                {kit.waf && (
+                  <span style={{ fontSize: "0.62rem", padding: "2px 8px", borderRadius: "6px", background: "rgba(16,185,129,0.12)", color: "#10b981", fontWeight: 700 }}>✅ WAF-Aligned</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Navigation */}
         <div style={{ textAlign: "center", marginTop: "32px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", padding: "6px 0" }}>
           <Link to="/ecosystem" style={{ padding: "8px 18px", borderRadius: "10px", border: "1px solid rgba(16,185,129,0.3)", fontSize: "0.78rem", fontWeight: 600, textDecoration: "none", color: "var(--ifm-font-color-base)", transition: "all 0.25s" }}>

@@ -29,8 +29,8 @@ export default function EcosystemPage(): JSX.Element {
               <ul style={{ fontSize: "0.82rem", lineHeight: 1.7, paddingLeft: "16px" }}>
                 <li>🛠️ <strong>DevKit</strong> — empowers your co-coder before coding</li>
                 <li>🎛️ <strong>TuneKit</strong> — fine-tunes AI before shipping</li>
+                <li>📐 <strong>SpecKit</strong> — architecture specs + WAF alignment</li>
                 <li>Infra blueprints + agent.md + config + evaluation</li>
-                <li>LEGO blocks that compose into full solutions</li>
               </ul>
               <div style={{ textAlign: "center", marginTop: "16px" }}>
                 <Link to="/solution-plays" className={styles.glowPill} style={{ "--pill-color": "#7c3aed", display: "inline-block" } as React.CSSProperties}>
@@ -99,6 +99,60 @@ export default function EcosystemPage(): JSX.Element {
               <div style={{ textAlign: "center", marginTop: "16px" }}>
                 <Link to="/vscode-extension" className={styles.glowPill} style={{ "--pill-color": "#6366f1", display: "inline-block" } as React.CSSProperties}>
                   Install VS Code Extension →
+                </Link>
+              </div>
+            </div>
+
+            {/* Docker Image */}
+            <div style={{ padding: "24px", borderRadius: "16px", border: "2px solid rgba(6, 182, 212, 0.25)", background: "rgba(6, 182, 212, 0.03)" }}>
+              <div style={{ fontSize: "2rem", marginBottom: "6px", textAlign: "center" }}>🐳</div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 800, textAlign: "center", marginBottom: "4px" }}>Docker Image</h3>
+              <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#06b6d4", textAlign: "center", marginBottom: "12px" }}>Run anywhere — zero install</p>
+              <ul style={{ fontSize: "0.82rem", lineHeight: 1.7, paddingLeft: "16px" }}>
+                <li>Multi-arch: amd64 + arm64 (Apple Silicon ready)</li>
+                <li>Same 22 MCP tools, 682KB knowledge</li>
+                <li>Kubernetes-ready sidecar deployment</li>
+                <li>Pinnable versions for reproducibility</li>
+              </ul>
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
+                <Link to="/docker" className={styles.glowPill} style={{ "--pill-color": "#06b6d4", display: "inline-block" } as React.CSSProperties}>
+                  Docker Setup →
+                </Link>
+              </div>
+            </div>
+
+            {/* CLI */}
+            <div style={{ padding: "24px", borderRadius: "16px", border: "2px solid rgba(245, 158, 11, 0.25)", background: "rgba(245, 158, 11, 0.03)" }}>
+              <div style={{ fontSize: "2rem", marginBottom: "6px", textAlign: "center" }}>⚡</div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 800, textAlign: "center", marginBottom: "4px" }}>CLI (npx frootai)</h3>
+              <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#f59e0b", textAlign: "center", marginBottom: "12px" }}>For your terminal</p>
+              <ul style={{ fontSize: "0.82rem", lineHeight: 1.7, paddingLeft: "16px" }}>
+                <li>6 commands: init, search, cost, validate, doctor, help</li>
+                <li><code>validate --waf</code> → WAF alignment scorecard (6 pillars)</li>
+                <li>Scaffolds full project with SpecKit + WAF instructions</li>
+                <li>Zero install — runs via npx</li>
+              </ul>
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
+                <Link to="/cli" className={styles.glowPill} style={{ "--pill-color": "#f59e0b", display: "inline-block" } as React.CSSProperties}>
+                  CLI Docs →
+                </Link>
+              </div>
+            </div>
+
+            {/* REST API */}
+            <div style={{ padding: "24px", borderRadius: "16px", border: "2px solid rgba(236, 72, 153, 0.25)", background: "rgba(236, 72, 153, 0.03)" }}>
+              <div style={{ fontSize: "2rem", marginBottom: "6px", textAlign: "center" }}>📡</div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 800, textAlign: "center", marginBottom: "4px" }}>REST API</h3>
+              <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#ec4899", textAlign: "center", marginBottom: "12px" }}>No SDK needed</p>
+              <ul style={{ fontSize: "0.82rem", lineHeight: 1.7, paddingLeft: "16px" }}>
+                <li>5 endpoints: chat, search, cost, health, openapi.json</li>
+                <li>Rate-limited: 60 requests/min per IP</li>
+                <li>OpenAPI 3.1 spec for auto-generation</li>
+                <li>CORS-enabled for web integrations</li>
+              </ul>
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
+                <Link to="/api-docs" className={styles.glowPill} style={{ "--pill-color": "#ec4899", display: "inline-block" } as React.CSSProperties}>
+                  REST API Docs →
                 </Link>
               </div>
             </div>

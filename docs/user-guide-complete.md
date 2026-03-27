@@ -99,7 +99,7 @@ The extension works **offline** with bundled knowledge. It caches downloaded con
 
 ### 3.1 What is the MCP Server?
 
-The FrootAI MCP Server exposes 16 tools that any MCP-compatible AI agent can call. It adds AI architecture knowledge to your agent's capabilities.
+The FrootAI MCP Server exposes 22 tools that any MCP-compatible AI agent can call. It adds AI architecture knowledge to your agent's capabilities.
 
 ### 3.2 Setup
 
@@ -271,6 +271,122 @@ Each play includes:
 - `evaluation/golden-set.jsonl` — Expected inputs/outputs (5+ examples)
 - `evaluation/evaluate.py` — Scoring script (accuracy, latency, safety)
 - Results output to `evaluation/results.json`
+
+---
+
+## 6b. SpecKit Deep Dive
+
+SpecKit provides architecture specifications and WAF (Well-Architected Framework) alignment for every solution play.
+
+### What's in SpecKit?
+
+| File | Purpose |
+|---|---|
+| `spec/play-spec.json` | Architecture pattern, WAF pillar scores, evaluation thresholds |
+
+### WAF Alignment (6 Pillars)
+
+Every play is scored across the Azure Well-Architected Framework:
+
+| Pillar | What it checks |
+|---|---|
+| **Reliability** | Retry policies, health probes, multi-region readiness |
+| **Security** | Managed identity, private endpoints, RBAC, no API keys |
+| **Cost Optimization** | Right-sized SKUs, autoscaling, reserved capacity |
+| **Operational Excellence** | Diagnostic settings, Log Analytics, CI/CD |
+| **Performance** | Caching, async patterns, connection pooling |
+| **Responsible AI** | Content Safety, guardrails, bias monitoring |
+
+### CLI WAF Scorecard
+
+```bash
+npx frootai validate --waf
+```
+
+Runs 17 checks across 6 pillars and shows per-pillar scores + failing items.
+
+---
+
+## 6c. Using the CLI
+
+The FrootAI CLI (`npx frootai`) provides 6 commands for terminal-based workflows.
+
+### Commands
+
+| Command | What it does |
+|---|---|
+| `npx frootai init` | Scaffold a new project with DevKit + SpecKit + WAF instructions |
+| `npx frootai search <query>` | Search across 18 knowledge modules |
+| `npx frootai cost <service>` | Estimate Azure AI service costs |
+| `npx frootai validate` | Run consistency checks across your project |
+| `npx frootai validate --waf` | WAF alignment scorecard (6 pillars, 17 checks) |
+| `npx frootai doctor` | Health check: Node.js, npm, VS Code, MCP config |
+| `npx frootai help` | Show all available commands |
+
+---
+
+## 6d. Using Docker
+
+Run the FrootAI MCP Server as a container — no Node.js required.
+
+### Quick Start
+
+```bash
+docker run -i --rm ghcr.io/gitpavleenbali/frootai-mcp:latest
+```
+
+### Client Configuration
+
+**Claude Desktop / Cursor:**
+```json
+{
+  "mcpServers": {
+    "frootai": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "ghcr.io/gitpavleenbali/frootai-mcp:latest"]
+    }
+  }
+}
+```
+
+**VS Code Copilot (.vscode/mcp.json):**
+```json
+{
+  "servers": {
+    "frootai": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "ghcr.io/gitpavleenbali/frootai-mcp:latest"],
+      "type": "stdio"
+    }
+  }
+}
+```
+
+Multi-arch (amd64 + arm64). Same 22 tools, 682KB knowledge. Pinnable versions.
+
+---
+
+## 6e. Using the REST API
+
+The FrootAI REST API provides 5 HTTP endpoints — no SDK or MCP client needed.
+
+### Base URL
+
+`https://frootai-chatbot-api.azurewebsites.net`
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/chat` | Chat with Agent FAI (AI assistant) |
+| GET | `/api/search?q=<query>` | Search solution plays |
+| GET | `/api/cost?service=<name>` | Estimate Azure AI costs |
+| GET | `/api/health` | Health check |
+| GET | `/api/openapi.json` | OpenAPI 3.1 specification |
+
+### Rate Limits
+
+60 requests/minute per IP. Sliding window. Returns HTTP 429 when exceeded.
 
 ---
 

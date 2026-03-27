@@ -127,6 +127,7 @@ function PlayCard({ play }: { play: typeof plays[0] }): JSX.Element {
           <Link to={play.github} className="glow-btn glow-btn-github">GitHub</Link>
           <Link to={`${play.github}#-devkit--developer-velocity-ecosystem`} className="glow-btn glow-btn-devkit">🛠️ DevKit</Link>
           <Link to={`${play.github}#-tunekit--ai-fine-tuning-ecosystem`} className="glow-btn glow-btn-tunekit">🎛️ TuneKit</Link>
+          <Link to={`${play.github}#-speckit--architecture-specs`} className="glow-btn glow-btn-tunekit" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>📐 SpecKit</Link>
           {play.userGuide && (
             <Link to={play.userGuide} className="glow-btn glow-btn-github" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>📖 User Guide</Link>
           )}
@@ -154,7 +155,7 @@ export default function SolutionPlaysPage(): JSX.Element {
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>🎯 Solution Plays</h1>
           <p style={{ fontSize: "0.92rem", color: "var(--ifm-color-emphasis-500)", maxWidth: "660px", margin: "0 auto 16px" }}>
-            Each play ships with the full <strong>.github Agentic OS</strong> (19 files, 4 layers), <strong>🛠️ DevKit</strong> (empower your coding agent), <strong>🎛️ TuneKit</strong> (fine-tune AI for production), and <strong>plugin.json</strong> (Layer 4 distribution manifest). LEGO blocks that compose into complete solutions.
+            Each play ships with the full <strong>.github Agentic OS</strong> (19 files, 4 layers), <strong>🛠️ DevKit</strong> (empower your coding agent), <strong>🎛️ TuneKit</strong> (fine-tune AI for production), <strong>📐 SpecKit</strong> (architecture specs + WAF alignment), and <strong>plugin.json</strong> (Layer 4 distribution manifest).
           </p>
         </div>
 
@@ -195,6 +196,18 @@ export default function SolutionPlaysPage(): JSX.Element {
               <div><strong style={{ color: "#7c3aed" }}>evaluation/</strong> — test + score + ship</div>
             </div>
             <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>Tune AI without being an AI specialist.</p>
+          </div>
+          {/* SpecKit */}
+          <div style={{ padding: "20px", borderRadius: "16px", border: "2px solid rgba(245, 158, 11, 0.25)", background: "rgba(245, 158, 11, 0.03)", textAlign: "center" }}>
+            <div style={{ fontSize: "1.8rem", marginBottom: "6px" }}>📐</div>
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "10px" }}>SpecKit — Architecture Specs</h3>
+            <div style={{ textAlign: "left", fontSize: "0.78rem", lineHeight: 1.7 }}>
+              <div><strong style={{ color: "#f59e0b" }}>play-spec.json</strong> — architecture pattern</div>
+              <div><strong style={{ color: "#f59e0b" }}>WAF alignment</strong> — 6 pillar scores</div>
+              <div><strong style={{ color: "#f59e0b" }}>eval thresholds</strong> — quality gates</div>
+              <div><strong style={{ color: "#f59e0b" }}>validate --waf</strong> — CLI scorecard</div>
+            </div>
+            <p style={{ fontSize: "0.68rem", color: "var(--ifm-color-emphasis-400)", marginTop: "10px", marginBottom: 0, fontStyle: "italic" }}>WAF-aligned from day one · ✅ Well-Architected</p>
           </div>
         </div>
 
