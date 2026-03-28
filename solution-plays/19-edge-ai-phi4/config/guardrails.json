@@ -1,1 +1,16 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": false, "_note": "No cloud API available in offline mode — use local content filter" },
+  "pii_detection": { "enabled": true, "types": ["ssn", "credit_card", "phone_number"], "action": "local_redact", "_note": "Regex-based local PII detection (no cloud API)" },
+  "prompt_injection": { "enabled": true, "action": "local_block", "_note": "Pattern-matching guard — no cloud validation" },
+  "edge_specific": {
+    "max_context_tokens": 4096,
+    "max_response_tokens": 512,
+    "inference_timeout_seconds": 10,
+    "memory_budget_mb": 2048,
+    "require_model_signature_verification": true,
+    "model_update_policy": { "auto_update": false, "require_admin_approval": true, "update_channel": "stable" },
+    "data_residency": { "all_data_stays_on_device": true, "no_telemetry_upload": true, "local_logs_only": true },
+    "fallback": { "on_model_failure": "return_error_message", "no_cloud_fallback": true },
+    "supported_platforms": ["windows-x64", "linux-x64", "linux-arm64", "android-arm64"]
+  }
+}

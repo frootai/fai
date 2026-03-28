@@ -1,1 +1,23 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 0, "sexual": 0, "violence": 0, "self_harm": 0 } },
+  "pii_detection": { "enabled": true, "types": ["api_key", "password", "secret"], "action": "block" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "prompt_management_specific": {
+    "max_prompt_length_tokens": 8000,
+    "require_system_prompt": true,
+    "require_output_format_spec": true,
+    "content_filter_all_prompts": true,
+    "version_control": {
+      "require_approval_for_production": true,
+      "min_eval_score_for_promotion": 4.0,
+      "max_rollback_versions": 5,
+      "auto_rollback_on_quality_drop": true
+    },
+    "ab_testing": {
+      "max_concurrent_experiments": 3,
+      "min_sample_size": 100,
+      "significance_threshold": 0.05
+    },
+    "audit_trail": { "log_all_changes": true, "require_change_reason": true }
+  }
+}

@@ -1,1 +1,24 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 } },
+  "pii_detection": { "enabled": true, "types": ["ip_address", "hostname", "email"], "action": "mask_in_alerts" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "anomaly_detection_specific": {
+    "detection_windows": {
+      "real_time": { "window_seconds": 60, "min_data_points": 10 },
+      "hourly": { "window_minutes": 60, "min_data_points": 30 },
+      "daily": { "window_hours": 24, "min_data_points": 100 }
+    },
+    "sensitivity": { "default_sigma": 3.0, "critical_metrics_sigma": 2.0 },
+    "false_positive_handling": {
+      "require_confirmation_for_critical": false,
+      "auto_suppress_after_n_false_positives": 3,
+      "maintenance_window_suppression": true
+    },
+    "alert_fatigue_prevention": {
+      "max_alerts_per_metric_per_hour": 5,
+      "dedup_window_minutes": 15,
+      "aggregate_related_anomalies": true
+    },
+    "data_retention": { "raw_data_days": 30, "aggregated_data_days": 365, "anomaly_records_days": 730 }
+  }
+}

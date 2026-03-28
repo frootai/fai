@@ -1,1 +1,19 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 2, "sexual": 0, "violence": 2, "self_harm": 0 } },
+  "pii_detection": { "enabled": true, "types": ["employee_id", "salary", "ssn", "email"], "action": "mask_in_logs" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "teams_extension_specific": {
+    "require_sso": true,
+    "auth_provider": "entra_id",
+    "max_message_length": 2000,
+    "adaptive_card_max_size_kb": 50,
+    "allowed_plugins": ["search", "approvals", "notifications"],
+    "file_upload": { "enabled": true, "max_size_mb": 10, "allowed_types": ["pdf", "docx", "xlsx", "png", "jpg"] },
+    "rate_limit": { "per_user_per_minute": 15, "per_team_per_minute": 100 },
+    "data_access": {
+      "sharepoint": { "respect_permissions": true },
+      "graph_api": { "scopes": ["User.Read", "Sites.Read.All"] }
+    },
+    "blocked_actions": ["send_email_on_behalf", "modify_calendar", "access_other_mailbox"]
+  }
+}

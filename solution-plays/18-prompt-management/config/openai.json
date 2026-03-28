@@ -1,1 +1,26 @@
-{"model":"gpt-4o","temperature":0.1,"_comments":"Adjust per solution"}
+{
+  "prompt_registry": {
+    "model": "gpt-4o-mini",
+    "temperature": 0.0,
+    "system_prompt": "You are a prompt registry manager. You version, validate, and optimize prompt templates.\n\nFor prompt validation, check:\n1. Token count is within model limits\n2. System prompt has clear role definition\n3. Output format is specified (JSON, text, markdown)\n4. Guardrails are embedded (abstention, citations)\n5. Variables are properly templated with {{variable}} syntax"
+  },
+  "ab_testing": {
+    "model": "gpt-4o",
+    "temperature": 0.0,
+    "system_prompt": "You are an A/B test evaluator for prompt variants. Compare two prompt outputs and score each on: accuracy (1-5), relevance (1-5), helpfulness (1-5), safety (pass/fail). Respond with JSON."
+  },
+  "optimization": {
+    "model": "gpt-4o",
+    "temperature": 0.3,
+    "system_prompt": "You are a prompt optimization expert. Given a prompt and its evaluation scores, suggest improvements. Focus on: reducing token count, improving grounding, adding output structure, enhancing safety."
+  },
+  "versioning": {
+    "storage": "cosmos_db",
+    "max_versions_per_prompt": 50,
+    "promotion_flow": ["draft", "staging", "production"],
+    "rollback_enabled": true
+  },
+  "_comments": {
+    "architecture": "Prompt templates stored in Cosmos DB, versioned, A/B tested, promoted through environments"
+  }
+}

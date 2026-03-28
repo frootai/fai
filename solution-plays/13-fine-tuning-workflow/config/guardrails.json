@@ -1,1 +1,22 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 0, "sexual": 0, "violence": 0, "self_harm": 0 } },
+  "pii_detection": { "enabled": true, "types": ["ssn", "credit_card", "medical_record", "email"], "action": "redact_from_training_data" },
+  "prompt_injection": { "enabled": true, "action": "remove_from_dataset" },
+  "fine_tuning_specific": {
+    "min_training_examples": 50,
+    "max_training_examples": 100000,
+    "require_validation_set": true,
+    "validation_min_percent": 10,
+    "data_quality_checks": {
+      "max_duplicate_percent": 5,
+      "min_response_length_chars": 10,
+      "max_response_length_chars": 4000,
+      "require_system_prompt": true
+    },
+    "content_filter_training_data": true,
+    "max_epochs": 10,
+    "cost_limit_usd": 500,
+    "model_eval_before_deploy": true,
+    "eval_min_score": 3.5
+  }
+}

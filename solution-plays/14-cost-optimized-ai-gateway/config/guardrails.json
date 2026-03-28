@@ -1,1 +1,19 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 } },
+  "pii_detection": { "enabled": true, "types": ["api_key", "subscription_key"], "action": "mask_in_logs" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "gateway_specific": {
+    "max_tokens_per_request": 4000,
+    "max_requests_per_consumer_per_day": 1000,
+    "circuit_breaker": { "enabled": true, "failure_threshold": 5, "reset_timeout_seconds": 60 },
+    "retry_policy": { "max_retries": 3, "retry_on": [429, 500, 503], "backoff": "exponential" },
+    "cost_controls": {
+      "daily_budget_usd": 200,
+      "action_on_budget_exceeded": "degrade_to_mini",
+      "alert_at_percent": [50, 80, 95]
+    },
+    "token_budgets_per_consumer": true,
+    "require_api_key": true,
+    "allowed_models": ["gpt-4o", "gpt-4o-mini", "text-embedding-3-small"]
+  }
+}

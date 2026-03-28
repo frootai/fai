@@ -1,1 +1,35 @@
-{"model":"gpt-4o","temperature":0.1,"_comments":"Adjust per solution"}
+{
+  "gateway": {
+    "primary_model": "gpt-4o-mini",
+    "fallback_model": "gpt-4o",
+    "routing_strategy": "cost_first",
+    "routing_rules": [
+      { "condition": "token_count < 500", "model": "gpt-4o-mini" },
+      { "condition": "token_count >= 500 AND complexity == 'high'", "model": "gpt-4o" },
+      { "condition": "retry_count > 0", "model": "gpt-4o", "note": "Escalate on failure" }
+    ]
+  },
+  "rate_limiting": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000,
+    "burst_allowance": 1.5,
+    "per_consumer_limits": true
+  },
+  "caching": {
+    "semantic_cache": true,
+    "cache_ttl_seconds": 3600,
+    "similarity_threshold": 0.95,
+    "cache_backend": "azure_redis"
+  },
+  "cost_tracking": {
+    "enabled": true,
+    "budget_alert_threshold_percent": 80,
+    "monthly_budget_usd": 5000,
+    "track_per_consumer": true,
+    "log_to": "app_insights"
+  },
+  "_comments": {
+    "architecture": "APIM front door -> routing logic -> Azure OpenAI backends",
+    "strategy": "Route cheap queries to mini, complex to full, cache repeated queries"
+  }
+}

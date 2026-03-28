@@ -1,1 +1,26 @@
-{"model":"gpt-4o","temperature":0.1,"_comments":"Adjust per solution"}
+{
+  "base_model": "gpt-4o-mini",
+  "fine_tuning": {
+    "training_file_format": "jsonl",
+    "validation_split": 0.2,
+    "n_epochs": 3,
+    "batch_size": "auto",
+    "learning_rate_multiplier": "auto",
+    "suffix": "frootai-custom"
+  },
+  "evaluation": {
+    "model": "gpt-4o",
+    "temperature": 0.0,
+    "system_prompt": "You are an evaluation judge. Compare the fine-tuned model's response against the ground truth. Score 1-5 on: accuracy, relevance, completeness. Respond with JSON: {\"accuracy\": N, \"relevance\": N, \"completeness\": N, \"reasoning\": \"...\"}."
+  },
+  "dataset_prep": {
+    "model": "gpt-4o-mini",
+    "temperature": 0.3,
+    "system_prompt": "You are a training data curator. Given a document, generate high-quality question-answer pairs for fine-tuning. Each pair must have: system prompt, user message, assistant response. Ensure diversity in question types."
+  },
+  "_comments": {
+    "architecture": "3-stage pipeline: dataset prep -> fine-tuning -> evaluation",
+    "base_model": "gpt-4o-mini is cost-effective for fine-tuning",
+    "eval_model": "gpt-4o judges quality of fine-tuned output"
+  }
+}

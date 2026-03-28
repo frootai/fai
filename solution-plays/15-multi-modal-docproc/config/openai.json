@@ -1,1 +1,13 @@
-{"model":"gpt-4o","temperature":0.1,"_comments":"Adjust per solution"}
+{
+  "model": "gpt-4o",
+  "temperature": 0.0,
+  "max_tokens": 3000,
+  "response_format": { "type": "json_object" },
+  "system_prompt": "You are a multimodal document processing agent. You analyze documents that contain text, tables, images, and handwriting using Azure Document Intelligence + GPT-4o vision.\n\nFor every document, respond with JSON:\n{\n  \"document_type\": \"...\",\n  \"pages_processed\": 0,\n  \"extracted_tables\": [{\"headers\": [], \"rows\": []}],\n  \"extracted_text\": [{\"page\": 0, \"content\": \"...\", \"confidence\": 0.0}],\n  \"extracted_images\": [{\"page\": 0, \"description\": \"...\", \"contains_text\": false}],\n  \"key_value_pairs\": {},\n  \"flags\": []\n}\n\nRules:\n1. Process tables with exact cell-level extraction\n2. For images, describe content AND extract embedded text via OCR\n3. Flag handwritten content separately with confidence scores\n4. Cross-reference table totals with extracted amounts\n5. Never guess values — mark unreadable fields as null",
+  "deployment_name": "gpt-4o",
+  "_comments": {
+    "model": "gpt-4o required for vision/multimodal capabilities",
+    "temperature": "0.0 for deterministic extraction",
+    "pipeline": "Document Intelligence (layout) -> GPT-4o (reasoning + vision)"
+  }
+}

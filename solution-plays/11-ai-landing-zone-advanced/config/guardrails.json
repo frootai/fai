@@ -1,1 +1,16 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 } },
+  "pii_detection": { "enabled": true, "types": ["subscription_id", "tenant_id", "client_secret", "connection_string"], "action": "block" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "landing_zone_specific": {
+    "enforce_private_endpoints": true,
+    "enforce_managed_identity": true,
+    "enforce_diagnostic_settings": true,
+    "enforce_nsg_rules": true,
+    "allowed_regions": ["swedencentral", "westeurope", "eastus2"],
+    "required_azure_policies": ["deny-public-ip", "require-https", "require-encryption-at-rest", "require-diagnostic-settings"],
+    "max_resource_group_count": 10,
+    "naming_convention": "rg-{workload}-{env}-{region}",
+    "cost_governance": { "require_cost_tags": true, "mandatory_tags": ["environment", "owner", "cost-center", "project"] }
+  }
+}

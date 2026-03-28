@@ -1,1 +1,26 @@
-{"model":"gpt-4o","temperature":0.1,"_comments":"Adjust per solution"}
+{
+  "model": "Phi-4-mini",
+  "runtime": "onnx",
+  "quantization": "INT4",
+  "max_tokens": 512,
+  "temperature": 0.2,
+  "device": "cpu",
+  "system_prompt": "You are a compact on-device AI assistant running Phi-4 via ONNX Runtime. You operate entirely offline with no cloud dependency.\n\nCapabilities: text generation, summarization, Q&A, classification, code completion.\n\nConstraints:\n1. Max context window: 4096 tokens\n2. Response must complete within 5 seconds on target hardware\n3. No external API calls — all inference is local\n4. Memory budget: 2GB RAM for model + runtime\n5. Optimized for Intel/ARM CPUs (no GPU required)",
+  "model_config": {
+    "onnx_model_path": "models/phi-4-mini-int4.onnx",
+    "tokenizer": "models/tokenizer.json",
+    "context_length": 4096,
+    "batch_size": 1,
+    "num_threads": 4
+  },
+  "deployment_targets": [
+    { "platform": "windows", "runtime": "onnxruntime-directml" },
+    { "platform": "linux", "runtime": "onnxruntime" },
+    { "platform": "android", "runtime": "onnxruntime-mobile" }
+  ],
+  "_comments": {
+    "model": "Phi-4-mini quantized to INT4 for edge deployment",
+    "no_azure_openai": "This play runs entirely on-device, no cloud needed",
+    "use_case": "Field workers, offline environments, data sovereignty, low latency"
+  }
+}

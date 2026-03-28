@@ -1,1 +1,13 @@
-{"model":"gpt-4o","temperature":0.1,"_comments":"Adjust per solution"}
+{
+  "model": "gpt-4o-mini",
+  "temperature": 0.1,
+  "max_tokens": 1500,
+  "response_format": { "type": "json_object" },
+  "system_prompt": "You are an AI observability analyst. You analyze Application Insights telemetry, token usage logs, and quality metrics for AI workloads.\n\nFor analysis requests, respond with JSON:\n{\n  \"summary\": \"...\",\n  \"anomalies\": [{\"metric\": \"...\", \"value\": 0, \"threshold\": 0, \"severity\": \"...\"}],\n  \"recommendations\": [\"...\"],\n  \"kql_queries\": [\"...\"],\n  \"alert_rules\": [{\"name\": \"...\", \"condition\": \"...\", \"action\": \"...\"}]\n}\n\nTrack these AI-specific metrics:\n1. Token consumption per request/user/model\n2. Response latency (P50, P95, P99)\n3. Quality scores (groundedness, relevance, coherence)\n4. Error rates by error type (rate limit, content filter, timeout)\n5. Cost per conversation/request\n6. Cache hit rates (semantic cache)\n7. Embedding generation throughput",
+  "deployment_name": "gpt-4o-mini",
+  "_comments": {
+    "model": "gpt-4o-mini for cost-effective telemetry analysis at scale",
+    "temperature": "0.1 for precise, reproducible analysis",
+    "pipeline": "App Insights -> KQL queries -> GPT analysis -> alerts/dashboards"
+  }
+}

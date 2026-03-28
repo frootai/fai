@@ -1,1 +1,18 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 } },
+  "pii_detection": { "enabled": true, "types": ["connection_string", "api_key", "bearer_token"], "action": "redact" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "observability_specific": {
+    "log_retention_days": 90,
+    "metric_collection_interval_seconds": 60,
+    "alert_rules": [
+      { "name": "high_error_rate", "condition": "error_rate > 5%", "severity": "critical", "action": "page_oncall" },
+      { "name": "high_latency", "condition": "p95_latency > 5000ms", "severity": "warning", "action": "email_team" },
+      { "name": "budget_exceeded", "condition": "daily_cost > budget * 0.9", "severity": "warning", "action": "email_team" },
+      { "name": "quality_degradation", "condition": "groundedness_score < 3.5", "severity": "critical", "action": "page_oncall" }
+    ],
+    "custom_metrics": ["tokens_per_request", "cost_per_request", "cache_hit_rate", "groundedness", "relevance"],
+    "dashboard_refresh_seconds": 300,
+    "data_classification": { "log_request_body": false, "log_response_body": false, "log_metadata_only": true }
+  }
+}

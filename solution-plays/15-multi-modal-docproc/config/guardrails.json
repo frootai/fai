@@ -1,1 +1,16 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 } },
+  "pii_detection": { "enabled": true, "types": ["ssn", "credit_card", "bank_account", "tax_id", "passport", "drivers_license"], "action": "flag_and_redact" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "multimodal_specific": {
+    "max_pages": 100,
+    "max_file_size_mb": 200,
+    "supported_formats": ["pdf", "docx", "xlsx", "pptx", "png", "jpg", "jpeg", "tiff", "bmp", "heic"],
+    "image_analysis": { "max_resolution": "4096x4096", "require_ocr_for_images": true },
+    "table_extraction": { "verify_row_column_count": true, "flag_merged_cells": true },
+    "confidence_thresholds": { "auto_approve": 0.95, "human_review": 0.75, "reject": 0.5 },
+    "handwriting_detection": { "enabled": true, "min_confidence": 0.7 },
+    "audit_trail": true,
+    "retain_originals": true
+  }
+}

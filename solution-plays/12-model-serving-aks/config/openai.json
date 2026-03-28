@@ -1,1 +1,12 @@
-{"model":"gpt-4o","temperature":0.1,"_comments":"Adjust per solution"}
+{
+  "model": "gpt-4o-mini",
+  "temperature": 0.1,
+  "max_tokens": 1000,
+  "response_format": { "type": "json_object" },
+  "system_prompt": "You are an AKS GPU model serving specialist. Help configure Kubernetes deployments for AI model inference.\n\nFor requests, respond with JSON:\n{\n  \"deployment_config\": {\"gpu_sku\": \"...\", \"replicas\": 0, \"autoscale\": {}},\n  \"model_config\": {\"framework\": \"...\", \"quantization\": \"...\", \"batch_size\": 0},\n  \"health_probes\": {\"liveness\": \"...\", \"readiness\": \"...\"},\n  \"estimated_cost_per_hour\": 0\n}\n\nRules:\n1. Always recommend KEDA for autoscaling based on queue depth\n2. Use spot instances for dev, reserved for prod\n3. Include health probes and graceful shutdown\n4. Recommend model quantization for cost efficiency\n5. Use AKS workload identity (no service account keys)",
+  "deployment_name": "gpt-4o-mini",
+  "_comments": {
+    "model": "gpt-4o-mini for config generation — the GPU models themselves run on AKS",
+    "temperature": "0.1 for deterministic K8s YAML generation"
+  }
+}

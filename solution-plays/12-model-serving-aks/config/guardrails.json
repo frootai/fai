@@ -1,1 +1,16 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true}}
+{
+  "content_safety": { "enabled": true, "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 } },
+  "pii_detection": { "enabled": true, "types": ["api_key", "kubeconfig", "registry_password"], "action": "block" },
+  "prompt_injection": { "enabled": true, "action": "block_and_log" },
+  "aks_specific": {
+    "require_workload_identity": true,
+    "require_network_policy": true,
+    "max_gpu_nodes": 8,
+    "allowed_gpu_skus": ["Standard_NC24ads_A100_v4", "Standard_NC6s_v3", "Standard_NC4as_T4_v3"],
+    "require_health_probes": true,
+    "require_resource_limits": true,
+    "max_model_size_gb": 50,
+    "model_registry": { "require_signed_images": true, "allowed_registries": ["*.azurecr.io"] },
+    "autoscaling": { "min_replicas": 1, "max_replicas": 10, "scale_on": "queue_depth", "cooldown_seconds": 300 }
+  }
+}
