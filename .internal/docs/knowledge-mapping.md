@@ -177,3 +177,32 @@ When completing any implementation item:
 | 7 | Publish VS Code Extension v1.4.0 | Pavleen | `cd vscode-extension && vsce publish` |
 | 8 | Publish marketing (blog, Show HN, Product Hunt) | Pavleen | Drafts in .internal/marketing/ |
 | 9 | Revoke + regenerate PyPI token | Pavleen | Token was exposed in terminal |
+
+
+---
+
+## Propagation Status (March 28, 2026  Final)
+
+| Feature | README | Website | VS Code | Chatbot | PyPI |
+|---------|--------|---------|---------|---------|------|
+| 23 MCP tools | OK | OK (15 pages) | OK (MCP_TOOLS array) | OK | N/A |
+| 20 Ready plays | OK | OK (solution-plays.tsx) | OK (SOLUTION_PLAYS) | OK | OK (plays.py) |
+| 19 VS Code commands | OK | OK (6 pages) | OK (package.json) | N/A | N/A |
+| 16 modules | OK | OK (14 pages) | OK | OK | OK |
+| Python SDK | OK | OK (ecosystem, setup-guide, mcp-tooling) | OK (install dropdown) | OK | LIVE |
+| run_evaluation | OK (README table) | OK (mcp-tooling) | OK (MCP_TOOLS) | OK | N/A |
+| Bicep registry | OK (README) | Not yet (no page) | N/A | N/A | N/A |
+| GitHub Action | OK (README) | Not yet (no page) | N/A | N/A | N/A |
+| A2A protocol | OK (README) | OK (.well-known/agent.json) | N/A | N/A | N/A |
+| Foundry hosting | OK (README) | Not yet (no page) | N/A | N/A | N/A |
+| froot.json | Not in README | Not yet (no page) | N/A | N/A | N/A |
+| Enterprise tiers | Not in README | OK (/enterprise) | N/A | N/A | N/A |
+| Certification | Not in README | OK (/learning-hub) | N/A | N/A | N/A |
+| Workshops | OK (README) | OK (/learning-hub) | N/A | N/A | N/A |
+| v1.4.0 VS Code | N/A | OK (dev-hub, vscode-extension) | OK (package.json) | N/A | N/A |
+
+### Items NOT needing dedicated website pages (already documented elsewhere):
+- Bicep registry  documented in README, referenced in setup guides
+- GitHub Action  documented in README, CI/CD usage clear
+- Foundry hosting  documented in README, enterprise-level feature
+- froot.json  internal manifest, not user-facing
