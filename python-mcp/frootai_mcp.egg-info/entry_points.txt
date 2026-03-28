@@ -1,0 +1,2 @@
+[console_scripts]
+frootai-mcp-py = frootai_mcp.server:main

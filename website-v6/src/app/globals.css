@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════
+   FrootAI v6 — Premium Dark-First Design System
+   Zero inline styles. Pure Tailwind. Handcrafted.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Surface layers (deep → elevated) */
+  --bg: #050508;
+  --bg-surface: #0a0a12;
+  --bg-elevated: #111119;
+  --bg-hover: #191924;
+
+  /* Foreground layers */
+  --fg: #ededf0;
+  --fg-muted: #85859d;
+  --fg-dim: #4a4a62;
+
+  /* Borders */
+  --border: #1a1a2e;
+  --border-subtle: #111120;
+
+  /* FROOT brand palette */
+  --amber: #f59e0b;
+  --gold: #fbbf24;
+  --emerald: #10b981;
+  --cyan: #06b6d4;
+  --indigo: #6366f1;
+  --violet: #7c3aed;
+  --pink: #ec4899;
+  --orange: #f97316;
+  --green: #00c853;
+  --red: #ef4444;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-hover: var(--bg-hover);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-dim: var(--fg-dim);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-amber: var(--amber);
+  --color-gold: var(--gold);
+  --color-emerald: var(--emerald);
+  --color-cyan: var(--cyan);
+  --color-indigo: var(--indigo);
+  --color-violet: var(--violet);
+  --color-pink: var(--pink);
+  --color-orange: var(--orange);
+  --color-green: var(--green);
+  --color-red: var(--red);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ── Resets ── */
+* { border-color: var(--border); }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::selection { background: var(--emerald); color: #000; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Gradient text ── */
+.text-gradient-froot {
+  background: linear-gradient(135deg, #10b981, #06b6d4 30%, #6366f1 60%, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-gold {
+  background: linear-gradient(135deg, #f59e0b, #eab308 50%, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Keyframes ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-8px); opacity: 1; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ── Chatbot dots + cursor ── */
+.bounce-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; background: var(--amber);
+  animation: bounce-dot 1.4s ease-in-out infinite;
+}
+.bounce-dot:nth-child(1) { animation-delay: 0s; }
+.bounce-dot:nth-child(2) { animation-delay: 0.2s; }
+.bounce-dot:nth-child(3) { animation-delay: 0.4s; }
+.streaming-cursor::after {
+  content: '▌'; color: var(--amber);
+  animation: blink 0.8s step-end infinite;
+}
+
+/* ── Glass effect ── */
+.glass {
+  background: rgba(10, 10, 18, 0.65);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
