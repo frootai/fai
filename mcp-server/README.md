@@ -93,7 +93,7 @@ docker run -i ghcr.io/gitpavleenbali/frootai-mcp
 
 | Tool | What it does |
 |------|-------------|
-| `list_modules` | Browse 18 FROOT modules by layer |
+| `list_modules` | Browse 16 FROOT modules by layer |
 | `get_module` | Read any module (F1-F4, R1-R3, O1-O6, T1-T3) |
 | `lookup_term` | 200+ AI/ML term definitions |
 | `search_knowledge` | Full-text search across all modules |
@@ -224,7 +224,7 @@ Agent FAI is also available as a REST API:
 
 | Content | Size |
 |---------|------|
-| 18 FROOT modules (F·R·O·O·T) | 682KB |
+| 16 FROOT modules (F·R·O·O·T) | 682KB |
 | 200+ glossary terms | A-Z |
 | 20 solution plays | .github Agentic OS |
 | 7 architecture decision guides | RAG, agents, hosting, cost |

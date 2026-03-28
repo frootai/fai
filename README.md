@@ -68,6 +68,18 @@ npx frootai doctor                        # Health check
 
 **npm**: [npmjs.com/package/frootai-mcp](https://www.npmjs.com/package/frootai-mcp) · **Docker**: [ghcr.io/gitpavleenbali/frootai-mcp](https://github.com/gitpavleenbali/frootai/pkgs/container/frootai-mcp)
 
+### Python SDK + MCP Server
+
+```bash
+# Python SDK — offline knowledge access, 20 plays, cost estimation
+pip install frootai
+
+# Python MCP Server — same 22 tools, pure Python
+pip install frootai-mcp
+```
+
+**PyPI**: [pypi.org/project/frootai](https://pypi.org/project/frootai/) · [pypi.org/project/frootai-mcp](https://pypi.org/project/frootai-mcp/)
+
 Then add to your MCP config:
 
 ```json

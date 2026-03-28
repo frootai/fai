@@ -26,7 +26,7 @@ export default function SetupGuidePage(): JSX.Element {
 
         <h1 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "8px" }}>📖 FrootAI Setup Guide</h1>
         <p style={{ fontSize: "0.95rem", color: "var(--ifm-color-emphasis-500)", marginBottom: "32px" }}>
-          Two tools, one setup page. Get FrootAI's <strong>MCP Server</strong> (for your AI agent) and <strong>VS Code Extension</strong> (for you) up and running in minutes. Plus <strong>CLI</strong> and <strong>Docker</strong> options.
+          Two tools, one setup page. Get FrootAI's <strong>MCP Server</strong> (for your AI agent) and <strong>VS Code Extension</strong> (for you) up and running in minutes. Plus <strong>CLI</strong>, <strong>Docker</strong>, and <strong>Python</strong> options.
         </p>
 
         {/* ══ SECTION SELECTOR ══ */}
@@ -42,6 +42,9 @@ export default function SetupGuidePage(): JSX.Element {
           </button>
           <button onClick={() => { document.getElementById('docker-section')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ padding: "10px 24px", borderRadius: "10px", border: "2px solid rgba(6,182,212,0.3)", background: "rgba(6,182,212,0.04)", color: "var(--ifm-font-color-base)", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
             🐳 Docker Setup
+          </button>
+          <button onClick={() => { document.getElementById('python-section')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ padding: "10px 24px", borderRadius: "10px", border: "2px solid rgba(59,130,246,0.3)", background: "rgba(59,130,246,0.04)", color: "var(--ifm-font-color-base)", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
+            🐍 Python Setup
           </button>
         </div>
 
@@ -470,6 +473,48 @@ docker run -i --rm ghcr.io/gitpavleenbali/frootai-mcp:3.1.2`}</pre>
           </div>
           <p style={{ fontSize: "0.82rem", textAlign: "center" }}>
             <Link to="/docker" style={{ color: "#06b6d4", fontWeight: 600 }}>Full Docker Documentation →</Link>
+          </p>
+        </div>
+
+        {/* PART 5: PYTHON                                       */}
+        {/* ═══════════════════════════════════════════ */}
+        <div id="python-section" style={{ padding: "24px", borderRadius: "16px", border: "2px solid rgba(59,130,246,0.2)", background: "rgba(59,130,246,0.02)", marginBottom: "48px" }}>
+          <h2 style={{ ...h2Style, marginTop: 0, color: "#3b82f6" }}>🐍 Part 5: Python SDK + MCP Server</h2>
+          <p style={{ fontSize: "0.85rem", color: "var(--ifm-color-emphasis-500)", marginBottom: "20px" }}>
+            Offline-first Python access to FrootAI's 16 knowledge modules, 20 solution plays, cost estimation, evaluation, and A/B testing. Zero external dependencies.
+          </p>
+          <div style={cardStyle}>
+            <h3 style={{ ...h3Style, marginTop: 0 }}>Install</h3>
+            <pre style={codeStyle}>{`# Python SDK — offline knowledge access
+pip install frootai
+
+# Python MCP Server — runs as stdio MCP server
+pip install frootai-mcp`}</pre>
+          </div>
+          <div style={cardStyle}>
+            <h3 style={{ ...h3Style, marginTop: 0 }}>Python CLI</h3>
+            <pre style={codeStyle}>{`frootai plays                   # List all 20 solution plays
+frootai search "RAG architecture"  # Search knowledge base
+frootai modules                 # List all 16 modules
+frootai glossary embeddings     # Look up a term
+frootai cost 01-enterprise-rag --scale prod  # Azure cost estimate`}</pre>
+          </div>
+          <div style={cardStyle}>
+            <h3 style={{ ...h3Style, marginTop: 0 }}>Python API</h3>
+            <pre style={codeStyle}>{`from frootai import FrootAI, SolutionPlay, Evaluator
+
+client = FrootAI()
+results = client.search("RAG architecture")
+cost = client.estimate_cost("01-enterprise-rag", scale="prod")
+plays = SolutionPlay.ready()  # 20 production-ready plays
+
+evaluator = Evaluator()
+evaluator.check_thresholds({"groundedness": 4.5, "relevance": 3.8})`}</pre>
+          </div>
+          <p style={{ fontSize: "0.82rem", textAlign: "center" }}>
+            <a href="https://pypi.org/project/frootai/" target="_blank" style={{ color: "#3b82f6", fontWeight: 600 }}>PyPI: frootai</a>
+            {" · "}
+            <a href="https://pypi.org/project/frootai-mcp/" target="_blank" style={{ color: "#3b82f6", fontWeight: 600 }}>PyPI: frootai-mcp</a>
           </p>
         </div>
 

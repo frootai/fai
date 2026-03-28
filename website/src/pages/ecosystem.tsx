@@ -156,6 +156,24 @@ export default function EcosystemPage(): JSX.Element {
                 </Link>
               </div>
             </div>
+
+            {/* Python SDK + MCP */}
+            <div style={{ padding: "24px", borderRadius: "16px", border: "2px solid rgba(59, 130, 246, 0.25)", background: "rgba(59, 130, 246, 0.03)" }}>
+              <div style={{ fontSize: "2rem", marginBottom: "6px", textAlign: "center" }}>🐍</div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 800, textAlign: "center", marginBottom: "4px" }}>Python SDK + MCP</h3>
+              <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#3b82f6", textAlign: "center", marginBottom: "12px" }}>pip install frootai</p>
+              <ul style={{ fontSize: "0.82rem", lineHeight: 1.7, paddingLeft: "16px" }}>
+                <li>Offline-first — 682KB knowledge, zero dependencies</li>
+                <li>Search 16 modules, 20 plays, 159+ glossary terms</li>
+                <li>Cost estimation, evaluation, A/B testing framework</li>
+                <li>Python MCP server: <code>pip install frootai-mcp</code></li>
+              </ul>
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
+                <a href="https://pypi.org/project/frootai/" className={styles.glowPill} style={{ "--pill-color": "#3b82f6", display: "inline-block" } as React.CSSProperties}>
+                  PyPI →
+                </a>
+              </div>
+            </div>
           </div>
         </section>
 

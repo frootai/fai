@@ -113,7 +113,7 @@ Install: \`npm install -g frootai-mcp\` or use directly: \`npx frootai <command>
 | Command | Description |
 |---------|-------------|
 | \`npx frootai init\` | Interactive scaffolding — creates .vscode/mcp.json, .github/agents, config/, spec/, WAF instructions |
-| \`npx frootai search "query"\` | Search 18 knowledge modules + 200 glossary terms |
+| \`npx frootai search "query"\` | Search 16 knowledge modules + 159 glossary terms |
 | \`npx frootai cost <play> [--scale dev\\|prod]\` | Estimate monthly Azure cost for any play |
 | \`npx frootai validate [--waf]\` | Check project structure + optional WAF scorecard |
 | \`npx frootai doctor\` | Health check — Node.js, npm, VS Code, MCP, Docker versions |
@@ -131,7 +131,7 @@ Website: [/cli](/cli) | npm: [frootai-mcp](https://www.npmjs.com/package/frootai
 | GET | /api/openapi.json | OpenAPI 3.1 specification |
 Rate limit: 60 req/min. Website: [/api-docs](/api-docs) | [OpenAPI Spec](https://frootai-chatbot-api.azurewebsites.net/api/openapi.json)
 
-## 18 KNOWLEDGE MODULES (FROOT Framework)
+## 16 KNOWLEDGE MODULES (FROOT Framework)
 **F** — Foundations: GenAI Foundations, LLM Landscape, AI Glossary A-Z (200+ terms), .github Agentic OS
 **R** — Reasoning: Prompt Engineering, RAG Architecture, Deterministic AI
 **O** — Orchestration: Semantic Kernel, AI Agents, MCP & Tools
@@ -152,6 +152,12 @@ Access: [/docs/](/docs/) or FAI Learning Hub navbar
 7. **Build with Copilot**: Open Copilot Chat → it reads agent.md + .github context automatically
 8. **Deploy**: \`azd up\` with provided Bicep templates
 Or use CLI: \`npx frootai init\` → scaffolds everything in one command
+
+## PYTHON SDK + MCP (pip install)
+- **pip install frootai** — Offline Python SDK: search 16 modules, 20 plays, cost estimation, A/B testing. Zero dependencies.
+- **pip install frootai-mcp** — Python MCP server: same 22 tools over stdio.
+- **pip install frootai && frootai search embeddings** — CLI works too.
+PyPI: [pypi.org/project/frootai](https://pypi.org/project/frootai/) | [pypi.org/project/frootai-mcp](https://pypi.org/project/frootai-mcp/)
 
 ## COST ESTIMATES (monthly)
 | Scenario | Dev/Test | Production |
