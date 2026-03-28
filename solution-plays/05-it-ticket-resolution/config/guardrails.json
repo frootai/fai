@@ -1,1 +1,29 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true},"prompt_injection":{"enabled":true}}
+{
+  "content_safety": {
+    "enabled": true,
+    "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 }
+  },
+  "pii_detection": {
+    "enabled": true,
+    "types": ["password", "api_key", "connection_string", "ssn", "credit_card"],
+    "action": "redact",
+    "mask_in_ticket_summary": true
+  },
+  "prompt_injection": {
+    "enabled": true,
+    "action": "block_and_log"
+  },
+  "ticket_specific": {
+    "auto_resolve_confidence_threshold": 0.85,
+    "auto_resolve_max_per_day": 200,
+    "auto_resolve_excluded_priorities": ["P1-Critical", "P2-High"],
+    "require_human_review_for_security_tickets": true,
+    "max_resolution_steps": 5,
+    "credential_patterns_block": ["password", "pwd", "secret", "token", "apikey", "connectionstring"]
+  },
+  "abstention": {
+    "enabled": true,
+    "topics": ["salary_data", "hr_issues", "employee_performance"],
+    "response": "This ticket requires human review. Routing to your manager."
+  }
+}

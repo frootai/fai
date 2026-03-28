@@ -1,1 +1,37 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true},"prompt_injection":{"enabled":true}}
+{
+  "content_safety": {
+    "enabled": true,
+    "severity_thresholds": { "hate": 2, "sexual": 0, "violence": 2, "self_harm": 0 },
+    "custom_blocklists": ["competitor-names", "profanity-extended"]
+  },
+  "pii_detection": {
+    "enabled": true,
+    "types": ["phone_number", "ssn", "credit_card", "email", "address"],
+    "action": "mask_in_logs",
+    "mask_in_response": true
+  },
+  "prompt_injection": {
+    "enabled": true,
+    "action": "block_and_log"
+  },
+  "voice_specific": {
+    "max_response_words": 50,
+    "max_response_duration_seconds": 30,
+    "require_consent_recording": true,
+    "escalation_triggers": [
+      "speak to a manager",
+      "legal action",
+      "lawyer",
+      "suicide",
+      "self-harm",
+      "billing dispute over $500"
+    ],
+    "escalation_action": "transfer_to_human",
+    "profanity_response": "I understand you're frustrated. Let me transfer you to a specialist who can help."
+  },
+  "abstention": {
+    "enabled": true,
+    "topics": ["medical_advice", "legal_advice", "financial_advice"],
+    "response": "I'm not qualified to advise on that. Let me connect you with a specialist."
+  }
+}

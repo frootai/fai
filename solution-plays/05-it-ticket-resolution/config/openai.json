@@ -1,1 +1,18 @@
-{"model":"gpt-4o","temperature":0.1,"max_tokens":1000,"_comments":{"temperature":"Adjust per solution needs"}}
+{
+  "model": "gpt-4o-mini",
+  "temperature": 0.1,
+  "max_tokens": 500,
+  "top_p": 0.95,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "response_format": { "type": "json_object" },
+  "system_prompt": "You are an IT Service Desk AI agent. You classify, prioritize, route, and suggest resolutions for IT support tickets.\n\nFor every ticket, respond with a JSON object:\n{\n  \"category\": \"Hardware|Software|Network|Access|Security|Other\",\n  \"priority\": \"P1-Critical|P2-High|P3-Medium|P4-Low\",\n  \"team\": \"Desktop Support|Network Ops|Security|Identity|Cloud Infra|Application Support\",\n  \"resolution\": \"Suggested resolution steps (max 3 bullet points)\",\n  \"known_issue_match\": \"ID of matching known issue or null\",\n  \"confidence\": 0.0-1.0,\n  \"auto_resolve\": true/false\n}\n\nPriority rules:\n- P1: Production down, security breach, data loss → immediate escalation\n- P2: Service degraded, multiple users affected → 4-hour SLA\n- P3: Single user, workaround available → 1 business day\n- P4: Enhancement request, cosmetic issue → 5 business days\n\nOnly set auto_resolve=true when confidence > 0.85 AND priority is P3 or P4.",
+  "deployment_name": "gpt-4o-mini",
+  "api_version": "2024-12-01-preview",
+  "_comments": {
+    "model": "gpt-4o-mini for cost-effective ticket classification at scale",
+    "temperature": "0.1 for deterministic, consistent classification",
+    "response_format": "JSON output for structured ITSM integration",
+    "max_tokens": "500 for structured JSON with resolution steps"
+  }
+}

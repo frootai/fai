@@ -1,1 +1,35 @@
-{"content_safety":{"enabled":true},"pii_detection":{"enabled":true},"prompt_injection":{"enabled":true}}
+{
+  "content_safety": {
+    "enabled": true,
+    "severity_thresholds": { "hate": 2, "sexual": 2, "violence": 2, "self_harm": 2 }
+  },
+  "pii_detection": {
+    "enabled": true,
+    "types": ["ssn", "credit_card", "bank_account", "tax_id", "passport_number"],
+    "action": "flag_and_mask",
+    "retain_in_secure_store": true
+  },
+  "prompt_injection": {
+    "enabled": true,
+    "action": "block_and_log"
+  },
+  "document_specific": {
+    "max_pages": 50,
+    "max_file_size_mb": 100,
+    "supported_formats": ["pdf", "docx", "xlsx", "png", "jpg", "jpeg", "tiff", "bmp"],
+    "confidence_threshold_auto_approve": 0.9,
+    "confidence_threshold_human_review": 0.7,
+    "financial_validation": {
+      "verify_totals_match_line_items": true,
+      "flag_amounts_over": 100000
+    },
+    "pii_redaction_in_output": true,
+    "retain_original_document": true,
+    "audit_trail": true
+  },
+  "abstention": {
+    "enabled": true,
+    "topics": ["handwritten_text_below_50_confidence", "corrupted_pages"],
+    "response": "This document requires manual review due to low extraction confidence."
+  }
+}
