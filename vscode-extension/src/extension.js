@@ -54,26 +54,26 @@ function loadBundledKnowledge() {
 // ─── Data ──────────────────────────────────────────────────────────
 
 const SOLUTION_PLAYS = [
-  { id: "01", name: "Enterprise RAG Q&A", icon: "🔍", status: "Ready", dir: "01-enterprise-rag" },
-  { id: "02", name: "AI Landing Zone", icon: "⛰️", status: "Ready", dir: "02-ai-landing-zone" },
-  { id: "03", name: "Deterministic Agent", icon: "🎯", status: "Ready", dir: "03-deterministic-agent" },
-  { id: "04", name: "Call Center Voice AI", icon: "📞", status: "Ready", dir: "04-call-center-voice-ai" },
-  { id: "05", name: "IT Ticket Resolution", icon: "🎫", status: "Ready", dir: "05-it-ticket-resolution" },
-  { id: "06", name: "Document Intelligence", icon: "📄", status: "Ready", dir: "06-document-intelligence" },
-  { id: "07", name: "Multi-Agent Service", icon: "🤖", status: "Ready", dir: "07-multi-agent-service" },
-  { id: "08", name: "Copilot Studio Bot", icon: "💬", status: "Ready", dir: "08-copilot-studio-bot" },
-  { id: "09", name: "AI Search Portal", icon: "🔎", status: "Ready", dir: "09-ai-search-portal" },
-  { id: "10", name: "Content Moderation", icon: "🛡️", status: "Ready", dir: "10-content-moderation" },
-  { id: "11", name: "Landing Zone Advanced", icon: "🏔️", status: "Ready", dir: "11-ai-landing-zone-advanced" },
-  { id: "12", name: "Model Serving AKS", icon: "⚙️", status: "Ready", dir: "12-model-serving-aks" },
-  { id: "13", name: "Fine-Tuning Workflow", icon: "🔬", status: "Ready", dir: "13-fine-tuning-workflow" },
-  { id: "14", name: "AI Gateway", icon: "🚪", status: "Ready", dir: "14-cost-optimized-ai-gateway" },
-  { id: "15", name: "Multi-Modal DocProc", icon: "🖼️", status: "Ready", dir: "15-multi-modal-docproc" },
-  { id: "16", name: "Copilot Teams Ext", icon: "👥", status: "Ready", dir: "16-copilot-teams-extension" },
-  { id: "17", name: "AI Observability", icon: "📊", status: "Ready", dir: "17-ai-observability" },
-  { id: "18", name: "Prompt Management", icon: "📝", status: "Ready", dir: "18-prompt-management" },
-  { id: "19", name: "Edge AI Phi-4", icon: "📱", status: "Ready", dir: "19-edge-ai-phi4" },
-  { id: "20", name: "Anomaly Detection", icon: "🚨", status: "Ready", dir: "20-anomaly-detection" },
+  { id: "01", name: "Enterprise RAG Q&A", icon: "🔍", status: "Ready", dir: "01-enterprise-rag", layer: "R" },
+  { id: "02", name: "AI Landing Zone", icon: "⛰️", status: "Ready", dir: "02-ai-landing-zone", layer: "F" },
+  { id: "03", name: "Deterministic Agent", icon: "🎯", status: "Ready", dir: "03-deterministic-agent", layer: "O" },
+  { id: "04", name: "Call Center Voice AI", icon: "📞", status: "Ready", dir: "04-call-center-voice-ai", layer: "O" },
+  { id: "05", name: "IT Ticket Resolution", icon: "🎫", status: "Ready", dir: "05-it-ticket-resolution", layer: "O" },
+  { id: "06", name: "Document Intelligence", icon: "📄", status: "Ready", dir: "06-document-intelligence", layer: "R" },
+  { id: "07", name: "Multi-Agent Service", icon: "🤖", status: "Ready", dir: "07-multi-agent-service", layer: "O" },
+  { id: "08", name: "Copilot Studio Bot", icon: "💬", status: "Ready", dir: "08-copilot-studio-bot", layer: "O" },
+  { id: "09", name: "AI Search Portal", icon: "🔎", status: "Ready", dir: "09-ai-search-portal", layer: "R" },
+  { id: "10", name: "Content Moderation", icon: "🛡️", status: "Ready", dir: "10-content-moderation", layer: "O" },
+  { id: "11", name: "Landing Zone Advanced", icon: "🏔️", status: "Ready", dir: "11-ai-landing-zone-advanced", layer: "F" },
+  { id: "12", name: "Model Serving AKS", icon: "⚙️", status: "Ready", dir: "12-model-serving-aks", layer: "T" },
+  { id: "13", name: "Fine-Tuning Workflow", icon: "🔬", status: "Ready", dir: "13-fine-tuning-workflow", layer: "T" },
+  { id: "14", name: "AI Gateway", icon: "🚪", status: "Ready", dir: "14-cost-optimized-ai-gateway", layer: "O" },
+  { id: "15", name: "Multi-Modal DocProc", icon: "🖼️", status: "Ready", dir: "15-multi-modal-docproc", layer: "R" },
+  { id: "16", name: "Copilot Teams Ext", icon: "👥", status: "Ready", dir: "16-copilot-teams-extension", layer: "O" },
+  { id: "17", name: "AI Observability", icon: "📊", status: "Ready", dir: "17-ai-observability", layer: "O" },
+  { id: "18", name: "Prompt Management", icon: "📝", status: "Ready", dir: "18-prompt-management", layer: "T" },
+  { id: "19", name: "Edge AI Phi-4", icon: "📱", status: "Ready", dir: "19-edge-ai-phi4", layer: "T" },
+  { id: "20", name: "Anomaly Detection", icon: "🚨", status: "Ready", dir: "20-anomaly-detection", layer: "O" },
 ];
 
 const FROOT_MODULES = [
@@ -336,11 +336,14 @@ class SolutionPlayProvider {
   getTreeItem(element) { return element; }
   getChildren(element) {
     if (!element) {
+      const layerColors = { F: "charts.yellow", R: "charts.green", O: "charts.blue", T: "charts.purple" };
+      const layerNames = { F: "Foundations", R: "Reasoning", O: "Orchestration", T: "Transformation" };
       return SOLUTION_PLAYS.map((p) => {
-        const item = new vscode.TreeItem(`${p.icon} ${p.id} — ${p.name}`, vscode.TreeItemCollapsibleState.None);
-        item.description = p.status;
-        item.tooltip = `${p.name}\nStatus: ${p.status}\n\nClick for:\n• Init DevKit (.github Agentic OS)\n• Init TuneKit (config + infra + eval)\n• Init SpecKit (spec + WAF alignment)\n• Install as Plugin\n• Run Evaluation\n\nClick to open action menu.`;
+        const item = new vscode.TreeItem(`${p.id} ${p.name}`, vscode.TreeItemCollapsibleState.None);
+        item.description = layerNames[p.layer] || p.layer;
+        item.tooltip = `${p.name}\nFROOT Layer: ${layerNames[p.layer] || p.layer}\nStatus: ${p.status}\n\nRight-click or click to:\n• Init DevKit\n• Init TuneKit\n• Init SpecKit\n• Estimate Cost\n• Run Evaluation`;
         item.contextValue = "solutionPlay";
+        item.iconPath = new vscode.ThemeIcon("symbol-event", new vscode.ThemeColor(layerColors[p.layer] || "charts.blue"));
         item.command = { command: "frootai.openSolutionPlay", title: "Open", arguments: [p] };
         return item;
       });
@@ -421,31 +424,37 @@ function getModuleDescription(moduleId) {
 
 class McpToolProvider {
   getTreeItem(element) { return element; }
-  getChildren() {
-    // Group by type
+  getChildren(element) {
     const groups = [
-      { label: "📦 Static Tools (6)", type: "static", icon: "database" },
-      { label: "⛅ Live Tools (4)", type: "live", icon: "cloud" },
-      { label: "🔗 Agent Chain (3)", type: "chain", icon: "link" },
-      { label: "🌐 Ecosystem Tools (3)", type: "ecosystem", icon: "globe" },
-      { label: "🧮 Compute Tools (6)", type: "compute", icon: "beaker" },
+      { label: "Static (6)", type: "static", icon: "database", desc: "Offline knowledge lookups" },
+      { label: "Live (4)", type: "live", icon: "cloud", desc: "Azure + GitHub API calls" },
+      { label: "Agent Chain (3)", type: "chain", icon: "link", desc: "Build → Review → Tune workflow" },
+      { label: "Ecosystem (3)", type: "ecosystem", icon: "globe", desc: "Model catalog + pricing" },
+      { label: "Compute (6)", type: "compute", icon: "beaker", desc: "Cost estimation + validation" },
     ];
-    const items = [];
-    for (const g of groups) {
-      const header = new vscode.TreeItem(g.label, vscode.TreeItemCollapsibleState.None);
-      header.description = "";
-      header.iconPath = new vscode.ThemeIcon(g.icon);
-      items.push(header);
-      for (const t of MCP_TOOLS.filter(t => t.type === g.type)) {
-        const item = new vscode.TreeItem(`  ${t.name}`, vscode.TreeItemCollapsibleState.None);
-        item.description = t.desc;
-        item.tooltip = `MCP Tool: ${t.name}\nType: ${t.type}\n${t.desc}\n\nClick for actions (docs, install, start)`;
-        item.contextValue = "mcpTool";
-        item.command = { command: "frootai.mcpToolAction", title: "MCP Action", arguments: [t] };
-        items.push(item);
-      }
+    if (!element) {
+      return groups.map(g => {
+        const item = new vscode.TreeItem(g.label, vscode.TreeItemCollapsibleState.Collapsed);
+        item.description = g.desc;
+        item.iconPath = new vscode.ThemeIcon(g.icon);
+        item.contextValue = "toolGroup";
+        item._groupType = g.type;
+        return item;
+      });
     }
-    return items;
+    const groupType = groups.find(g => g.label === element.label)?._groupType || element._groupType;
+    if (groupType) {
+      return MCP_TOOLS.filter(t => t.type === groupType).map(t => {
+        const item = new vscode.TreeItem(t.name, vscode.TreeItemCollapsibleState.None);
+        item.description = t.desc;
+        item.tooltip = `${t.name}\n${t.desc}\n\nType: ${t.type}`;
+        item.iconPath = new vscode.ThemeIcon("symbol-method");
+        item.contextValue = "mcpTool";
+        item.command = { command: "frootai.mcpToolAction", title: "Action", arguments: [t] };
+        return item;
+      });
+    }
+    return [];
   }
 }
 
@@ -488,13 +497,11 @@ function activate(context) {
   // Optional: find local repo if available (enhances but not required)
   const root = findFrootAIRoot();
 
-  // Register tree views
+  // Register tree views (2 focused panels: Plays + MCP Tools)
   vscode.window.registerTreeDataProvider("frootai.solutionPlays", new SolutionPlayProvider());
-  vscode.window.registerTreeDataProvider("frootai.frootModules", new FrootModuleProvider());
   vscode.window.registerTreeDataProvider("frootai.mcpTools", new McpToolProvider());
-  if (knowledgeLoaded) {
-    vscode.window.registerTreeDataProvider("frootai.glossary", new GlossaryProvider());
-  }
+  // Knowledge Hub and Glossary available via command palette (lookupTerm, searchKnowledge)
+  // but removed from sidebar for cleaner UX
 
   // ── Command: Open Solution Play (action picker) ──
   context.subscriptions.push(
@@ -1058,11 +1065,12 @@ function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.installMcpServer", async () => {
       const choice = await vscode.window.showQuickPick([
-        { label: "$(gear) Configure MCP (.vscode/mcp.json)", description: "⭐ Recommended — enables Copilot Agent mode", value: "config" },
-        { label: "$(play) Run directly (npx)", description: "npx frootai-mcp@latest — zero install, always fresh", value: "npx" },
+        { label: "$(gear) Configure MCP", description: "⭐ Recommended — creates .vscode/mcp.json for Copilot", value: "config" },
+        { label: "$(play) Run via npx", description: "npx frootai-mcp@latest — zero install", value: "npx" },
         { label: "$(package) Install globally (npm)", description: "npm install -g frootai-mcp@latest", value: "global" },
+        { label: "$(symbol-namespace) Python (pip)", description: "pip install frootai-mcp — pure Python server", value: "pip" },
         { label: "$(symbol-container) Docker", description: "docker run -i ghcr.io/gitpavleenbali/frootai-mcp", value: "docker" },
-      ], { placeHolder: "How do you want to set up the FrootAI MCP Server?" });
+      ], { placeHolder: "Set up FrootAI MCP Server" });
       if (!choice) return;
 
       // Helper: auto-create .vscode/mcp.json for any install method
@@ -1102,6 +1110,12 @@ function activate(context) {
         terminal.sendText("docker run -i ghcr.io/gitpavleenbali/frootai-mcp");
         terminal.show();
         vscode.window.showInformationMessage("🐳 Starting FrootAI MCP via Docker. 22 tools ready.");
+        autoCreateMcpJson();
+      } else if (choice.value === "pip") {
+        const terminal = vscode.window.createTerminal("FrootAI MCP Python");
+        terminal.sendText("pip install frootai-mcp && frootai-mcp-py");
+        terminal.show();
+        vscode.window.showInformationMessage("🐍 Installing Python MCP server from PyPI.");
         autoCreateMcpJson();
       } else if (choice.value === "config") {
         const wsFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;

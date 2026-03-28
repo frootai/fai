@@ -1,8 +1,8 @@
 {
   "name": "frootai",
-  "displayName": "FrootAI — From the Roots to the Fruits",
-  "description": "The open glue binding Infrastructure, Platform & Application teams with the GenAI ecosystem. Standalone engine: 16 modules, 200+ terms, 20 solution plays, 22 MCP tools — works from any workspace.",
-  "version": "1.3.1",
+  "displayName": "FrootAI — AI Architecture Toolkit",
+  "description": "20 solution plays + 22 MCP tools for building production AI on Azure. Scaffold DevKit, TuneKit, SpecKit in one click. Works standalone from any workspace.",
+  "version": "1.4.0",
   "publisher": "pavleenbali",
   "engines": {
     "vscode": "^1.85.0"
@@ -53,98 +53,90 @@
       "frootai-sidebar": [
         {
           "id": "frootai.solutionPlays",
-          "name": "🎯 Solution Plays (20)"
+          "name": "Solution Plays"
         },
         {
           "id": "frootai.mcpTools",
-          "name": "🔌 MCP Tools (22)"
-        },
-        {
-          "id": "frootai.frootModules",
-          "name": "FAI Knowledge Hub (18 modules)"
-        },
-        {
-          "id": "frootai.glossary",
-          "name": "📖 AI Glossary (200+ terms)"
+          "name": "MCP Tools"
         }
       ]
     },
     "commands": [
-      {
-        "command": "frootai.browseSolutionPlays",
-        "title": "FrootAI: Browse Solution Plays"
-      },
-      {
-        "command": "frootai.lookupTerm",
-        "title": "FrootAI: Look Up AI Term"
-      },
-      {
-        "command": "frootai.searchKnowledge",
-        "title": "FrootAI: Search Knowledge Base"
-      },
-      {
-        "command": "frootai.openSetupGuide",
-        "title": "FrootAI: Open Setup Guide"
-      },
       {
         "command": "frootai.openSolutionPlay",
         "title": "FrootAI: Open Solution Play"
       },
       {
         "command": "frootai.initDevKit",
-        "title": "FrootAI: Initialize DevKit (Full .github Agentic OS)"
-      },
-      {
-        "command": "frootai.showArchitecturePattern",
-        "title": "FrootAI: Show Architecture Pattern"
-      },
-      {
-        "command": "frootai.initHooks",
-        "title": "FrootAI: Initialize Hooks (guardrails.json)"
-      },
-      {
-        "command": "frootai.initPrompts",
-        "title": "FrootAI: Initialize Prompt Files (slash commands)"
+        "title": "FrootAI: Initialize DevKit"
       },
       {
         "command": "frootai.initTuneKit",
-        "title": "FrootAI: Initialize TuneKit (config + evaluation + infra)"
+        "title": "FrootAI: Initialize TuneKit"
       },
       {
         "command": "frootai.initSpecKit",
-        "title": "FrootAI: Initialize SpecKit (spec + WAF alignment)"
+        "title": "FrootAI: Initialize SpecKit"
       },
       {
         "command": "frootai.installMcpServer",
-        "title": "FrootAI: Install MCP Server (npm)"
-      },
-      {
-        "command": "frootai.startMcpServer",
-        "title": "FrootAI: Start MCP Server"
+        "title": "FrootAI: Install MCP Server"
       },
       {
         "command": "frootai.configureMcp",
-        "title": "FrootAI: Configure MCP (add .vscode/mcp.json)"
-      },
-      {
-        "command": "frootai.autoChainAgents",
-        "title": "FrootAI: Auto-Chain Agents (Build → Review → Tune)"
+        "title": "FrootAI: Configure MCP"
       },
       {
         "command": "frootai.quickCostEstimate",
-        "title": "FrootAI: Quick Cost Estimate"
+        "title": "FrootAI: Cost Estimate"
       },
       {
         "command": "frootai.validateConfig",
         "title": "FrootAI: Validate Config"
       },
       {
+        "command": "frootai.autoChainAgents",
+        "title": "FrootAI: Build → Review → Tune"
+      },
+      {
         "command": "frootai.installPlugin",
-        "title": "FrootAI: Install Community Plugin"
+        "title": "FrootAI: Install Plugin"
       },
       {
         "command": "frootai.runEvaluation",
         "title": "FrootAI: Run Evaluation"
+      },
+      {
+        "command": "frootai.browseSolutionPlays",
+        "title": "FrootAI: Browse All Plays"
+      },
+      {
+        "command": "frootai.openSetupGuide",
+        "title": "FrootAI: Setup Guide"
+      },
+      {
+        "command": "frootai.startMcpServer",
+        "title": "FrootAI: Start MCP Server"
+      },
+      {
+        "command": "frootai.lookupTerm",
+        "title": "FrootAI: Look Up Term"
+      },
+      {
+        "command": "frootai.searchKnowledge",
+        "title": "FrootAI: Search Knowledge"
+      },
+      {
+        "command": "frootai.showArchitecturePattern",
+        "title": "FrootAI: Architecture Patterns"
+      },
+      {
+        "command": "frootai.initHooks",
+        "title": "FrootAI: Initialize Hooks"
+      },
+      {
+        "command": "frootai.initPrompts",
+        "title": "FrootAI: Initialize Prompts"
       }
     ],
     "menus": {
