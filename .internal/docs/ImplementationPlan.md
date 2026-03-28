@@ -683,7 +683,7 @@ Sprint 5D (Rich Sidebar + UX): ✅ 4/6 — glossary panel, status bar, badges do
 |---|------|--------|--------|
 | 11.1 | Pure Python MCP server (pip install frootai-mcp) | ✅ Done | Full rewrite using Python MCP SDK, reads same knowledge.json, no Node.js dependency |
 | 11.2 | Python SDK (pip install frootai) | ✅ Done | Thin Python wrapper that spawns npx internally, requires Node.js |
-| 11.3 | run_evaluation tool (Phase 8C.1) | 📋 | Needs Azure Function for sandboxed Python execution |
+| 11.3 | run_evaluation tool | ✅ Done | Needs Azure Function for sandboxed Python execution |
 | 11.4 | A2A (Agent-to-Agent) protocol | 📋 | When A2A standard matures |
 | 11.5 | Azure Marketplace listing | 📋 | When extension is stable + 100+ installs |
 | 11.6 | GitHub Marketplace listing | 📋 | When MCP server has 50+ stars |
@@ -1416,15 +1416,15 @@ LATER: Telemetry (when demand) → A2A (when spec matures) → Enterprise SSO (w
 
 | # | Item | Source | Effort |
 |---|------|--------|--------|
-| P18 | MCP Server v2.2: Real AI ecosystem live tools (model catalog, pricing) | Phase 6.5 | 3 days |
-| P19 | Per-play CI pipelines (automated testing per play) | Phase 6.6 | 3 days |
-| P20 | Full CI/CD pipeline: all 6 distribution channels | Phase 11.9 | 5 days |
-| P21 | run_evaluation tool (sandboxed Python execution) | Phase 11.3 | 5 days |
+| P18 | ~~MCP Server live tools~~ | Phase 6.5 | ✅ Already exist |
+| P19 | ~~Per-play CI pipelines~~ | Phase 6.6 | ✅ validate-plays.yml |
+| P20 | ~~Full CI/CD all channels~~ | Phase 11.9 | ✅ 13 workflows |
+| P21 | ~~run_evaluation MCP tool~~ | Phase 11.3 | ✅ Tool #23 done |
 | P22 | One-command full scaffold (npx frootai init → everything) | Phase 14B.4 | 2 days |
-| P23 | Self-guided tutorial mode after scaffold | Phase 14B.5 | 2 days |
-| P24 | Post-scaffold welcome message | Phase 14C.2 | 1 hour |
-| P25 | Auto-detect existing project (merge vs overwrite) | Phase 14C.3 | 3 hours |
-| P26 | Progress indicator with delight (tree animation) | Phase 14C.4 | 2 hours |
+| P23 | ~~Self-guided tutorial~~ | Phase 14B.5 | ✅ 5-step README |
+| P24 | ~~Post-scaffold welcome~~ | Phase 14C.2 | ✅ Done |
+| P25 | ~~Auto-detect existing~~ | Phase 14C.3 | ✅ Done |
+| P26 | ~~Progress tree animation~~ | Phase 14C.4 | ✅ Done |
 | P27 | Natural language init ("What are you building?") | Phase 14C.1 | 3 days |
 | P28 | TypeScript SDK (@frootai/sdk) | Phase 13C.1 | 5 days |
 | P29 | SDK documentation + examples | Phase 13C.3 | 2 days |

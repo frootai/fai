@@ -1575,6 +1575,55 @@ server.tool(
 );
 
 // ═══════════════════════════════════════════════════════════════════
+// Phase 8C — run_evaluation (local threshold-based evaluation)
+// ═══════════════════════════════════════════════════════════════════
+
+server.tool(
+  "run_evaluation",
+  "RUN EVALUATION — Check AI quality scores against thresholds. Input actual scores from your evaluation run, get pass/fail per metric. Supports: groundedness, relevance, coherence, fluency, safety.",
+  {
+    scores: z.record(z.number()).describe("Metric scores e.g. {groundedness: 4.5, relevance: 3.8, coherence: 4.1, fluency: 4.6}"),
+    thresholds: z.record(z.number()).optional().describe("Custom thresholds (default: 4.0 for all). e.g. {groundedness: 4.5, relevance: 3.5}"),
+    play: z.string().optional().describe("Solution play number for context (e.g. '01')"),
+  },
+  async ({ scores, thresholds, play }) => {
+    const defaultThresholds = { groundedness: 4.0, relevance: 4.0, coherence: 4.0, fluency: 4.0, safety: 4.0 };
+    const t = { ...defaultThresholds, ...thresholds };
+    const results = [];
+    let passCount = 0;
+    let totalCount = 0;
+
+    for (const [metric, score] of Object.entries(scores)) {
+      const threshold = t[metric] || 4.0;
+      const passed = score >= threshold;
+      if (passed) passCount++;
+      totalCount++;
+      results.push(`| ${metric} | ${score.toFixed(1)} | ${threshold.toFixed(1)} | ${passed ? "✅ PASS" : "❌ FAIL"} |`);
+    }
+
+    const allPassed = passCount === totalCount;
+    const playCtx = play ? ` (Play ${play})` : "";
+    const verdict = allPassed
+      ? `✅ **ALL CHECKS PASSED**${playCtx} — ${passCount}/${totalCount} metrics meet thresholds. Ready for production.`
+      : `❌ **${totalCount - passCount} CHECK(S) FAILED**${playCtx} — ${passCount}/${totalCount} passed. Review failing metrics before deploying.`;
+
+    const recommendations = [];
+    for (const [metric, score] of Object.entries(scores)) {
+      const threshold = t[metric] || 4.0;
+      if (score < threshold) {
+        if (metric === "groundedness") recommendations.push("- **Groundedness**: Add more citations, increase context window, reduce chunk overlap");
+        if (metric === "relevance") recommendations.push("- **Relevance**: Improve system prompt specificity, tune top-k, add query rewriting");
+        if (metric === "coherence") recommendations.push("- **Coherence**: Reduce temperature, add response structure requirements");
+        if (metric === "fluency") recommendations.push("- **Fluency**: Switch to larger model (gpt-4o), increase max_tokens");
+        if (metric === "safety") recommendations.push("- **Safety**: Enable Content Safety API, tighten guardrails.json severity thresholds");
+      }
+    }
+
+    return { content: [{ type: "text", text: `## 📊 Evaluation Results${playCtx}\n\n| Metric | Score | Threshold | Result |\n|--------|-------|-----------|--------|\n${results.join("\n")}\n\n${verdict}${recommendations.length > 0 ? "\n\n### 💡 Recommendations\n" + recommendations.join("\n") : ""}` }] };
+  }
+);
+
+// ═══════════════════════════════════════════════════════════════════
 // Phase 8C — embedding_playground (lite — no Azure OpenAI required)
 // ═══════════════════════════════════════════════════════════════════
 

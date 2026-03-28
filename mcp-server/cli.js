@@ -160,6 +160,19 @@ async function cmdInit() {
   // ─── Scaffold ───
   console.log(`\n${c.cyan}  Scaffolding ${projectName} with play ${playId} (${scale})...${c.reset}\n`);
 
+  // Progress tree animation
+  const stages = [
+    ['🌱', 'SpecKit', 'Architecture specs + WAF alignment'],
+    ['🌿', 'DevKit', '.github agents + instructions + MCP config'],
+    ['🌳', 'TuneKit', 'AI configs + evaluation + guardrails'],
+  ];
+  for (const [icon, kit, desc] of stages) {
+    process.stdout.write(`  ${icon} ${c.bold}${kit}${c.reset} ${c.dim}${desc}${c.reset}`);
+    await new Promise(r => setTimeout(r, 300));
+    process.stdout.write(` ${c.green}✓${c.reset}\n`);
+  }
+  console.log('');
+
   const projectDir = resolve(projectName);
 
   if (existsSync(projectDir)) {
@@ -290,36 +303,64 @@ For agent handoffs, use @builder, @reviewer, or @tuner in Copilot Chat.
   // README
   writeIfNotExists(join(projectDir, 'README.md'), `# ${projectName}
 
-> Built with [FrootAI](https://frootai.dev) — Solution Play: \`${playId}\`
+> Built with [FrootAI](https://frootai.dev) — Solution Play: \`${playId}\` | Scale: **${scale}**
 
-## Quick Start
+## Getting Started (5 minutes)
 
+### Step 1: Open in VS Code
 \`\`\`bash
-# Open in VS Code (MCP server auto-connects)
 code .
+\`\`\`
+The MCP server auto-connects via \`.vscode/mcp.json\`. Copilot now has 22 AI architecture tools.
 
-# Or use the MCP server directly
-npx frootai-mcp@${VERSION}
+### Step 2: Start Building
+Open **Copilot Chat** (Ctrl+Shift+I) and type:
+\`\`\`
+@builder Build the main application entry point for this ${playId} solution
 \`\`\`
 
-## Architecture
+### Step 3: Review Your Code
+\`\`\`
+@reviewer Review the code for security, WAF alignment, and production readiness
+\`\`\`
 
-Scale: **${scale}**
+### Step 4: Validate & Tune
+\`\`\`bash
+npx frootai validate --waf    # Check WAF alignment (6 pillars)
+\`\`\`
+\`\`\`
+@tuner Check if configs in config/ are production-appropriate
+\`\`\`
 
-See \`config/\` for all configuration values.
-See \`.github/agents/\` for Copilot agent definitions.
+### Step 5: Deploy
+\`\`\`bash
+az deployment group create --resource-group myRG --template-file infra/main.bicep
+\`\`\`
 
-## FrootAI Commands
+## Project Structure
 
-- Use \`@builder\` in Copilot Chat to implement features
-- Use \`@reviewer\` to review code
-- Use \`@tuner\` to validate configs and run evaluations
+| Path | Kit | What |
+|------|-----|------|
+| \`.github/agents/\` | DevKit | Builder, Reviewer, Tuner agents |
+| \`.github/instructions/\` | DevKit | WAF security + reliability rules |
+| \`config/\` | TuneKit | OpenAI, guardrails, search configs |
+| \`spec/\` | SpecKit | Architecture spec + WAF alignment |
+| \`evaluation/\` | EvalKit | Quality thresholds + test config |
+| \`infra/\` | InfraKit | Bicep templates |
+| \`.vscode/mcp.json\` | MCP | Auto-connects 22 tools |
+
+## Useful Commands
+
+\`\`\`bash
+npx frootai search "RAG architecture"   # Search knowledge base
+npx frootai cost ${playId.split('-')[0]} --scale ${scale}   # Cost estimate
+npx frootai validate                      # Check project structure
+npx frootai doctor                        # Health check
+\`\`\`
 
 ## Links
 
-- [FrootAI Docs](https://frootai.dev)
-- [MCP Server](https://www.npmjs.com/package/frootai-mcp)
-- [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
+- [FrootAI](https://frootai.dev) | [npm](https://www.npmjs.com/package/frootai-mcp) | [VS Code](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai) | [PyPI](https://pypi.org/project/frootai/)
 `);
 
   // .gitignore
