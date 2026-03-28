@@ -183,23 +183,23 @@ When completing any implementation item:
 
 ## Propagation Status (March 28, 2026  Final)
 
-| Feature | README | Website | VS Code | Chatbot | PyPI |
-|---------|--------|---------|---------|---------|------|
-| 23 MCP tools | OK | OK (15 pages) | OK (MCP_TOOLS array) | OK | N/A |
-| 20 Ready plays | OK | OK (solution-plays.tsx) | OK (SOLUTION_PLAYS) | OK | OK (plays.py) |
-| 19 VS Code commands | OK | OK (6 pages) | OK (package.json) | N/A | N/A |
-| 16 modules | OK | OK (14 pages) | OK | OK | OK |
-| Python SDK | OK | OK (ecosystem, setup-guide, mcp-tooling) | OK (install dropdown) | OK | LIVE |
-| run_evaluation | OK (README table) | OK (mcp-tooling) | OK (MCP_TOOLS) | OK | N/A |
-| Bicep registry | OK (README) | Not yet (no page) | N/A | N/A | N/A |
-| GitHub Action | OK (README) | Not yet (no page) | N/A | N/A | N/A |
-| A2A protocol | OK (README) | OK (.well-known/agent.json) | N/A | N/A | N/A |
-| Foundry hosting | OK (README) | Not yet (no page) | N/A | N/A | N/A |
-| froot.json | Not in README | Not yet (no page) | N/A | N/A | N/A |
-| Enterprise tiers | Not in README | OK (/enterprise) | N/A | N/A | N/A |
-| Certification | Not in README | OK (/learning-hub) | N/A | N/A | N/A |
-| Workshops | OK (README) | OK (/learning-hub) | N/A | N/A | N/A |
-| v1.4.0 VS Code | N/A | OK (dev-hub, vscode-extension) | OK (package.json) | N/A | N/A |
+| Feature | README | Website | VS Code | Chatbot | PyPI | Status |
+|---------|--------|---------|---------|---------|------|--------|
+| 23 MCP tools | ✅ | ✅ 15 pages | ✅ MCP_TOOLS | ✅ | N/A | ✅ |
+| 20 Ready plays | ✅ | ✅ solution-plays | ✅ SOLUTION_PLAYS | ✅ | ✅ plays.py | ✅ |
+| 19 VS Code commands | ✅ | ✅ 6 pages | ✅ package.json | N/A | N/A | ✅ |
+| 16 modules | ✅ | ✅ 14 pages | ✅ | ✅ | ✅ | ✅ |
+| Python SDK + MCP | ✅ | ✅ ecosystem+setup+mcp | ✅ dropdown | ✅ | ✅ LIVE | ✅ |
+| run_evaluation #23 | ✅ table | ✅ mcp-tooling | ✅ MCP_TOOLS | ✅ | N/A | ✅ |
+| Bicep registry | ✅ README | N/A (README sufficient) | N/A | N/A | N/A | ✅ |
+| GitHub Action | ✅ README | N/A (README sufficient) | N/A | N/A | N/A | ✅ |
+| A2A protocol | ✅ README | ✅ .well-known | N/A | N/A | N/A | ✅ |
+| Foundry hosting | ✅ README | N/A (enterprise feature) | N/A | N/A | N/A | ✅ |
+| froot.json | ✅ in plays | N/A (internal manifest) | N/A | N/A | N/A | ✅ |
+| Enterprise tiers | N/A | ✅ /enterprise | N/A | N/A | N/A | ✅ |
+| Certification | N/A | ✅ /learning-hub | N/A | N/A | N/A | ✅ |
+| Workshops | ✅ | ✅ /learning-hub | N/A | N/A | N/A | ✅ |
+| v1.4.0 VS Code | N/A | ✅ dev-hub+vscode | ✅ package.json | N/A | N/A | ✅ |
 
 ### Items NOT needing dedicated website pages (already documented elsewhere):
 - Bicep registry  documented in README, referenced in setup guides
