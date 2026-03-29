@@ -34,8 +34,13 @@ function preprocessContent(raw: string): string {
   // Normalize Windows line endings
   let content = raw.replace(/\r\n/g, '\n');
 
-  // Strip YAML frontmatter
-  content = content.replace(/^---[\s\S]*?---\n*/m, "");
+  // Strip YAML frontmatter (only if file starts with ---) 
+  if (content.startsWith("---\n")) {
+    const end = content.indexOf("\n---", 4);
+    if (end > 0) {
+      content = content.substring(end + 4).replace(/^\n+/, "");
+    }
+  }
 
   // Convert Docusaurus admonitions to blockquote-based markers
   // :::type Title\ncontent\n::: → > [!type] Title\n> content
