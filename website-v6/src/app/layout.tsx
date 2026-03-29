@@ -31,7 +31,14 @@ export const metadata: Metadata = {
     description: "22 MCP tools, 20 solution plays, 18 knowledge modules.",
     images: ["/img/frootai-og.png"],
   },
-  icons: { icon: [{ url: "/img/frootai-mark.svg", type: "image/svg+xml", sizes: "any" }], apple: { url: "/img/frootai-logo.png", sizes: "180x180" } },
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+  },
   robots: { index: true, follow: true },
 };
 
