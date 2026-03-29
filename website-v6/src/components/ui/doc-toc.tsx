@@ -60,13 +60,14 @@ export function DocTableOfContents() {
           key={item.id}
           href={`#${item.id}`}
           onClick={() => setMobileOpen(false)}
-          className={`block text-[12px] leading-snug py-1 transition-colors duration-150 border-l-2 hover:text-fg hover:border-emerald/50
-            ${item.level === 1 ? "pl-3 font-bold" : ""}
-            ${item.level === 2 ? "pl-3 font-semibold" : ""}
-            ${item.level === 3 ? "pl-6" : ""}
-            ${item.level === 4 ? "pl-9 text-[11px]" : ""}
+          className={`block text-[12px] leading-snug py-1.5 px-3 rounded-r-lg transition-all duration-200 border-l-2
+            hover:text-emerald hover:border-emerald hover:bg-emerald/[0.06] hover:shadow-[inset_0_0_12px_rgba(16,185,129,0.08)]
+            ${item.level === 1 ? "font-bold" : ""}
+            ${item.level === 2 ? "font-semibold" : ""}
+            ${item.level === 3 ? "ml-3" : ""}
+            ${item.level === 4 ? "ml-6 text-[11px]" : ""}
             ${activeId === item.id
-              ? "text-emerald border-emerald"
+              ? "text-emerald border-emerald bg-emerald/[0.06] shadow-[inset_0_0_12px_rgba(16,185,129,0.08)]"
               : "text-fg-dim border-transparent"
             }`}
         >
