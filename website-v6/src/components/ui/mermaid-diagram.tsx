@@ -188,7 +188,7 @@ export function MermaidDiagram({ chart }: { chart: string }) {
   return (
     <div
       ref={containerRef}
-      className="my-6 rounded-2xl border border-indigo/15 bg-gradient-to-br from-[#0a0a18] via-[#0d0d1a] to-[#0f0f22] p-6 overflow-x-auto shadow-lg shadow-black/20"
+      className="my-6 rounded-2xl border border-indigo/15 bg-gradient-to-br from-[#0a0a18] via-[#0d0d1a] to-[#0f0f22] p-6 overflow-x-auto shadow-lg shadow-black/20 [&_svg]:mx-auto [&_svg]:max-w-full [&_.node_rect]:transition-all [&_.node_rect]:duration-200"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

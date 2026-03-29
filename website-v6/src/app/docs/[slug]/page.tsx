@@ -46,7 +46,7 @@ export default async function DocSlugPage({ params }: { params: Promise<{ slug: 
         <Link href="/docs" className="text-[12px] text-amber hover:underline font-medium">← Back to Knowledge Modules</Link>
       </div>
 
-      <div className="flex gap-8">
+      <div className="flex gap-8 items-start relative">
         {/* Main content */}
         <div className="flex-1 min-w-0 max-w-4xl">
           <h1 className="text-3xl font-extrabold tracking-tight mb-8">{title}</h1>

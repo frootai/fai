@@ -79,7 +79,7 @@ export function DocTableOfContents() {
   return (
     <>
       {/* Desktop: sticky sidebar */}
-      <aside className="hidden xl:block sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto w-56 shrink-0 pr-2">
+      <aside className="hidden xl:block sticky top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto w-60 shrink-0 pr-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-fg-dim mb-3 px-3">On this page</p>
         {tocContent}
       </aside>
