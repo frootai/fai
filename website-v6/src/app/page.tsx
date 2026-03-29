@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -140,17 +139,16 @@ export default function Home() {
 
         <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
           <FadeIn>
-            <div className="animate-float mx-auto mb-[-48px]">
-              <Image src="/img/frootai-logo.png" alt="FrootAI" width={300} height={300} priority
-                className="mx-auto" />
+            <div className="animate-float mx-auto mb-4">
+              <img src="/img/frootai-mark.svg" alt="FrootAI" width={160} height={160} className="mx-auto" />
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="text-5xl font-extrabold tracking-tighter sm:text-6xl lg:text-7xl text-gradient-froot">FrootAI</h1>
+            <h1 className="text-5xl font-extrabold tracking-tighter sm:text-6xl lg:text-7xl"><span className="text-white">Froot</span><span className="text-emerald">AI</span></h1>
           </FadeIn>
           <FadeIn delay={0.15}>
-            <p className="mt-3 text-sm font-semibold uppercase tracking-[0.15em] text-emerald">From the Roots to the Fruits</p>
-            <p className="mt-1 text-sm italic text-gold">It&apos;s simply Frootful.</p>
+            <p className="mt-3 text-sm font-semibold uppercase tracking-[0.15em] text-white">From the Roots to the Fruits</p>
+            <p className="mt-1 text-sm italic text-emerald">It&apos;s simply Frootful.</p>
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="mt-4 text-[12px] tracking-[0.2em] text-fg-muted">Infra ⇄ Platform ⇄ Apps</p>

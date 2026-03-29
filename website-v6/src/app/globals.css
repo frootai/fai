@@ -76,7 +76,13 @@ body {
 
 /* ── Gradient text ── */
 .text-gradient-froot {
-  background: linear-gradient(135deg, #10b981, #06b6d4 30%, #6366f1 60%, #7c3aed);
+  background: linear-gradient(135deg, #7c3aed 0%, #10b981 30%, #06b6d4 55%, #ec4899 75%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-froot-tagline {
+  background: linear-gradient(90deg, #06b6d4 0%, #10b981 25%, #f59e0b 50%, #ec4899 75%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -1,0 +1,334 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480" fill="none">
+  <defs>
+    <!-- Trunk gradient: muted emerald → gold → amber -->
+    <linearGradient id="trunkGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#10b981" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#34d399" stop-opacity="0.75"/>
+      <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#d97706" stop-opacity="0.6"/>
+    </linearGradient>
+    <!-- Ambient aura -->
+    <radialGradient id="aura" cx="50%" cy="38%" r="48%">
+      <stop offset="0%"  stop-color="#10b981" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Filters -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="fruitGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="rootGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ================================================================ -->
+  <!--  AMBIENT AURA                                                    -->
+  <!-- ================================================================ -->
+  <ellipse cx="200" cy="180" rx="180" ry="160" fill="url(#aura)"/>
+
+
+  <!-- ================================================================ -->
+  <!--  TRUNK — Muted gradient, thick, reaches up into canopy           -->
+  <!-- ================================================================ -->
+  <rect x="188" y="200" width="24" height="100" rx="12" fill="url(#trunkGrad)"/>
+
+
+  <!-- ================================================================ -->
+  <!--  CANOPY — 3 circles, exactly like the mark logo scaled up        -->
+  <!--                                                                  -->
+  <!--    Top     = Emerald  #10b981  (largest)                         -->
+  <!--    Left    = Violet   #7c3aed                                    -->
+  <!--    Right   = Cyan     #06b6d4                                    -->
+  <!--    Center  = Magenta  #ec4899  (smaller overlap)                 -->
+  <!--                                                                  -->
+  <!--  Each circle has: glow layer → fill layer → thin stroke ring     -->
+  <!-- ================================================================ -->
+
+  <!-- Glow halos behind the 3 circles -->
+  <circle cx="200" cy="108" r="100" fill="#10b981" opacity="0.04" filter="url(#softGlow)"/>
+  <circle cx="140" cy="168" r="80"  fill="#7c3aed" opacity="0.03" filter="url(#softGlow)"/>
+  <circle cx="260" cy="168" r="80"  fill="#06b6d4" opacity="0.03" filter="url(#softGlow)"/>
+
+  <!-- Top circle — Emerald (largest, crowns the tree) -->
+  <circle cx="200" cy="108" r="92"  fill="#10b981" opacity="0.28"/>
+  <circle cx="200" cy="108" r="84"  fill="#10b981" opacity="0.12" stroke="#10b981" stroke-width="0.8" stroke-opacity="0.2"/>
+
+  <!-- Left circle — Violet -->
+  <circle cx="140" cy="168" r="72"  fill="#7c3aed" opacity="0.22"/>
+  <circle cx="140" cy="168" r="64"  fill="#7c3aed" opacity="0.1"  stroke="#7c3aed" stroke-width="0.7" stroke-opacity="0.18"/>
+
+  <!-- Right circle — Cyan -->
+  <circle cx="260" cy="168" r="72"  fill="#06b6d4" opacity="0.22"/>
+  <circle cx="260" cy="168" r="64"  fill="#06b6d4" opacity="0.1"  stroke="#06b6d4" stroke-width="0.7" stroke-opacity="0.18"/>
+
+  <!-- Center overlap — Magenta (smaller) -->
+  <circle cx="200" cy="165" r="48"  fill="#ec4899" opacity="0.09"/>
+  <circle cx="200" cy="158" r="32"  fill="#ec4899" opacity="0.06"/>
+
+  <!-- Core glow — bright emerald center light -->
+  <circle cx="200" cy="142" r="24"  fill="#10b981" opacity="0.2"/>
+  <circle cx="200" cy="138" r="14"  fill="#34d399" opacity="0.15"/>
+
+
+  <!-- ================================================================ -->
+  <!--  CIRCUIT BRANCHES — Organic curves from trunk through canopy     -->
+  <!-- ================================================================ -->
+  <g stroke="#4ade80" stroke-width="1.5" fill="none" opacity="0.28" stroke-linecap="round">
+    <!-- Central spine -->
+    <path d="M200,210 C200,170 200,130 200,60"/>
+    <!-- Left main -->
+    <path d="M200,200 C185,175 162,165 140,162"/>
+    <!-- Left upper -->
+    <path d="M175,172 C165,145 150,120 140,105"/>
+    <!-- Left far -->
+    <path d="M140,162 C118,160 100,165 88,172"/>
+    <!-- Right main -->
+    <path d="M200,200 C215,175 238,165 260,162"/>
+    <!-- Right upper -->
+    <path d="M225,172 C235,145 250,120 260,105"/>
+    <!-- Right far -->
+    <path d="M260,162 C282,160 300,165 312,172"/>
+    <!-- Crown forks -->
+    <path d="M200,120 C190,90 175,70 162,58"/>
+    <path d="M200,120 C210,90 225,70 238,58"/>
+  </g>
+
+
+  <!-- ================================================================ -->
+  <!--  NEURAL CONSTELLATION — Synapse connections between fruit nodes  -->
+  <!--  "The connections were right and it propagated" — the web        -->
+  <!-- ================================================================ -->
+  <g stroke="#818cf8" stroke-width="0.7" fill="none" opacity="0.18" stroke-linecap="round">
+    <!-- Crown triangle -->
+    <line x1="200" y1="52"  x2="160" y2="60"/>
+    <line x1="200" y1="52"  x2="240" y2="60"/>
+    <line x1="160" y1="60"  x2="240" y2="60"/>
+    <!-- Crown to mid -->
+    <line x1="160" y1="60"  x2="92"  y2="164"/>
+    <line x1="240" y1="60"  x2="308" y2="164"/>
+    <line x1="160" y1="60"  x2="200" y2="140"/>
+    <line x1="240" y1="60"  x2="200" y2="140"/>
+    <!-- Mid to lower -->
+    <line x1="92"  y1="164" x2="120" y2="212"/>
+    <line x1="308" y1="164" x2="280" y2="212"/>
+    <!-- Center to lower -->
+    <line x1="200" y1="140" x2="120" y2="212"/>
+    <line x1="200" y1="140" x2="280" y2="212"/>
+    <!-- Mid to center -->
+    <line x1="92"  y1="164" x2="200" y2="140"/>
+    <line x1="308" y1="164" x2="200" y2="140"/>
+    <!-- Horizontal accents -->
+    <line x1="168" y1="108" x2="232" y2="108"/>
+    <line x1="140" y1="140" x2="260" y2="140"/>
+    <!-- Extra cross-threads -->
+    <line x1="160" y1="60"  x2="140" y2="102"/>
+    <line x1="240" y1="60"  x2="260" y2="102"/>
+    <line x1="140" y1="102" x2="92"  y2="164"/>
+    <line x1="260" y1="102" x2="308" y2="164"/>
+  </g>
+
+  <!-- Data-pulse dots along the constellation -->
+  <g opacity="0.2">
+    <circle cx="180" cy="56"  r="1.3" fill="#c4b5fd"/>
+    <circle cx="220" cy="56"  r="1.3" fill="#c4b5fd"/>
+    <circle cx="200" cy="96"  r="1.3" fill="#fcd34d"/>
+    <circle cx="126" cy="112" r="1.2" fill="#818cf8"/>
+    <circle cx="274" cy="112" r="1.2" fill="#818cf8"/>
+    <circle cx="146" cy="164" r="1.0" fill="#a78bfa"/>
+    <circle cx="254" cy="164" r="1.0" fill="#67e8f9"/>
+    <circle cx="200" cy="140" r="1.0" fill="#fcd34d"/>
+    <circle cx="160" cy="188" r="1.0" fill="#a78bfa"/>
+    <circle cx="240" cy="188" r="1.0" fill="#67e8f9"/>
+  </g>
+
+
+  <!-- ================================================================ -->
+  <!--  FRUIT NODES — Glowing orbs at constellation intersections       -->
+  <!--  "Snap — the connections were right" = fruits appear             -->
+  <!-- ================================================================ -->
+  <g filter="url(#fruitGlow)">
+    <!-- Crown apex — large violet -->
+    <circle cx="200" cy="50"  r="9"   fill="#7c3aed" opacity="0.9"/>
+    <circle cx="200" cy="50"  r="4.5" fill="#c4b5fd" opacity="0.5"/>
+
+    <!-- Upper-left — violet -->
+    <circle cx="160" cy="58"  r="6.5" fill="#7c3aed" opacity="0.85"/>
+    <circle cx="160" cy="58"  r="3.2" fill="#c4b5fd" opacity="0.45"/>
+
+    <!-- Upper-right — violet -->
+    <circle cx="240" cy="58"  r="6.5" fill="#7c3aed" opacity="0.85"/>
+    <circle cx="240" cy="58"  r="3.2" fill="#c4b5fd" opacity="0.45"/>
+
+    <!-- Mid-left accent — violet -->
+    <circle cx="140" cy="102" r="4.5" fill="#a78bfa" opacity="0.65"/>
+    <circle cx="140" cy="102" r="2.2" fill="#ddd6fe" opacity="0.38"/>
+
+    <!-- Mid-right accent — cyan -->
+    <circle cx="260" cy="102" r="4.5" fill="#67e8f9" opacity="0.65"/>
+    <circle cx="260" cy="102" r="2.2" fill="#cffafe" opacity="0.38"/>
+
+    <!-- Far-left wing — cyan -->
+    <circle cx="92"  cy="164" r="6"   fill="#06b6d4" opacity="0.78"/>
+    <circle cx="92"  cy="164" r="3"   fill="#67e8f9" opacity="0.42"/>
+
+    <!-- Far-right wing — cyan -->
+    <circle cx="308" cy="164" r="6"   fill="#06b6d4" opacity="0.78"/>
+    <circle cx="308" cy="164" r="3"   fill="#67e8f9" opacity="0.42"/>
+
+    <!-- Center core — gold (intelligence heart) -->
+    <circle cx="200" cy="140" r="8.5" fill="#f59e0b" opacity="0.88"/>
+    <circle cx="200" cy="140" r="4.2" fill="#fcd34d" opacity="0.5"/>
+
+    <!-- Lower-left — soft violet -->
+    <circle cx="120" cy="212" r="5"   fill="#a78bfa" opacity="0.68"/>
+    <circle cx="120" cy="212" r="2.5" fill="#ddd6fe" opacity="0.38"/>
+
+    <!-- Lower-right — soft teal -->
+    <circle cx="280" cy="212" r="5"   fill="#2dd4bf" opacity="0.68"/>
+    <circle cx="280" cy="212" r="2.5" fill="#99f6e4" opacity="0.38"/>
+
+    <!-- Mid bridge accents -->
+    <circle cx="168" cy="108" r="3"   fill="#818cf8" opacity="0.5"/>
+    <circle cx="232" cy="108" r="3"   fill="#818cf8" opacity="0.5"/>
+  </g>
+
+
+  <!-- ================================================================ -->
+  <!--  IC / PCB ROOTS — Diagonal fan-out from trunk base               -->
+  <!--                                                                  -->
+  <!--  Like the original PNG: roots splay DIAGONALLY outward from      -->
+  <!--  the trunk, then have small IC-style right-angle kinks at tips   -->
+  <!--  with terminal pads. NOT horizontal-first.                       -->
+  <!--                                                                  -->
+  <!--  5 root traces, each independent, no cross-connections.          -->
+  <!--  Colors L→R: Cyan · Gold · Emerald · Rose · Violet              -->
+  <!-- ================================================================ -->
+  <g filter="url(#rootGlow)">
+
+    <!-- ── ROOT 1 · FAR LEFT · Cyan ──────────────────────────── -->
+    <g stroke="#06b6d4" fill="none" stroke-linecap="round">
+      <!-- Main diagonal: trunk-base → down-left -->
+      <path d="M192,298 L120,385"                           stroke-width="2.5" opacity="0.72"/>
+      <!-- IC kink: horizontal left then down -->
+      <path d="M120,385 L92,385"                            stroke-width="2"   opacity="0.55"/>
+      <path d="M92,385 L92,410"                             stroke-width="1.6" opacity="0.42"/>
+      <!-- Branch spur: down from mid-diagonal -->
+      <path d="M152,346 L135,346 L135,372"                  stroke-width="1.5" opacity="0.4"/>
+      <!-- Tiny extension -->
+      <path d="M120,395 L105,395"                           stroke-width="1"   opacity="0.28"/>
+    </g>
+    <!-- Vias at bends -->
+    <circle cx="120" cy="385" r="1.8" fill="#06b6d4" opacity="0.45"/>
+    <circle cx="92"  cy="385" r="1.5" fill="#06b6d4" opacity="0.38"/>
+    <circle cx="152" cy="346" r="1.5" fill="#06b6d4" opacity="0.38"/>
+    <circle cx="135" cy="346" r="1.3" fill="#06b6d4" opacity="0.32"/>
+    <!-- Terminal pads -->
+    <circle cx="92"  cy="410" r="4"   fill="#06b6d4" opacity="0.82"/>
+    <circle cx="92"  cy="410" r="2"   fill="#67e8f9" opacity="0.48"/>
+    <circle cx="135" cy="372" r="3.2" fill="#06b6d4" opacity="0.65"/>
+    <circle cx="135" cy="372" r="1.6" fill="#67e8f9" opacity="0.38"/>
+    <circle cx="105" cy="395" r="2.5" fill="#06b6d4" opacity="0.48"/>
+    <circle cx="105" cy="395" r="1.2" fill="#67e8f9" opacity="0.3"/>
+
+    <!-- ── ROOT 2 · LEFT · Gold ──────────────────────────────── -->
+    <g stroke="#f59e0b" fill="none" stroke-linecap="round">
+      <!-- Main diagonal -->
+      <path d="M195,298 L155,400"                           stroke-width="2.5" opacity="0.68"/>
+      <!-- IC kink: left then down -->
+      <path d="M155,400 L130,400 L130,430"                  stroke-width="1.8" opacity="0.48"/>
+      <!-- Branch spur from mid-diagonal -->
+      <path d="M172,356 L152,374"                           stroke-width="1.5" opacity="0.38"/>
+      <path d="M152,374 L140,374"                           stroke-width="1.2" opacity="0.3"/>
+    </g>
+    <!-- Vias -->
+    <circle cx="155" cy="400" r="1.8" fill="#f59e0b" opacity="0.42"/>
+    <circle cx="130" cy="400" r="1.5" fill="#f59e0b" opacity="0.35"/>
+    <circle cx="172" cy="356" r="1.3" fill="#f59e0b" opacity="0.32"/>
+    <circle cx="152" cy="374" r="1.3" fill="#f59e0b" opacity="0.3"/>
+    <!-- Terminals -->
+    <circle cx="155" cy="400" r="3.5" fill="#f59e0b" opacity="0.72"/>
+    <circle cx="155" cy="400" r="1.8" fill="#fcd34d" opacity="0.42"/>
+    <circle cx="130" cy="430" r="3.5" fill="#f59e0b" opacity="0.68"/>
+    <circle cx="130" cy="430" r="1.8" fill="#fcd34d" opacity="0.4"/>
+    <circle cx="140" cy="374" r="2.5" fill="#f59e0b" opacity="0.42"/>
+    <circle cx="140" cy="374" r="1.2" fill="#fcd34d" opacity="0.28"/>
+
+    <!-- ── ROOT 3 · CENTER · Emerald ─────────────────────────── -->
+    <g stroke="#10b981" fill="none" stroke-linecap="round">
+      <!-- Straight down -->
+      <path d="M200,300 L200,445"                           stroke-width="2.5" opacity="0.72"/>
+      <!-- Left IC spur -->
+      <path d="M200,408 L180,408 L180,435"                  stroke-width="1.6" opacity="0.45"/>
+      <!-- Right IC spur -->
+      <path d="M200,420 L220,420 L220,445"                  stroke-width="1.6" opacity="0.45"/>
+    </g>
+    <!-- Vias -->
+    <circle cx="200" cy="408" r="1.5" fill="#10b981" opacity="0.4"/>
+    <circle cx="180" cy="408" r="1.3" fill="#10b981" opacity="0.35"/>
+    <circle cx="200" cy="420" r="1.5" fill="#10b981" opacity="0.4"/>
+    <circle cx="220" cy="420" r="1.3" fill="#10b981" opacity="0.35"/>
+    <!-- Terminals -->
+    <circle cx="200" cy="445" r="4"   fill="#10b981" opacity="0.8"/>
+    <circle cx="200" cy="445" r="2"   fill="#6ee7b7" opacity="0.48"/>
+    <circle cx="180" cy="435" r="3"   fill="#10b981" opacity="0.6"/>
+    <circle cx="180" cy="435" r="1.5" fill="#6ee7b7" opacity="0.35"/>
+    <circle cx="220" cy="445" r="3"   fill="#10b981" opacity="0.6"/>
+    <circle cx="220" cy="445" r="1.5" fill="#6ee7b7" opacity="0.35"/>
+
+    <!-- ── ROOT 4 · RIGHT · Rose / Pink ──────────────────────── -->
+    <g stroke="#ec4899" fill="none" stroke-linecap="round">
+      <!-- Main diagonal -->
+      <path d="M205,298 L245,400"                           stroke-width="2.5" opacity="0.68"/>
+      <!-- IC kink: right then down -->
+      <path d="M245,400 L270,400 L270,430"                  stroke-width="1.8" opacity="0.48"/>
+      <!-- Branch spur -->
+      <path d="M228,356 L248,374"                           stroke-width="1.5" opacity="0.38"/>
+      <path d="M248,374 L260,374"                           stroke-width="1.2" opacity="0.3"/>
+    </g>
+    <!-- Vias -->
+    <circle cx="245" cy="400" r="1.8" fill="#ec4899" opacity="0.42"/>
+    <circle cx="270" cy="400" r="1.5" fill="#ec4899" opacity="0.35"/>
+    <circle cx="228" cy="356" r="1.3" fill="#ec4899" opacity="0.32"/>
+    <circle cx="248" cy="374" r="1.3" fill="#ec4899" opacity="0.3"/>
+    <!-- Terminals -->
+    <circle cx="245" cy="400" r="3.5" fill="#ec4899" opacity="0.72"/>
+    <circle cx="245" cy="400" r="1.8" fill="#f9a8d4" opacity="0.42"/>
+    <circle cx="270" cy="430" r="3.5" fill="#ec4899" opacity="0.65"/>
+    <circle cx="270" cy="430" r="1.8" fill="#f9a8d4" opacity="0.38"/>
+    <circle cx="260" cy="374" r="2.5" fill="#ec4899" opacity="0.42"/>
+    <circle cx="260" cy="374" r="1.2" fill="#f9a8d4" opacity="0.28"/>
+
+    <!-- ── ROOT 5 · FAR RIGHT · Violet ───────────────────────── -->
+    <g stroke="#7c3aed" fill="none" stroke-linecap="round">
+      <!-- Main diagonal -->
+      <path d="M208,298 L280,385"                           stroke-width="2.5" opacity="0.72"/>
+      <!-- IC kink: horizontal right then down -->
+      <path d="M280,385 L308,385"                           stroke-width="2"   opacity="0.55"/>
+      <path d="M308,385 L308,410"                           stroke-width="1.6" opacity="0.42"/>
+      <!-- Branch spur -->
+      <path d="M248,346 L265,346 L265,372"                  stroke-width="1.5" opacity="0.4"/>
+      <!-- Tiny extension -->
+      <path d="M280,395 L295,395"                           stroke-width="1"   opacity="0.28"/>
+    </g>
+    <!-- Vias -->
+    <circle cx="280" cy="385" r="1.8" fill="#7c3aed" opacity="0.45"/>
+    <circle cx="308" cy="385" r="1.5" fill="#7c3aed" opacity="0.38"/>
+    <circle cx="248" cy="346" r="1.5" fill="#7c3aed" opacity="0.38"/>
+    <circle cx="265" cy="346" r="1.3" fill="#7c3aed" opacity="0.32"/>
+    <!-- Terminals -->
+    <circle cx="308" cy="410" r="4"   fill="#7c3aed" opacity="0.82"/>
+    <circle cx="308" cy="410" r="2"   fill="#c4b5fd" opacity="0.48"/>
+    <circle cx="265" cy="372" r="3.2" fill="#7c3aed" opacity="0.65"/>
+    <circle cx="265" cy="372" r="1.6" fill="#c4b5fd" opacity="0.38"/>
+    <circle cx="295" cy="395" r="2.5" fill="#7c3aed" opacity="0.48"/>
+    <circle cx="295" cy="395" r="1.2" fill="#c4b5fd" opacity="0.3"/>
+
+  </g>
+
+</svg>
