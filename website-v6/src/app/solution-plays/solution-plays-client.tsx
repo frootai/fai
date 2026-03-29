@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Search, Mountain, Target, Phone, Ticket, FileText, Bot, MessageCircle, Shield, Settings, Microscope, DoorOpen, Image, Users, BarChart3, FileEdit, Smartphone, AlertTriangle, Brain, Wrench, Sliders, Ruler, Factory, Package, Box, Layers, type LucideIcon } from "lucide-react";
+import { ChevronRight, Search, Mountain, Target, Phone, Ticket, FileText, Bot, MessageCircle, Shield, Settings, Microscope, DoorOpen, Image, Users, BarChart3, FileEdit, Smartphone, AlertTriangle, Brain, Wrench, Sliders, Ruler, Factory, Package, Box, Layers, Monitor, Zap, Cog, type LucideIcon } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { StaggerChildren, StaggerItem } from "@/components/motion/stagger-children";
 import { Badge } from "@/components/ui/badge";
@@ -45,11 +45,13 @@ function EcoLayer({ icon, name, tagline, color, borderColor, children, rounded }
   const [open, setOpen] = useState(false);
   return (
     <div className={`border-2 ${borderColor} ${rounded || ""} transition-all duration-200 overflow-visible`} style={{ background: `${color}08` }}>
-      <button onClick={() => setOpen(!open)} className="w-full px-4 py-3 grid grid-cols-[auto_140px_1fr_auto] items-center gap-3 cursor-pointer">
-        {icon}
-        <h3 className="font-bold text-[12px] text-fg text-left whitespace-nowrap">{name}</h3>
-        <span className="text-[10px] text-fg/55 italic text-left truncate">{tagline}</span>
-        <ChevronRight className={`h-3 w-3 text-fg/40 shrink-0 transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
+      <button onClick={() => setOpen(!open)} className="w-full px-4 py-3 flex items-start gap-3 cursor-pointer text-left">
+        <div className="pt-0.5 shrink-0">{icon}</div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-[13px] text-fg">{name}</h3>
+          <div className="text-[11px] text-fg/55 mt-0.5">{tagline}</div>
+        </div>
+        <ChevronRight className={`h-3.5 w-3.5 text-fg/40 shrink-0 mt-1 transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
       </button>
       <AnimatePresence>
         {open && (
@@ -67,96 +69,107 @@ function EcosystemPanel() {
   return (
     <div className="mb-10 rounded-2xl border border-emerald/15 bg-gradient-to-b from-emerald/[0.02] to-transparent p-5">
       <div className="flex items-center justify-center gap-2 mb-4">
-        <img src="/img/frootai-mark.svg" alt="" className="h-5 w-5" />
-        <h2 className="font-extrabold text-[14px] tracking-wide">F<span className="text-emerald">AI</span> Ecosystem</h2>
-        <span className="text-[10px] text-fg/55 italic ml-1">the living system behind every play</span>
+        <img src="/img/frootai-mark.svg" alt="" className="h-6 w-6" />
+        <h2 className="font-extrabold text-[16px] tracking-wide">F<span className="text-emerald">AI</span> Ecosystem</h2>
+        <span className="text-[11px] text-fg/60 italic ml-1">Factory builds, Packages deliver, Toolkit equips</span>
       </div>
 
       <div className="space-y-0">
         {/* FAI Toolkit */}
-        <EcoLayer icon={<Box className="h-4 w-4 text-indigo" />} name="FAI Toolkit" tagline="Layer 3 — composable kits: build, tune, architect" color="#6366f1" borderColor="border-indigo/20 border-b-0" rounded="rounded-t-xl">
+        <EcoLayer icon={<Cog className="h-4 w-4 text-indigo" />} name="FAI Toolkit" tagline="🧠 Layer 3 — composable kits developers touch daily: DevKit, TuneKit, SpecKit" color="#6366f1" borderColor="border-indigo/20 border-b-0" rounded="rounded-t-xl">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2 mb-3">
             <div className="rounded-lg border border-cyan/20 bg-cyan/[0.03] p-4 text-center">
-              <div className="text-[8px] font-bold text-cyan mb-1">Box 1</div>
+              <div className="text-[10px] font-bold text-cyan mb-1">Box 1</div>
               <Wrench className="h-4 w-4 mx-auto mb-1.5 text-cyan" />
               <div className="font-bold text-[11px] text-fg mb-1">DevKit</div>
               <div className="text-[10px] text-fg/55 leading-relaxed">Your AI co-coder. agent.md gives Copilot solution context, infra/ deploys Bicep, MCP tools extend your agent, plugins add custom functions.</div>
             </div>
             <div className="rounded-lg border border-violet/20 bg-violet/[0.03] p-4 text-center">
-              <div className="text-[8px] font-bold text-violet mb-1">Box 2</div>
+              <div className="text-[10px] font-bold text-violet mb-1">Box 2</div>
               <Sliders className="h-4 w-4 mx-auto mb-1.5 text-violet" />
               <div className="font-bold text-[11px] text-fg mb-1">TuneKit</div>
               <div className="text-[10px] text-fg/55 leading-relaxed">AI config without being an AI specialist. config/*.json controls temperature, top-k, models. evaluation/ scores quality. Ship with confidence.</div>
             </div>
             <div className="rounded-lg border border-amber/20 bg-amber/[0.03] p-4 text-center">
-              <div className="text-[8px] font-bold text-amber mb-1">Box 3</div>
+              <div className="text-[10px] font-bold text-amber mb-1">Box 3</div>
               <Ruler className="h-4 w-4 mx-auto mb-1.5 text-amber" />
               <div className="font-bold text-[11px] text-fg mb-1">SpecKit</div>
               <div className="text-[10px] text-fg/55 leading-relaxed">Architecture blueprint. play-spec.json defines components, WAF alignment across all 6 pillars, and evaluation thresholds for production.</div>
             </div>
           </div>
           <div className="text-center">
-            <span className="text-[10px] text-fg/50 italic"><Brain className="h-3 w-3 inline mr-0.5 text-indigo/60" />Agentic OS (.github) — instructions · agents · skills · hooks · workflows — woven into every kit</span>
+            <span className="text-[10px] text-fg/50 italic"><Cog className="h-3 w-3 inline mr-1 text-indigo/60" />Agentic OS (.github) — knowledge · instructions · agents · skills · hooks · workflows — woven into every kit</span>
           </div>
         </EcoLayer>
 
         {/* FAI Packages */}
-        <EcoLayer icon={<Package className="h-4 w-4 text-emerald" />} name="FAI Packages" tagline="Layer 2 — install once, every kit arrives" color="#10b981" borderColor="border-emerald/20 border-b-0">
-          <div className="text-[10px] text-fg/55 text-center mb-3 leading-relaxed">
-            Every FAI Package delivers the full Toolkit — DevKit, TuneKit, and SpecKit — through the channel you prefer. Install one package, get all three kits.
-          </div>
+        <EcoLayer icon={<Package className="h-4 w-4 text-emerald" />} name="FAI Packages" tagline="🧠 Layer 2 — install one channel, the full Toolkit arrives" color="#10b981" borderColor="border-emerald/20 border-b-0">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             <Link href="/vscode-extension" className="glow-card rounded-lg p-2 text-center" style={{ "--glow": "#10b981" } as React.CSSProperties}>
               <div className="font-bold text-[10px] text-fg">VS Code</div>
-              <div className="text-[9px] text-fg/45">Extension</div>
+              <div className="text-[10px] text-fg/55">Extension</div>
             </Link>
             <Link href="/mcp-tooling" className="glow-card rounded-lg p-2 text-center" style={{ "--glow": "#10b981" } as React.CSSProperties}>
               <div className="font-bold text-[10px] text-fg">MCP Server</div>
-              <div className="text-[9px] text-fg/45">npm install</div>
+              <div className="text-[10px] text-fg/55">npm install</div>
             </Link>
             <Link href="/docker" className="glow-card rounded-lg p-2 text-center" style={{ "--glow": "#10b981" } as React.CSSProperties}>
               <div className="font-bold text-[10px] text-fg">Docker</div>
-              <div className="text-[9px] text-fg/45">Container</div>
+              <div className="text-[10px] text-fg/55">Container</div>
             </Link>
             <Link href="/cli" className="glow-card rounded-lg p-2 text-center" style={{ "--glow": "#10b981" } as React.CSSProperties}>
               <div className="font-bold text-[10px] text-fg">CLI</div>
-              <div className="text-[9px] text-fg/45">Terminal</div>
+              <div className="text-[10px] text-fg/55">Terminal</div>
             </Link>
             <Link href="/marketplace" className="glow-card rounded-lg p-2 text-center" style={{ "--glow": "#10b981" } as React.CSSProperties}>
               <div className="font-bold text-[10px] text-fg">Marketplace</div>
-              <div className="text-[9px] text-fg/45">Discover</div>
+              <div className="text-[10px] text-fg/55">Discover</div>
             </Link>
           </div>
           <div className="text-center mt-2">
-            <Link href="/setup-guide" className="glow-card inline-block rounded-lg px-3 py-1 text-[10px] text-emerald font-semibold" style={{ "--glow": "#10b981" } as React.CSSProperties}>Setup Guide →</Link>
+            <Link href="/setup-guide" className="glow-card inline-block rounded-lg px-3 py-1 text-[11px] text-emerald font-semibold" style={{ "--glow": "#10b981" } as React.CSSProperties}>Setup Guide →</Link>
+          </div>
+          <div className="mt-2 text-center">
+            <span className="text-[10px] text-fg/50 italic"><Package className="h-3 w-3 inline mr-0.5 text-emerald/60" />Install one package, get all three kits — every channel delivers the full Toolkit</span>
           </div>
         </EcoLayer>
 
         {/* FAI Factory */}
-        <EcoLayer icon={<Factory className="h-4 w-4 text-amber" />} name="FAI Factory" tagline="Layer 1 — the production engine" color="#f59e0b" borderColor="border-amber/20" rounded="rounded-b-xl">
-          <div className="text-[10px] text-fg/55 text-center leading-relaxed mb-2">
-            Where raw ideas become production AI — assembles Agentic OS primitives into a coherent system. You don&apos;t just get templates. You get the machine that makes them.
+        <EcoLayer icon={<Factory className="h-4 w-4 text-amber" />} name="FAI Factory" tagline="🧠 Layer 1 — the production engine that packs skills & knowledge into deployable form" color="#f59e0b" borderColor="border-amber/20" rounded="rounded-b-xl">
+          {/* Conveyor belt */}
+          <div className="rounded-lg border border-amber/15 bg-[#0d0d1a] p-3 overflow-x-auto">
+            <div className="flex items-center justify-center gap-0 min-w-[380px]">
+              <div className="flex flex-col items-center shrink-0">
+                <Factory className="h-7 w-7 text-amber mb-1" />
+                <div className="text-[10px] font-bold text-amber">FAI Factory</div>
+              </div>
+              <div className="mx-2 w-16 animate-flow-line-amber rounded-full" />
+              <div className="flex flex-col items-center shrink-0">
+                <div className="flex gap-1 mb-1">
+                  <div className="w-7 h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Monitor className="h-3.5 w-3.5 text-emerald" /></div>
+                  <div className="w-7 h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Package className="h-3.5 w-3.5 text-emerald" /></div>
+                  <div className="w-7 h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Zap className="h-3.5 w-3.5 text-emerald" /></div>
+                </div>
+                <div className="text-[10px] font-bold text-emerald">FAI Packages</div>
+              </div>
+              <div className="mx-2 w-16 animate-flow-line rounded-full" />
+              <div className="flex flex-col items-center shrink-0">
+                <div className="flex gap-1 mb-1">
+                  <div className="w-7 h-7 rounded-md border border-cyan/30 bg-cyan/[0.06] flex items-center justify-center"><Wrench className="h-3.5 w-3.5 text-cyan" /></div>
+                  <div className="w-7 h-7 rounded-md border border-violet/30 bg-violet/[0.06] flex items-center justify-center"><Sliders className="h-3.5 w-3.5 text-violet" /></div>
+                  <div className="w-7 h-7 rounded-md border border-amber/30 bg-amber/[0.06] flex items-center justify-center"><Ruler className="h-3.5 w-3.5 text-amber" /></div>
+                </div>
+                <div className="text-[10px] font-bold text-indigo">FAI Toolkit</div>
+              </div>
+            </div>
+            <div className="text-center mt-2">
+              <span className="text-[11px] text-fg/55 font-medium">Factory builds → Packages deliver → Toolkit equips</span>
+            </div>
           </div>
-          <div className="text-center">
-            <span className="text-[9px] text-fg/45 italic"><Factory className="h-2.5 w-2.5 inline mr-0.5 text-amber/50" />Skills &amp; knowledge packed into usable form — the engine behind every play</span>
+          <div className="mt-2 text-center">
+            <span className="text-[10px] text-fg/50 italic"><Factory className="h-3 w-3 inline mr-0.5 text-amber/60" />The machine that makes everything — assembles Agentic OS primitives into production AI</span>
           </div>
         </EcoLayer>
-      </div>
-
-      {/* Layer definitions */}
-      <div className="mt-3 space-y-1.5 text-[10px]">
-        <div className="flex items-center gap-2 text-fg/45">
-          <span className="font-bold text-amber w-12 shrink-0">Layer 1</span>
-          <span><span className="font-semibold text-fg/60">FAI Factory</span> — production engine that assembles skills &amp; knowledge into deployable form</span>
-        </div>
-        <div className="flex items-center gap-2 text-fg/45">
-          <span className="font-bold text-emerald w-12 shrink-0">Layer 2</span>
-          <span><span className="font-semibold text-fg/60">FAI Packages</span> — install one channel, the full Toolkit arrives (VS Code, npm, Docker, CLI)</span>
-        </div>
-        <div className="flex items-center gap-2 text-fg/45">
-          <span className="font-bold text-indigo w-12 shrink-0">Layer 3</span>
-          <span><span className="font-semibold text-fg/60">FAI Toolkit</span> — composable kits developers touch: DevKit, TuneKit, SpecKit</span>
-        </div>
       </div>
     </div>
   );
@@ -182,7 +195,7 @@ function FlipKit({ icon, name, color, front, back }: { icon: React.ReactNode; na
         ) : (
           <motion.div key="back" initial={{ opacity: 0, rotateY: 90 }} animate={{ opacity: 1, rotateY: 0 }} exit={{ opacity: 0, rotateY: -90 }} transition={{ duration: 0.25 }}>
             <div className="text-[11px] text-fg/60 leading-relaxed">{back}</div>
-            <div className="text-[9px] text-fg/30 mt-1.5 italic">tap to flip back</div>
+            <div className="text-[10px] text-fg/30 mt-1.5 italic">tap to flip back</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -267,7 +280,7 @@ function PlayCard({ play }: { play: typeof plays[0] }) {
               <div className="pt-2 border-t border-border mt-2">
                 <span className="font-bold text-fg/70">Ships with:</span> FAI Factory · FAI Toolkit (DevKit + TuneKit + SpecKit) · FAI Packages
               </div>
-              <div className="text-[11px] text-fg/45 italic">
+              <div className="text-[11px] text-fg/55 italic">
                 {isReady ? "Ready — clone → open in VS Code → Copilot is solution-aware → build → tune → deploy → evaluate" : "Skeleton ready — DevKit + TuneKit files present. Open in VS Code → co-coder fills implementation."}
               </div>
             </div>

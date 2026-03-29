@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Settings, Target, Monitor, Package, Store, Handshake, Puzzle, BookOpen, Wrench, Leaf, Sprout, TreePine, Layers, Cloud, Apple, Rocket, Bot, Building2, Landmark, Crosshair, BarChart3, Moon, Shield, type LucideIcon } from "lucide-react";
+import { ChevronRight, Settings, Target, Monitor, Package, Store, Handshake, Puzzle, BookOpen, Wrench, Leaf, Sprout, TreePine, Layers, Cloud, Apple, Rocket, Bot, Building2, Landmark, Crosshair, BarChart3, Moon, Shield, Factory, Cog, Sliders, Ruler, Zap, type LucideIcon } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { StaggerChildren, StaggerItem } from "@/components/motion/stagger-children";
 import { Card } from "@/components/ui/card";
@@ -158,11 +158,43 @@ export default function Home() {
               AI <span className="font-bold text-amber">F</span>oundations · <span className="font-bold text-emerald">R</span>easoning · <span className="font-bold text-cyan">O</span>rchestration · <span className="font-bold text-indigo">O</span>perations · <span className="font-bold text-violet">T</span>ransformation
             </p>
           </FadeIn>
-          <FadeIn delay={0.3}>
-            <div className="mx-auto mt-5 max-w-xl rounded-2xl border border-emerald/20 bg-gradient-to-br from-emerald/[0.04] to-indigo/[0.02] px-6 py-4">
-              <p className="text-[13px] leading-relaxed text-fg-muted italic text-center">
-                &ldquo;An open ecosystem where Infra, Platform, and App teams converge to build AI Frootfully.&rdquo;
-              </p>
+          {/* Conveyor belt — full diagram */}
+          <FadeIn delay={0.35}>
+            <div className="mx-auto mt-5 max-w-lg">
+              <div className="rounded-xl border border-border-subtle bg-[#0d0d1a] p-4 overflow-x-auto">
+                <div className="flex items-center justify-center gap-0 min-w-[420px]">
+                  <div className="flex flex-col items-center shrink-0">
+                    <Factory className="h-8 w-8 text-amber mb-1" />
+                    <div className="text-[10px] font-bold text-amber">FAI Factory</div>
+                  </div>
+                  <div className="mx-3 w-14 animate-flow-line-amber rounded-full" />
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="flex gap-1.5 mb-1">
+                      <div className="w-8 h-8 rounded-lg border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Monitor className="h-4 w-4 text-emerald" /></div>
+                      <div className="w-8 h-8 rounded-lg border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Package className="h-4 w-4 text-emerald" /></div>
+                      <div className="w-8 h-8 rounded-lg border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Zap className="h-4 w-4 text-emerald" /></div>
+                    </div>
+                    <div className="text-[10px] font-bold text-emerald">FAI Packages</div>
+                  </div>
+                  <div className="mx-3 w-14 animate-flow-line rounded-full" />
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="flex gap-1.5 mb-1">
+                      <div className="w-8 h-8 rounded-lg border border-cyan/30 bg-cyan/[0.06] flex items-center justify-center"><Wrench className="h-4 w-4 text-cyan" /></div>
+                      <div className="w-8 h-8 rounded-lg border border-violet/30 bg-violet/[0.06] flex items-center justify-center"><Sliders className="h-4 w-4 text-violet" /></div>
+                      <div className="w-8 h-8 rounded-lg border border-amber/30 bg-amber/[0.06] flex items-center justify-center"><Ruler className="h-4 w-4 text-amber" /></div>
+                    </div>
+                    <div className="text-[10px] font-bold text-indigo">FAI Toolkit</div>
+                  </div>
+                </div>
+                <div className="text-center mt-2">
+                  <span className="text-[11px] text-fg/55 font-medium">Factory builds → Packages deliver → Toolkit equips</span>
+                </div>
+              </div>
+              <div className="mt-3 text-center animate-glow-border rounded-xl border border-emerald/15 bg-gradient-to-br from-emerald/[0.02] to-indigo/[0.01] px-4 py-3">
+                <p className="text-[13px] text-fg-muted italic">
+                  An open ecosystem where <span className="font-semibold text-fg">Infra</span>, <span className="font-semibold text-fg">Platform</span>, and <span className="font-semibold text-fg">App</span> teams build AI <span className="text-emerald font-semibold">Frootfully</span>.
+                </p>
+              </div>
             </div>
           </FadeIn>
         </div>
@@ -174,8 +206,8 @@ export default function Home() {
 
         {/* ═══ 2. ECOSYSTEM GRID ═══ */}
         <section>
-          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight mb-1">FAI Ecosystem</h2>
-            <p className="text-[12px] text-fg-dim text-center italic mb-8">Click on the cards to explore more</p></FadeIn>
+          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight text-fg-muted mb-1">FAI Ecosystem</h2>
+            <p className="text-[12px] text-fg-muted text-center italic mb-8">Click on the cards to explore more</p></FadeIn>
           <StaggerChildren className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {ecosystemCards.map((c) => (
               <StaggerItem key={c.title}>
@@ -192,8 +224,8 @@ export default function Home() {
         {/* ═══ 4. FROOT FRAMEWORK ═══ */}
         <div className="mx-auto max-w-4xl px-8"><div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" /></div>
         <section>
-          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight mb-1">The FAI Framework</h2>
-            <p className="text-[12px] text-fg-dim text-center italic mb-8">Click to expand, then click modules to learn</p></FadeIn>
+          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight text-fg-muted mb-1">The FAI Framework</h2>
+            <p className="text-[12px] text-fg-muted text-center italic mb-8">Click to expand, then click modules to learn</p></FadeIn>
           <div className="space-y-2.5 max-w-2xl mx-auto">
             {layers.map((l, i) => (<FadeIn key={l.id} delay={i * 0.06}><ExpandableLayer layer={l} /></FadeIn>))}
           </div>
@@ -202,7 +234,7 @@ export default function Home() {
         {/* ═══ 5. OUTCOMES GRID ═══ */}
         <div className="mx-auto max-w-4xl px-8"><div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" /></div>
         <section>
-          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight mb-8">What These Help You Achieve</h2></FadeIn>
+          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight mb-8"><span className="text-fg-muted">Ampli</span><span className="text-white font-extrabold">F</span><span className="text-emerald font-extrabold">AI</span> <span className="text-fg-muted">Your Expertise</span></h2></FadeIn>
           <StaggerChildren className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {outcomes.map((o) => (
               <StaggerItem key={o.title}>
@@ -220,8 +252,8 @@ export default function Home() {
         <div className="mx-auto max-w-4xl px-8"><div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" /></div>
         <section>
           <FadeIn>
-            <h2 className="text-2xl font-bold text-center tracking-tight mb-2">
-              FAI Universe
+            <h2 className="text-2xl font-bold text-center tracking-tight text-fg-muted mb-2">
+              Explore FAI
             </h2>
             <p className="text-[13px] text-fg-muted text-center max-w-2xl mx-auto mb-6">
               The open glue that binds Infra, Platform, and App teams into one Agentic AI ecosystem.

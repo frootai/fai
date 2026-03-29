@@ -40,7 +40,7 @@ export function Footer() {
               <span>Froot<span className="text-emerald">AI</span></span>
             </Link>
             <p className="mt-3 text-[12px] text-fg-muted leading-relaxed max-w-[200px]">
-              From the Roots to the Fruits.<br />It&apos;s simply <span className="text-emerald font-medium">Frootful</span>.
+              From the Roots to the Fruits.<br /><span className="text-emerald font-medium">It&apos;s simply Frootful.</span>
             </p>
           </div>
 
