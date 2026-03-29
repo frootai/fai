@@ -8,13 +8,16 @@ export function DocTableOfContents() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let tocbotInstance: typeof import("tocbot") | null = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let tocbotRef: any = null;
 
     const init = async () => {
-      const tocbot = await import("tocbot");
-      tocbotInstance = tocbot;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tocbot = (await import("tocbot" as any)) as any;
+      const tb = tocbot.default || tocbot;
+      tocbotRef = tb;
 
-      tocbot.init({
+      tb.init({
         tocSelector: ".js-toc",
         contentSelector: "article",
         headingSelector: "h1, h2, h3",
@@ -42,19 +45,19 @@ export function DocTableOfContents() {
 
     return () => {
       clearTimeout(timer);
-      tocbotInstance?.destroy();
+      tocbotRef?.destroy();
     };
   }, []);
 
   // Also init mobile TOC
   useEffect(() => {
     if (!mobileOpen || !ready) return;
-    let tocbotMobile: typeof import("tocbot") | null = null;
 
     const initMobile = async () => {
-      const tocbot = await import("tocbot");
-      tocbotMobile = tocbot;
-      tocbot.refresh({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tocbot = (await import("tocbot" as any)) as any;
+      const tb = tocbot.default || tocbot;
+      tb.refresh({
         tocSelector: ".js-toc-mobile",
         contentSelector: "article",
         headingSelector: "h1, h2, h3",
@@ -71,7 +74,6 @@ export function DocTableOfContents() {
     };
 
     initMobile();
-    return () => { tocbotMobile = null; };
   }, [mobileOpen, ready]);
 
   return (
