@@ -8,15 +8,15 @@ import { Menu, X, ChevronDown, Sparkles, Settings, Target, Package, Link2, Monit
 import { SearchFAI, SearchFAIPanel } from "@/components/layout/search-fai";
 
 const menus = [
-  { label: "FAI Platform", items: [
-    { href: "/ecosystem", label: "FAI Ecosystem", Icon: Link2 },
+  { label: "FAI Ecosystem", items: [
+    { href: "/ecosystem", label: "FAI Overview", Icon: Link2 },
     { href: "/configurator", label: "FAI Solution Configurator", Icon: Settings },
     { href: "/solution-plays", label: "FAI Solution Plays", Icon: Target },
-    { href: "/packages", label: "FAI Packages", Icon: Package },
   ]},
-  { label: "FAI Solutions", items: [
+  { label: "FAI Packages", items: [
+    { href: "/packages", label: "FAI Packages", Icon: Package },
     { href: "/vscode-extension", label: "VS Code Extension", Icon: Monitor },
-    { href: "/mcp-tooling", label: "MCP Server (22 tools)", Icon: Plug },
+    { href: "/mcp-tooling", label: "MCP Server", Icon: Plug },
     { href: "/cli", label: "CLI (npx frootai)", Icon: Zap },
     { href: "/docker", label: "Docker Image", Icon: Container },
     { href: "/setup-guide", label: "Setup Guide", Icon: ClipboardList },

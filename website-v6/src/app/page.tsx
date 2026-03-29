@@ -20,7 +20,7 @@ const ecosystemCards = [
   { href: "/mcp-tooling", Icon: Package, title: "MCP Server (npm)", sub: "22 tools for your agent", color: "#10b981" },
   { href: "/marketplace", Icon: Store, title: "Plugin Marketplace", sub: "Discover & share plugins", color: "#ec4899" },
   { href: "/partners", Icon: Handshake, title: "Partner Integrations", sub: "ServiceNow, Salesforce, SAP", color: "#06b6d4" },
-  { href: "/packages", Icon: Puzzle, title: "FROOT Packages", sub: "Downloadable LEGO blocks", color: "#8b5cf6" },
+  { href: "/packages", Icon: Puzzle, title: "FAI Packages", sub: "Downloadable LEGO blocks", color: "#8b5cf6" },
   { href: "/learning-hub", Icon: BookOpen, title: "FAI Learning Hub", sub: "18 modules · Glossary · Workshops", color: "#f97316" },
   { href: "/dev-hub", Icon: Wrench, title: "FAI Developer Hub", sub: "API ref · Changelog · Guides", color: "#0ea5e9" },
   { href: "/community", Icon: Leaf, title: "100% Open Source", sub: "MIT License — Star on GitHub", color: "#00c853" },
@@ -76,7 +76,7 @@ const outcomes = [
 const ctaLinks = [
   { label: "Solution Configurator", href: "/configurator", color: "#f59e0b" },
   { label: "Solution Plays", href: "/solution-plays", color: "#7c3aed" },
-  { label: "FROOT Packages", href: "/packages", color: "#8b5cf6" },
+  { label: "FAI Packages", href: "/packages", color: "#8b5cf6" },
   { label: "Ecosystem Overview", href: "/ecosystem", color: "#0ea5e9" },
   { label: "VS Code Extension", href: "/vscode-extension", color: "#6366f1" },
   { label: "MCP Server", href: "/mcp-tooling", color: "#10b981" },
@@ -192,7 +192,7 @@ export default function Home() {
         {/* ═══ 4. FROOT FRAMEWORK ═══ */}
         <div className="mx-auto max-w-4xl px-8"><div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" /></div>
         <section>
-          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight mb-1">The FROOT Framework</h2>
+          <FadeIn><h2 className="text-2xl font-bold text-center tracking-tight mb-1">The FAI Framework</h2>
             <p className="text-[12px] text-fg-dim text-center italic mb-8">Click to expand, then click modules to learn</p></FadeIn>
           <div className="space-y-2.5 max-w-2xl mx-auto">
             {layers.map((l, i) => (<FadeIn key={l.id} delay={i * 0.06}><ExpandableLayer layer={l} /></FadeIn>))}

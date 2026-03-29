@@ -37,12 +37,12 @@ export default function EcosystemPage() {
         </div>
       </FadeIn>
 
-      {/* ═══ FROOT TOOLKIT ═══ */}
+      {/* ═══ FAI Toolkit ═══ */}
       <FadeIn delay={0.1}>
         <div className="mb-6 rounded-2xl border-2 border-indigo/20 p-6" style={{ background: "#6366f108" }}>
           <div className="flex items-center gap-2 justify-center mb-4">
             <Box className="h-5 w-5 text-indigo" />
-            <h2 className="font-extrabold text-[16px] text-fg">FROOT Toolkit</h2>
+            <h2 className="font-extrabold text-[16px] text-fg">FAI Toolkit</h2>
             <span className="text-[11px] text-fg/55 italic ml-1">Layer 3 — composable kits: build, tune, architect</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
@@ -77,16 +77,16 @@ export default function EcosystemPage() {
         </div>
       </FadeIn>
 
-      {/* ═══ FROOT PACKAGES ═══ */}
+      {/* ═══ FAI Packages ═══ */}
       <FadeIn delay={0.15}>
         <div className="mb-6 rounded-2xl border-2 border-emerald/20 p-6" style={{ background: "#10b98108" }}>
           <div className="flex items-center gap-2 justify-center mb-3">
             <Package className="h-5 w-5 text-emerald" />
-            <h2 className="font-extrabold text-[16px] text-fg">FROOT Packages</h2>
+            <h2 className="font-extrabold text-[16px] text-fg">FAI Packages</h2>
             <span className="text-[11px] text-fg/55 italic ml-1">Layer 2 — install once, every kit arrives</span>
           </div>
           <p className="text-[11px] text-fg/55 text-center mb-4 leading-relaxed max-w-lg mx-auto">
-            Every FROOT Package delivers the full Toolkit — DevKit, TuneKit, and SpecKit — through the channel you prefer. Install one package, get all three kits.
+            Every FAI Package delivers the full Toolkit — DevKit, TuneKit, and SpecKit — through the channel you prefer. Install one package, get all three kits.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
             {channels.map((c) => (
@@ -103,12 +103,12 @@ export default function EcosystemPage() {
         </div>
       </FadeIn>
 
-      {/* ═══ FROOT FACTORY ═══ */}
+      {/* ═══ FAI Factory ═══ */}
       <FadeIn delay={0.2}>
         <div className="mb-10 rounded-2xl border-2 border-amber/20 p-6" style={{ background: "#f59e0b08" }}>
           <div className="flex items-center gap-2 justify-center mb-3">
             <Factory className="h-5 w-5 text-amber" />
-            <h2 className="font-extrabold text-[16px] text-fg">FROOT Factory</h2>
+            <h2 className="font-extrabold text-[16px] text-fg">FAI Factory</h2>
             <span className="text-[11px] text-fg/55 italic ml-1">Layer 1 — the production engine</span>
           </div>
           <p className="text-[11px] text-fg/55 text-center leading-relaxed max-w-lg mx-auto">
@@ -123,7 +123,7 @@ export default function EcosystemPage() {
           <Layers className="h-6 w-6 mx-auto mb-2 text-emerald" />
           <h2 className="font-extrabold text-[15px] text-fg mb-2">Solution Plays</h2>
           <p className="text-[11px] text-fg/50 mb-4 max-w-md mx-auto">
-            Production-ready blueprints assembled by the FAI Ecosystem. Each play ships with the full FROOT stack — or pick any kit individually.
+            Production-ready blueprints assembled by the FAI Ecosystem. Each play ships with the full FAI stack — or pick any kit individually.
           </p>
           <GlowPill href="/solution-plays" color="#10b981">Explore Solution Plays →</GlowPill>
         </div>

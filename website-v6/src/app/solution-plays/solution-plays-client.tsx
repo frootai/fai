@@ -73,8 +73,8 @@ function EcosystemPanel() {
       </div>
 
       <div className="space-y-0">
-        {/* FROOT Toolkit */}
-        <EcoLayer icon={<Box className="h-4 w-4 text-indigo" />} name="FROOT Toolkit" tagline="Layer 3 — composable kits: build, tune, architect" color="#6366f1" borderColor="border-indigo/20 border-b-0" rounded="rounded-t-xl">
+        {/* FAI Toolkit */}
+        <EcoLayer icon={<Box className="h-4 w-4 text-indigo" />} name="FAI Toolkit" tagline="Layer 3 — composable kits: build, tune, architect" color="#6366f1" borderColor="border-indigo/20 border-b-0" rounded="rounded-t-xl">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2 mb-3">
             <div className="rounded-lg border border-cyan/20 bg-cyan/[0.03] p-4 text-center">
               <div className="text-[8px] font-bold text-cyan mb-1">Box 1</div>
@@ -100,10 +100,10 @@ function EcosystemPanel() {
           </div>
         </EcoLayer>
 
-        {/* FROOT Packages */}
-        <EcoLayer icon={<Package className="h-4 w-4 text-emerald" />} name="FROOT Packages" tagline="Layer 2 — install once, every kit arrives" color="#10b981" borderColor="border-emerald/20 border-b-0">
+        {/* FAI Packages */}
+        <EcoLayer icon={<Package className="h-4 w-4 text-emerald" />} name="FAI Packages" tagline="Layer 2 — install once, every kit arrives" color="#10b981" borderColor="border-emerald/20 border-b-0">
           <div className="text-[10px] text-fg/55 text-center mb-3 leading-relaxed">
-            Every FROOT Package delivers the full Toolkit — DevKit, TuneKit, and SpecKit — through the channel you prefer. Install one package, get all three kits.
+            Every FAI Package delivers the full Toolkit — DevKit, TuneKit, and SpecKit — through the channel you prefer. Install one package, get all three kits.
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             <Link href="/vscode-extension" className="glow-card rounded-lg p-2 text-center" style={{ "--glow": "#10b981" } as React.CSSProperties}>
@@ -132,8 +132,8 @@ function EcosystemPanel() {
           </div>
         </EcoLayer>
 
-        {/* FROOT Factory */}
-        <EcoLayer icon={<Factory className="h-4 w-4 text-amber" />} name="FROOT Factory" tagline="Layer 1 — the production engine" color="#f59e0b" borderColor="border-amber/20" rounded="rounded-b-xl">
+        {/* FAI Factory */}
+        <EcoLayer icon={<Factory className="h-4 w-4 text-amber" />} name="FAI Factory" tagline="Layer 1 — the production engine" color="#f59e0b" borderColor="border-amber/20" rounded="rounded-b-xl">
           <div className="text-[10px] text-fg/55 text-center leading-relaxed">
             Where raw ideas become production AI — assembles Agentic OS primitives into a coherent system. You don&apos;t just get templates. You get the machine that makes them.
           </div>
@@ -224,16 +224,16 @@ function PlayCard({ play }: { play: typeof plays[0] }) {
           <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`} />
           {expanded ? "Hide Highlights" : "Quick Highlights"}
         </button>
-        {/* FROOT Toolkit */}
+        {/* FAI Toolkit */}
         <button onClick={() => setKitOpen(!kitOpen)}
           className="glow-card flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold text-amber cursor-pointer" style={{ "--glow": "#f59e0b" } as React.CSSProperties}>
           <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${kitOpen ? "rotate-90" : ""}`} />
-          {kitOpen ? "Close FROOT Toolkit" : "FROOT Toolkit"}
+          {kitOpen ? "Close FAI Toolkit" : "FAI Toolkit"}
         </button>
         <span className="text-[10px] text-fg/40 italic self-center">→ delivered via</span>
-        {/* FROOT Packages */}
+        {/* FAI Packages */}
         <Link href="/setup-guide" className="glow-card flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold text-emerald" style={{ "--glow": "#10b981" } as React.CSSProperties}>
-          <Package className="h-3.5 w-3.5" /> FROOT Packages
+          <Package className="h-3.5 w-3.5" /> FAI Packages
         </Link>
       </div>
 
@@ -246,7 +246,7 @@ function PlayCard({ play }: { play: typeof plays[0] }) {
               <div><span className="font-bold text-emerald">Infra:</span> {play.infra}</div>
               <div><span className="font-bold text-cyan">Tuning:</span> {play.tune}</div>
               <div className="pt-2 border-t border-border mt-2">
-                <span className="font-bold text-fg/70">Ships with:</span> FROOT Factory · FROOT Toolkit (DevKit + TuneKit + SpecKit) · FROOT Packages
+                <span className="font-bold text-fg/70">Ships with:</span> FAI Factory · FAI Toolkit (DevKit + TuneKit + SpecKit) · FAI Packages
               </div>
               <div className="text-[11px] text-fg/45 italic">
                 {isReady ? "Ready — clone → open in VS Code → Copilot is solution-aware → build → tune → deploy → evaluate" : "Skeleton ready — DevKit + TuneKit files present. Open in VS Code → co-coder fills implementation."}
@@ -262,7 +262,7 @@ function PlayCard({ play }: { play: typeof plays[0] }) {
             exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
             <div className="mt-3 rounded-xl border border-amber/20 bg-amber/[0.02] p-4">
               <div className="text-[11px] text-fg/50 text-center mb-3">
-                <span className="font-bold text-emerald">FROOT Toolkit</span> — composable kits for <span className="text-fg/70 font-semibold">{play.name}</span>
+                <span className="font-bold text-emerald">FAI Toolkit</span> — composable kits for <span className="text-fg/70 font-semibold">{play.name}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <FlipKit
@@ -288,7 +288,7 @@ function PlayCard({ play }: { play: typeof plays[0] }) {
                 />
               </div>
               <div className="mt-3 pt-2 border-t border-amber/10 text-center">
-                <div className="text-[10px] text-fg/50 italic">Install any FROOT Package to get all three kits · Assembled by the FROOT Factory</div>
+                <div className="text-[10px] text-fg/50 italic">Install any FAI Package to get all three kits · Assembled by the FAI Factory</div>
               </div>
             </div>
           </motion.div>
