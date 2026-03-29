@@ -134,10 +134,29 @@ function EcosystemPanel() {
 
         {/* FAI Factory */}
         <EcoLayer icon={<Factory className="h-4 w-4 text-amber" />} name="FAI Factory" tagline="Layer 1 — the production engine" color="#f59e0b" borderColor="border-amber/20" rounded="rounded-b-xl">
-          <div className="text-[10px] text-fg/55 text-center leading-relaxed">
+          <div className="text-[10px] text-fg/55 text-center leading-relaxed mb-2">
             Where raw ideas become production AI — assembles Agentic OS primitives into a coherent system. You don&apos;t just get templates. You get the machine that makes them.
           </div>
+          <div className="text-center">
+            <span className="text-[9px] text-fg/45 italic"><Factory className="h-2.5 w-2.5 inline mr-0.5 text-amber/50" />Skills &amp; knowledge packed into usable form — the engine behind every play</span>
+          </div>
         </EcoLayer>
+      </div>
+
+      {/* Layer definitions */}
+      <div className="mt-3 space-y-1.5 text-[10px]">
+        <div className="flex items-center gap-2 text-fg/45">
+          <span className="font-bold text-amber w-12 shrink-0">Layer 1</span>
+          <span><span className="font-semibold text-fg/60">FAI Factory</span> — production engine that assembles skills &amp; knowledge into deployable form</span>
+        </div>
+        <div className="flex items-center gap-2 text-fg/45">
+          <span className="font-bold text-emerald w-12 shrink-0">Layer 2</span>
+          <span><span className="font-semibold text-fg/60">FAI Packages</span> — install one channel, the full Toolkit arrives (VS Code, npm, Docker, CLI)</span>
+        </div>
+        <div className="flex items-center gap-2 text-fg/45">
+          <span className="font-bold text-indigo w-12 shrink-0">Layer 3</span>
+          <span><span className="font-semibold text-fg/60">FAI Toolkit</span> — composable kits developers touch: DevKit, TuneKit, SpecKit</span>
+        </div>
       </div>
     </div>
   );

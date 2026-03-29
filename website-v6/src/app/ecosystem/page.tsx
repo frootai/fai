@@ -111,9 +111,43 @@ export default function EcosystemPage() {
             <h2 className="font-extrabold text-[16px] text-fg">FAI Factory</h2>
             <span className="text-[11px] text-fg/55 italic ml-1">Layer 1 — the production engine</span>
           </div>
-          <p className="text-[11px] text-fg/55 text-center leading-relaxed max-w-lg mx-auto">
+          <p className="text-[11px] text-fg/55 text-center leading-relaxed max-w-lg mx-auto mb-3">
             Where raw ideas become production AI — assembles Agentic OS primitives into a coherent system. You don&apos;t just get templates. You get the machine that makes them.
           </p>
+          <div className="text-center">
+            <span className="text-[10px] text-fg/50 italic"><Factory className="h-3 w-3 inline mr-0.5 text-amber/60" />Skills &amp; knowledge packed into usable form — the engine behind every play, every kit, every package</span>
+          </div>
+        </div>
+      </FadeIn>
+
+      {/* ═══ LAYER DEFINITIONS ═══ */}
+      <FadeIn delay={0.22}>
+        <div className="mb-10 rounded-xl border border-border-subtle bg-bg-surface/30 p-5">
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-16 text-[10px] font-bold text-amber uppercase tracking-wider pt-0.5">Layer 1</div>
+              <div>
+                <span className="font-bold text-[12px] text-fg">FAI Factory</span>
+                <span className="text-[11px] text-fg/50 ml-2">The production engine. Assembles Agentic OS primitives, skills, and knowledge into deployable plays and kits.</span>
+              </div>
+            </div>
+            <div className="h-px bg-border-subtle" />
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-16 text-[10px] font-bold text-emerald uppercase tracking-wider pt-0.5">Layer 2</div>
+              <div>
+                <span className="font-bold text-[12px] text-fg">FAI Packages</span>
+                <span className="text-[11px] text-fg/50 ml-2">Distribution channels. Install one package (VS Code, npm, Docker, CLI) and the full Toolkit arrives.</span>
+              </div>
+            </div>
+            <div className="h-px bg-border-subtle" />
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-16 text-[10px] font-bold text-indigo uppercase tracking-wider pt-0.5">Layer 3</div>
+              <div>
+                <span className="font-bold text-[12px] text-fg">FAI Toolkit</span>
+                <span className="text-[11px] text-fg/50 ml-2">Composable kits — DevKit (build), TuneKit (evaluate), SpecKit (architect). What developers touch daily.</span>
+              </div>
+            </div>
+          </div>
         </div>
       </FadeIn>
 
