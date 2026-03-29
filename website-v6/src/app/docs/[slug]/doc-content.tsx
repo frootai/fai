@@ -1,10 +1,54 @@
 "use client";
 
+import { useMemo } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { MermaidDiagram } from "@/components/ui/mermaid-diagram";
+import { AlertTriangle, Info, Lightbulb, MessageCircleWarning, Flame } from "lucide-react";
 
-// Generate anchor ID from heading text (matches search index toHash)
+// ─── Admonition styling ────────────────────────────────────────
+const ADMONITION_STYLES: Record<string, { icon: React.ReactNode; border: string; bg: string; titleColor: string }> = {
+  tip:     { icon: <Lightbulb className="h-4 w-4 shrink-0" />, border: "border-emerald/30", bg: "bg-emerald/[0.04]", titleColor: "text-emerald" },
+  note:    { icon: <Info className="h-4 w-4 shrink-0" />,      border: "border-indigo/30",  bg: "bg-indigo/[0.04]",  titleColor: "text-indigo" },
+  info:    { icon: <Info className="h-4 w-4 shrink-0" />,      border: "border-cyan/30",    bg: "bg-cyan/[0.04]",    titleColor: "text-cyan" },
+  warning: { icon: <AlertTriangle className="h-4 w-4 shrink-0" />, border: "border-amber/30", bg: "bg-amber/[0.04]", titleColor: "text-amber" },
+  caution: { icon: <MessageCircleWarning className="h-4 w-4 shrink-0" />, border: "border-orange/30", bg: "bg-orange/[0.04]", titleColor: "text-orange" },
+  danger:  { icon: <Flame className="h-4 w-4 shrink-0" />,    border: "border-rose/30",    bg: "bg-rose/[0.04]",    titleColor: "text-rose" },
+};
+
+function Admonition({ type, title, children }: { type: string; title: string; children: React.ReactNode }) {
+  const style = ADMONITION_STYLES[type] || ADMONITION_STYLES.note;
+  return (
+    <div className={`my-4 rounded-xl border-l-4 ${style.border} ${style.bg} px-4 py-3`}>
+      <div className={`flex items-center gap-2 font-bold text-[13px] ${style.titleColor} mb-1`}>
+        {style.icon}
+        {title || type.charAt(0).toUpperCase() + type.slice(1)}
+      </div>
+      <div className="text-[13px] leading-[1.7] text-fg-muted [&>p]:my-1">{children}</div>
+    </div>
+  );
+}
+
+// ─── Preprocessing: convert Docusaurus syntax to HTML markers ──
+function preprocessContent(raw: string): string {
+  // Strip YAML frontmatter
+  let content = raw.replace(/^---[\s\S]*?---\n*/m, "");
+
+  // Convert Docusaurus admonitions: :::type Title\ncontent\n:::
+  content = content.replace(
+    /^:::(\w+)\s*(.*?)\n([\s\S]*?)^:::/gm,
+    (_match, type, title, body) => {
+      const escapedTitle = (title || "").trim().replace(/"/g, "&quot;");
+      const trimmedBody = body.trim();
+      return `<div data-admonition="${type}" data-title="${escapedTitle}">\n\n${trimmedBody}\n\n</div>`;
+    }
+  );
+
+  return content;
+}
+
+// ─── Heading anchor IDs ────────────────────────────────────────
 function toId(children: React.ReactNode): string {
   const text = typeof children === "string" ? children
     : Array.isArray(children) ? children.map(c => typeof c === "string" ? c : c?.props?.children || "").join("")
@@ -37,12 +81,34 @@ const components: Record<string, React.FC<any>> = {
 
     const isBlock = className?.includes("language-");
     return isBlock ? (
-      <pre className="my-4 rounded-xl border border-border bg-bg/80 p-4 overflow-x-auto text-[13px] leading-relaxed"><code>{children}</code></pre>
+      <pre className="my-4 rounded-xl border border-border bg-[#0a0a14] p-4 overflow-x-auto text-[12.5px] leading-[1.7] font-mono max-h-[500px] overflow-y-auto">
+        {lang && <span className="block text-[10px] text-fg-dim uppercase tracking-wider mb-2 pb-1 border-b border-border-subtle">{lang}</span>}
+        <code>{children}</code>
+      </pre>
     ) : (
       <code className="rounded bg-indigo/10 px-1.5 py-0.5 text-[13px] text-indigo font-mono">{children}</code>
     );
   },
   pre: ({ children }: any) => <>{children}</>,
+  // Admonition divs — rendered from preprocessed :::type blocks
+  div: ({ children, ...props }: any) => {
+    const admonitionType = props["data-admonition"];
+    if (admonitionType) {
+      return <Admonition type={admonitionType} title={props["data-title"] || ""}>{children}</Admonition>;
+    }
+    return <div {...props}>{children}</div>;
+  },
+  // Details/Summary for expandable sections
+  details: ({ children }: any) => (
+    <details className="my-4 rounded-xl border border-border bg-bg-surface/50 overflow-hidden">
+      {children}
+    </details>
+  ),
+  summary: ({ children }: any) => (
+    <summary className="px-4 py-3 text-[13px] font-semibold text-fg cursor-pointer hover:bg-bg-hover transition-colors select-none">
+      {children}
+    </summary>
+  ),
   table: ({ children }: any) => (
     <div className="my-4 overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-[13px] leading-relaxed border-collapse">{children}</table>
@@ -57,10 +123,11 @@ const components: Record<string, React.FC<any>> = {
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export function DocContent({ content }: { content: string }) {
+  const processed = useMemo(() => preprocessContent(content), [content]);
   return (
     <article className="max-w-none">
-      <Markdown remarkPlugins={[remarkGfm]} components={components}>
-        {content}
+      <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={components}>
+        {processed}
       </Markdown>
     </article>
   );
