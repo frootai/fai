@@ -91,11 +91,15 @@ export function DocTableOfContents() {
   return (
     <>
       {/* Desktop: fixed sidebar */}
-      <aside className="hidden xl:block fixed top-20 right-[max(1rem,calc((100vw-80rem)/2))] w-56 z-30">
-        <div className="rounded-xl border border-border-subtle/50 bg-bg-surface/60 backdrop-blur-xl p-3 max-h-[calc(100vh-6rem)] overflow-y-auto">
-          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald mb-2 px-3">On this page</p>
-          <div className="h-px bg-gradient-to-r from-emerald/20 via-border to-transparent mb-2" />
-          {tocContent}
+      <aside className="hidden xl:block fixed top-20 right-[max(1rem,calc((100vw-80rem)/2))] w-56 z-30 max-h-[calc(100vh-6rem)] flex flex-col">
+        <div className="rounded-xl border border-border-subtle/50 bg-bg-surface/60 backdrop-blur-xl flex flex-col max-h-full">
+          <div className="px-3 pt-3 pb-1 shrink-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald mb-2 px-0">On this page</p>
+            <div className="h-px bg-gradient-to-r from-emerald/20 via-border to-transparent" />
+          </div>
+          <div className="overflow-y-auto overscroll-contain p-3 pt-2">
+            {tocContent}
+          </div>
         </div>
       </aside>
 
