@@ -36,7 +36,6 @@ export function DocTableOfContents() {
 
       setReady(true);
     };
-    };
 
     // Wait for article headings to render
     const timer = setTimeout(init, 400);
