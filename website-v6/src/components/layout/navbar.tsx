@@ -100,12 +100,12 @@ export function Navbar() {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden lg:flex items-center gap-0">
+        <div className="hidden lg:flex items-center gap-0 min-w-0">
           {menus.map((m) => <DesktopDropdown key={m.label} {...m} />)}
         </div>
 
         {/* Right links */}
-        <div className="hidden lg:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-1 shrink-0">
           <Link href="/hi-fai" className="nav-accent-emerald flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium text-emerald whitespace-nowrap transition-all duration-200">
             <Hand className="h-4 w-4" /> Hi FAI
           </Link>

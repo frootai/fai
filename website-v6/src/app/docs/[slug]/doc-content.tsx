@@ -32,12 +32,15 @@ function Admonition({ type, title, children }: { type: string; title: string; ch
 
 // ─── Preprocessing: convert Docusaurus syntax to HTML markers ──
 function preprocessContent(raw: string): string {
+  // Normalize Windows line endings
+  let content = raw.replace(/\r\n/g, '\n');
+
   // Strip YAML frontmatter
-  let content = raw.replace(/^---[\s\S]*?---\n*/m, "");
+  content = content.replace(/^---[\s\S]*?---\n*/m, "");
 
   // Convert Docusaurus admonitions: :::type Title\ncontent\n:::
   content = content.replace(
-    /^:::(\w+)\s*(.*?)\n([\s\S]*?)^:::/gm,
+    /^:::(\w+)\s*(.*)\n([\s\S]*?)\n^:::\s*$/gm,
     (_match, type, title, body) => {
       const escapedTitle = (title || "").trim().replace(/"/g, "&quot;");
       const trimmedBody = body.trim();

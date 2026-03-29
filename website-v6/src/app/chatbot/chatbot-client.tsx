@@ -212,12 +212,12 @@ export function ChatbotClient() {
   const followUps = lastAssistant ? getFollowUps(lastAssistant.text) : [];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 relative overflow-x-hidden">
+    <div className="mx-auto max-w-3xl px-4 py-4 sm:py-12 relative overflow-x-hidden">
       {/* Ambient glow */}
       <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse,rgba(245,158,11,0.06),transparent_70%)]" />
 
-      {/* ═══ HERO HEADER ═══ */}
-      <div className="text-center mb-6 relative z-10">
+      {/* ═══ HERO HEADER — hidden on mobile so chat is immediately visible ═══ */}
+      <div className="text-center mb-4 sm:mb-6 relative z-10 hidden sm:block">
         <div className="inline-block px-3.5 py-1 rounded-full border border-amber/25 bg-amber/8 text-[11px] text-amber font-bold uppercase tracking-wider mb-3">
           Powered by Azure OpenAI GPT-4.1
         </div>

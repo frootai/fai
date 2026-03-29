@@ -79,7 +79,12 @@ export function SearchFAI() {
         className="nav-accent-indigo px-3 py-1.5 rounded-lg text-[13px] font-medium text-indigo whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5">
         <Search className="h-3.5 w-3.5" /> Search FAI
       </button>
-      {open && <SearchFAIPanel onClose={() => setOpen(false)} />}
+      {open && (
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <SearchFAIPanel onClose={() => setOpen(false)} />
+        </div>
+      )}
     </>
   );
 }
