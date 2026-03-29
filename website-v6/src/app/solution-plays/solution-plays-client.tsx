@@ -137,33 +137,33 @@ function EcosystemPanel() {
         {/* FAI Factory */}
         <EcoLayer icon={<Factory className="h-4 w-4 text-amber" />} name="FAI Factory" tagline="🧠 Layer 1 — the production engine that packs skills & knowledge into deployable form" color="#f59e0b" borderColor="border-amber/20" rounded="rounded-b-xl">
           {/* Conveyor belt */}
-          <div className="rounded-lg border border-amber/15 bg-[#0d0d1a] p-3 overflow-x-auto">
-            <div className="flex items-center justify-center gap-0 min-w-[380px]">
+          <div className="rounded-lg border border-amber/15 bg-[#0d0d1a] p-3">
+            <div className="flex items-center justify-center gap-0">
               <div className="flex flex-col items-center shrink-0">
-                <Factory className="h-7 w-7 text-amber mb-1" />
-                <div className="text-[10px] font-bold text-amber">FAI Factory</div>
+                <Factory className="h-6 w-6 sm:h-7 sm:w-7 text-amber mb-1" />
+                <div className="text-[9px] sm:text-[10px] font-bold text-amber">FAI Factory</div>
               </div>
-              <div className="mx-2 w-16 animate-flow-line-amber rounded-full" />
+              <div className="mx-1.5 sm:mx-2 w-8 sm:w-16 animate-flow-line-amber rounded-full" />
               <div className="flex flex-col items-center shrink-0">
                 <div className="flex gap-1 mb-1">
-                  <div className="w-7 h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Monitor className="h-3.5 w-3.5 text-emerald" /></div>
-                  <div className="w-7 h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Package className="h-3.5 w-3.5 text-emerald" /></div>
-                  <div className="w-7 h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Zap className="h-3.5 w-3.5 text-emerald" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Monitor className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md border border-emerald/30 bg-emerald/[0.06] flex items-center justify-center"><Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald" /></div>
                 </div>
-                <div className="text-[10px] font-bold text-emerald">FAI Packages</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-emerald">FAI Packages</div>
               </div>
-              <div className="mx-2 w-16 animate-flow-line rounded-full" />
+              <div className="mx-1.5 sm:mx-2 w-8 sm:w-16 animate-flow-line rounded-full" />
               <div className="flex flex-col items-center shrink-0">
                 <div className="flex gap-1 mb-1">
-                  <div className="w-7 h-7 rounded-md border border-cyan/30 bg-cyan/[0.06] flex items-center justify-center"><Wrench className="h-3.5 w-3.5 text-cyan" /></div>
-                  <div className="w-7 h-7 rounded-md border border-violet/30 bg-violet/[0.06] flex items-center justify-center"><Sliders className="h-3.5 w-3.5 text-violet" /></div>
-                  <div className="w-7 h-7 rounded-md border border-amber/30 bg-amber/[0.06] flex items-center justify-center"><Ruler className="h-3.5 w-3.5 text-amber" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md border border-cyan/30 bg-cyan/[0.06] flex items-center justify-center"><Wrench className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-cyan" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md border border-violet/30 bg-violet/[0.06] flex items-center justify-center"><Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-violet" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md border border-amber/30 bg-amber/[0.06] flex items-center justify-center"><Ruler className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber" /></div>
                 </div>
-                <div className="text-[10px] font-bold text-indigo">FAI Toolkit</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-indigo">FAI Toolkit</div>
               </div>
             </div>
             <div className="text-center mt-2">
-              <span className="text-[11px] text-fg/55 font-medium">Factory builds → Packages deliver → Toolkit equips</span>
+              <span className="text-[10px] sm:text-[11px] text-fg/55 font-medium">Factory builds → Packages deliver → Toolkit equips</span>
             </div>
           </div>
           <div className="mt-2 text-center">
