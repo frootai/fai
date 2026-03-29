@@ -42,7 +42,7 @@ export default async function DocSlugPage({ params }: { params: Promise<{ slug: 
   const title = slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <div className="mx-auto max-w-4xl xl:max-w-5xl px-4 lg:px-6 xl:pr-64 py-12 sm:py-16 overflow-x-hidden">
+    <div className="mx-auto max-w-4xl xl:max-w-5xl px-4 lg:px-6 xl:pr-72 py-12 sm:py-16 overflow-x-hidden">
       <div className="mb-4">
         <Link href="/docs" className="text-[12px] text-amber hover:underline font-medium">← Back to Knowledge Modules</Link>
       </div>

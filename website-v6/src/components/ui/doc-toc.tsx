@@ -77,7 +77,7 @@ export function DocTableOfContents() {
   return (
     <>
       {/* Desktop: fixed sidebar */}
-      <aside className="hidden xl:block fixed top-20 right-[max(1rem,calc((100vw-80rem)/2))] w-56 z-30 max-h-[calc(100vh-6rem)]">
+      <aside className="hidden xl:block fixed top-20 right-[max(0.5rem,calc((100vw-82rem)/2))] w-64 z-30 max-h-[calc(100vh-6rem)]">
         <div className="rounded-xl border border-border-subtle/50 bg-bg-surface/60 backdrop-blur-xl flex flex-col max-h-[calc(100vh-6rem)]">
           <div className="px-3 pt-3 pb-1 shrink-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald mb-2">On this page</p>

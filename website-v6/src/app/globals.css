@@ -107,9 +107,8 @@ body {
   text-decoration: none;
   border-left: 2px solid transparent;
   transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 .toc-link:hover {
   color: #ffffff;
