@@ -312,7 +312,6 @@ section('⚙️  GITHUB ACTIONS');
 
 const expectedWorkflows = [
   'consistency-check.yml',
-  'deploy.yml',
   'deploy-chatbot.yml',
   'docker-publish.yml',
   'npm-publish.yml',

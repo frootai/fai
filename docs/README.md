@@ -415,7 +415,7 @@ FrootAI is not just documentation — it's a **programmable knowledge base**. Co
 }
 ```
 
-**22 tools:** 6 static (knowledge) + 4 live (Azure docs, MCP registries) + 3 agent chain (build → review → tune) + 3 AI ecosystem (model catalog, pricing, compare) + 6 compute
+**23 tools:** 6 static (knowledge) + 4 live (Azure docs, MCP registries) + 3 agent chain (build → review → tune) + 3 AI ecosystem (model catalog, pricing, compare) + 6 compute
 
 See [mcp-server/README.md](../mcp-server/README.md) for full setup.
 

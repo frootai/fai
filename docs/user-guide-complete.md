@@ -99,7 +99,7 @@ The extension works **offline** with bundled knowledge. It caches downloaded con
 
 ### 3.1 What is the MCP Server?
 
-The FrootAI MCP Server exposes 22 tools that any MCP-compatible AI agent can call. It adds AI architecture knowledge to your agent's capabilities.
+The FrootAI MCP Server exposes 23 tools that any MCP-compatible AI agent can call. It adds AI architecture knowledge to your agent's capabilities.
 
 ### 3.2 Setup
 
@@ -376,7 +376,7 @@ docker run -i --rm ghcr.io/frootai/frootai-mcp:latest
 }
 ```
 
-Multi-arch (amd64 + arm64). Same 22 tools, 682KB knowledge. Pinnable versions.
+Multi-arch (amd64 + arm64). Same 23 tools, 682KB knowledge. Pinnable versions.
 
 ---
 
