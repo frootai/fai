@@ -10,5 +10,9 @@ mcp-server/node_modules/
 # Internal development plans — NOT pushed to remote
 .internal/
 
+# Website lives in separate private repo (frootai/frootai.dev)
+website/
+website-v6/
+
 __pycache__/
 *.pyc
