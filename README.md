@@ -6,7 +6,7 @@
 [![VS Code Installs](https://img.shields.io/visual-studio-marketplace/i/pavleenbali.frootai?style=for-the-badge&logo=visualstudiocode&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
 [![npm Downloads](https://img.shields.io/npm/dw/frootai-mcp?style=for-the-badge&logo=npm&label=npm)](https://www.npmjs.com/package/frootai-mcp)
 [![GitHub Stars](https://img.shields.io/github/stars/frootai/fai?style=for-the-badge&logo=github)](https://github.com/frootai/fai)
-[![Build](https://img.shields.io/github/actions/workflow/status/frootai/fai/deploy.yml?style=for-the-badge&label=Website)](https://github.com/frootai/fai/actions/workflows/deploy.yml)
+[![Website](https://img.shields.io/badge/Website-frootai.dev-10b981?style=for-the-badge&logo=cloudflare)](https://frootai.dev)
 [![Docker](https://img.shields.io/github/actions/workflow/status/frootai/fai/docker-publish.yml?style=for-the-badge&label=Docker&logo=docker)](https://github.com/frootai/fai/actions/workflows/docker-publish.yml)
 [![npm Version](https://img.shields.io/npm/v/frootai-mcp?style=for-the-badge&logo=npm&label=MCP)](https://www.npmjs.com/package/frootai-mcp)
 [![Uptime](https://img.shields.io/github/actions/workflow/status/frootai/fai/uptime.yml?style=for-the-badge&label=Uptime&logo=statuspage)](https://github.com/frootai/fai/actions/workflows/uptime.yml)
