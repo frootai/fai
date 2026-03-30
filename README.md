@@ -64,13 +64,9 @@ Works with: **GitHub Copilot**  **Claude Desktop**  **Cursor**  **Windsurf**  **
 
 ### The FAI Ecosystem
 
-```mermaid
-graph TB
-  F[" FAI Factory<br/><i>The engine that builds everything</i>"]
-  P[" FAI Packages<br/><i>VS Code  npm  PyPI  Docker  CLI  GitHub</i>"]
-  T[" FAI Toolkit<br/><i>DevKit  TuneKit  SpecKit</i>"]
-  F -->|builds| P -->|delivers| T
-```
+<p align="center">
+  <img src=".github/fai-eco-big.png" width="700" alt="FAI Ecosystem — Factory builds, Packages deliver, Toolkit equips">
+</p>
 
 ---
 
@@ -118,21 +114,6 @@ graph TB
 Every play ships with: `.github` Agentic OS (19 files)  DevKit  TuneKit  SpecKit  Bicep infra
 
 </details>
-
----
-
-### .github Agentic OS
-
-Every solution play includes 4 layers, 7 primitives  **380 agentic OS files total**.
-
-```mermaid
-graph LR
-  L1["Layer 1<br/>Always-On Context<br/><code>instructions/</code>"]
-  L2["Layer 2<br/>On-Demand<br/><code>prompts/ agents/ skills/</code>"]
-  L3["Layer 3<br/>Enforcement<br/><code>hooks/ workflows/</code>"]
-  L4["Layer 4<br/>Distribution<br/><code>plugin.json</code>"]
-  L1 --> L2 --> L3 --> L4
-```
 
 ---
 
