@@ -29,14 +29,14 @@
 
 > **FROOT** = **F**oundations · **R**easoning · **O**rchestration · **O**perations · **T**ransformation
 
-| What | Numbers | For Whom |
-|------|:-------:|----------|
-| 🎯 **Solution Plays** — pre-tuned, deployable AI solutions | **20** plays | Infra & platform engineers |
-| 🔌 **MCP Server** — callable AI architecture knowledge | **23** tools | AI agents (Copilot, Claude, Cursor) |
-| 📖 **Knowledge Modules** — end-to-end AI curriculum | **16** modules | Cloud architects, CSAs |
-| 💻 **VS Code Extension** — browse, scaffold, search | **19** commands | Developers |
-| 🐍 **Python SDK** — offline knowledge + evaluation | **zero** dependencies | Data scientists |
-| ⌨️ **CLI** — init, search, cost, validate, doctor | **6** commands | Everyone |
+| What | Numbers | For Whom | Links |
+|------|:-------:|----------|-------|
+| 🎯 **Solution Plays** — pre-tuned, deployable AI solutions | **20** plays | Infra & platform engineers | [Website](https://frootai.dev/solution-plays) · [GitHub](https://github.com/frootai/frootai/tree/main/solution-plays) |
+| 🔌 **MCP Server** — callable AI architecture knowledge | **23** tools | AI agents (Copilot, Claude, Cursor) | [Website](https://frootai.dev/mcp-tooling) · [npm](https://www.npmjs.com/package/frootai-mcp) |
+| 📖 **Knowledge Modules** — end-to-end AI curriculum | **16** modules | Cloud architects, CSAs | [Website](https://frootai.dev/docs) · [GitHub](https://github.com/frootai/frootai/tree/main/docs) |
+| 💻 **VS Code Extension** — browse, scaffold, search | **19** commands | Developers | [Website](https://frootai.dev/vscode-extension) · [Marketplace](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai) |
+| 🐍 **Python SDK** — offline knowledge + evaluation | **zero** dependencies | Data scientists | [PyPI](https://pypi.org/project/frootai/) |
+| ⌨️ **CLI** — init, search, cost, validate, doctor | **6** commands | Everyone | [Website](https://frootai.dev/cli) |
 
 ---
 
@@ -196,16 +196,16 @@ Every solution play includes the full GitHub Copilot Agentic OS — 4 layers, 7 
 
 ## Distribution Channels
 
-| Channel | Install | Version |
-|---------|---------|:-------:|
-| **npm** | `npm install frootai-mcp` | 3.2.0 |
-| **PyPI SDK** | `pip install frootai` | 3.3.0 |
-| **PyPI MCP** | `pip install frootai-mcp` | 3.2.0 |
-| **Docker** | `docker run -i ghcr.io/frootai/frootai-mcp` | latest |
-| **VS Code** | `code --install-extension pavleenbali.frootai` | 1.4.0 |
-| **CLI** | `npx frootai <command>` | 3.2.0 |
-| **REST API** | [frootai.dev/api-docs](https://frootai.dev/api-docs) | live |
-| **GitHub** | [github.com/frootai/frootai](https://github.com/frootai/frootai) | latest |
+| Channel | Install | Version | Links |
+|---------|---------|:-------:|-------|
+| **npm** | `npm install frootai-mcp` | 3.2.0 | [Website](https://frootai.dev/mcp-tooling) · [npmjs.com](https://www.npmjs.com/package/frootai-mcp) |
+| **PyPI SDK** | `pip install frootai` | 3.3.0 | [PyPI](https://pypi.org/project/frootai/) |
+| **PyPI MCP** | `pip install frootai-mcp` | 3.2.0 | [PyPI](https://pypi.org/project/frootai-mcp/) |
+| **Docker** | `docker run -i ghcr.io/frootai/frootai-mcp` | latest | [Website](https://frootai.dev/docker) · [GHCR](https://github.com/frootai/frootai/pkgs/container/frootai-mcp) |
+| **VS Code** | `code --install-extension pavleenbali.frootai` | 1.4.0 | [Website](https://frootai.dev/vscode-extension) · [Marketplace](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai) |
+| **CLI** | `npx frootai <command>` | 3.2.0 | [Website](https://frootai.dev/cli) |
+| **REST API** | [frootai.dev/api-docs](https://frootai.dev/api-docs) | live | [API Docs](https://frootai.dev/api-docs) |
+| **GitHub** | [github.com/frootai/frootai](https://github.com/frootai/frootai) | latest | [GitHub](https://github.com/frootai/frootai) |
 
 ---
 
