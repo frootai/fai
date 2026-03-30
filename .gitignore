@@ -12,7 +12,12 @@ mcp-server/node_modules/
 
 # Website lives in separate private repo (frootai/frootai.dev)
 website/
+website-v2/
+website-v3/
+website-v4/
+website-v5/
 website-v6/
+website-implementation-plan.md
 
 __pycache__/
 *.pyc
