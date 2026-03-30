@@ -22,7 +22,7 @@ title: Contributor Guide
 
 ```bash
 # Clone the repository
-git clone https://github.com/gitpavleenbali/frootai.git
+git clone https://github.com/frootai/fai.git
 cd frootai
 
 # Website

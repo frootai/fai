@@ -265,7 +265,7 @@ function markdownToHtml(markdown, title) {
   <p style="font-size:0.72rem;color:#555;">
     <strong>FrootAI</strong> — From the Roots to the Fruits · 
     <a href="https://frootai.dev">Website</a> · 
-    <a href="https://github.com/gitpavleenbali/frootai">GitHub</a>
+    <a href="https://github.com/frootai/fai">GitHub</a>
   </p>
 </body>
 </html>`;
@@ -313,7 +313,7 @@ function downloadFromGitHub(repoPath) {
   if (cached) return Promise.resolve(cached);
 
   return new Promise((resolve, reject) => {
-    const url = `https://raw.githubusercontent.com/gitpavleenbali/frootai/main/${repoPath}`;
+    const url = `https://raw.githubusercontent.com/frootai/fai/main/${repoPath}`;
     https.get(url, { headers: { "User-Agent": "FrootAI-VSCode" } }, (res) => {
       if (res.statusCode === 302 || res.statusCode === 301) {
         https.get(res.headers.location, (res2) => {
@@ -539,7 +539,7 @@ function activate(context) {
             createModuleWebview(context, play.dir, `${play.icon} ${play.name}`, content);
           });
         } catch {
-          vscode.env.openExternal(vscode.Uri.parse(`https://github.com/gitpavleenbali/frootai/tree/main/solution-plays/${play.dir}`));
+          vscode.env.openExternal(vscode.Uri.parse(`https://github.com/frootai/fai/tree/main/solution-plays/${play.dir}`));
         }
       } else if (action.value === "userguide") {
         vscode.env.openExternal(vscode.Uri.parse(`https://frootai.dev/user-guide?play=${play.id}`));
@@ -558,7 +558,7 @@ function activate(context) {
       } else if (action.value === "eval") {
         vscode.commands.executeCommand("frootai.runEvaluation");
       } else if (action.value === "github") {
-        vscode.env.openExternal(vscode.Uri.parse(`https://github.com/gitpavleenbali/frootai/tree/main/solution-plays/${play.dir}`));
+        vscode.env.openExternal(vscode.Uri.parse(`https://github.com/frootai/fai/tree/main/solution-plays/${play.dir}`));
       }
     })
   );
@@ -1071,7 +1071,7 @@ function activate(context) {
         { label: "$(play) Run via npx", description: "npx frootai-mcp@latest — zero install", value: "npx" },
         { label: "$(package) Install globally (npm)", description: "npm install -g frootai-mcp@latest", value: "global" },
         { label: "$(symbol-namespace) Python (pip)", description: "pip install frootai-mcp — pure Python server", value: "pip" },
-        { label: "$(symbol-container) Docker", description: "docker run -i ghcr.io/gitpavleenbali/frootai-mcp", value: "docker" },
+        { label: "$(symbol-container) Docker", description: "docker run -i ghcr.io/frootai/frootai-mcp", value: "docker" },
       ], { placeHolder: "Set up FrootAI MCP Server" });
       if (!choice) return;
 
@@ -1109,7 +1109,7 @@ function activate(context) {
         autoCreateMcpJson();
       } else if (choice.value === "docker") {
         const terminal = vscode.window.createTerminal("FrootAI MCP Docker");
-        terminal.sendText("docker run -i ghcr.io/gitpavleenbali/frootai-mcp");
+        terminal.sendText("docker run -i ghcr.io/frootai/frootai-mcp");
         terminal.show();
         vscode.window.showInformationMessage("🐳 Starting FrootAI MCP via Docker. 22 tools ready.");
         autoCreateMcpJson();

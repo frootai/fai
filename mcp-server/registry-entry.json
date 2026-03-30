@@ -8,12 +8,12 @@
   "author": {
     "name": "FrootAI Contributors",
     "url": "https://frootai.dev",
-    "github": "gitpavleenbali"
+    "github": "frootai"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gitpavleenbali/frootai"
+    "url": "https://github.com/frootai/fai"
   },
   "homepage": "https://frootai.dev",
   "documentation": "https://frootai.dev/setup-guide",

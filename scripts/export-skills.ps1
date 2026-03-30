@@ -117,7 +117,7 @@ ${Content}
 
 ## What is this?
 
-This folder contains the ``${Mid}`` module from the [FrootAI FROOT Framework](https://github.com/gitpavleenbali/frootai)
+This folder contains the ``${Mid}`` module from the [FrootAI FROOT Framework](https://github.com/frootai/fai)
 exported as a GitHub Copilot skill.
 
 ## How to use

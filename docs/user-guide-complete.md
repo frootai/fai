@@ -346,7 +346,7 @@ Run the FrootAI MCP Server as a container — no Node.js required.
 ### Quick Start
 
 ```bash
-docker run -i --rm ghcr.io/gitpavleenbali/frootai-mcp:latest
+docker run -i --rm ghcr.io/frootai/frootai-mcp:latest
 ```
 
 ### Client Configuration
@@ -357,7 +357,7 @@ docker run -i --rm ghcr.io/gitpavleenbali/frootai-mcp:latest
   "mcpServers": {
     "frootai": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "ghcr.io/gitpavleenbali/frootai-mcp:latest"]
+      "args": ["run", "-i", "--rm", "ghcr.io/frootai/frootai-mcp:latest"]
     }
   }
 }
@@ -369,7 +369,7 @@ docker run -i --rm ghcr.io/gitpavleenbali/frootai-mcp:latest
   "servers": {
     "frootai": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "ghcr.io/gitpavleenbali/frootai-mcp:latest"],
+      "args": ["run", "-i", "--rm", "ghcr.io/frootai/frootai-mcp:latest"],
       "type": "stdio"
     }
   }
@@ -480,7 +480,7 @@ A: See the [Contributor Guide](./contributor-guide) for step-by-step instruction
 A: Yes. FrootAI is 100% open source under the MIT license.
 
 **Q: How do I report a bug?**
-A: Open an issue on [GitHub](https://github.com/gitpavleenbali/frootai/issues) using the bug report template.
+A: Open an issue on [GitHub](https://github.com/frootai/fai/issues) using the bug report template.
 
 **Q: How often is the knowledge base updated?**
 A: Knowledge modules are updated with each release. The changelog tracks all content changes.

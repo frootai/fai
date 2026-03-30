@@ -40,7 +40,7 @@ print(result)
 
 - Website: [frootai.dev](https://frootai.dev)
 - npm (Node.js): `npx frootai-mcp`
-- Docker: `docker run -i ghcr.io/gitpavleenbali/frootai-mcp`
+- Docker: `docker run -i ghcr.io/frootai/frootai-mcp`
 - VS Code: Search "FrootAI" in Extensions
 
 ---

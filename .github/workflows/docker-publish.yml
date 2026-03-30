@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: gitpavleenbali/frootai-mcp
+  IMAGE_NAME: frootai/fai-mcp
 
 jobs:
   build-and-push:

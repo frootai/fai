@@ -64,12 +64,12 @@ jobs:
             code --install-extension pavleenbali.frootai
 
             # Docker
-            docker run -i ghcr.io/gitpavleenbali/frootai-mcp:${{ steps.info.outputs.version }}
+            docker run -i ghcr.io/frootai/frootai-mcp:${{ steps.info.outputs.version }}
             ```
 
             **Links:**
             - [npm](https://www.npmjs.com/package/frootai-mcp)
             - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai)
-            - [Docker](https://github.com/gitpavleenbali/frootai/pkgs/container/frootai-mcp)
+            - [Docker](https://github.com/frootai/fai/pkgs/container/frootai-mcp)
             - [Website](https://frootai.dev)
           generate_release_notes: true

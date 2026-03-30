@@ -25,7 +25,7 @@ npm i -g frootai-mcp@latest && frootai-mcp
 
 **Docker (no Node.js needed):**
 ```bash
-docker run -i ghcr.io/gitpavleenbali/frootai-mcp
+docker run -i ghcr.io/frootai/frootai-mcp
 ```
 
 </details>
@@ -76,7 +76,7 @@ docker run -i ghcr.io/gitpavleenbali/frootai-mcp
     "frootai": {
       "type": "stdio",
       "command": "docker",
-      "args": ["run", "-i", "ghcr.io/gitpavleenbali/frootai-mcp"]
+      "args": ["run", "-i", "ghcr.io/frootai/frootai-mcp"]
     }
   }
 }
@@ -240,8 +240,8 @@ Agent FAI is also available as a REST API:
 | **CLI Docs** | [frootai.dev/cli](https://frootai.dev/cli) |
 | **REST API Docs** | [frootai.dev/api-docs](https://frootai.dev/api-docs) |
 | **VS Code Extension** | [marketplace.visualstudio.com](https://marketplace.visualstudio.com/items?itemName=pavleenbali.frootai) |
-| **Docker** | [ghcr.io/gitpavleenbali/frootai-mcp](https://github.com/gitpavleenbali/frootai/pkgs/container/frootai-mcp) |
-| **GitHub** | [github.com/gitpavleenbali/frootai](https://github.com/gitpavleenbali/frootai) |
+| **Docker** | [ghcr.io/frootai/frootai-mcp](https://github.com/frootai/fai/pkgs/container/frootai-mcp) |
+| **GitHub** | [github.com/frootai/fai](https://github.com/frootai/fai) |
 | **Setup Guide** | [frootai.dev/setup-guide](https://frootai.dev/setup-guide) |
 
 ---

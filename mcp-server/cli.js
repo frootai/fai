@@ -919,7 +919,7 @@ function cmdHelp() {
   console.log(`    ${c.dim}npx frootai validate --waf${c.reset}`);
   console.log(`    ${c.dim}npx frootai doctor${c.reset}\n`);
   console.log(`  ${c.dim}Docs: https://frootai.dev${c.reset}`);
-  console.log(`  ${c.dim}GitHub: https://github.com/gitpavleenbali/frootai${c.reset}\n`);
+  console.log(`  ${c.dim}GitHub: https://github.com/frootai/fai${c.reset}\n`);
 }
 
 // ─── Helpers ───

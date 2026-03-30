@@ -24,7 +24,7 @@
 ### Post-Publish Verification
 - [ ] `npm info frootai-mcp version` shows new version
 - [ ] VS Code Marketplace shows new version
-- [ ] `docker pull ghcr.io/gitpavleenbali/frootai-mcp:latest` works
+- [ ] `docker pull ghcr.io/frootai/frootai-mcp:latest` works
 - [ ] frootai.dev loads correctly
 - [ ] Agent FAI chatbot responds with correct version info
 
