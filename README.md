@@ -216,7 +216,7 @@ frootai/frootai
 ├── mcp-server/            23 MCP tools + knowledge.json (682KB)
 ├── vscode-extension/      VS Code extension (19 commands, 2 sidebar panels)
 ├── python-sdk/            Python SDK — offline, zero deps
-├── python-mcp/            Python MCP Server — 22 tools
+├── python-mcp/            Python MCP Server — 23 tools
 ├── functions/             REST API + Agent FAI chatbot
 ├── solution-plays/        20 plays with full .github Agentic OS
 ├── docs/                  16 FROOT knowledge modules
