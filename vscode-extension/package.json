@@ -35,6 +35,7 @@
     "url": "https://github.com/frootai/frootai/issues"
   },
   "license": "MIT",
+  "icon": "media/frootai-mark.png",
   "activationEvents": [
     "onStartupFinished"
   ],

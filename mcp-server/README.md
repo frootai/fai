@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="frootai-mark.png" width="100" alt="FrootAI">
+</p>
+
 # frootai-mcp
 
 > **The AI architecture knowledge engine for your coding agent.**

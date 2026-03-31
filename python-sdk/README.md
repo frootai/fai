@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="frootai-mark.png" width="100" alt="FrootAI">
+</p>
+
 # FrootAI — Python SDK
 
 > Offline-first access to 16 AI architecture knowledge modules, 20 solution plays, cost estimation, evaluation, and A/B testing. Zero external dependencies.

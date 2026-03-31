@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="media/frootai-mark.png" width="100" alt="FrootAI">
+</p>
+
 # FrootAI — From the Roots to the Fruits
 
 > **The open glue for GenAI.** 16 modules, 200+ terms, 20 solution plays, 23 MCP tools — works standalone from any workspace.

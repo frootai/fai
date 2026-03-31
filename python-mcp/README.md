@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="frootai-mark.png" width="100" alt="FrootAI">
+</p>
+
 # FrootAI MCP Server — Python
 
 > 🐍 Python implementation of the FrootAI MCP Server. Same 23 tools, 16 modules, 200+ terms.
