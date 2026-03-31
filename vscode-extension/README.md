@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/frootai-mark.png" width="120" alt="FrootAI">
+  <img src="https://raw.githubusercontent.com/frootai/frootai/main/.github/frootai-mark.png" width="120" alt="FrootAI">
 </p>
 
 <h1 align="center">FrootAI for VS Code</h1>
