@@ -312,23 +312,17 @@ function downloadFromGitHub(repoPath) {
   const cached = readFromCache(repoPath);
   if (cached) return Promise.resolve(cached);
 
-  return new Promise((resolve, reject) => {
-    const url = `https://raw.githubusercontent.com/frootai/frootai/main/${repoPath}`;
-    https.get(url, { headers: { "User-Agent": "FrootAI-VSCode" } }, (res) => {
-      if (res.statusCode === 302 || res.statusCode === 301) {
-        https.get(res.headers.location, (res2) => {
-          let data = "";
-          res2.on("data", (chunk) => data += chunk);
-          res2.on("end", () => { writeToCache(repoPath, data); resolve(data); });
-        }).on("error", reject);
-        return;
-      }
-      if (res.statusCode !== 200) { reject(new Error(`HTTP ${res.statusCode}`)); return; }
-      let data = "";
-      res.on("data", (chunk) => data += chunk);
-      res.on("end", () => { writeToCache(repoPath, data); resolve(data); });
-    }).on("error", reject);
-  });
+  const url = `https://raw.githubusercontent.com/frootai/frootai/main/${repoPath}`;
+  // Use global fetch (Node 18+, VS Code 1.85+) — respects VS Code proxy settings
+  return fetch(url, { headers: { "User-Agent": "FrootAI-VSCode" } })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    })
+    .then(text => {
+      writeToCache(repoPath, text);
+      return text;
+    });
 }
 
 // ─── Tree Data Providers ───────────────────────────────────────────
@@ -340,12 +334,13 @@ class SolutionPlayProvider {
     if (!element) {
       const layerColors = { F: "charts.yellow", R: "charts.green", O: "charts.blue", T: "charts.purple" };
       const layerNames = { F: "Foundations", R: "Reasoning", O: "Orchestration", T: "Transformation" };
+      const layerIcons = { F: "server-process", R: "lightbulb", O: "extensions", T: "rocket" };
       return SOLUTION_PLAYS.map((p) => {
         const item = new vscode.TreeItem(`${p.id} ${p.name}`, vscode.TreeItemCollapsibleState.None);
         item.description = layerNames[p.layer] || p.layer;
-        item.tooltip = `${p.name}\nFROOT Layer: ${layerNames[p.layer] || p.layer}\nStatus: ${p.status}\n\nRight-click or click to:\n• Init DevKit\n• Init TuneKit\n• Init SpecKit\n• Estimate Cost\n• Run Evaluation`;
+        item.tooltip = `${p.name}\nFROOT Layer: ${layerNames[p.layer] || p.layer}\nStatus: ${p.status}\n\nClick to open actions`;
         item.contextValue = "solutionPlay";
-        item.iconPath = new vscode.ThemeIcon("symbol-event", new vscode.ThemeColor(layerColors[p.layer] || "charts.blue"));
+        item.iconPath = new vscode.ThemeIcon(layerIcons[p.layer] || "package", new vscode.ThemeColor(layerColors[p.layer] || "charts.blue"));
         item.command = { command: "frootai.openSolutionPlay", title: "Open", arguments: [p] };
         return item;
       });
@@ -446,13 +441,14 @@ class McpToolProvider {
     }
     const groupType = groups.find(g => g.label === element.label)?._groupType || element._groupType;
     if (groupType) {
+      const typeIcons = { static: "book", live: "cloud-upload", chain: "debug-disconnect", ecosystem: "graph-scatter", compute: "symbol-ruler" };
       return MCP_TOOLS.filter(t => t.type === groupType).map(t => {
         const item = new vscode.TreeItem(t.name, vscode.TreeItemCollapsibleState.None);
         item.description = t.desc;
-        item.tooltip = `${t.name}\n${t.desc}\n\nType: ${t.type}`;
-        item.iconPath = new vscode.ThemeIcon("symbol-method");
+        item.tooltip = `${t.name}\n${t.desc}\n\nType: ${t.type}\n\nClick to view documentation`;
+        item.iconPath = new vscode.ThemeIcon(typeIcons[t.type] || "symbol-method");
         item.contextValue = "mcpTool";
-        item.command = { command: "frootai.mcpToolAction", title: "Action", arguments: [t] };
+        item.command = { command: "frootai.viewToolDocs", title: "View Docs", arguments: [t] };
         return item;
       });
     }
@@ -525,22 +521,8 @@ function activate(context) {
       if (!action) return;
 
       if (action.value === "read") {
-        // Read documentation
-        if (root) {
-          const readmePath = path.join(root, "solution-plays", play.dir, "README.md");
-          if (fs.existsSync(readmePath)) {
-            createModuleWebview(context, play.dir, `${play.icon} ${play.name}`, fs.readFileSync(readmePath, "utf-8"));
-            return;
-          }
-        }
-        try {
-          await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: `Loading ${play.name}...` }, async () => {
-            const content = await downloadFromGitHub(`solution-plays/${play.dir}/README.md`);
-            createModuleWebview(context, play.dir, `${play.icon} ${play.name}`, content);
-          });
-        } catch {
-          vscode.env.openExternal(vscode.Uri.parse(`https://github.com/frootai/frootai/tree/main/solution-plays/${play.dir}`));
-        }
+        // Read documentation — open on website
+        vscode.env.openExternal(vscode.Uri.parse(`https://frootai.dev/solution-plays/${play.dir}`));
       } else if (action.value === "userguide") {
         vscode.env.openExternal(vscode.Uri.parse(`https://frootai.dev/user-guide?play=${play.id}`));
       } else if (action.value === "devkit") {
@@ -1173,47 +1155,44 @@ function activate(context) {
   // ── Command: MCP Tool Action (left-click action picker) ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.mcpToolAction", async (tool) => {
-      const picks = [
-        { label: "$(info) View Tool Documentation", description: `Read ${tool.name} docs in VS Code`, value: "docs" },
-        { label: "$(package) Install MCP Server globally", description: "npm install -g frootai-mcp", value: "install" },
-        { label: "$(play) Start MCP Server (npx)", description: "Launch in terminal — 22 tools ready", value: "start" },
-        { label: "$(gear) Configure MCP for this workspace", description: "Add .vscode/mcp.json — auto-connects", value: "config" },
-        { label: "$(globe) Open npm page", description: "npmjs.com/package/frootai-mcp", value: "npm" },
-        { label: "$(book) Open setup guide", description: "Full MCP setup documentation", value: "guide" },
-      ];
-      const action = await vscode.window.showQuickPick(picks, { placeHolder: `🔌 ${tool.name} — ${tool.desc}` });
-
-      if (!action) return;
-
-      if (action.value === "docs") {
-        // B3: Render tool documentation in a VS Code webview panel
-        const typeLabel = { static: "📦 Static", live: "⛅ Live", chain: "🔗 Agent Chain" };
-        const docsHtml = `
-          <h2>🔌 ${tool.name}</h2>
-          <p style="opacity:0.7;">${typeLabel[tool.type] || tool.type} Tool</p>
-          <p><strong>${tool.desc}</strong></p>
-          <hr/>
-          <div style="white-space:pre-wrap;line-height:1.6;">${(tool.docs || "No documentation available.").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code style='background:#333;padding:2px 6px;border-radius:3px;'>$1</code>").replace(/\n/g, "<br/>")}</div>
-          <hr/>
-          <p style="opacity:0.5;">Part of <strong>frootai-mcp@3.0.2</strong> — 22 tools (6 static + 4 live + 3 chain + 3 ecosystem + 6 compute)</p>
-          <p style="opacity:0.5;">Install: <code>npm install -g frootai-mcp@latest</code> | Run: <code>npx frootai-mcp@latest</code></p>
-        `;
-        const panel = vscode.window.createWebviewPanel("frootai.mcpDocs", `MCP: ${tool.name}`, vscode.ViewColumn.One, {});
-        panel.webview.html = `<!DOCTYPE html><html><head><style>body{font-family:var(--vscode-font-family,system-ui);color:#e0e0e0;background:#1a1a2e;padding:24px;max-width:700px;}h2{color:#00C853;}code{font-family:var(--vscode-editor-font-family,monospace);}hr{border:none;border-top:1px solid #333;margin:16px 0;}strong{color:#4fc3f7;}</style></head><body>${docsHtml}</body></html>`;
-      } else if (action.value === "install") {
-        vscode.commands.executeCommand("frootai.installMcpServer");
-      } else if (action.value === "start") {
-        vscode.commands.executeCommand("frootai.startMcpServer");
-      } else if (action.value === "config") {
-        vscode.commands.executeCommand("frootai.configureMcp");
-      } else if (action.value === "npm") {
-        vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
-      } else if (action.value === "guide") {
-        vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/setup-guide"));
-      }
+      // Direct to docs view - no QuickPick menu
+      vscode.commands.executeCommand("frootai.viewToolDocs", tool);
     })
   );
 
+  // -- Command: View Tool Documentation (rich webview) --
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.viewToolDocs", async (tool) => {
+      if (!tool) return;
+      const typeLabel = { static: "Static", live: "Live", chain: "Agent Chain", ecosystem: "Ecosystem", compute: "Compute" };
+      const typeColor = { static: "#10b981", live: "#06b6d4", chain: "#f59e0b", ecosystem: "#8b5cf6", compute: "#ec4899" };
+      const color = typeColor[tool.type] || "#10b981";
+      const panel = vscode.window.createWebviewPanel("frootai.mcpDocs", tool.name, vscode.ViewColumn.One, {});
+      panel.webview.html = `<!DOCTYPE html><html><head><style>
+        body { font-family: var(--vscode-font-family, system-ui); color: var(--vscode-editor-foreground, #e0e0e0); background: var(--vscode-editor-background, #0a0a0f); padding: 32px; max-width: 720px; margin: 0 auto; }
+        h1 { font-size: 1.6rem; margin-bottom: 4px; color: ${color}; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: ${color}15; color: ${color}; border: 1px solid ${color}33; margin-bottom: 16px; }
+        .desc { font-size: 1rem; opacity: 0.85; margin-bottom: 20px; line-height: 1.5; }
+        .docs { background: var(--vscode-editor-inactiveSelectionBackground, #1a1a2e); padding: 20px; border-radius: 12px; border: 1px solid ${color}22; line-height: 1.7; font-size: 0.9rem; }
+        .docs code { background: #00000040; padding: 2px 7px; border-radius: 4px; font-family: var(--vscode-editor-font-family, monospace); font-size: 0.85em; color: ${color}; }
+        .docs strong { color: ${color}; }
+        hr { border: none; border-top: 1px solid #ffffff10; margin: 20px 0; }
+        .footer { font-size: 0.75rem; opacity: 0.4; margin-top: 24px; }
+        .footer a { color: ${color}; text-decoration: none; }
+        .install { margin-top: 16px; padding: 12px 16px; border-radius: 8px; background: #ffffff06; border: 1px solid #ffffff10; font-size: 0.8rem; }
+        .install code { background: #00000060; padding: 3px 8px; border-radius: 4px; }
+      </style></head><body>
+        <h1>${tool.name}</h1>
+        <div class="badge">${typeLabel[tool.type] || tool.type}</div>
+        <div class="desc">${tool.desc}</div>
+        <div class="docs">${(tool.docs || "No documentation available.").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/` + '`' + `([^` + '`' + `]+)` + '`' + `/g, "<code>$1</code>").replace(/\n/g, "<br/>")}</div>
+        <div class="install">
+          <strong>Install:</strong> <code>npx frootai-mcp@latest</code> | <code>pip install frootai-mcp</code> | <code>docker run -i ghcr.io/frootai/frootai-mcp</code>
+        </div>
+        <div class="footer">Part of <strong>frootai-mcp</strong> - 23 tools | <a href="https://frootai.dev/mcp-tooling">frootai.dev/mcp-tooling</a> | <a href="https://www.npmjs.com/package/frootai-mcp">npm</a> | <a href="https://pypi.org/project/frootai-mcp/">PyPI</a></div>
+      </body></html>`;
+    })
+  );
   // ── Command: Quick Cost Estimate ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.quickCostEstimate", async () => {
@@ -1535,6 +1514,8 @@ function activate(context) {
       if (!folders) { vscode.window.showWarningMessage("Open a workspace first."); return; }
       const wsRoot = folders[0].uri.fsPath;
       const evalConfig = path.join(wsRoot, "evaluation", "eval-config.json");
+      const evalPy = path.join(wsRoot, "evaluation", "eval.py");
+      const testSet = path.join(wsRoot, "evaluation", "test-set.jsonl");
 
       if (!fs.existsSync(evalConfig)) {
         const create = await vscode.window.showWarningMessage("No evaluation/eval-config.json found. Create one?", "Yes", "No");
@@ -1546,20 +1527,89 @@ function activate(context) {
         return;
       }
 
-      // Read and display eval config
+      // Read eval config
       const config = JSON.parse(fs.readFileSync(evalConfig, "utf8"));
-      const panel = vscode.window.createWebviewPanel("frootai.evaluation", "Evaluation Dashboard", vscode.ViewColumn.One, { enableScripts: true });
       const metrics = config.metrics || [];
       const thresholds = config.thresholds || {};
+
+      // Try to run eval.py if it exists
+      let evalResults = null;
+      let evalStatus = "awaiting";
+      let evalOutput = "";
+
+      if (fs.existsSync(evalPy) && fs.existsSync(testSet)) {
+        await vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, title: "Running evaluation...", cancellable: false },
+          async () => {
+            try {
+              const { execSync } = require("child_process");
+              const cmd = process.platform === "win32"
+                ? `python "${evalPy}" --test-set "${testSet}"`
+                : `python3 "${evalPy}" --test-set "${testSet}"`;
+              evalOutput = execSync(cmd, {
+                cwd: wsRoot,
+                encoding: "utf-8",
+                timeout: 30000,
+                shell: true,
+              });
+              evalStatus = "completed";
+
+              // Parse scores from output (look for lines like "Faithfulness: 0.85")
+              const scorePatterns = {
+                groundedness: /groundedness[:\s]+([0-9.]+)/i,
+                relevance: /relevance[:\s]+([0-9.]+)/i,
+                coherence: /coherence[:\s]+([0-9.]+)/i,
+                fluency: /fluency[:\s]+([0-9.]+)/i,
+                faithfulness: /faithfulness[:\s]+([0-9.]+)/i,
+              };
+              evalResults = {};
+              for (const [metric, pattern] of Object.entries(scorePatterns)) {
+                const match = evalOutput.match(pattern);
+                if (match) evalResults[metric] = parseFloat(match[1]);
+              }
+
+              // Also try to parse "PASS: X/Y" or summary line
+              const passMatch = evalOutput.match(/(\d+)\s*\/\s*(\d+)\s*(?:passed|PASS)/i);
+              if (passMatch) evalResults._summary = `${passMatch[1]}/${passMatch[2]} passed`;
+            } catch (err) {
+              evalOutput = err.message || "Evaluation script failed";
+              evalStatus = "error";
+            }
+          }
+        );
+      } else if (fs.existsSync(evalPy) && !fs.existsSync(testSet)) {
+        evalStatus = "no-testset";
+      }
+
+      // Build dashboard
+      const panel = vscode.window.createWebviewPanel("frootai.evaluation", "Evaluation Dashboard", vscode.ViewColumn.One, { enableScripts: true });
+
       const metricsHtml = metrics.map(m => {
-        const threshold = thresholds[m] || "N/A";
-        const color = threshold >= 4.0 ? "#10b981" : threshold >= 3.0 ? "#f59e0b" : "#ef4444";
+        const threshold = thresholds[m] || 4.0;
+        const actual = evalResults && evalResults[m] !== undefined ? evalResults[m] : null;
+        const color = actual !== null
+          ? (actual >= threshold ? "#10b981" : actual >= threshold * 0.75 ? "#f59e0b" : "#ef4444")
+          : "#10b981";
+        const displayValue = actual !== null ? actual.toFixed(2) : threshold;
+        const label = actual !== null ? `score: ${actual.toFixed(2)}` : `threshold ≥ ${threshold}`;
         return `<div style="padding:16px;border-radius:12px;border:2px solid ${color}33;background:${color}08;text-align:center;min-width:140px">
-          <div style="font-size:2rem;font-weight:800;color:${color}">${threshold}</div>
+          <div style="font-size:2rem;font-weight:800;color:${color}">${displayValue}</div>
           <div style="font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#888;margin-top:4px">${m}</div>
-          <div style="font-size:0.65rem;color:#666;margin-top:2px">threshold ≥ ${threshold}</div>
+          <div style="font-size:0.65rem;color:#666;margin-top:2px">${label}</div>
         </div>`;
       }).join("");
+
+      const statusHtml = evalStatus === "completed"
+        ? `<div class="status" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#10b981;display:inline-block">✅ Evaluation complete${evalResults?._summary ? ` — ${evalResults._summary}` : ""}</div>`
+        : evalStatus === "error"
+        ? `<div class="status" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:inline-block">❌ Evaluation failed</div>`
+        : evalStatus === "no-testset"
+        ? `<div class="status" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;display:inline-block">⚠️ No test-set.jsonl found — create evaluation/test-set.jsonl</div>`
+        : `<div class="status" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;display:inline-block">⏳ Awaiting evaluation run</div>`;
+
+      const outputHtml = evalOutput
+        ? `<h2 style="margin-top:24px">Output</h2><pre style="background:#111;padding:12px;border-radius:8px;font-size:0.75rem;overflow-x:auto;color:#ccc;max-height:300px;overflow-y:auto">${evalOutput.replace(/</g, "&lt;")}</pre>`
+        : "";
 
       panel.webview.html = `<!DOCTYPE html><html><head><style>body{font-family:-apple-system,sans-serif;background:#0a0a0f;color:#e0e0e0;padding:24px}h1{font-size:1.5rem;margin-bottom:4px}h2{font-size:1.1rem;color:#10b981;margin-top:24px}.grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}.status{padding:12px 20px;border-radius:10px;font-size:0.85rem;font-weight:600}</style></head><body>
         <h1>📊 Evaluation Dashboard</h1>
@@ -1567,20 +1617,34 @@ function activate(context) {
         <h2>Quality Thresholds</h2>
         <div class="grid">${metricsHtml}</div>
         <h2 style="margin-top:24px">Dataset</h2>
-        <p style="font-size:0.85rem">${config.dataset || "Not configured"}</p>
+        <p style="font-size:0.85rem">${config.dataset || "evaluation/test-data.jsonl"}</p>
         <h2>Status</h2>
-        <div class="status" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;display:inline-block">⏳ Awaiting evaluation run</div>
-        <p style="font-size:0.8rem;color:#666;margin-top:16px">To run evaluation: <code>python evaluation/eval.py</code> or add to CI pipeline</p>
+        ${statusHtml}
+        ${outputHtml}
         <hr style="border-color:#222;margin:24px 0">
         <p style="font-size:0.7rem;color:#555">FrootAI EvalKit — Part of the FROOT framework. <a href="https://frootai.dev" style="color:#10b981">frootai.dev</a></p>
       </body></html>`;
     })
   );
 
+  // ── Command: Open npm Page ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.openNpmPage", () => {
+      vscode.env.openExternal(vscode.Uri.parse("https://www.npmjs.com/package/frootai-mcp"));
+    })
+  );
+
+  // ── Command: Open Setup Guide ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.openSetupGuide", () => {
+      vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/setup-guide"));
+    })
+  );
+
   // ── Status Bar ──
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBar.text = "$(tree-view-icon) FrootAI";
-  statusBar.tooltip = `FrootAI — From the Roots to the Fruits\n${knowledgeLoaded ? `${Object.keys(KNOWLEDGE.modules).length} modules · ${Object.keys(GLOSSARY).length} terms · 22 MCP tools` : "Knowledge loading..."}`;
+  statusBar.tooltip = `FrootAI — From the Roots to the Fruits\n${knowledgeLoaded ? `${Object.keys(KNOWLEDGE.modules).length} modules · ${Object.keys(GLOSSARY).length} terms · 23 MCP tools` : "Knowledge loading..."}`;
   statusBar.command = "frootai.browseSolutionPlays";
   statusBar.show();
   context.subscriptions.push(statusBar);

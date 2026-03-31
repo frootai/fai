@@ -54,11 +54,11 @@
       "frootai-sidebar": [
         {
           "id": "frootai.solutionPlays",
-          "name": "Solution Plays"
+          "name": "FAI Solution Plays"
         },
         {
           "id": "frootai.mcpTools",
-          "name": "MCP Tools"
+          "name": "FAI MCP Tools"
         }
       ]
     },
@@ -81,7 +81,9 @@
       },
       {
         "command": "frootai.installMcpServer",
-        "title": "FrootAI: Install MCP Server"
+        "title": "FrootAI: Setup MCP Server",
+        "icon": "$(cloud-download)",
+        "shortTitle": "Install"
       },
       {
         "command": "frootai.configureMcp",
@@ -109,7 +111,9 @@
       },
       {
         "command": "frootai.browseSolutionPlays",
-        "title": "FrootAI: Browse All Plays"
+        "title": "FrootAI: Browse All Plays",
+        "icon": "$(globe)",
+        "shortTitle": "Browse"
       },
       {
         "command": "frootai.openSetupGuide",
@@ -138,6 +142,18 @@
       {
         "command": "frootai.initPrompts",
         "title": "FrootAI: Initialize Prompts"
+      },
+      {
+        "command": "frootai.openNpmPage",
+        "title": "FrootAI: Open npm Page",
+        "icon": "$(globe)",
+        "shortTitle": "npm"
+      },
+      {
+        "command": "frootai.openSetupGuide",
+        "title": "FrootAI: Open Setup Guide",
+        "icon": "$(book)",
+        "shortTitle": "Docs"
       }
     ],
     "menus": {
@@ -150,7 +166,17 @@
         {
           "command": "frootai.installMcpServer",
           "when": "view == frootai.mcpTools",
-          "group": "navigation"
+          "group": "navigation@1"
+        },
+        {
+          "command": "frootai.openSetupGuide",
+          "when": "view == frootai.mcpTools",
+          "group": "navigation@2"
+        },
+        {
+          "command": "frootai.openNpmPage",
+          "when": "view == frootai.mcpTools",
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
@@ -173,21 +199,6 @@
           "command": "frootai.initPrompts",
           "when": "view == frootai.solutionPlays",
           "group": "1_init@4"
-        },
-        {
-          "command": "frootai.installMcpServer",
-          "when": "view == frootai.mcpTools",
-          "group": "1_mcp@1"
-        },
-        {
-          "command": "frootai.startMcpServer",
-          "when": "view == frootai.mcpTools",
-          "group": "1_mcp@2"
-        },
-        {
-          "command": "frootai.configureMcp",
-          "when": "view == frootai.mcpTools",
-          "group": "1_mcp@3"
         }
       ]
     },
