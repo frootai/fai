@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/frootai/frootai/main/.github/frootai-mark.png" width="120" alt="FrootAI">
-</p>
-
 <h1 align="center">FrootAI for VS Code</h1>
 <p align="center"><strong>From the Roots to the Fruits</strong></p>
 <p align="center"><em>20 Solution Plays  23 MCP Tools  16 Knowledge Modules  200+ AI Terms</em></p>
