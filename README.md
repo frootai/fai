@@ -166,7 +166,7 @@ graph LR
 ```
 frootai/frootai
  mcp-server/            23 MCP tools + knowledge.json (682KB)
- vscode-extension/      VS Code extension (19 commands)
+ vscode-extension/      VS Code extension (21 commands)
  python-sdk/            Python SDK  offline, zero deps
  python-mcp/            Python MCP Server  23 tools
  functions/             REST API + Agent FAI chatbot
