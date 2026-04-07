@@ -6,6 +6,7 @@ on:
       - 'mcp-server/**'
     branches: [main]
     tags:
+      - 'v*'
       - 'mcp-v*'
   workflow_dispatch:
 

@@ -6,6 +6,9 @@ on:
     paths:
       - 'python-mcp/**'
       - 'python-sdk/**'
+    tags:
+      - 'v*'
+      - 'pypi-v*'
   workflow_dispatch:
 
 permissions:

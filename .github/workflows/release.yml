@@ -3,6 +3,7 @@ name: Create GitHub Release
 on:
   push:
     tags:
+      - 'v*'
       - 'mcp-v*'
       - 'ext-v*'
 

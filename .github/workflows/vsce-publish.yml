@@ -6,6 +6,7 @@ on:
     paths:
       - 'vscode-extension/**'
     tags:
+      - 'v*'
       - 'ext-v*'
   workflow_dispatch:
 

@@ -6,6 +6,7 @@ on:
     paths:
       - 'mcp-server/**'
     tags:
+      - 'v*'
       - 'mcp-v*'
   workflow_dispatch:
 
