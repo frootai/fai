@@ -1,0 +1,57 @@
+{
+  "play": "62-federated-learning-pipeline",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "T1-Fine-Tuning-MLOps",
+      "T2-Responsible-AI",
+      "T3-Production-Patterns",
+      "F1-GenAI-Foundations",
+      "O5-GPU-Infra"
+    ],
+    "waf": [
+      "security",
+      "responsible-ai",
+      "reliability",
+      "cost-optimization",
+      "performance-efficiency"
+    ],
+    "scope": "federated-learning-pipeline-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/federated-learning-pipeline-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-federated-learning-pipeline/",
+      "./.github/skills/evaluate-federated-learning-pipeline/",
+      "./.github/skills/tune-federated-learning-pipeline/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "groundedness": 0.85,
+      "coherence": 0.8,
+      "relevance": 0.8,
+      "safety": 0,
+      "costPerQuery": 0.05
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

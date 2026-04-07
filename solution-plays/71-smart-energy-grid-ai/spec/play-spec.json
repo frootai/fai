@@ -1,0 +1,29 @@
+{
+  "name": "71-smart-energy-grid-ai",
+  "version": "1.0.0",
+  "description": "> AI-driven energy demand prediction, renewable source optimization, and grid balancing using digita",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "smart-energy-grid-ai"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README",
+    "operational-excellence": "See README",
+    "security": "See README"
+  }
+}

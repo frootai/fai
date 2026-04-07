@@ -1,0 +1,39 @@
+{
+  "name": "incident-response",
+  "description": "Incident Response — on-call triage, KQL query generation, Azure resource diagnostics, runbook automation, and post-incident reviews. AI-assisted SRE with intelligent alerting and root cause analysis.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "incident-response",
+    "on-call",
+    "sre",
+    "kql",
+    "diagnostics",
+    "runbook",
+    "root-cause",
+    "alerting"
+  ],
+  "agents": [
+    "../../agents/frootai-incident-responder.agent.md",
+    "../../agents/frootai-devops-expert.agent.md",
+    "../../agents/frootai-azure-monitor-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/opex-monitoring.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-azure-resource-health/",
+    "../../skills/frootai-azure-resource-graph/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-session-logger/"
+  ]
+}

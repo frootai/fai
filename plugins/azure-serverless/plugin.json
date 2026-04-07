@@ -1,0 +1,40 @@
+{
+  "name": "azure-serverless",
+  "description": "Azure Serverless — Functions, Logic Apps, Event Grid, and Durable Functions patterns. Event-driven architectures with consumption-based scaling, cold start mitigation, and cost optimization.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "azure",
+    "serverless",
+    "functions",
+    "logic-apps",
+    "event-grid",
+    "durable-functions",
+    "event-driven",
+    "consumption"
+  ],
+  "agents": [
+    "../../agents/frootai-azure-functions-expert.agent.md",
+    "../../agents/frootai-azure-logic-apps-expert.agent.md",
+    "../../agents/frootai-event-driven-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/azure-functions-waf.instructions.md",
+    "../../instructions/azure-logic-apps-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-azure-functions-setup/",
+    "../../skills/frootai-azure-event-grid-setup/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-cost-tracker/"
+  ]
+}

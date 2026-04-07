@@ -1,0 +1,56 @@
+{
+  "play": "61-content-moderation-v2",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "T2-Responsible-AI",
+      "F1-GenAI-Foundations",
+      "O2-Agent-Coding",
+      "T3-Production-Patterns",
+      "R3-Deterministic-AI"
+    ],
+    "waf": [
+      "responsible-ai",
+      "security",
+      "reliability",
+      "operational-excellence"
+    ],
+    "scope": "content-moderation-v2-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/content-moderation-v2-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-content-moderation-v2/",
+      "./.github/skills/evaluate-content-moderation-v2/",
+      "./.github/skills/tune-content-moderation-v2/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "groundedness": 0.85,
+      "coherence": 0.8,
+      "relevance": 0.8,
+      "safety": 0,
+      "costPerQuery": 0.05
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

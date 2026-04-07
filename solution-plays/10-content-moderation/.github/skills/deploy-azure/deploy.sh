@@ -24,3 +24,22 @@ az deployment group create \
 
 echo "✅ Deployment complete."
 echo "🔗 Verify resources: az resource list --resource-group $RG_NAME --output table"
+
+# Post-deployment verification
+echo "Running post-deployment checks..."
+HEALTH_URL="${APP_URL:-http://localhost:8080}/health"
+RETRIES=5
+for i in $(seq 1 $RETRIES); do
+  STATUS=$(curl -sf -o /dev/null -w "%{http_code}" "$HEALTH_URL" 2>/dev/null || echo "000")
+  if [ "$STATUS" = "200" ]; then
+    echo "Health check passed (attempt $i)"
+    break
+  fi
+  echo "Health check failed (attempt $i/$RETRIES, status=$STATUS), retrying in 10s..."
+  sleep 10
+done
+if [ "$STATUS" != "200" ]; then
+  echo "ERROR: Health check failed after $RETRIES attempts"
+  exit 1
+fi
+echo "Deployment complete and verified."

@@ -1,0 +1,52 @@
+{
+  "name": "71-smart-energy-grid-ai",
+  "description": "FrootAI solution play: Smart Energy Grid Ai",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "smart-energy-grid-ai",
+    "performance-efficiency",
+    "reliability",
+    "cost-optimization",
+    "operational-excellence",
+    "security",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "71-smart-energy-grid-ai"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/smart-energy-grid-ai-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "performance-efficiency",
+    "reliability",
+    "cost-optimization",
+    "operational-excellence",
+    "security"
+  ],
+  "install": "npx frootai install 71-smart-energy-grid-ai"
+}

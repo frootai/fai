@@ -1,0 +1,26 @@
+{
+  "assumes": [
+    "R2-RAG-Architecture",
+    "O3-MCP-Tools-Functions",
+    "T3-Production-Patterns",
+    "F1-GenAI-Foundations"
+  ],
+  "waf": [
+    "security",
+    "reliability",
+    "cost-optimization",
+    "performance-efficiency"
+  ],
+  "compatiblePlays": [
+    "01-enterprise-rag",
+    "09-ai-search-portal",
+    "21-agentic-rag",
+    "36-knowledge-graph-rag"
+  ],
+  "evaluation": {
+    "groundedness": 0.95,
+    "coherence": 0.90,
+    "relevance": 0.85,
+    "costPerQuery": 0.01
+  }
+}

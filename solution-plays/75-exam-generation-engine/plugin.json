@@ -1,0 +1,48 @@
+{
+  "name": "75-exam-generation-engine",
+  "description": "FrootAI solution play: Exam Generation Engine",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "exam-generation-engine",
+    "responsible-ai",
+    "reliability",
+    "performance-efficiency",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "75-exam-generation-engine"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/exam-generation-engine-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "responsible-ai",
+    "reliability",
+    "performance-efficiency"
+  ],
+  "install": "npx frootai install 75-exam-generation-engine"
+}

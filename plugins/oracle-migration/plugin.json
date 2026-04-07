@@ -1,0 +1,41 @@
+{
+  "name": "oracle-migration",
+  "description": "Oracle Migration — Oracle-to-PostgreSQL and Oracle-to-Azure SQL migration patterns. Schema conversion, PL/SQL translation, data pipeline design, and validation testing for database modernization.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "oracle",
+    "migration",
+    "postgresql",
+    "azure-sql",
+    "schema-conversion",
+    "plsql",
+    "database-modernization"
+  ],
+  "agents": [
+    "../../agents/frootai-migration-expert.agent.md",
+    "../../agents/frootai-postgresql-expert.agent.md",
+    "../../agents/frootai-sql-server-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/sql-optimization-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-build-sql-migration/",
+    "../../skills/frootai-postgresql-optimization/",
+    "../../skills/frootai-postgresql-code-review/",
+    "../../skills/frootai-sql-optimization-skill/",
+    "../../skills/frootai-sql-code-review-skill/",
+    "../../skills/frootai-database-schema-designer/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

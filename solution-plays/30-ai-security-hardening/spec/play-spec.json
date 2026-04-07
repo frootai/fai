@@ -1,0 +1,35 @@
+{
+  "name": "30-ai-security-hardening",
+  "version": "1.0.0",
+  "play": "30-ai-security-hardening",
+  "description": "LLM security platform — prompt injection detection, jailbreak defense, content safety enforcement, red teaming automation, and OWASP LLM Top 10 compliance scanning.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "security-hardening",
+    "data_flow": "See README.md for architecture diagram"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "responsible-ai": "See README.md",
+    "operational-excellence": "See README.md"
+  }
+}

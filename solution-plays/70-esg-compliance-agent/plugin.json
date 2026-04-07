@@ -1,0 +1,50 @@
+{
+  "name": "70-esg-compliance-agent",
+  "description": "FrootAI solution play: Esg Compliance Agent",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "esg-compliance-agent",
+    "responsible-ai",
+    "security",
+    "operational-excellence",
+    "reliability",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "70-esg-compliance-agent"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/esg-compliance-agent-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "responsible-ai",
+    "security",
+    "operational-excellence",
+    "reliability"
+  ],
+  "install": "npx frootai install 70-esg-compliance-agent"
+}

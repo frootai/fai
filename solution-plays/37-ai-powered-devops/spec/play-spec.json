@@ -1,0 +1,35 @@
+{
+  "name": "37-ai-powered-devops",
+  "version": "1.0.0",
+  "play": "37-ai-powered-devops",
+  "description": "AI-assisted SRE and DevOps — intelligent incident triage, automated runbook execution, deployment risk scoring, GitOps with AI review, and predictive scaling.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "ai-devops",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "operational-excellence": "See README.md",
+    "cost-optimization": "See README.md"
+  }
+}

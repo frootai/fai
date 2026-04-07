@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "redact-pii.sh",
+        "cwd": ".",
+        "env": {
+          "REDACT_MODE": "warn"
+        },
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "play": "21-agentic-rag",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": ["R2-RAG-Architecture", "O2-AI-Agents", "O3-MCP-Tools-Functions", "T3-Production-Patterns"],
+    "waf": ["security", "reliability", "cost-optimization", "performance-efficiency", "responsible-ai"],
+    "scope": "agentic-rag-multi-source"
+  },
+  "primitives": {
+    "agents": ["./.github/agents/agentic-rag.agent.md"],
+    "instructions": [
+      "./.github/instructions/agentic-rag.instructions.md",
+      "../../instructions/python-waf.instructions.md"
+    ],
+    "skills": [],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "groundedness": 0.95,
+      "coherence": 0.90,
+      "relevance": 0.90,
+      "safety": 0,
+      "costPerQuery": 0.02
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": "./.github/",
+    "tunekit": "./config/",
+    "speckit": "./spec/"
+  }
+}

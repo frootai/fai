@@ -1,0 +1,61 @@
+{
+  "play": "73-waste-recycling-optimizer",
+  "version": "1.0.0",
+  "description": "AI-powered waste management — material classification via computer vision, collection route optimization, contamination detection, and recycling rate analytics.",
+  "context": {
+    "knowledge": [
+      "F1-GenAI-Foundations",
+      "O2-AI-Agents",
+      "T3-Production-Patterns"
+    ],
+    "waf": [
+      "responsible-ai",
+      "cost-optimization",
+      "performance-efficiency",
+      "reliability"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "73-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-73/",
+      "evaluate-73/",
+      "tune-73/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure AI Vision",
+      "Azure OpenAI",
+      "Azure IoT Hub",
+      "Azure Container Apps",
+      "Azure Cosmos DB"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

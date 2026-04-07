@@ -1,0 +1,59 @@
+{
+  "play": "50-financial-risk-intelligence",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "R2-RAG-Architecture",
+      "O2-Agent-Coding",
+      "R3-Deterministic-AI",
+      "T2-Responsible-AI",
+      "T3-Production-Patterns",
+      "F2-LLM-Selection"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "responsible-ai",
+      "cost-optimization",
+      "operational-excellence",
+      "performance-efficiency"
+    ],
+    "scope": "financial-risk-intelligence-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/financial-risk-intelligence-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-financial-risk-intelligence/",
+      "./.github/skills/evaluate-financial-risk-intelligence/",
+      "./.github/skills/tune-financial-risk-intelligence/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "groundedness": 0.85,
+      "coherence": 0.8,
+      "relevance": 0.8,
+      "safety": 0,
+      "costPerQuery": 0.05
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

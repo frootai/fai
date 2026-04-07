@@ -1,0 +1,47 @@
+{
+  "name": "deterministic-agent",
+  "description": "Deterministic AI Agent — finite state machines, rule-based routing, guardrailed tool use, and reproducible conversation flows. Build agents that produce consistent outputs regardless of LLM temperature.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "deterministic",
+    "finite-state-machine",
+    "guardrails",
+    "reproducible",
+    "rule-based",
+    "agent",
+    "waf-aligned"
+  ],
+  "agents": [
+    "../../agents/frootai-play-03-builder.agent.md",
+    "../../agents/frootai-play-03-reviewer.agent.md",
+    "../../agents/frootai-play-03-tuner.agent.md",
+    "../../agents/frootai-deterministic-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/play-03-deterministic-agent-patterns.instructions.md",
+    "../../instructions/python-waf.instructions.md",
+    "../../instructions/agent-safety.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-deploy-03-deterministic-agent/",
+    "../../skills/frootai-evaluate-03-deterministic-agent/",
+    "../../skills/frootai-tune-03-deterministic-agent/",
+    "../../skills/frootai-deterministic-agent-skill/",
+    "../../skills/frootai-guardrails-policy/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-output-validator/"
+  ],
+  "plays": [
+    "03-deterministic-agent"
+  ]
+}

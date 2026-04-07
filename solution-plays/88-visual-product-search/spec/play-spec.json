@@ -1,0 +1,28 @@
+{
+  "name": "88-visual-product-search",
+  "version": "1.0.0",
+  "description": "> Image-based product discovery combining reverse image search, visual similarity matching, style re",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "visual-product-search"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "cost-optimization": "See README"
+  }
+}

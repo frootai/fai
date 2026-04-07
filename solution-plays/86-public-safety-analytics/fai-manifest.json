@@ -1,0 +1,61 @@
+{
+  "play": "86-public-safety-analytics",
+  "version": "1.0.0",
+  "description": "Crime pattern prediction with resource allocation optimization, community sentiment analysis from social media and 311 calls, and real-time incident dashboard for law enforcement and emergency management.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "T2-Responsible-AI",
+      "O2-AI-Agents"
+    ],
+    "waf": [
+      "responsible-ai",
+      "security",
+      "reliability",
+      "performance-efficiency"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "86-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-86/",
+      "evaluate-86/",
+      "tune-86/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure Machine Learning",
+      "Azure Event Hubs",
+      "Azure Cosmos DB",
+      "Azure Stream Analytics"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

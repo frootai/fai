@@ -1,0 +1,41 @@
+{
+  "name": "cicd-automation",
+  "description": "CI/CD Automation — GitHub Actions, Azure DevOps pipelines, build matrices, deployment gates, and release management. Automate test → build → deploy → evaluate pipelines for AI workloads.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "cicd",
+    "github-actions",
+    "azure-devops",
+    "pipelines",
+    "deployment",
+    "release",
+    "automation"
+  ],
+  "agents": [
+    "../../agents/frootai-github-actions-expert.agent.md",
+    "../../agents/frootai-cicd-pipeline-expert.agent.md",
+    "../../agents/frootai-azure-devops-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/github-actions-waf.instructions.md",
+    "../../instructions/azure-devops-waf.instructions.md",
+    "../../instructions/opex-github-actions.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-build-github-workflow/",
+    "../../skills/frootai-codeql-setup/",
+    "../../skills/frootai-editorconfig-setup/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-waf-compliance/"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "31-low-code-ai-builder",
+  "description": "FrootAI solution play: Low Code Ai Builder",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "low-code-ai-builder",
+    "security",
+    "reliability",
+    "cost-optimization",
+    "operational-excellence",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "31-low-code-ai-builder"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/low-code-ai-builder-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "install": "npx frootai install 31-low-code-ai-builder"
+}

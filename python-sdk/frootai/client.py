@@ -1,6 +1,8 @@
 """FrootAI Client — Main entry point for the SDK.
 
-Offline-first: queries bundled 682KB knowledge base (16 modules, 5 FROOT layers).
+Offline-first: queries bundled knowledge base (18 modules, 5 FROOT layers).
+100 solution plays, 830+ FAI primitives (238 agents, 176 instructions, 322 skills, 10 hooks),
+77 plugins, 16 cookbook recipes, 12 workflows, 25 MCP tools.
 No network required for search, modules, glossary, or cost estimation.
 """
 
@@ -46,6 +48,8 @@ _PLAY_COSTS = {
 
 class FrootAI:
     """FrootAI SDK client — offline-first access to AI architecture knowledge.
+
+    100 solution plays, 830+ FAI primitives, 77 plugins, 25 MCP tools.
 
     Usage:
         client = FrootAI()
@@ -190,6 +194,47 @@ class FrootAI:
             "currency": "USD",
             "monthly_total": total,
             "breakdown": breakdown,
+        }
+
+    def primitives_catalog(self) -> dict:
+        """Get the FAI primitives catalog — all 830+ LEGO blocks."""
+        return {
+            "total": 780,
+            "categories": {
+                "agents": {"count": 201, "path": "agents/", "ext": ".agent.md", "install": "vscode://github.copilot-chat/createAgent?url=<raw_url>"},
+                "instructions": {"count": 176, "path": "instructions/", "ext": ".instructions.md", "install": "Copy to .github/instructions/"},
+                "skills": {"count": 282, "path": "skills/", "ext": "/SKILL.md", "install": "Copy skill folder to .github/skills/"},
+                "hooks": {"count": 10, "path": "hooks/", "ext": "/hooks.json", "install": "Copy hook folder to .github/hooks/"},
+                "plugins": {"count": 77, "path": "plugins/", "ext": "/plugin.json", "install": "npx frootai install <plugin-name>"},
+                "workflows": {"count": 12, "path": "workflows/", "ext": ".md", "install": "Copy to .github/workflows/"},
+                "cookbook": {"count": 16, "path": "cookbook/", "ext": ".md"},
+            },
+            "waf_pillars": ["reliability", "security", "cost-optimization", "operational-excellence", "performance-efficiency", "responsible-ai"],
+            "fai_protocol": {
+                "manifest": "fai-manifest.json — full play wiring",
+                "context": "fai-context.json — lightweight LEGO block context",
+                "schemas": 7,
+                "engine_modules": 7,
+                "auto_wiring": "Standalone primitives auto-wire when placed inside a solution play via fai-manifest.json",
+            },
+            "website": "https://frootai.dev/primitives",
+            "github": "https://github.com/FrootAI/frootai",
+        }
+
+    def fai_protocol(self) -> dict:
+        """Get FAI Protocol info — the binding glue."""
+        return {
+            "name": "FAI Protocol",
+            "spec_file": "fai-manifest.json",
+            "description": "The missing binding glue — context-wiring between agents, instructions, skills, hooks, workflows, plugins, tools, prompts, and guardrails.",
+            "evolution": ["FAI Protocol (spec)", "FAI Layer (concept)", "FAI Engine (runtime)", "FAI Factory (CI/CD)", "FAI Packages (distribution)", "FAI Marketplace (discovery)"],
+            "key_concepts": {
+                "context_wiring": "Knowledge modules + WAF pillars + compatible plays propagate to all primitives",
+                "auto_wiring": "Place a primitive in a play → shared context applies automatically",
+                "standalone_mode": "Any primitive works alone as a LEGO block",
+                "wired_mode": "Inside a play, primitives share context via fai-manifest.json",
+            },
+            "schemas": ["agent.schema.json", "instruction.schema.json", "skill.schema.json", "hook.schema.json", "plugin.schema.json", "fai-manifest.schema.json", "fai-context.schema.json"],
         }
 
     def get_module_section(self, module_id: str, heading: str) -> Optional[str]:

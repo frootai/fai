@@ -1,0 +1,50 @@
+{
+  "name": "86-public-safety-analytics",
+  "description": "FrootAI solution play: Public Safety Analytics",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "public-safety-analytics",
+    "responsible-ai",
+    "security",
+    "reliability",
+    "performance-efficiency",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "86-public-safety-analytics"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/public-safety-analytics-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "responsible-ai",
+    "security",
+    "reliability",
+    "performance-efficiency"
+  ],
+  "install": "npx frootai install 86-public-safety-analytics"
+}

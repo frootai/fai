@@ -1,0 +1,50 @@
+{
+  "name": "24-ai-code-review-pipeline",
+  "description": "FrootAI solution play: Ai Code Review Pipeline",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-code-review-pipeline",
+    "security",
+    "reliability",
+    "operational-excellence",
+    "responsible-ai",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "24-ai-code-review-pipeline"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-code-review-pipeline-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "operational-excellence",
+    "responsible-ai"
+  ],
+  "install": "npx frootai install 24-ai-code-review-pipeline"
+}

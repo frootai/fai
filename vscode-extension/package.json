@@ -1,8 +1,8 @@
 {
   "name": "frootai-vscode",
   "displayName": "FrootAI — From the Roots to the Fruits",
-  "description": "20 solution plays + 23 MCP tools for building production AI on Azure. Scaffold DevKit, TuneKit, SpecKit in one click. Works standalone from any workspace.",
-  "version": "1.6.0",
+  "description": "100 solution plays + 25 MCP tools + 830+ primitives for building production AI on Azure. Scaffold DevKit, TuneKit, SpecKit in one click. Works standalone from any workspace.",
+  "version": "2.1.0",
   "publisher": "frootai",
   "engines": {
     "vscode": "^1.85.0"
@@ -54,11 +54,19 @@
       "frootai-sidebar": [
         {
           "id": "frootai.solutionPlays",
-          "name": "FAI Solution Plays"
+          "name": "FAI Solution Plays (100)"
+        },
+        {
+          "id": "frootai.primitivesCatalog",
+          "name": "FAI Primitives (830+)"
+        },
+        {
+          "id": "frootai.faiProtocol",
+          "name": "FAI Protocol & Layer"
         },
         {
           "id": "frootai.mcpTools",
-          "name": "FAI MCP Tools"
+          "name": "FAI MCP Tools (25)"
         }
       ]
     },
@@ -104,6 +112,26 @@
       {
         "command": "frootai.installPlugin",
         "title": "FrootAI: Install Plugin"
+      },
+      {
+        "command": "frootai.browsePrimitives",
+        "title": "FrootAI: Browse Primitives Catalog"
+      },
+      {
+        "command": "frootai.installAgent",
+        "title": "FrootAI: Install Agent"
+      },
+      {
+        "command": "frootai.installInstruction",
+        "title": "FrootAI: Install Instruction"
+      },
+      {
+        "command": "frootai.viewFaiProtocol",
+        "title": "FrootAI: View FAI Protocol"
+      },
+      {
+        "command": "frootai.createManifest",
+        "title": "FrootAI: Create fai-manifest.json"
       },
       {
         "command": "frootai.runEvaluation",

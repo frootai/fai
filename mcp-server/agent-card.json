@@ -9,7 +9,10 @@
     "name": "FrootAI",
     "url": "https://frootai.dev"
   },
-  "protocols": ["MCP/1.0", "A2A/1.0"],
+  "protocols": [
+    "MCP/1.0",
+    "A2A/1.0"
+  ],
   "capabilities": {
     "knowledge": {
       "query": true,
@@ -24,7 +27,11 @@
     },
     "workflow": {
       "build_review_tune": true,
-      "agent_chain": ["agent_build", "agent_review", "agent_tune"]
+      "agent_chain": [
+        "agent_build",
+        "agent_review",
+        "agent_tune"
+      ]
     },
     "retrieval": {
       "azure_docs": true,
@@ -37,42 +44,91 @@
       "id": "knowledge",
       "name": "FROOT Knowledge Query",
       "description": "Search and retrieve AI architecture knowledge across 18 modules and 200+ terms",
-      "inputModes": ["text"],
-      "outputModes": ["text"]
+      "inputModes": [
+        "text"
+      ],
+      "outputModes": [
+        "text"
+      ]
     },
     {
       "id": "model_advisor",
       "name": "AI Model Advisor",
       "description": "Compare Azure OpenAI models, estimate costs, recommend the right model for a use case",
-      "inputModes": ["text"],
-      "outputModes": ["text"]
+      "inputModes": [
+        "text"
+      ],
+      "outputModes": [
+        "text"
+      ]
     },
     {
       "id": "solution_architect",
       "name": "Solution Architecture Guide",
       "description": "Guide through 20 pre-packaged solution plays with DevKit + TuneKit configurations",
-      "inputModes": ["text"],
-      "outputModes": ["text"]
+      "inputModes": [
+        "text"
+      ],
+      "outputModes": [
+        "text"
+      ]
     },
     {
       "id": "build_review_tune",
       "name": "Build → Review → Tune Workflow",
       "description": "Three-agent chain: Builder creates, Reviewer validates, Tuner optimizes for production",
-      "inputModes": ["text"],
-      "outputModes": ["text"]
+      "inputModes": [
+        "text"
+      ],
+      "outputModes": [
+        "text"
+      ]
     }
   ],
   "authentication": {
-    "schemes": ["none"],
+    "schemes": [
+      "none"
+    ],
     "_comment": "FrootAI MCP is open source — no authentication required for read-only knowledge queries. Azure-deployed instances can add Managed Identity auth."
   },
   "tools": {
-    "mcp_tools": 16,
+    "mcp_tools": 25,
     "categories": {
-      "static": ["list_modules", "get_module", "lookup_term", "search_knowledge", "get_architecture_pattern", "get_froot_overview"],
-      "live": ["fetch_azure_docs", "fetch_external_mcp", "list_community_plays", "get_github_agentic_os"],
-      "agent_chain": ["agent_build", "agent_review", "agent_tune"],
-      "ai_ecosystem": ["get_model_catalog", "get_azure_pricing", "compare_models"]
+      "static": [
+        "list_modules",
+        "get_module",
+        "lookup_term",
+        "search_knowledge",
+        "get_architecture_pattern",
+        "get_froot_overview"
+      ],
+      "live": [
+        "fetch_azure_docs",
+        "fetch_external_mcp",
+        "list_community_plays",
+        "get_github_agentic_os"
+      ],
+      "agent_chain": [
+        "agent_build",
+        "agent_review",
+        "agent_tune"
+      ],
+      "ai_ecosystem": [
+        "get_model_catalog",
+        "get_azure_pricing",
+        "compare_models",
+        "compare_plays",
+        "semantic_search_plays",
+        "validate_config",
+        "run_evaluation",
+        "list_primitives",
+        "get_play_detail"
+      ],
+      "compute": [
+        "estimate_cost",
+        "embedding_playground",
+        "generate_architecture_diagram"
+      ]
     }
   }
 }

@@ -1,12 +1,37 @@
 {
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
+  "api_version": "2024-12-01-preview",
+  "deployment_name": "gpt-4o",
+  "endpoint": "${AZURE_OPENAI_ENDPOINT}",
   "temperature": 0.1,
-  "max_tokens": 1000,
-  "response_format": { "type": "json_object" },
-  "system_prompt": "You are an anomaly detection analyst. You analyze time-series data streams from Azure Event Hub and Stream Analytics to detect anomalies.\n\nFor each analysis, respond with JSON:\n{\n  \"anomalies_detected\": [{\n    \"timestamp\": \"...\",\n    \"metric\": \"...\",\n    \"value\": 0,\n    \"expected_range\": [0, 0],\n    \"severity\": \"critical|warning|info\",\n    \"likely_cause\": \"...\",\n    \"recommended_action\": \"...\"\n  }],\n  \"summary\": \"...\",\n  \"pattern\": \"spike|drift|seasonality_break|level_shift\"\n}\n\nRules:\n1. Use statistical context (mean, stddev, trend) before flagging anomalies\n2. Distinguish between spikes (temporary) and level shifts (persistent)\n3. Consider seasonality patterns (daily, weekly, monthly)\n4. For critical anomalies, include immediate remediation actions\n5. Correlate across multiple metrics when data is available",
-  "deployment_name": "gpt-4o-mini",
-  "_comments": {
-    "model": "gpt-4o-mini for cost-effective real-time analysis",
-    "pipeline": "Event Hub -> Stream Analytics (statistical detection) -> GPT (root cause analysis) -> alerts"
+  "max_tokens": 4096,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": null,
+  "response_format": {
+    "type": "json_object"
+  },
+  "seed": 42,
+  "stream": false,
+  "embedding_model": "text-embedding-3-large",
+  "embedding_deployment": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "system_message_ref": "agent.md",
+  "safety": {
+    "content_safety_enabled": true,
+    "violence_threshold": 2,
+    "hate_threshold": 2,
+    "sexual_threshold": 2,
+    "self_harm_threshold": 2
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000
+  },
+  "retry": {
+    "max_retries": 3,
+    "backoff_multiplier": 2,
+    "backoff_max": 30
   }
 }

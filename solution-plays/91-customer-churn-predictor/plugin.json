@@ -1,0 +1,50 @@
+{
+  "name": "91-customer-churn-predictor",
+  "description": "FrootAI solution play: Customer Churn Predictor",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "customer-churn-predictor",
+    "cost-optimization",
+    "reliability",
+    "responsible-ai",
+    "performance-efficiency",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "91-customer-churn-predictor"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/customer-churn-predictor-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "cost-optimization",
+    "reliability",
+    "responsible-ai",
+    "performance-efficiency"
+  ],
+  "install": "npx frootai install 91-customer-churn-predictor"
+}

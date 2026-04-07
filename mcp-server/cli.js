@@ -4,6 +4,11 @@
  *
  * Commands:
  *   init                Interactive project scaffolding
+ *   scaffold <play>     Scaffold a specific solution play
+ *   install <plugin>    Install a FrootAI plugin
+ *   list [keyword]      List available plugins
+ *   primitives [type]   Browse 830+ FAI primitives catalog
+ *   protocol            View FAI Protocol overview
  *   search <query>      Search FrootAI knowledge base
  *   cost <play>         Estimate costs for a solution play
  *   validate            Run consistency + config checks
@@ -17,7 +22,7 @@
  */
 
 import { createInterface } from 'readline';
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, statSync, copyFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -60,6 +65,12 @@ switch (command) {
   case 'scaffold':
     await cmdScaffold(args[1]);
     break;
+  case 'install':
+    await cmdInstall(args[1], args.includes('--dry-run'));
+    break;
+  case 'list':
+    cmdListPlugins(args[1]);
+    break;
   case 'search':
     cmdSearch(args.slice(1).join(' '));
     break;
@@ -71,6 +82,13 @@ switch (command) {
     break;
   case 'doctor':
     cmdDoctor();
+    break;
+  case 'primitives':
+  case 'catalog':
+    cmdPrimitivesCatalog(args[1]);
+    break;
+  case 'protocol':
+    cmdProtocol();
     break;
   case 'version':
   case '--version':
@@ -116,7 +134,7 @@ async function cmdInit() {
   console.log(`  3) AI Gateway (API management, cost control)`);
   console.log(`  4) Content Moderation (safety, compliance)`);
   console.log(`  5) Multi-modal (vision, document intelligence)`);
-  console.log(`  6) Custom (pick from 20 solution plays)${c.reset}\n`);
+  console.log(`  6) Custom (pick from 100 solution plays)${c.reset}\n`);
   const scenario = await ask(`${c.green}  Choose [1-6]: ${c.reset}`);
 
   const playMap = {
@@ -139,6 +157,34 @@ async function cmdInit() {
       '13-fine-tuning-workflow', '14-cost-optimized-ai-gateway', '15-multi-modal-docproc',
       '16-copilot-teams-extension', '17-ai-observability', '18-prompt-management',
       '19-edge-ai-phi4', '20-anomaly-detection',
+      '21-agentic-rag', '22-multi-agent-swarm', '23-browser-automation-agent',
+      '24-ai-code-review-pipeline', '25-conversation-memory-layer', '26-semantic-search-engine',
+      '27-ai-data-pipeline', '28-knowledge-graph-rag', '29-mcp-gateway',
+      '30-ai-security-hardening', '31-low-code-ai-builder', '32-ai-powered-testing',
+      '33-voice-ai-agent', '34-edge-ai-deployment', '35-ai-compliance-engine',
+      '36-multimodal-agent', '37-ai-powered-devops', '38-document-understanding-v2',
+      '39-ai-meeting-assistant', '40-copilot-studio-advanced', '41-ai-red-teaming',
+      '42-computer-use-agent', '43-ai-video-generation', '44-foundry-local-on-device',
+      '45-realtime-event-ai', '46-healthcare-clinical-ai', '47-synthetic-data-factory',
+      '48-ai-model-governance', '49-creative-ai-studio', '50-financial-risk-intelligence',
+      '51-autonomous-coding-agent', '52-ai-api-gateway-v2', '53-legal-document-ai',
+      '54-ai-customer-support-v2', '55-supply-chain-ai', '56-semantic-code-search',
+      '57-ai-translation-engine', '58-digital-twin-agent', '59-ai-recruiter-agent',
+      '60-responsible-ai-dashboard', '61-content-moderation-v2', '62-federated-learning-pipeline',
+      '63-fraud-detection-agent', '64-ai-sales-assistant', '65-ai-training-curriculum',
+      '66-ai-infrastructure-optimizer', '67-ai-knowledge-management', '68-predictive-maintenance-ai',
+      '69-carbon-footprint-tracker', '70-esg-compliance-agent', '71-smart-energy-grid-ai',
+      '72-climate-risk-assessor', '73-waste-recycling-optimizer',
+      '74-ai-tutoring-agent', '75-exam-generation-engine',
+      '76-accessibility-learning-agent', '77-research-paper-ai',
+      '78-precision-agriculture-agent', '79-food-safety-inspector-ai', '80-biodiversity-monitor',
+      '81-property-valuation-ai', '82-construction-safety-ai', '83-building-energy-optimizer',
+      '84-citizen-services-chatbot', '85-policy-impact-analyzer', '86-public-safety-analytics',
+      '87-dynamic-pricing-engine', '88-visual-product-search', '89-retail-inventory-predictor',
+      '90-network-optimization-agent', '91-customer-churn-predictor', '92-telecom-fraud-shield',
+      '93-continual-learning-agent', '94-ai-podcast-generator', '95-multimodal-search-v2',
+      '96-realtime-voice-agent-v2', '97-ai-data-marketplace', '98-agent-evaluation-platform',
+      '99-enterprise-ai-governance-hub', '100-fai-meta-agent',
     ];
     plays.forEach((p, i) => console.log(`${c.dim}  ${String(i + 1).padStart(2)}) ${p}${c.reset}`));
     const idx = await ask(`\n${c.green}  Choose [1-${plays.length}]: ${c.reset}`);
@@ -347,7 +393,7 @@ az deployment group create --resource-group myRG --template-file infra/main.bice
 | \`spec/\` | SpecKit | Architecture spec + WAF alignment |
 | \`evaluation/\` | EvalKit | Quality thresholds + test config |
 | \`infra/\` | InfraKit | Bicep templates |
-| \`.vscode/mcp.json\` | MCP | Auto-connects 22 tools |
+| \`.vscode/mcp.json\` | MCP | Auto-connects 25 tools |
 
 ## Useful Commands
 
@@ -597,30 +643,36 @@ function cmdWafScorecard() {
       checks: [
         { label: 'Security instructions', test: () => existsSync('.github/instructions/waf-security.instructions.md') },
         { label: 'Guardrails config', test: () => existsSync('config/guardrails.json') },
-        { label: 'No hardcoded secrets', test: () => {
-          try {
-            const files = ['config/openai.json', '.env'];
-            for (const f of files) {
-              if (existsSync(f)) {
-                const content = readFileSync(f, 'utf8');
-                if (/sk-[a-zA-Z0-9]{20,}/.test(content) || /password\s*[:=]\s*["'][^"']+["']/i.test(content)) return false;
+        {
+          label: 'No hardcoded secrets', test: () => {
+            try {
+              const files = ['config/openai.json', '.env'];
+              for (const f of files) {
+                if (existsSync(f)) {
+                  const content = readFileSync(f, 'utf8');
+                  if (/sk-[a-zA-Z0-9]{20,}/.test(content) || /password\s*[:=]\s*["'][^"']+["']/i.test(content)) return false;
+                }
               }
-            }
-            return true;
-          } catch (e) { return true; }
-        }},
+              return true;
+            } catch (e) { return true; }
+          }
+        },
       ]
     },
     {
       name: 'Cost Optimization',
       checks: [
         { label: 'Cost optimization instructions', test: () => existsSync('.github/instructions/waf-cost-optimization.instructions.md') },
-        { label: 'Model config (temperature, max_tokens)', test: () => {
-          try { const c = JSON.parse(readFileSync('config/openai.json','utf8')); return c.max_tokens !== undefined; } catch (e) { return false; }
-        }},
-        { label: 'Token budget in guardrails', test: () => {
-          try { const c = JSON.parse(readFileSync('config/guardrails.json','utf8')); return c.max_tokens_per_request !== undefined; } catch (e) { return false; }
-        }},
+        {
+          label: 'Model config (temperature, max_tokens)', test: () => {
+            try { const c = JSON.parse(readFileSync('config/openai.json', 'utf8')); return c.max_tokens !== undefined; } catch (e) { return false; }
+          }
+        },
+        {
+          label: 'Token budget in guardrails', test: () => {
+            try { const c = JSON.parse(readFileSync('config/guardrails.json', 'utf8')); return c.max_tokens_per_request !== undefined; } catch (e) { return false; }
+          }
+        },
       ]
     },
     {
@@ -635,21 +687,27 @@ function cmdWafScorecard() {
       name: 'Performance',
       checks: [
         { label: 'Performance instructions', test: () => existsSync('.github/instructions/waf-performance-efficiency.instructions.md') },
-        { label: 'Search config (top_k)', test: () => {
-          try { const c = JSON.parse(readFileSync('config/search.json','utf8')); return c.top_k !== undefined; } catch (e) { return false; }
-        }},
+        {
+          label: 'Search config (top_k)', test: () => {
+            try { const c = JSON.parse(readFileSync('config/search.json', 'utf8')); return c.top_k !== undefined; } catch (e) { return false; }
+          }
+        },
       ]
     },
     {
       name: 'Responsible AI',
       checks: [
         { label: 'RAI instructions', test: () => existsSync('.github/instructions/waf-responsible-ai.instructions.md') },
-        { label: 'Content safety in guardrails', test: () => {
-          try { const c = JSON.parse(readFileSync('config/guardrails.json','utf8')); return Array.isArray(c.blocked_categories); } catch (e) { return false; }
-        }},
-        { label: 'Grounding check enabled', test: () => {
-          try { const c = JSON.parse(readFileSync('config/guardrails.json','utf8')); return c.grounding_check === true; } catch (e) { return false; }
-        }},
+        {
+          label: 'Content safety in guardrails', test: () => {
+            try { const c = JSON.parse(readFileSync('config/guardrails.json', 'utf8')); return Array.isArray(c.blocked_categories); } catch (e) { return false; }
+          }
+        },
+        {
+          label: 'Grounding check enabled', test: () => {
+            try { const c = JSON.parse(readFileSync('config/guardrails.json', 'utf8')); return c.grounding_check === true; } catch (e) { return false; }
+          }
+        },
       ]
     },
   ];
@@ -772,6 +830,34 @@ async function cmdScaffold(playArg) {
     '13-fine-tuning-workflow', '14-cost-optimized-ai-gateway', '15-multi-modal-docproc',
     '16-copilot-teams-extension', '17-ai-observability', '18-prompt-management',
     '19-edge-ai-phi4', '20-anomaly-detection',
+    '21-agentic-rag', '22-multi-agent-swarm', '23-browser-automation-agent',
+    '24-ai-code-review-pipeline', '25-conversation-memory-layer', '26-semantic-search-engine',
+    '27-ai-data-pipeline', '28-knowledge-graph-rag', '29-mcp-gateway',
+    '30-ai-security-hardening', '31-low-code-ai-builder', '32-ai-powered-testing',
+    '33-voice-ai-agent', '34-edge-ai-deployment', '35-ai-compliance-engine',
+    '36-multimodal-agent', '37-ai-powered-devops', '38-document-understanding-v2',
+    '39-ai-meeting-assistant', '40-copilot-studio-advanced', '41-ai-red-teaming',
+    '42-computer-use-agent', '43-ai-video-generation', '44-foundry-local-on-device',
+    '45-realtime-event-ai', '46-healthcare-clinical-ai', '47-synthetic-data-factory',
+    '48-ai-model-governance', '49-creative-ai-studio', '50-financial-risk-intelligence',
+    '51-autonomous-coding-agent', '52-ai-api-gateway-v2', '53-legal-document-ai',
+    '54-ai-customer-support-v2', '55-supply-chain-ai', '56-semantic-code-search',
+    '57-ai-translation-engine', '58-digital-twin-agent', '59-ai-recruiter-agent',
+    '60-responsible-ai-dashboard', '61-content-moderation-v2', '62-federated-learning-pipeline',
+    '63-fraud-detection-agent', '64-ai-sales-assistant', '65-ai-training-curriculum',
+    '66-ai-infrastructure-optimizer', '67-ai-knowledge-management', '68-predictive-maintenance-ai',
+    '69-carbon-footprint-tracker', '70-esg-compliance-agent', '71-smart-energy-grid-ai',
+    '72-climate-risk-assessor', '73-waste-recycling-optimizer',
+    '74-ai-tutoring-agent', '75-exam-generation-engine',
+    '76-accessibility-learning-agent', '77-research-paper-ai',
+    '78-precision-agriculture-agent', '79-food-safety-inspector-ai', '80-biodiversity-monitor',
+    '81-property-valuation-ai', '82-construction-safety-ai', '83-building-energy-optimizer',
+    '84-citizen-services-chatbot', '85-policy-impact-analyzer', '86-public-safety-analytics',
+    '87-dynamic-pricing-engine', '88-visual-product-search', '89-retail-inventory-predictor',
+    '90-network-optimization-agent', '91-customer-churn-predictor', '92-telecom-fraud-shield',
+    '93-continual-learning-agent', '94-ai-podcast-generator', '95-multimodal-search-v2',
+    '96-realtime-voice-agent-v2', '97-ai-data-marketplace', '98-agent-evaluation-platform',
+    '99-enterprise-ai-governance-hub', '100-fai-meta-agent',
   ];
 
   if (!playArg) {
@@ -897,12 +983,208 @@ async function cmdScaffold(playArg) {
 // ═══════════════════════════════════════════════════
 // HELP
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// INSTALL — Install a FrootAI plugin into your project
+// ═══════════════════════════════════════════════════
+async function cmdInstall(pluginName, dryRun = false) {
+  banner();
+
+  if (!pluginName) {
+    console.log(`${c.red}  Error: Plugin name required.${c.reset}`);
+    console.log(`${c.dim}  Usage: frootai install <plugin-name> [--dry-run]${c.reset}`);
+    console.log(`${c.dim}  Run 'frootai list' to see available plugins.${c.reset}\n`);
+    process.exit(1);
+  }
+
+  // Resolve the FrootAI repo root (where plugins/ lives)
+  const repoRoot = resolve(__dirname, '..');
+  const pluginDir = join(repoRoot, 'plugins', pluginName);
+  const pluginJsonPath = join(pluginDir, 'plugin.json');
+
+  if (!existsSync(pluginJsonPath)) {
+    console.log(`${c.red}  Plugin not found: ${pluginName}${c.reset}`);
+    console.log(`${c.dim}  Available plugins: frootai list${c.reset}\n`);
+
+    // Fuzzy match suggestion
+    const allPlugins = readdirSync(join(repoRoot, 'plugins')).filter(f => {
+      try { return statSync(join(repoRoot, 'plugins', f)).isDirectory() && existsSync(join(repoRoot, 'plugins', f, 'plugin.json')); } catch { return false; }
+    });
+    const suggestions = allPlugins.filter(p => p.includes(pluginName) || pluginName.includes(p.replace(/-/g, '')));
+    if (suggestions.length > 0) {
+      console.log(`${c.yellow}  Did you mean?${c.reset}`);
+      suggestions.slice(0, 5).forEach(s => console.log(`    ${c.green}frootai install ${s}${c.reset}`));
+      console.log('');
+    }
+    process.exit(1);
+  }
+
+  const plugin = JSON.parse(readFileSync(pluginJsonPath, 'utf8'));
+  const targetDir = process.cwd();
+  const githubDir = join(targetDir, '.github');
+
+  console.log(`${c.cyan}  Installing plugin: ${c.bold}${plugin.name}${c.reset} v${plugin.version}`);
+  console.log(`${c.dim}  ${plugin.description}${c.reset}\n`);
+
+  if (dryRun) {
+    console.log(`${c.yellow}  DRY RUN — no files will be written${c.reset}\n`);
+  }
+
+  // Ensure .github directories exist
+  const dirs = ['agents', 'instructions', 'skills', 'hooks'];
+  for (const d of dirs) {
+    const dirPath = join(githubDir, d);
+    if (!existsSync(dirPath) && !dryRun) {
+      mkdirSync(dirPath, { recursive: true });
+    }
+  }
+
+  let installed = 0;
+  let skipped = 0;
+
+  // Install agents
+  for (const ref of (plugin.agents || [])) {
+    const srcPath = resolve(pluginDir, ref);
+    if (!existsSync(srcPath)) { skipped++; continue; }
+    const filename = srcPath.split(/[/\\]/).pop();
+    const destPath = join(githubDir, 'agents', filename);
+    if (existsSync(destPath)) {
+      console.log(`  ${c.dim}⏭  agents/${filename} (already exists)${c.reset}`);
+      skipped++;
+    } else {
+      if (!dryRun) { copyFileSync(srcPath, destPath); }
+      console.log(`  ${c.green}✅ agents/${filename}${c.reset}`);
+      installed++;
+    }
+  }
+
+  // Install instructions
+  for (const ref of (plugin.instructions || [])) {
+    const srcPath = resolve(pluginDir, ref);
+    if (!existsSync(srcPath)) { skipped++; continue; }
+    const filename = srcPath.split(/[/\\]/).pop();
+    const destPath = join(githubDir, 'instructions', filename);
+    if (existsSync(destPath)) {
+      console.log(`  ${c.dim}⏭  instructions/${filename} (already exists)${c.reset}`);
+      skipped++;
+    } else {
+      if (!dryRun) { copyFileSync(srcPath, destPath); }
+      console.log(`  ${c.green}✅ instructions/${filename}${c.reset}`);
+      installed++;
+    }
+  }
+
+  // Install skills (directories)
+  for (const ref of (plugin.skills || [])) {
+    const srcPath = resolve(pluginDir, ref.replace(/\/$/, ''));
+    if (!existsSync(srcPath)) { skipped++; continue; }
+    const folderName = srcPath.split(/[/\\]/).pop();
+    const destPath = join(githubDir, 'skills', folderName);
+    if (existsSync(destPath)) {
+      console.log(`  ${c.dim}⏭  skills/${folderName}/ (already exists)${c.reset}`);
+      skipped++;
+    } else {
+      if (!dryRun) { copyDirRecursive(srcPath, destPath); }
+      console.log(`  ${c.green}✅ skills/${folderName}/${c.reset}`);
+      installed++;
+    }
+  }
+
+  // Install hooks (directories)
+  for (const ref of (plugin.hooks || [])) {
+    const srcPath = resolve(pluginDir, ref.replace(/\/$/, ''));
+    if (!existsSync(srcPath)) { skipped++; continue; }
+    const folderName = srcPath.split(/[/\\]/).pop();
+    const destPath = join(githubDir, 'hooks', folderName);
+    if (existsSync(destPath)) {
+      console.log(`  ${c.dim}⏭  hooks/${folderName}/ (already exists)${c.reset}`);
+      skipped++;
+    } else {
+      if (!dryRun) { copyDirRecursive(srcPath, destPath); }
+      console.log(`  ${c.green}✅ hooks/${folderName}/${c.reset}`);
+      installed++;
+    }
+  }
+
+  // Summary
+  const total = installed + skipped;
+  console.log(`\n  ${c.bold}${c.green}Installed: ${installed}${c.reset} | ${c.dim}Skipped: ${skipped}${c.reset} | Total: ${total}`);
+
+  if (plugin.plays && plugin.plays.length > 0) {
+    console.log(`\n  ${c.cyan}Compatible plays:${c.reset} ${plugin.plays.join(', ')}`);
+  }
+
+  console.log(`\n  ${c.dim}Files installed to: ${githubDir}${c.reset}`);
+  if (dryRun) {
+    console.log(`  ${c.yellow}(dry run — run without --dry-run to install)${c.reset}`);
+  }
+  console.log('');
+}
+
+function copyDirRecursive(src, dest) {
+  mkdirSync(dest, { recursive: true });
+  for (const entry of readdirSync(src)) {
+    const srcPath = join(src, entry);
+    const destPath = join(dest, entry);
+    if (statSync(srcPath).isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// LIST — List available plugins
+// ═══════════════════════════════════════════════════
+function cmdListPlugins(category) {
+  banner();
+
+  const repoRoot = resolve(__dirname, '..');
+  const pluginsDir = join(repoRoot, 'plugins');
+
+  if (!existsSync(pluginsDir)) {
+    console.log(`${c.red}  Plugins directory not found.${c.reset}\n`);
+    process.exit(1);
+  }
+
+  const plugins = readdirSync(pluginsDir)
+    .filter(f => {
+      try { return statSync(join(pluginsDir, f)).isDirectory() && existsSync(join(pluginsDir, f, 'plugin.json')); }
+      catch { return false; }
+    })
+    .map(f => {
+      const data = JSON.parse(readFileSync(join(pluginsDir, f, 'plugin.json'), 'utf8'));
+      const items = (data.agents || []).length + (data.instructions || []).length +
+        (data.skills || []).length + (data.hooks || []).length;
+      return { name: data.name, description: data.description, items, plays: data.plays || [], keywords: data.keywords || [] };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Filter by category keyword if provided
+  const filtered = category
+    ? plugins.filter(p => p.keywords.some(k => k.includes(category.toLowerCase())) || p.name.includes(category.toLowerCase()))
+    : plugins;
+
+  console.log(`${c.bold}  FAI Marketplace — ${filtered.length} plugins${category ? ` matching "${category}"` : ''}${c.reset}\n`);
+
+  for (const p of filtered) {
+    const playsStr = p.plays.length > 0 ? `${c.cyan}[${p.plays.join(', ')}]${c.reset}` : '';
+    console.log(`  ${c.green}${p.name}${c.reset} ${c.dim}(${p.items} items)${c.reset} ${playsStr}`);
+    console.log(`    ${c.dim}${p.description.substring(0, 100)}${p.description.length > 100 ? '...' : ''}${c.reset}`);
+  }
+
+  console.log(`\n  ${c.bold}Install:${c.reset} frootai install <plugin-name>`);
+  console.log(`  ${c.bold}Filter:${c.reset}  frootai list <keyword>\n`);
+}
+
 function cmdHelp() {
   banner();
   console.log(`${c.bold}  Usage:${c.reset} frootai <command> [options]\n`);
   console.log(`${c.bold}  Commands:${c.reset}`);
   console.log(`    ${c.green}init${c.reset}              Interactive project scaffolding`);
   console.log(`    ${c.green}scaffold${c.reset} <play>    One-command play scaffold (e.g. play-01)`);
+  console.log(`    ${c.green}install${c.reset} <plugin>   Install a plugin (agents, skills, hooks → .github/)`);
+  console.log(`    ${c.green}list${c.reset} [keyword]     Browse all 77 plugins in the FAI Marketplace`);
   console.log(`    ${c.green}search${c.reset} <query>     Search FrootAI knowledge base`);
   console.log(`    ${c.green}cost${c.reset} [play]        Cost estimate (--scale dev|prod)`);
   console.log(`    ${c.green}validate${c.reset}           Check project structure + configs`);
@@ -912,14 +1194,83 @@ function cmdHelp() {
   console.log(`    ${c.green}help${c.reset}               Show this help\n`);
   console.log(`${c.bold}  Examples:${c.reset}`);
   console.log(`    ${c.dim}npx frootai init${c.reset}`);
+  console.log(`    ${c.dim}npx frootai install enterprise-rag${c.reset}`);
+  console.log(`    ${c.dim}npx frootai install frootai-essentials --dry-run${c.reset}`);
+  console.log(`    ${c.dim}npx frootai list azure${c.reset}`);
   console.log(`    ${c.dim}npx frootai scaffold 01-enterprise-rag${c.reset}`);
-  console.log(`    ${c.dim}npx frootai scaffold play-01${c.reset}`);
   console.log(`    ${c.dim}npx frootai search "RAG architecture"${c.reset}`);
   console.log(`    ${c.dim}npx frootai cost enterprise-rag --scale prod${c.reset}`);
   console.log(`    ${c.dim}npx frootai validate --waf${c.reset}`);
   console.log(`    ${c.dim}npx frootai doctor${c.reset}\n`);
   console.log(`  ${c.dim}Docs: https://frootai.dev${c.reset}`);
   console.log(`  ${c.dim}GitHub: https://github.com/frootai/frootai${c.reset}\n`);
+}
+
+// ═══════════════════════════════════════════════════
+// PRIMITIVES — Browse the 830+ LEGO blocks catalog
+// ═══════════════════════════════════════════════════
+function cmdPrimitivesCatalog(filter) {
+  banner();
+  const catalog = [
+    { type: "Agents", count: 201, icon: "🤖", path: "agents/", ext: ".agent.md", install: "vscode://github.copilot-chat/createAgent?url=<raw>" },
+    { type: "Instructions", count: 176, icon: "📝", path: "instructions/", ext: ".instructions.md", install: "Copy to .github/instructions/" },
+    { type: "Skills", count: 282, icon: "🔧", path: "skills/", ext: "/SKILL.md", install: "Copy folder to .github/skills/" },
+    { type: "Hooks", count: 10, icon: "🛡️", path: "hooks/", ext: "/hooks.json", install: "Copy folder to .github/hooks/" },
+    { type: "Plugins", count: 77, icon: "📦", path: "plugins/", ext: "/plugin.json", install: "npx frootai install <name>" },
+    { type: "Workflows", count: 12, icon: "🔄", path: "workflows/", ext: ".md", install: "Copy to .github/workflows/" },
+    { type: "Cookbook", count: 16, icon: "📖", path: "cookbook/", ext: ".md", install: "Follow recipe steps" },
+  ];
+
+  const total = catalog.reduce((s, c) => s + c.count, 0);
+  console.log(`${c.cyan}  FAI Primitives Catalog — ${total}+ LEGO Blocks${c.reset}\n`);
+  console.log(`  ${"Type".padEnd(16)} | ${"Count".padEnd(6)} | Install Method`);
+  console.log(`  ${"─".repeat(16)}─┼${"─".repeat(7)}┼${"─".repeat(45)}`);
+
+  for (const cat of catalog) {
+    if (filter && !cat.type.toLowerCase().includes(filter.toLowerCase())) continue;
+    console.log(`  ${cat.icon} ${cat.type.padEnd(14)} | ${String(cat.count).padEnd(6)} | ${c.dim}${cat.install}${c.reset}`);
+  }
+
+  console.log(`\n${c.bold}  Total: ${total}+ primitives across 7 categories${c.reset}`);
+  console.log(`\n  ${c.dim}FAI Protocol binds these LEGO blocks together:`);
+  console.log(`  fai-manifest.json → auto-wires primitives + context + WAF + evaluation`);
+  console.log(`  Standalone mode: any primitive works alone`);
+  console.log(`  Wired mode: inside a play, shared context propagates automatically${c.reset}`);
+  console.log(`\n  ${c.dim}Browse online: https://frootai.dev/primitives${c.reset}\n`);
+}
+
+// ═══════════════════════════════════════════════════
+// PROTOCOL — FAI Protocol overview
+// ═══════════════════════════════════════════════════
+function cmdProtocol() {
+  banner();
+  console.log(`${c.cyan}  FAI Protocol — The Binding Glue${c.reset}\n`);
+
+  const layers = [
+    { name: "FAI Protocol", desc: "fai-manifest.json — the specification", icon: "📋" },
+    { name: "FAI Layer", desc: "The conceptual binding glue — context wiring", icon: "🔗" },
+    { name: "FAI Engine", desc: "Runtime: 7 modules, 42 tests, 12ms load", icon: "⚙️" },
+    { name: "FAI Factory", desc: "CI/CD: validate → build → test → publish", icon: "🏭" },
+    { name: "FAI Packages", desc: "npm + PyPI + VS Code + Docker", icon: "📦" },
+    { name: "FAI Marketplace", desc: "77 plugins, 1,008 items, npx frootai install", icon: "🏪" },
+  ];
+
+  for (const layer of layers) {
+    console.log(`  ${layer.icon} ${c.bold}${layer.name}${c.reset}`);
+    console.log(`     ${c.dim}${layer.desc}${c.reset}\n`);
+  }
+
+  console.log(`${c.bold}  Key Files:${c.reset}`);
+  console.log(`  ${c.dim}fai-manifest.json${c.reset}  — Full play wiring (context + primitives + infra + toolkit)`);
+  console.log(`  ${c.dim}fai-context.json${c.reset}   — Lightweight LEGO block context (WAF + compatible plays)`);
+  console.log(`  ${c.dim}7 JSON schemas${c.reset}     — agent, instruction, skill, hook, plugin, manifest, context`);
+
+  console.log(`\n${c.bold}  How It Works:${c.reset}`);
+  console.log(`  ${c.dim}1. Create fai-manifest.json in your solution play`);
+  console.log(`  2. Reference primitives (agents, skills, hooks)`);
+  console.log(`  3. FAI Engine auto-resolves: knowledge → WAF → context → wiring`);
+  console.log(`  4. All primitives share context — no manual configuration${c.reset}`);
+  console.log(`\n  ${c.dim}Learn more: https://frootai.dev/fai-protocol${c.reset}\n`);
 }
 
 // ─── Helpers ───

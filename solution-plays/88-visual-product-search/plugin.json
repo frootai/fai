@@ -1,0 +1,50 @@
+{
+  "name": "88-visual-product-search",
+  "description": "FrootAI solution play: Visual Product Search",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "visual-product-search",
+    "performance-efficiency",
+    "reliability",
+    "responsible-ai",
+    "cost-optimization",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "88-visual-product-search"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/visual-product-search-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "performance-efficiency",
+    "reliability",
+    "responsible-ai",
+    "cost-optimization"
+  ],
+  "install": "npx frootai install 88-visual-product-search"
+}

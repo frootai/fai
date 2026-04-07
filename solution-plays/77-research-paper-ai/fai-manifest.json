@@ -1,0 +1,62 @@
+{
+  "play": "77-research-paper-ai",
+  "version": "1.0.0",
+  "description": "AI-powered academic research assistant — literature review, citation network analysis, methodology critique, research gap identification, and paper summarization.",
+  "context": {
+    "knowledge": [
+      "R2-RAG-Architecture",
+      "O2-AI-Agents",
+      "T2-Responsible-AI",
+      "F1-GenAI-Foundations"
+    ],
+    "waf": [
+      "responsible-ai",
+      "reliability",
+      "performance-efficiency",
+      "security"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "77-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-77/",
+      "evaluate-77/",
+      "tune-77/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure AI Search",
+      "Azure Cosmos DB",
+      "Microsoft Graph",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

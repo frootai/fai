@@ -1,0 +1,114 @@
+[
+  {
+    "id": "01-init-play",
+    "title": "Recipe 1: Initialize a Solution Play\r",
+    "steps": 10,
+    "file": "cookbook/01-init-play.md",
+    "size": 11571
+  },
+  {
+    "id": "02-deploy-play",
+    "title": "Recipe 2: Deploy a Solution Play to Azure\r",
+    "steps": 0,
+    "file": "cookbook/02-deploy-play.md",
+    "size": 12196
+  },
+  {
+    "id": "03-evaluate-play",
+    "title": "Recipe 3: Evaluate a Solution Play\r",
+    "steps": 0,
+    "file": "cookbook/03-evaluate-play.md",
+    "size": 17517
+  },
+  {
+    "id": "04-create-agent",
+    "title": "Recipe 4: Create a Custom Agent\r",
+    "steps": 0,
+    "file": "cookbook/04-create-agent.md",
+    "size": 15753
+  },
+  {
+    "id": "05-build-mcp-server",
+    "title": "Recipe 5: Build an MCP Server\r",
+    "steps": 10,
+    "file": "cookbook/05-build-mcp-server.md",
+    "size": 11663
+  },
+  {
+    "id": "06-package-plugin",
+    "title": "Recipe 6: Package a FrootAI Plugin\r",
+    "steps": 10,
+    "file": "cookbook/06-package-plugin.md",
+    "size": 11983
+  },
+  {
+    "id": "07-fai-engine",
+    "title": "Recipe 7: Use the FAI Engine\r",
+    "steps": 10,
+    "file": "cookbook/07-fai-engine.md",
+    "size": 16468
+  },
+  {
+    "id": "08-security-hooks",
+    "title": "Recipe 8: Implement Security Hooks\r",
+    "steps": 7,
+    "file": "cookbook/08-security-hooks.md",
+    "size": 17928
+  },
+  {
+    "id": "09-create-instruction",
+    "title": "Recipe 9: Create a Custom Instruction\r",
+    "steps": 9,
+    "file": "cookbook/09-create-instruction.md",
+    "size": 11326
+  },
+  {
+    "id": "10-create-skill",
+    "title": "Recipe 10: Create a Custom Skill\r",
+    "steps": 10,
+    "file": "cookbook/10-create-skill.md",
+    "size": 11582
+  },
+  {
+    "id": "11-build-agentic-workflow",
+    "title": "Recipe 11: Build an Agentic Workflow\r",
+    "steps": 8,
+    "file": "cookbook/11-build-agentic-workflow.md",
+    "size": 11905
+  },
+  {
+    "id": "12-wire-fai-context",
+    "title": "Recipe 12: Wire FAI Context (LEGO Blocks)\r",
+    "steps": 9,
+    "file": "cookbook/12-wire-fai-context.md",
+    "size": 12361
+  },
+  {
+    "id": "13-agentic-loop",
+    "title": "Recipe 13: Build an Agentic Loop (Ralph Loop Pattern)\r",
+    "steps": 6,
+    "file": "cookbook/13-agentic-loop.md",
+    "size": 6995
+  },
+  {
+    "id": "14-configure-vscode",
+    "title": "Recipe 14: Configure VS Code for FrootAI\r",
+    "steps": 7,
+    "file": "cookbook/14-configure-vscode.md",
+    "size": 6315
+  },
+  {
+    "id": "15-error-handling",
+    "title": "Recipe 15: Error Handling & Recovery Patterns\r",
+    "steps": 0,
+    "file": "cookbook/15-error-handling.md",
+    "size": 8748
+  },
+  {
+    "id": "16-create-hook",
+    "title": "Recipe 16: Create a Custom Hook\r",
+    "steps": 7,
+    "file": "cookbook/16-create-hook.md",
+    "size": 6396
+  }
+]

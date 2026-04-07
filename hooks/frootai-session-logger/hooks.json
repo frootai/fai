@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "log-session.sh",
+        "cwd": ".",
+        "env": {
+          "SESSION_EVENT": "sessionStart"
+        },
+        "timeoutSec": 5
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "log-session.sh",
+        "cwd": ".",
+        "env": {
+          "SESSION_EVENT": "sessionEnd"
+        },
+        "timeoutSec": 5
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "log-session.sh",
+        "cwd": ".",
+        "env": {
+          "SESSION_EVENT": "userPromptSubmitted"
+        },
+        "timeoutSec": 5
+      }
+    ]
+  }
+}

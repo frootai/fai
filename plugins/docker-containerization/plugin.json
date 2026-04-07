@@ -1,0 +1,39 @@
+{
+  "name": "docker-containerization",
+  "description": "Docker Containerization — multi-stage builds, distroless images, BuildKit caching, health checks, and security scanning. Containerize any workload with optimized images for AI inference and web services.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "docker",
+    "containerization",
+    "multi-stage",
+    "distroless",
+    "buildkit",
+    "health-checks",
+    "security-scanning"
+  ],
+  "agents": [
+    "../../agents/frootai-docker-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/docker-waf.instructions.md",
+    "../../instructions/containerization-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-build-docker-image/",
+    "../../skills/frootai-multi-stage-docker/",
+    "../../skills/frootai-containerize-aspnet/",
+    "../../skills/frootai-containerize-aspnet-framework/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-license-checker/"
+  ]
+}

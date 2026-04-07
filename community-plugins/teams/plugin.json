@@ -1,0 +1,51 @@
+{
+  "name": "frootai-teams-plugin",
+  "description": "Teams integration plugin for FrootAI — 3 MCP tools, dedicated agent, compatible plays",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "agent": "frootai-teams-expert",
+  "tools": [
+    {
+      "name": "teams_adaptive_card_send",
+      "description": "Send an Adaptive Card to a Teams channel or chat with interactive elements"
+    },
+    {
+      "name": "teams_channel_message",
+      "description": "Post a message to a Teams channel with formatting and @mentions"
+    },
+    {
+      "name": "teams_meeting_schedule",
+      "description": "Schedule a Teams meeting with participants, agenda, and AI-generated briefing"
+    }
+  ],
+  "compatible_plays": [
+    "08",
+    "16",
+    "39",
+    "40"
+  ],
+  "authentication": {
+    "type": "oauth2",
+    "token_url": "https://login.microsoftonline.com/token",
+    "scopes": [
+      "read",
+      "write"
+    ]
+  },
+  "configuration": {
+    "required": [
+      "base_url",
+      "client_id",
+      "client_secret_key_vault_ref"
+    ],
+    "optional": [
+      "timeout_ms",
+      "retry_max",
+      "rate_limit_per_minute"
+    ]
+  }
+}

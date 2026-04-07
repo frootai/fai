@@ -1,0 +1,36 @@
+{
+  "name": "29-mcp-gateway",
+  "version": "1.0.0",
+  "play": "29-mcp-gateway",
+  "description": "Centralized MCP server management — proxy, load balance, and govern multiple MCP servers with authentication, rate limiting, usage analytics, and tool discovery.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "mcp-gateway",
+    "data_flow": "See README.md for architecture diagram"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "operational-excellence": "See README.md",
+    "performance-efficiency": "See README.md"
+  }
+}

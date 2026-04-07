@@ -1,0 +1,54 @@
+{
+  "name": "50-financial-risk-intelligence",
+  "description": "FrootAI solution play: Financial Risk Intelligence",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "financial-risk-intelligence",
+    "security",
+    "reliability",
+    "responsible-ai",
+    "cost-optimization",
+    "operational-excellence",
+    "performance-efficiency",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "50-financial-risk-intelligence"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/financial-risk-intelligence-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "responsible-ai",
+    "cost-optimization",
+    "operational-excellence",
+    "performance-efficiency"
+  ],
+  "install": "npx frootai install 50-financial-risk-intelligence"
+}

@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "locale": "fr",
+    "name": "Français",
+    "direction": "ltr"
+  },
+  "common": {
+    "brand": "FrootAI",
+    "tagline": "Des Racines aux Fruits",
+    "description": "Le protocole FAI open-source pour l'unification des primitives IA — 100 solutions, 780+ primitives, 25 outils MCP",
+    "cta_get_started": "Commencer",
+    "nav_home": "Accueil",
+    "nav_solution_plays": "Solutions",
+    "nav_primitives": "Primitives",
+    "nav_learning_hub": "Centre d'Apprentissage",
+    "search_placeholder": "Rechercher solutions, primitives, documentation...",
+    "loading": "Chargement...",
+    "error_not_found": "Page non trouvée"
+  },
+  "home": {
+    "hero_title": "100 Solutions IA, Prêtes à Déployer",
+    "hero_subtitle": "Solutions IA de qualité production avec Azure, basées sur le Protocole FAI.",
+    "hero_cta_primary": "Explorer les Solutions",
+    "features_title": "Pourquoi FrootAI ?"
+  },
+  "chatbot": {
+    "greeting": "Bonjour ! Je suis l'Agent FAI. Je connais les 100 solutions et 780+ primitives. Comment puis-je vous aider ?"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "47-synthetic-data-factory",
+  "description": "FrootAI solution play: Synthetic Data Factory",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "synthetic-data-factory",
+    "security",
+    "responsible-ai",
+    "cost-optimization",
+    "operational-excellence",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "47-synthetic-data-factory"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/synthetic-data-factory-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "responsible-ai",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "install": "npx frootai install 47-synthetic-data-factory"
+}

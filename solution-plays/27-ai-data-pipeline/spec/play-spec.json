@@ -1,0 +1,36 @@
+{
+  "name": "27-ai-data-pipeline",
+  "version": "1.0.0",
+  "play": "27-ai-data-pipeline",
+  "description": "ETL with LLM augmentation — ingest, transform, classify, and enrich data using AI models. Schema detection, PII redaction, quality scoring, and lakehouse integration.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "data-pipeline",
+    "data_flow": "See README.md for architecture diagram"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "operational-excellence": "See README.md",
+    "responsible-ai": "See README.md"
+  }
+}

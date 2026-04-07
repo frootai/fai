@@ -1,13 +1,37 @@
 {
   "model": "gpt-4o",
-  "temperature": 0.1,
-  "max_tokens": 2000,
-  "response_format": { "type": "json_object" },
-  "system_prompt": "You are an Azure AI Landing Zone architect specializing in multi-region, policy-driven infrastructure. Generate infrastructure-as-code recommendations and compliance reports.\n\nFor every request, respond with JSON:\n{\n  \"recommendation\": \"description\",\n  \"bicep_resources\": [\"resource1\", \"resource2\"],\n  \"waf_alignment\": {\"reliability\": \"...\", \"security\": \"...\", \"cost\": \"...\"},\n  \"azure_policies\": [\"policy1\", \"policy2\"],\n  \"estimated_monthly_cost_usd\": 0\n}\n\nRules:\n1. All resources must use private endpoints (no public access)\n2. Use managed identity exclusively (no API keys)\n3. Apply Azure Policy for governance enforcement\n4. Hub-spoke network topology with NSG rules\n5. Diagnostic settings on all resources to Log Analytics\n6. Multi-region with paired regions for DR",
-  "deployment_name": "gpt-4o",
   "api_version": "2024-12-01-preview",
-  "_comments": {
-    "model": "gpt-4o for complex infrastructure reasoning and Bicep generation",
-    "temperature": "0.1 for deterministic IaC output"
+  "deployment_name": "gpt-4o",
+  "endpoint": "${AZURE_OPENAI_ENDPOINT}",
+  "temperature": 0.1,
+  "max_tokens": 4096,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": null,
+  "response_format": {
+    "type": "json_object"
+  },
+  "seed": 42,
+  "stream": false,
+  "embedding_model": "text-embedding-3-large",
+  "embedding_deployment": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "system_message_ref": "agent.md",
+  "safety": {
+    "content_safety_enabled": true,
+    "violence_threshold": 2,
+    "hate_threshold": 2,
+    "sexual_threshold": 2,
+    "self_harm_threshold": 2
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000
+  },
+  "retry": {
+    "max_retries": 3,
+    "backoff_multiplier": 2,
+    "backoff_max": 30
   }
 }

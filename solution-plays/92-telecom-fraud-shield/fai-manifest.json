@@ -1,0 +1,61 @@
+{
+  "play": "92-telecom-fraud-shield",
+  "version": "1.0.0",
+  "description": "Real-time telecom fraud detection covering SIM swap attacks, international revenue share fraud, subscription fraud, Wangiri callbacks, and toll fraud with sub-second blocking and explainable alert generation.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "R3-Deterministic-AI",
+      "O2-AI-Agents"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "performance-efficiency",
+      "responsible-ai"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "92-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-92/",
+      "evaluate-92/",
+      "tune-92/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure Event Hubs",
+      "Azure Stream Analytics",
+      "Azure OpenAI",
+      "Azure Cosmos DB",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

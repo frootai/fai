@@ -1,0 +1,61 @@
+{
+  "play": "90-network-optimization-agent",
+  "version": "1.0.0",
+  "description": "5G/LTE network capacity planning with AI-driven anomaly detection, self-healing automation, traffic prediction, and cell tower load balancing using digital twin simulation of network topology.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "O5-AI-Infrastructure",
+      "O2-AI-Agents"
+    ],
+    "waf": [
+      "performance-efficiency",
+      "reliability",
+      "cost-optimization",
+      "operational-excellence"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "90-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-90/",
+      "evaluate-90/",
+      "tune-90/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure IoT Hub",
+      "Azure Stream Analytics",
+      "Azure OpenAI",
+      "Azure Digital Twins",
+      "Azure Cosmos DB"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

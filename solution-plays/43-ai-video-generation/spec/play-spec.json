@@ -1,0 +1,28 @@
+{
+  "name": "43-ai-video-generation",
+  "version": "1.0.0",
+  "description": "Text-to-video content creation pipeline — prompt-driven video generation with content safety review, batch processing, asset versioning, and cost-controlled throughput for marketing, education, and media teams.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "video-gen"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "cost-optimization": "See README",
+    "responsible-ai": "See README",
+    "performance-efficiency": "See README",
+    "reliability": "See README"
+  }
+}

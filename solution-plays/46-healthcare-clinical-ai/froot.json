@@ -1,0 +1,40 @@
+{
+  "name": "46-healthcare-clinical-ai",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Healthcare Clinical AI Agent",
+  "description": "HIPAA-compliant clinical decision support — medical coding (ICD-10/CPT), clinical note summarization, drug interaction checking, patient triage, with audit trails for HIPAA/HITRUST and human-in-the-loop approval.",
+  "complexity": "High",
+  "tags": [
+    "security",
+    "responsible-ai",
+    "reliability",
+    "operational-excellence",
+    "cost-optimization"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "content-moderation",
+  "description": "Content Moderation — real-time text, image, and multi-modal content safety with Azure AI Content Safety. Includes severity scoring, blocklist management, custom categories, and human-in-the-loop review workflows.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "content-moderation",
+    "content-safety",
+    "azure-ai",
+    "image-moderation",
+    "text-moderation",
+    "blocklist",
+    "responsible-ai"
+  ],
+  "agents": [
+    "../../agents/frootai-play-10-builder.agent.md",
+    "../../agents/frootai-play-10-reviewer.agent.md",
+    "../../agents/frootai-play-10-tuner.agent.md",
+    "../../agents/frootai-content-safety-expert.agent.md",
+    "../../agents/frootai-responsible-ai-reviewer.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/play-10-content-moderation-patterns.instructions.md",
+    "../../instructions/rai-content-safety.instructions.md",
+    "../../instructions/rai-bias-testing.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-deploy-10-content-moderation/",
+    "../../skills/frootai-evaluate-10-content-moderation/",
+    "../../skills/frootai-tune-10-content-moderation/",
+    "../../skills/frootai-content-safety-review/",
+    "../../skills/frootai-human-in-the-loop/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-pii-redactor/",
+    "../../hooks/frootai-output-validator/"
+  ],
+  "plays": [
+    "10-content-moderation"
+  ]
+}

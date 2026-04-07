@@ -1,0 +1,52 @@
+{
+  "name": "azure-identity-security",
+  "description": "Azure Identity & Security — Managed Identity, Key Vault, RBAC, Conditional Access, and zero-trust architecture. Secure AI workloads with certificate-based auth, secret rotation, and compliance auditing.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "azure",
+    "identity",
+    "security",
+    "key-vault",
+    "managed-identity",
+    "rbac",
+    "zero-trust",
+    "conditional-access"
+  ],
+  "agents": [
+    "../../agents/frootai-azure-identity-expert.agent.md",
+    "../../agents/frootai-azure-key-vault-expert.agent.md",
+    "../../agents/frootai-security-reviewer.agent.md",
+    "../../agents/frootai-compliance-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/security-python.instructions.md",
+    "../../instructions/security-typescript.instructions.md",
+    "../../instructions/security-csharp.instructions.md",
+    "../../instructions/security-owasp.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-azure-key-vault-setup/",
+    "../../skills/frootai-azure-role-selector/",
+    "../../skills/frootai-secret-scanning/",
+    "../../skills/frootai-threat-model/",
+    "../../skills/frootai-security-review-skill/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-waf-compliance/",
+    "../../hooks/frootai-cost-tracker/",
+    "../../hooks/frootai-pii-redactor/",
+    "../../hooks/frootai-output-validator/",
+    "../../hooks/frootai-token-budget-enforcer/",
+    "../../hooks/frootai-session-logger/",
+    "../../hooks/frootai-license-checker/"
+  ]
+}

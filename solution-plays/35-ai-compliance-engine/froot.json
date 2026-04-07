@@ -1,0 +1,39 @@
+{
+  "name": "35-ai-compliance-engine",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "AI Compliance Engine",
+  "description": "Automated regulatory compliance — GDPR data mapping, HIPAA audit trails, SOC 2 evidence collection, EU AI Act risk assessment, and continuous compliance monitoring with AI.",
+  "complexity": "Medium",
+  "tags": [
+    "security",
+    "reliability",
+    "responsible-ai",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "mobile-development",
+  "description": "Mobile Development — Swift/SwiftUI for iOS, Kotlin for Android, .NET MAUI for cross-platform, and Flutter/Dart for hybrid apps. Native AI integration with on-device inference and platform-specific UX patterns.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "mobile",
+    "ios",
+    "android",
+    "swift",
+    "kotlin",
+    "maui",
+    "flutter",
+    "dart",
+    "cross-platform"
+  ],
+  "agents": [
+    "../../agents/frootai-swift-expert.agent.md",
+    "../../agents/frootai-kotlin-expert.agent.md",
+    "../../agents/frootai-dotnet-maui-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/swift-waf.instructions.md",
+    "../../instructions/kotlin-waf.instructions.md",
+    "../../instructions/maui-waf.instructions.md",
+    "../../instructions/dart-flutter-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-mcp-swift-scaffold/",
+    "../../skills/frootai-mcp-kotlin-scaffold/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

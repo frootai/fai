@@ -1,7 +1,7 @@
 {
   "name": "frootai-mcp",
-  "version": "3.4.0",
-  "description": "FrootAI™ MCP Server v3 — AI architecture knowledge + compute tools. 23 tools: 6 static + 4 live + 3 chain + 3 ecosystem + 6 compute (smart search, cost estimator, config validator, play comparator, architecture diagrams, embedding explorer). 16 modules, 200+ terms, 20 solution plays.",
+  "version": "4.0.0",
+  "description": "FrootAI™ MCP Server v3 — AI architecture knowledge + compute tools. 25 tools: 6 static + 4 live + 3 chain + 9 ecosystem + 3 compute. 18 modules, 200+ terms, 100 solution plays, 830+ primitives.",
   "main": "index.js",
   "type": "module",
   "bin": {
@@ -41,7 +41,8 @@
   },
   "homepage": "https://frootai.dev",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0"
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.25.0"
   },
   "engines": {
     "node": ">=18.0.0"

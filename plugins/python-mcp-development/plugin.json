@@ -1,0 +1,37 @@
+{
+  "name": "python-mcp-development",
+  "description": "Python MCP Development — build MCP servers in Python with FastMCP, asyncio, Pydantic models, type-safe tool schemas, and Azure Functions hosting.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "python",
+    "fastmcp",
+    "mcp",
+    "asyncio",
+    "pydantic",
+    "model-context-protocol",
+    "tool-server"
+  ],
+  "agents": [
+    "../../agents/frootai-python-mcp-expert.agent.md",
+    "../../agents/frootai-python-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/python-mcp-development.instructions.md",
+    "../../instructions/python-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-mcp-python-scaffold/",
+    "../../skills/frootai-mcp-python-generator/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

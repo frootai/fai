@@ -1,0 +1,59 @@
+{
+  "files.associations": {
+    "*.agent.md": "markdown",
+    "*.instructions.md": "markdown",
+    "*.prompt.md": "markdown",
+    "fai-manifest.json": "json",
+    "fai-context.json": "json",
+    "froot.json": "json",
+    "plugin.json": "json",
+    "hooks.json": "json",
+    "marketplace.json": "json",
+    "external.json": "json"
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["agents/*/fai-context.json", "**/fai-context.json"],
+      "url": "./schemas/fai-context.schema.json"
+    },
+    {
+      "fileMatch": ["solution-plays/*/fai-manifest.json", "**/fai-manifest.json"],
+      "url": "./schemas/fai-manifest.schema.json"
+    },
+    {
+      "fileMatch": ["plugins/*/plugin.json"],
+      "url": "./schemas/plugin.schema.json"
+    },
+    {
+      "fileMatch": ["hooks/*/hooks.json"],
+      "url": "./schemas/hook.schema.json"
+    }
+  ],
+  "search.exclude": {
+    ".internal/competitor/**": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/out": true,
+    "plugins/*/dist/**": true,
+    "website-data/**": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true
+  },
+  "editor.formatOnSave": true,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": false
+    }
+  },
+  "markdown.validate.enabled": true
+}

@@ -1,0 +1,28 @@
+{
+  "name": "96-realtime-voice-agent-v2",
+  "version": "1.0.0",
+  "description": "> Next-generation bidirectional WebSocket voice agent using Azure AI Voice Live SDK with MCP tool in",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "realtime-voice-agent-v2"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "security": "See README"
+  }
+}

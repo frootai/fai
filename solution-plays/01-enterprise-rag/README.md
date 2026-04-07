@@ -1,123 +1,200 @@
-# Solution Play 01: Enterprise RAG Q&A
+# Play 01: Enterprise Rag
 
-> **Complexity:** Medium | **Deploy time:** 15 min | **Status:** ✅ Ready
-> A production RAG pipeline — Azure AI Search + OpenAI + Container Apps. Pre-tuned. Evaluated.
+> **FrootAI Solution Play** — Production-grade Enterprise Rag on Azure with FAI Protocol integration
 
----
+[![WAF Aligned](https://img.shields.io/badge/WAF-6%2F6%20Pillars-green)](#waf-alignment)
+[![Azure](https://img.shields.io/badge/Azure-AI%20Services-blue)](#azure-services)
+[![FAI Protocol](https://img.shields.io/badge/FAI-Protocol%20v1-purple)](#fai-protocol)
+
+## Overview
+This solution play implements a production-ready Enterprise Rag system using Azure AI Services, following the FrootAI FAI Protocol for AI primitive unification and the Azure Well-Architected Framework (WAF) across all six pillars.
 
 ## Architecture
 
 ```mermaid
-graph LR
-    Q[User Query] --> APP[Container App]
-    APP --> SEARCH[AI Search<br/>Hybrid + Semantic]
-    APP --> LLM[Azure OpenAI<br/>GPT-4o]
-    SEARCH --> BLOB[Blob Storage]
-    LLM --> SAFE[Content Safety]
-    SAFE --> R[Response]
+graph TB
+    Client[Client Application] --> API[API Gateway / APIM]
+    API --> App[Application Service]
+    App --> OpenAI[Azure OpenAI<br/>GPT-4o]
+    App --> Search[Data Store<br/>AI Search / Cosmos DB]
+    App --> KV[Azure Key Vault]
+    App --> AI[Application Insights]
+    
+    subgraph Monitoring
+        AI --> LA[Log Analytics]
+        LA --> Alerts[Alert Rules]
+    end
+    
+    subgraph Security
+        KV --> MI[Managed Identity]
+        MI --> RBAC[RBAC Roles]
+    end
 ```
 
----
+## Azure Services
+| Service | Purpose | SKU (Prod) |
+|---------|---------|------------|
+| Azure OpenAI | Model inference (GPT-4o, embeddings) | S0 + GlobalStandard |
+| Azure Key Vault | Secret management | Standard |
+| Application Insights | Monitoring, tracing | Pay-as-you-go |
+| Log Analytics | Log aggregation, KQL queries | PerGB2018 |
+| Azure Storage | Data persistence | Standard_GRS |
 
-## 🛠️ DevKit — Developer Velocity Ecosystem
+## Prerequisites
+- Azure subscription with Contributor access
+- Azure CLI v2.60+ (`az --version`)
+- Azure Developer CLI v1.9+ (`azd version`)
+- Python 3.10+ (for evaluation pipeline)
+- Node.js 20+ (for MCP integration)
 
-**For developers who are BUILDING this solution in their IDE.**
+## Quickstart
 
-Download the DevKit → open folder in VS Code → your co-coder (Copilot/Cursor) becomes RAG-aware.
+### 1. Clone and Navigate
+```bash
+git clone https://github.com/frootai/frootai.git
+cd solution-plays/01-enterprise-rag
+```
 
-| File | What It Does |
+### 2. Deploy Infrastructure
+```bash
+az login
+azd init
+azd up --environment dev
+```
+
+### 3. Verify Deployment
+```bash
+curl -s https://${APP_URL}/health | jq .
+```
+
+### 4. Run Evaluation
+```bash
+pip install -r evaluation/requirements.txt
+python evaluation/eval.py --ci-gate
+```
+
+### 5. Use with Copilot
+Open this folder in VS Code with GitHub Copilot. The agent chain (builder → reviewer → tuner) activates automatically.
+
+## Configuration
+All settings are in the `config/` directory:
+
+| File | Description |
 |------|-------------|
-| `agent.md` | Agent personality — citation rules, abstention, 3 few-shot examples |
-| `instructions.md` | System prompt + guardrails + output format specification |
-| `.github/copilot-instructions.md` | VS Code Copilot context — generates RAG-specific code |
-| `.vscode/mcp.json` | Auto-connects FrootAI MCP + solution MCP in workspace |
-| `.vscode/settings.json` | IDE optimized for Python + Bicep + AI development |
-| `mcp/index.js` | Solution-specific MCP tools (get_rag_config, validate_config) |
-| `plugins/` | Reusable search, indexer, evaluator, config loader plugins |
+| `openai.json` | Model parameters (temperature, max_tokens, model) |
+| `agents.json` | Agent behavior and handoff rules |
+| `guardrails.json` | Content safety thresholds and evaluation gates |
+| `model-comparison.json` | Model cost/quality comparison matrix |
+| `chunking.json` | Data processing configuration |
+| `search.json` | Search/retrieval settings |
 
-### How to use DevKit
+## Agent Chain (DevKit)
+This play includes three specialized agents:
 
-```bash
-# 1. Download or clone
-git clone https://github.com/frootai/frootai.git
-cd frootai/solution-plays/01-enterprise-rag
+| Agent | File | Role |
+|-------|------|------|
+| **Builder** | `.github/agents/builder.agent.md` | Implements features, writes code |
+| **Reviewer** | `.github/agents/reviewer.agent.md` | Reviews security, quality, WAF compliance |
+| **Tuner** | `.github/agents/tuner.agent.md` | Optimizes config for production |
 
-# 2. Open in VS Code
-code .
+Workflow: `@builder` → `@reviewer` → `@tuner` → Production Ready
 
-# 3. Your co-coder is now RAG-aware:
-#    - Copilot reads agent.md + copilot-instructions.md
-#    - MCP auto-connects via .vscode/mcp.json
-#    - Ask Copilot: "Build the RAG pipeline following the agent.md rules"
-#    - The skeleton is here. The co-coder fills the implementation.
-```
+## Evaluation Pipeline
+The evaluation pipeline (`evaluation/eval.py`) measures:
 
----
-
-## 🎛️ TuneKit — AI Fine-Tuning Ecosystem
-
-**For platform teams who are TUNING this solution for production.**
-
-Download the TuneKit → review pre-tuned parameters → adjust knobs → deploy → evaluate.
-
-| File | What It Controls | Pre-Tuned Value |
-|------|-----------------|----------------|
-| `config/openai.json` | Model + generation | temp=0.1, seed=42, JSON schema, max=1000 |
-| `config/search.json` | Retrieval | Hybrid 60/40, top-k=5, threshold=0.78, semantic reranker |
-| `config/chunking.json` | Document processing | 512 tokens, semantic, 10% overlap |
-| `config/guardrails.json` | Safety | Content safety, PII redaction, injection blocking |
-| `infra/main.bicep` | Azure resources | AI Search + OpenAI + Container App + Storage |
-| `infra/parameters.json` | Deploy knobs | Region, SKU, model, capacity |
-| `evaluation/test-set.jsonl` | Test set | 100 Q&A pairs with ground truth |
-| `evaluation/eval.py` | Quality scoring | Faithfulness >0.90, Relevance >0.85, Groundedness >0.95 |
-
-### How to use TuneKit
+| Metric | Threshold | Description |
+|--------|-----------|-------------|
+| Relevance | ≥ 0.80 | Response addresses the query |
+| Groundedness | ≥ 0.85 | Grounded in provided context |
+| Coherence | ≥ 0.80 | Logically consistent |
+| Fluency | ≥ 0.85 | Grammatically correct |
+| Safety | ≥ 0.95 | No harmful content |
+| Latency p95 | ≤ 3s | Response time |
 
 ```bash
-# 1. Review and adjust configs
-cat config/openai.json    # Check temperature, model, schema
-cat config/search.json    # Check retrieval settings
-
-# 2. Deploy infrastructure
-az deployment group create --template-file infra/main.bicep --parameters infra/parameters.json
-
-# 3. Run evaluation
-python evaluation/eval.py --test-set evaluation/test-set.jsonl
-
-# 4. All green? Ship it.
+python evaluation/eval.py --report html --output evaluation/report.html
 ```
 
-### Tuning Guide
+## WAF Alignment
+| Pillar | Implementation |
+|--------|---------------|
+| **Reliability** | Retry policies, health checks, circuit breaker, graceful degradation |
+| **Security** | Managed Identity, Key Vault, Content Safety, RBAC, encryption |
+| **Cost Optimization** | Model routing, caching, right-sized SKUs, token budgets |
+| **Operational Excellence** | Bicep IaC, CI/CD, observability, incident runbooks |
+| **Performance** | Async patterns, connection pooling, CDN, streaming |
+| **Responsible AI** | Content safety, groundedness, fairness, transparency |
 
-| If You Need... | Adjust This | In This File |
-|----------------|-------------|-------------|
-| More creative answers | temperature: 0.1 → 0.3 | config/openai.json |
-| Cheaper deployment | model: gpt-4o → gpt-4o-mini | config/openai.json |
-| More retrieval results | top_k: 5 → 10 | config/search.json |
-| Smaller chunks | chunk_size_tokens: 512 → 256 | config/chunking.json |
-| Stricter safety | severity_threshold: 2 → 1 | config/guardrails.json |
+## Cost Estimate
+| Resource | Dev (monthly) | Prod (monthly) |
+|----------|:------------:|:-------------:|
+| Azure OpenAI (GPT-4o) | ~$50 | ~$500 |
+| Azure OpenAI (Embeddings) | ~$10 | ~$100 |
+| Key Vault | ~$1 | ~$5 |
+| Application Insights | ~$5 | ~$50 |
+| Storage | ~$2 | ~$20 |
+| **Total** | **~$68** | **~$675** |
 
----
+## Troubleshooting
 
-## Quick Deploy (Full Solution)
+### Common Issues
+| Issue | Solution |
+|-------|---------|
+| `DefaultAzureCredential` fails | Run `az login`, check RBAC assignments |
+| Model deployment not found | Verify deployment name in openai.json matches Azure portal |
+| Rate limit (429) | Check PTU capacity, implement retry with backoff |
+| Content blocked | Review Content Safety thresholds in guardrails.json |
+| High latency | Enable caching, reduce max_tokens, check network path |
 
-```bash
-# Clone + install
-git clone https://github.com/frootai/frootai.git
-cd frootai/solution-plays/01-enterprise-rag
+## FAI Protocol
+This play is wired through `fai-manifest.json`:
+- **Context:** Knowledge modules define what the play knows
+- **Primitives:** Agents, instructions, skills, hooks wired together
+- **Infrastructure:** Azure resource requirements defined in Bicep
+- **Guardrails:** Quality gates and safety rules enforced at runtime
 
-# Deploy infra
-az deployment group create -g myRG --template-file infra/main.bicep --parameters infra/parameters.json
+## Contributing
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines. Use the agent chain:
+1. `@builder` to implement changes
+2. `@reviewer` to validate quality
+3. `@tuner` to optimize for production
 
-# Upload documents + index
-python plugins/indexer.py --source ./your-docs/
+## License
+MIT — see [LICENSE](../../LICENSE)
 
-# Evaluate
-python evaluation/eval.py
 
-# Done. Production RAG pipeline running.
+## File Structure
+```
+.
+├── .github/                 # DevKit (agents, instructions, prompts, skills, hooks, workflows)
+├── .vscode/                 # VS Code settings and MCP config
+├── config/                  # All configuration files (JSON)
+├── evaluation/              # Quality evaluation pipeline (eval.py, test-set.jsonl)
+├── infra/                   # Azure infrastructure (Bicep, ARM, parameters)
+├── mcp/                     # MCP server plugin integration
+├── plugins/                 # Plugin documentation
+├── spec/                    # Architecture specification
+├── agent.md                 # Root agent definition
+├── CHANGELOG.md             # Version history
+├── fai-manifest.json        # FAI Protocol manifest (primitives, context, guardrails)
+├── froot.json               # Play metadata
+├── instructions.md          # Root coding instructions
+├── plugin.json              # Plugin manifest
+└── README.md                # This file
 ```
 
----
+## Related Resources
+- **Solution Plays Catalog:** [frootai.dev/solution-plays](https://frootai.dev/solution-plays)
+- **FAI Protocol:** [frootai.dev/fai-protocol](https://frootai.dev/fai-protocol)
+- **Primitives Catalog:** [frootai.dev/primitives](https://frootai.dev/primitives)
+- **Learning Hub:** [frootai.dev/learning-hub](https://frootai.dev/learning-hub)
+- **GitHub:** [github.com/frootai/frootai](https://github.com/frootai/frootai)
 
-> **FrootAI Solution Play 01** — DevKit empowers the builder. TuneKit ships it to production.
+## Changelog
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+## Support
+- **Issues:** [github.com/frootai/frootai/issues](https://github.com/frootai/frootai/issues)
+- **Discussions:** [github.com/frootai/frootai/discussions](https://github.com/frootai/frootai/discussions)
+- **MCP Server:** `npx frootai-mcp@latest` (25 tools for AI architecture)
+- **VS Code Extension:** Search "FrootAI" in VS Code Marketplace

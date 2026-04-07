@@ -1,0 +1,40 @@
+{
+  "name": "63-fraud-detection-agent",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Fraud Detection Agent",
+  "description": "Real-time fraud detection — transaction-level analysis with pattern recognition, behavioral anomaly scoring, velocity checks, device fingerprinting, network graph analysis, and explainable decisions for regulatory compliance with sub-100ms latency.",
+  "complexity": "High",
+  "tags": [
+    "security",
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

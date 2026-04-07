@@ -1,0 +1,50 @@
+{
+  "name": "58-digital-twin-agent",
+  "description": "FrootAI solution play: Digital Twin Agent",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "digital-twin-agent",
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "operational-excellence",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "58-digital-twin-agent"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/digital-twin-agent-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "install": "npx frootai install 58-digital-twin-agent"
+}

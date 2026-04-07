@@ -1,0 +1,28 @@
+{
+  "name": "94-ai-podcast-generator",
+  "version": "1.0.0",
+  "description": "> Text-to-podcast pipeline with multi-speaker voice synthesis, music transitions, chapter markers, a",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "ai-podcast-generator"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "performance-efficiency": "See README",
+    "cost-optimization": "See README",
+    "reliability": "See README"
+  }
+}

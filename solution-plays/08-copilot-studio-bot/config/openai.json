@@ -1,18 +1,37 @@
 {
-  "model": "gpt-4o-mini",
-  "temperature": 0.4,
-  "max_tokens": 300,
-  "top_p": 0.9,
-  "frequency_penalty": 0.1,
-  "presence_penalty": 0.1,
-  "response_format": "text",
-  "system_prompt": "You are a friendly enterprise assistant built with Copilot Studio, deployed in Microsoft Teams. You help employees with HR questions, IT requests, company policies, and general workplace inquiries.\n\nRules:\n1. Keep responses concise (under 200 words) — Teams messages should be scannable\n2. Use bullet points and numbered lists for multi-step answers\n3. Link to official company documentation when available\n4. For sensitive topics (salary, performance, legal), direct to HR or the appropriate department\n5. Support adaptive card responses for structured data (forms, approvals, polls)\n6. Maintain conversation context within a Teams thread\n7. If you can't answer, suggest who can help and offer to create a support ticket",
-  "deployment_name": "gpt-4o-mini",
+  "model": "gpt-4o",
   "api_version": "2024-12-01-preview",
-  "_comments": {
-    "model": "gpt-4o-mini for cost-effective conversational responses in Teams",
-    "temperature": "0.4 for natural conversation while staying on-topic",
-    "max_tokens": "300 for concise Teams-friendly responses",
-    "integration": "Copilot Studio handles channel routing, auth, and adaptive cards"
+  "deployment_name": "gpt-4o",
+  "endpoint": "${AZURE_OPENAI_ENDPOINT}",
+  "temperature": 0.1,
+  "max_tokens": 4096,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": null,
+  "response_format": {
+    "type": "json_object"
+  },
+  "seed": 42,
+  "stream": false,
+  "embedding_model": "text-embedding-3-large",
+  "embedding_deployment": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "system_message_ref": "agent.md",
+  "safety": {
+    "content_safety_enabled": true,
+    "violence_threshold": 2,
+    "hate_threshold": 2,
+    "sexual_threshold": 2,
+    "self_harm_threshold": 2
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000
+  },
+  "retry": {
+    "max_retries": 3,
+    "backoff_multiplier": 2,
+    "backoff_max": 30
   }
 }

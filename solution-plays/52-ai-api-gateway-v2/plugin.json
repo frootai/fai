@@ -1,0 +1,50 @@
+{
+  "name": "52-ai-api-gateway-v2",
+  "description": "FrootAI solution play: Ai Api Gateway V2",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-api-gateway-v2",
+    "security",
+    "performance-efficiency",
+    "cost-optimization",
+    "reliability",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "52-ai-api-gateway-v2"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-api-gateway-v2-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "performance-efficiency",
+    "cost-optimization",
+    "reliability"
+  ],
+  "install": "npx frootai install 52-ai-api-gateway-v2"
+}

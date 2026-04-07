@@ -1,0 +1,27 @@
+{
+  "name": "75-exam-generation-engine",
+  "version": "1.0.0",
+  "description": "> Auto-generate exams from curriculum with difficulty calibration, rubric generation, answer key cre",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "exam-generation-engine"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "performance-efficiency": "See README"
+  }
+}

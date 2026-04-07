@@ -1,0 +1,39 @@
+{
+  "name": "33-voice-ai-agent",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Voice AI Agent",
+  "description": "Real-time voice-driven AI agent — speech-to-text, intent recognition, conversational AI, and text-to-speech. Build voice bots for customer service, IVR, and accessibility.",
+  "complexity": "Medium",
+  "tags": [
+    "security",
+    "reliability",
+    "cost-optimization",
+    "responsible-ai"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

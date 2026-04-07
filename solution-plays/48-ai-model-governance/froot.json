@@ -1,0 +1,40 @@
+{
+  "name": "48-ai-model-governance",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "AI Model Governance & Registry",
+  "description": "Centralized model lifecycle management — model registry, version control, approval gates, A/B testing, safety evaluation, and audit trails satisfying SOX, EU AI Act, and enterprise risk governance requirements.",
+  "complexity": "High",
+  "tags": [
+    "operational-excellence",
+    "security",
+    "responsible-ai",
+    "reliability",
+    "cost-optimization"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

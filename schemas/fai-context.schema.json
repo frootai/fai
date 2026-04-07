@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://frootai.dev/schemas/fai-context.schema.json",
+  "title": "FAI Context Schema",
+  "description": "Lightweight context reference for standalone LEGO blocks. Makes an individual agent, skill, or instruction aware of the broader FAI ecosystem — which knowledge it assumes, which WAF pillars it respects, which plays it's compatible with, and what quality gates it should pass. This is the standalone-to-wired bridge.",
+  "type": "object",
+  "properties": {
+    "assumes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "FROOT knowledge module IDs this primitive assumes are available (e.g., 'R2-RAG-Architecture', 'T3-Production-Patterns'). When used standalone, these are informational. When used inside a play, the FAI Engine resolves them."
+    },
+    "waf": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["security", "reliability", "cost-optimization", "operational-excellence", "performance-efficiency", "responsible-ai"]
+      },
+      "uniqueItems": true,
+      "description": "WAF pillars this primitive respects or enforces."
+    },
+    "compatiblePlays": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9]{2}(-[a-z0-9-]+)?$"
+      },
+      "description": "Solution play IDs this primitive is tested and verified to work with. The FAI Engine uses this for auto-wiring."
+    },
+    "evaluation": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Expected groundedness threshold when this primitive runs."
+        },
+        "coherence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Expected coherence threshold."
+        },
+        "relevance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Expected relevance threshold."
+        },
+        "costPerQuery": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Expected cost per invocation in USD."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Quality expectations when this primitive runs. Used by the FAI Engine to set evaluation thresholds."
+    },
+    "requires": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Other primitives this one depends on (e.g., a skill that requires a specific agent or hook). Expressed as relative paths."
+    }
+  },
+  "additionalProperties": false
+}

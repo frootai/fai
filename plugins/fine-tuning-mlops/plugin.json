@@ -1,0 +1,43 @@
+{
+  "name": "fine-tuning-mlops",
+  "description": "Fine-Tuning & MLOps — dataset curation, model training, hyperparameter optimization, model registry, and deployment pipelines. End-to-end ML lifecycle with Azure AI Foundry, MLflow, and evaluation gates.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "fine-tuning",
+    "mlops",
+    "model-training",
+    "dataset",
+    "hyperparameter",
+    "mlflow",
+    "model-registry",
+    "azure-ai-foundry"
+  ],
+  "agents": [
+    "../../agents/frootai-fine-tuning-expert.agent.md",
+    "../../agents/frootai-ml-engineer.agent.md",
+    "../../agents/frootai-data-engineer.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/froot-t1-fine-tuning-data.instructions.md",
+    "../../instructions/python-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-fine-tune-llm/",
+    "../../skills/frootai-build-llm-evaluator/",
+    "../../skills/frootai-model-recommendation/",
+    "../../skills/frootai-inference-optimization/",
+    "../../skills/frootai-build-tokenizer/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-cost-tracker/"
+  ]
+}

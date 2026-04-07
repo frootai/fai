@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://frootai.dev/schemas/fai-manifest.schema.json",
+  "title": "FAI Manifest Schema",
+  "description": "The FAI Protocol glue file — a single JSON that wires all primitives together for a solution play. Describes context, primitive connections, quality gates, infrastructure, and toolkit. This is what makes FrootAI unique: no competitor has a context-wiring protocol.",
+  "type": "object",
+  "required": ["play", "version", "context", "primitives"],
+  "properties": {
+    "play": {
+      "type": "string",
+      "pattern": "^[0-9]{2}-[a-z0-9-]+$",
+      "description": "Solution play identifier (e.g., '01-enterprise-rag', '14-cost-optimized-ai-gateway')."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z0-9.]+)?$",
+      "description": "Semantic version of this manifest."
+    },
+    "context": {
+      "type": "object",
+      "required": ["knowledge", "waf"],
+      "properties": {
+        "knowledge": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "FROOT knowledge module IDs this play depends on (e.g., 'R2-RAG-Architecture', 'O3-MCP-Tools'). The FAI Engine resolves these to actual knowledge content."
+        },
+        "waf": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["security", "reliability", "cost-optimization", "operational-excellence", "performance-efficiency", "responsible-ai"]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "WAF pillars enforced for this play. All primitives must respect these guardrails."
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Scenario scope identifier (e.g., 'enterprise-rag-qa', 'multi-agent-orchestration'). Used for context isolation."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Shared knowledge context — which FROOT modules, WAF pillars, and scenario scope apply to all primitives."
+    },
+    "primitives": {
+      "type": "object",
+      "properties": {
+        "agents": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Paths to agent .md files (relative to play root)."
+        },
+        "instructions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Paths to instruction .md files."
+        },
+        "skills": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Paths to skill folders."
+        },
+        "hooks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Paths to hook folders."
+        },
+        "workflows": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Paths to agentic workflow .md files."
+        },
+        "guardrails": {
+          "type": "object",
+          "properties": {
+            "groundedness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Minimum groundedness score (0-1). Recommended: 0.95 for enterprise."
+            },
+            "coherence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Minimum coherence score. Recommended: 0.90."
+            },
+            "relevance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Minimum relevance score. Recommended: 0.85."
+            },
+            "safety": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 0,
+              "description": "Maximum allowed safety violations. Must be 0 for production."
+            },
+            "costPerQuery": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Maximum cost per query in USD (e.g., 0.01). Enforced by WAF Cost pillar."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Quality gates the FAI Engine evaluates after every agent response. Failures trigger retry or escalation."
+        }
+      },
+      "additionalProperties": false,
+      "description": "All primitives wired into this play — agents, instructions, skills, hooks, workflows, and quality guardrails."
+    },
+    "infrastructure": {
+      "type": "object",
+      "properties": {
+        "bicep": {
+          "type": "string",
+          "description": "Path to main Bicep template (e.g., './infra/main.bicep')."
+        },
+        "parameters": {
+          "type": "string",
+          "description": "Path to Bicep parameters file."
+        },
+        "docker": {
+          "type": "string",
+          "description": "Path to Dockerfile or docker-compose.yml."
+        },
+        "kubernetes": {
+          "type": "string",
+          "description": "Path to K8s manifests folder."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Infrastructure-as-code bindings. The FAI Engine validates and deploys these."
+    },
+    "toolkit": {
+      "type": "object",
+      "properties": {
+        "devkit": {
+          "type": "string",
+          "description": "Path to DevKit folder (agents, instructions, prompts, skills, hooks)."
+        },
+        "tunekit": {
+          "type": "string",
+          "description": "Path to TuneKit folder (config, evaluation, guardrails)."
+        },
+        "speckit": {
+          "type": "string",
+          "description": "Path to SpecKit folder (architecture, waf-alignment, this manifest)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "FAI Toolkit paths — the three kits that equip every play."
+    }
+  },
+  "additionalProperties": false
+}

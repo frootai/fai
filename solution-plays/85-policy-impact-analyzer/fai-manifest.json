@@ -1,0 +1,61 @@
+{
+  "play": "85-policy-impact-analyzer",
+  "version": "1.0.0",
+  "description": "Regulatory change detection with cross-sector impact assessment, stakeholder mapping, public comment analysis, and automated briefing generation for legislative and executive decision-makers.",
+  "context": {
+    "knowledge": [
+      "R2-RAG-Architecture",
+      "T2-Responsible-AI",
+      "T3-Production-Patterns"
+    ],
+    "waf": [
+      "responsible-ai",
+      "reliability",
+      "security",
+      "operational-excellence"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "85-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-85/",
+      "evaluate-85/",
+      "tune-85/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure AI Search",
+      "Azure Document Intelligence",
+      "Azure Cosmos DB",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

@@ -698,8 +698,30 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 
 ---
 **The Open Glue**: FrootAI removes silos between infrastructure, platform, and application teams.
-**Website**: https://frootai.dev
-**MCP v3**: 22 tools (6 static + 4 live + 3 chain + 3 AI ecosystem + 6 compute) · 200+ terms · 7 architecture patterns · 20 solution plays`;
+
+## FAI Ecosystem — By The Numbers
+- **100 Solution Plays** — Pre-tuned Azure AI blueprints (DevKit + TuneKit + SpecKit)
+- **830+ FAI Primitives** — 238 agents, 176 instructions, 322 skills, 10 hooks
+- **77 Plugins** — Composable packages (1,008 bundled items) via \`npx frootai install\`
+- **25 MCP Tools** — 6 static + 4 live + 3 chain + 7 ecosystem + 2 dev tools
+- **16 Cookbook Recipes** — Step-by-step guides from init to production
+- **12 Agentic Workflows** — CI/CD with safe-outputs
+- **18 Knowledge Modules** — 200+ terms, 7 architecture patterns
+- **7 JSON Schemas** — agent, instruction, skill, hook, plugin, manifest, context
+
+## FAI Protocol — The Binding Glue
+- **fai-manifest.json** — Full play wiring (context + primitives + infra + toolkit)
+- **fai-context.json** — Lightweight LEGO block context (WAF + compatible plays)
+- **FAI Engine** — Runtime: manifest-reader → context-resolver → primitive-wirer → hook-runner → evaluator → mcp-bridge
+- **FAI Layer** — The conceptual glue that auto-wires standalone primitives into solution plays
+
+**Website**: https://frootai.dev`;
+
+    // Add ecosystem data from knowledge.json if available
+    const eco = KNOWLEDGE.ecosystem;
+    if (eco) {
+      overview += `\\n\\n## Primitives Catalog\\n${Object.entries(eco.primitives || {}).map(([k, v]) => \`- **\${k}**: \${v.count} (\${v.desc})\`).join("\\n")}`;
+    }
 
     return {
       content: [{ type: "text", text: overview }],
@@ -836,7 +858,7 @@ server.tool(
 
 server.tool(
   "list_community_plays",
-  "List FrootAI solution plays from the GitHub repository. Shows all 20 plays with status. Falls back to static list if offline.",
+  "List FrootAI solution plays from the GitHub repository. Shows all 100 plays with status. Falls back to static list if offline.",
   {
     filter: z.string().optional().describe("Filter by keyword (e.g., 'rag', 'agent', 'landing-zone')"),
   },
@@ -883,7 +905,7 @@ server.tool(
     return {
       content: [{
         type: "text",
-        text: `## FrootAI Solution Plays\n*Offline — showing bundled list*\n\n${formatted}\n\n---\n**20 plays** · Each with .github Agentic OS + DevKit + TuneKit\n🌐 https://frootai.dev/solution-plays`,
+        text: `## FrootAI Solution Plays\n*Offline — showing bundled list*\n\n${formatted}\n\n---\n**100 plays** · Each with .github Agentic OS + DevKit + TuneKit\n🌐 https://frootai.dev/solution-plays`,
       }],
     };
   }
@@ -921,7 +943,7 @@ server.tool(
 **Layer 4 — Distribution**
   7. Plugins → Bundle agents + skills + commands for marketplace
 
-FrootAI ships 19 files per solution play × 20 plays = 380 agentic OS files.
+FrootAI ships 19 files per solution play × 100 plays = 1,292 agentic OS files.
 📖 Full module: get_module module_id=F4`,
 
       instructions: `## Primitive 1: Instructions
@@ -1365,6 +1387,86 @@ const PLAY_DATA = [
   { id: "18", name: "Prompt Management", services: ["OpenAI (gpt-4o)", "Cosmos DB", "App Service (B1)"], pattern: "prompt management versioning ab testing rollback template registry prompt engineering lifecycle", cx: "Medium" },
   { id: "19", name: "Edge AI Phi-4", services: ["IoT Hub", "ACR", "Blob Storage"], pattern: "edge ai phi small language model iot offline inference device deployment lightweight mobile embedded", cx: "High" },
   { id: "20", name: "Anomaly Detection", services: ["Event Hub", "Stream Analytics", "OpenAI (gpt-4o)", "Cosmos DB"], pattern: "anomaly detection streaming real time event processing alert iot sensor time series", cx: "High" },
+  { id: "21", name: "Agentic RAG", services: ["OpenAI (gpt-4o)", "AI Search", "Container Apps", "Key Vault"], pattern: "agentic rag autonomous retrieval multi-source semantic caching citation self-evaluation", cx: "High" },
+  { id: "22", name: "Multi-Agent Swarm", services: ["OpenAI (gpt-4o)", "Container Apps", "Service Bus", "Cosmos DB"], pattern: "multi agent swarm supervisor pipeline debate collaboration handoff state", cx: "Very High" },
+  { id: "23", name: "Browser Automation", services: ["OpenAI (gpt-4o)", "Container Apps", "Playwright"], pattern: "browser automation playwright vision web navigation form filling screenshot", cx: "High" },
+  { id: "24", name: "AI Code Review", services: ["OpenAI (gpt-4o)", "GitHub Actions", "CodeQL"], pattern: "code review codeql owasp pr pipeline ci cd security audit inline suggestions", cx: "Medium" },
+  { id: "25", name: "Conversation Memory", services: ["OpenAI (gpt-4o)", "Cosmos DB", "AI Search", "Redis"], pattern: "conversation memory short long episodic recall session persistence personalization", cx: "High" },
+  { id: "26", name: "Semantic Search Engine", services: ["AI Search", "OpenAI (gpt-4o)", "Blob Storage"], pattern: "semantic search hybrid vector bm25 reranking query expansion personalization answer generation", cx: "Medium" },
+  { id: "27", name: "AI Data Pipeline", services: ["OpenAI (gpt-4o-mini)", "Data Factory", "Cosmos DB", "Event Hubs"], pattern: "data pipeline etl llm augmented classify extract pii redaction quality score lakehouse", cx: "High" },
+  { id: "28", name: "Knowledge Graph RAG", services: ["OpenAI (gpt-4o)", "Cosmos DB Gremlin", "AI Search"], pattern: "knowledge graph rag entity extraction relationship mapping gremlin vector fusion contextual", cx: "High" },
+  { id: "29", name: "MCP Gateway", services: ["APIM", "Container Apps", "Monitor", "Key Vault"], pattern: "mcp gateway proxy rate limit tool discovery authentication analytics governance", cx: "Medium" },
+  { id: "30", name: "AI Security Hardening", services: ["Content Safety", "OpenAI (gpt-4o)", "Container Apps", "Monitor"], pattern: "security hardening prompt injection jailbreak owasp llm top 10 red teaming content safety defense", cx: "High" },
+  { id: "31", name: "Low-Code AI Builder", services: ["OpenAI (gpt-4o)", "Container Apps", "Cosmos DB", "Static Web Apps"], pattern: "low code visual builder drag drop pipeline template one click deploy citizen developer", cx: "Medium" },
+  { id: "32", name: "AI-Powered Testing", services: ["OpenAI (gpt-4o)", "GitHub Actions", "Container Apps"], pattern: "ai testing autonomous test generation unit integration e2e mutation coverage polyglot", cx: "Medium" },
+  { id: "33", name: "Voice AI Agent", services: ["AI Speech", "OpenAI (gpt-4o)", "Communication Services", "Container Apps"], pattern: "voice ai agent stt tts speech intent recognition real time streaming ivr customer service", cx: "High" },
+  { id: "34", name: "Edge AI Deployment", services: ["IoT Hub", "ONNX Runtime", "Container Instances", "Monitor"], pattern: "edge ai deployment onnx quantization offline inference fleet management cloud sync disconnected", cx: "High" },
+  { id: "35", name: "AI Compliance Engine", services: ["OpenAI (gpt-4o)", "Azure Policy", "Key Vault", "Cosmos DB"], pattern: "compliance engine gdpr hipaa soc2 eu ai act audit trail regulatory risk assessment", cx: "High" },
+  { id: "36", name: "Multimodal Agent", services: ["OpenAI (gpt-4o Vision)", "AI Vision", "Blob Storage", "Container Apps"], pattern: "multimodal agent vision text code image screenshot diagram cross modal understanding", cx: "Medium" },
+  { id: "37", name: "AI-Powered DevOps", services: ["OpenAI (gpt-4o)", "Monitor", "DevOps", "GitHub Actions"], pattern: "devops sre incident triage runbook automation risk scoring predictive scaling deployment", cx: "Medium" },
+  { id: "38", name: "Document Understanding v2", services: ["Document Intelligence", "OpenAI (gpt-4o)", "Cosmos DB"], pattern: "document understanding v2 multi page table relationship handwriting entity linking structured", cx: "High" },
+  { id: "39", name: "AI Meeting Assistant", services: ["AI Speech", "OpenAI (gpt-4o)", "Graph", "Container Apps"], pattern: "meeting assistant transcription diarization action items decision tracking followup scheduling", cx: "Medium" },
+  { id: "40", name: "Copilot Studio Advanced", services: ["Copilot Studio", "OpenAI (gpt-4o)", "Dataverse", "Graph"], pattern: "copilot studio advanced typespec declarative agents api plugins m365 sso adaptive cards", cx: "High" },
+  { id: "41", name: "AI Red Teaming", services: ["AI Foundry", "Content Safety", "OpenAI (gpt-4o)", "Monitor"], pattern: "red teaming adversarial testing prompt injection jailbreak safety scorecard eu ai act nist", cx: "High" },
+  { id: "42", name: "Computer Use Agent", services: ["OpenAI (gpt-4o Vision)", "Container Apps", "Blob Storage"], pattern: "computer use agent vision desktop web automation rpa screenshot mouse keyboard legacy", cx: "Very High" },
+  { id: "43", name: "AI Video Generation", services: ["OpenAI", "Blob Storage", "Content Safety", "Service Bus", "CDN"], pattern: "video generation text to video content safety batch processing watermark brand media", cx: "Very High" },
+  { id: "44", name: "Foundry Local On-Device", services: ["OpenAI", "IoT Hub", "Monitor", "Key Vault"], pattern: "foundry local on device air gapped inference cloud escalation offline queue fleet sync", cx: "High" },
+  { id: "45", name: "Real-Time Event AI", services: ["Event Hubs", "Functions", "OpenAI", "Cosmos DB", "SignalR"], pattern: "real time event streaming fraud iot anomaly sentiment supply chain sub second websocket dashboard", cx: "Very High" },
+  { id: "46", name: "Healthcare Clinical AI", services: ["OpenAI (gpt-4o)", "Health Data Services", "AI Search", "Content Safety"], pattern: "healthcare clinical hipaa medical coding drug interaction triage fhir audit human in the loop", cx: "Very High" },
+  { id: "47", name: "Synthetic Data Factory", services: ["OpenAI", "Machine Learning", "Blob Storage", "Key Vault"], pattern: "synthetic data generation privacy differential tabular text pii zero gdpr ccpa statistical fidelity", cx: "High" },
+  { id: "48", name: "AI Model Governance", services: ["Machine Learning", "AI Foundry", "DevOps", "Cosmos DB", "Policy"], pattern: "model governance registry approval gates ab testing audit trail sox eu ai act lineage mlops", cx: "High" },
+  { id: "49", name: "Creative AI Studio", services: ["OpenAI", "Blob Storage", "Content Safety", "Functions", "CDN"], pattern: "creative ai studio multi modal text image audio campaign brand voice content marketing", cx: "High" },
+  { id: "50", name: "Financial Risk Intelligence", services: ["OpenAI (gpt-4o)", "AI Search", "Cosmos DB", "Event Hubs"], pattern: "financial risk market analysis credit fraud detection sec basel explainable ai regulatory audit", cx: "Very High" },
+  { id: "51", name: "Autonomous Coding Agent", services: ["OpenAI (gpt-4o)", "GitHub Actions", "Container Apps"], pattern: "autonomous coding agent issue pr multi file test generation human approval code review", cx: "Very High" },
+  { id: "52", name: "AI API Gateway v2", services: ["APIM", "OpenAI", "Redis", "Monitor", "Key Vault"], pattern: "api gateway v2 semantic caching model routing token budget rate limiting cost attribution", cx: "High" },
+  { id: "53", name: "Legal Document AI", services: ["OpenAI (gpt-4o)", "AI Search", "Blob Storage", "Cosmos DB"], pattern: "legal document contract clause extraction risk identification privilege redline audit compliance", cx: "Very High" },
+  { id: "54", name: "AI Customer Support v2", services: ["OpenAI", "AI Search", "Communication Services", "Cosmos DB"], pattern: "customer support multi channel sentiment routing knowledge base csat escalation omnichannel", cx: "High" },
+  { id: "55", name: "Supply Chain AI", services: ["OpenAI", "Cosmos DB", "Event Hubs", "Functions", "ML"], pattern: "supply chain demand forecast inventory optimization supplier risk disruption route alert", cx: "Very High" },
+  { id: "56", name: "Semantic Code Search", services: ["OpenAI", "AI Search", "Blob Storage", "Container Apps"], pattern: "semantic code search natural language function discovery cross repo dependency mapping intent", cx: "Medium" },
+  { id: "57", name: "AI Translation Engine", services: ["OpenAI", "AI Translator", "Cosmos DB", "Container Apps", "CDN"], pattern: "translation multilingual 100 languages glossary cultural adaptation quality scoring batch", cx: "High" },
+  { id: "58", name: "Digital Twin Agent", services: ["IoT Hub", "Digital Twins", "OpenAI", "Functions", "Cosmos DB"], pattern: "digital twin iot simulation predictive modeling anomaly detection manufacturing energy infrastructure", cx: "Very High" },
+  { id: "59", name: "AI Recruiter Agent", services: ["OpenAI", "AI Search", "Cosmos DB", "Functions", "Graph"], pattern: "recruiter screening matching bias detection skills assessment diversity explainability fair hiring", cx: "High" },
+  { id: "60", name: "Responsible AI Dashboard", services: ["OpenAI", "ML", "Monitor", "Cosmos DB", "Static Web Apps"], pattern: "responsible ai dashboard fairness metrics bias detection transparency eu ai act compliance report", cx: "High" },
+  { id: "61", name: "Content Moderation v2", services: ["Content Safety", "OpenAI", "Cosmos DB", "Functions", "Service Bus"], pattern: "content moderation v2 multi modal cultural context human appeal false positive severity", cx: "High" },
+  { id: "62", name: "Federated Learning Pipeline", services: ["ML", "Confidential Computing", "Blob Storage", "Key Vault"], pattern: "federated learning privacy distributed training aggregation differential noise convergence", cx: "Very High" },
+  { id: "63", name: "Fraud Detection Agent", services: ["OpenAI", "Event Hubs", "Stream Analytics", "Cosmos DB"], pattern: "fraud detection real time transaction behavioral anomaly velocity fingerprint explainable sub 100ms", cx: "High" },
+  { id: "64", name: "AI Sales Assistant", services: ["OpenAI", "Cosmos DB", "Graph", "AI Search", "Functions"], pattern: "sales assistant crm lead scoring email personalization pipeline forecast deal risk next action", cx: "Medium" },
+  { id: "65", name: "AI Training Curriculum", services: ["OpenAI", "Cosmos DB", "Static Web Apps", "Functions"], pattern: "training curriculum adaptive learning assessment exercise personalization micro certification", cx: "Medium" },
+  { id: "66", name: "AI Infrastructure Optimizer", services: ["OpenAI", "Monitor", "Advisor", "Cost Management"], pattern: "infrastructure optimizer finops right sizing gpu utilization idle resource reserved scaling anomaly", cx: "High" },
+  { id: "67", name: "AI Knowledge Management", services: ["OpenAI", "AI Search", "Cosmos DB", "Blob Storage", "Graph"], pattern: "knowledge management freshness detection gap analysis expert identification contextual qa semantic", cx: "High" },
+  { id: "68", name: "Predictive Maintenance AI", services: ["IoT Hub", "OpenAI", "ML", "Stream Analytics", "Cosmos DB"], pattern: "predictive maintenance iot sensor rul remaining useful life anomaly scheduling spare parts dispatch", cx: "High" },
+  { id: "69", name: "Carbon Footprint Tracker", services: ["Azure Monitor", "OpenAI", "Cosmos DB", "Event Hubs"], pattern: "carbon footprint tracker accounting emission scope ghg esg supply chain cloud sustainability", cx: "High" },
+  { id: "70", name: "ESG Compliance Agent", services: ["OpenAI", "Document Intelligence", "Cosmos DB", "AI Search"], pattern: "esg compliance environmental social governance gri sasb tcfd csrd regulatory reporting", cx: "High" },
+  { id: "71", name: "Smart Energy Grid AI", services: ["IoT Hub", "OpenAI", "Stream Analytics", "Digital Twins"], pattern: "smart energy grid renewable solar wind battery demand prediction balancing optimization", cx: "Very High" },
+  { id: "72", name: "Climate Risk Assessor", services: ["OpenAI", "ML", "Cosmos DB", "AI Search"], pattern: "climate risk physical transition liability scenario modeling insurance financial rcp", cx: "High" },
+  { id: "73", name: "Waste & Recycling Optimizer", services: ["AI Vision", "OpenAI", "IoT Hub", "Container Apps"], pattern: "waste recycling material classification route optimization contamination detection", cx: "Medium" },
+  { id: "74", name: "AI Tutoring Agent", services: ["OpenAI", "Cosmos DB", "AI Search", "Static Web Apps", "Functions"], pattern: "tutoring agent socratic method knowledge gap adaptive difficulty personalized learning progress tracking", cx: "Medium" },
+  { id: "75", name: "Exam Generation Engine", services: ["OpenAI", "Blob Storage", "Cosmos DB", "Functions"], pattern: "exam generation curriculum difficulty calibration rubric answer key anti cheating question variation bloom taxonomy", cx: "Medium" },
+  { id: "76", name: "Accessibility Learning Agent", services: ["AI Speech", "OpenAI", "AI Vision", "Container Apps", "Cosmos DB"], pattern: "accessibility learning screen reader dyslexia multi modal text to speech wcag content adaptation inclusive", cx: "High" },
+  { id: "77", name: "Research Paper AI", services: ["OpenAI", "AI Search", "Cosmos DB", "Graph", "Functions"], pattern: "research paper academic literature review citation network methodology critique gap identification summarization", cx: "High" },
+  { id: "78", name: "Precision Agriculture Agent", services: ["IoT Hub", "AI Vision", "OpenAI", "Digital Twins", "ML"], pattern: "precision agriculture satellite imagery IoT sensor crop health irrigation fertilization yield prediction digital twin farmland", cx: "Very High" },
+  { id: "79", name: "Food Safety Inspector AI", services: ["Document Intelligence", "OpenAI", "Cosmos DB", "Event Hubs", "IoT Hub"], pattern: "food safety HACCP contamination supply chain traceability temperature pathogen risk audit regulatory compliance", cx: "High" },
+  { id: "80", name: "Biodiversity Monitor", services: ["AI Vision", "OpenAI", "IoT Hub", "Cosmos DB", "Functions"], pattern: "biodiversity species identification camera trap drone acoustic sensor ecosystem health population conservation", cx: "High" },
+  { id: "81", name: "Property Valuation AI", services: ["OpenAI", "AI Search", "Cosmos DB", "Machine Learning", "Functions"], pattern: "property valuation appraisal comparable sales market trend neighborhood scoring satellite imagery real estate mortgage underwriting", cx: "High" },
+  { id: "82", name: "Construction Safety AI", services: ["AI Vision", "IoT Hub", "OpenAI", "Container Apps", "Cosmos DB"], pattern: "construction safety PPE compliance hazard detection unauthorized zone entry incident reporting camera monitoring site", cx: "High" },
+  { id: "83", name: "Building Energy Optimizer", services: ["Digital Twins", "IoT Hub", "OpenAI", "Functions", "Cosmos DB"], pattern: "building energy HVAC lighting occupancy optimization digital twin scheduling predictive maintenance renewable commercial", cx: "Very High" },
+  { id: "84", name: "Citizen Services Chatbot", services: ["OpenAI", "AI Translator", "Communication Services", "AI Search", "Cosmos DB"], pattern: "citizen services municipal chatbot multi-language form filling appointment scheduling permit status FAQ escalation government", cx: "Medium" },
+  { id: "85", name: "Policy Impact Analyzer", services: ["OpenAI", "AI Search", "Document Intelligence", "Cosmos DB", "Functions"], pattern: "policy impact regulatory change detection stakeholder mapping public comment analysis briefing generation legislative executive", cx: "High" },
+  { id: "86", name: "Public Safety Analytics", services: ["OpenAI", "Machine Learning", "Event Hubs", "Cosmos DB", "Stream Analytics"], pattern: "public safety crime pattern prediction resource allocation community sentiment 311 calls incident dashboard law enforcement emergency", cx: "Very High" },
+  { id: "87", name: "Dynamic Pricing Engine", services: ["OpenAI", "Event Hubs", "Cosmos DB", "Redis Cache", "Machine Learning"], pattern: "dynamic pricing real-time price optimization demand signals competitor pricing inventory seasonality customer segments revenue fairness retail", cx: "High" },
+  { id: "88", name: "Visual Product Search", services: ["AI Vision", "OpenAI", "AI Search", "Container Apps", "Cosmos DB"], pattern: "visual product search reverse image similarity matching style recommendation virtual try-on fashion furniture home decor retail", cx: "High" },
+  { id: "89", name: "Retail Inventory Predictor", services: ["OpenAI", "Machine Learning", "Cosmos DB", "Event Hubs", "Functions"], pattern: "retail inventory demand forecasting sales data weather social trends economic indicators stock prediction reorder supplier automation", cx: "High" },
+  { id: "90", name: "Network Optimization Agent", services: ["IoT Hub", "Stream Analytics", "OpenAI", "Digital Twins", "Cosmos DB"], pattern: "5G LTE network capacity planning anomaly detection self-healing automation traffic prediction cell tower load balancing digital twin topology telecom", cx: "Very High" },
+  { id: "91", name: "Customer Churn Predictor", services: ["OpenAI", "Machine Learning", "Cosmos DB", "Communication Services", "Functions"], pattern: "customer churn prediction usage patterns billing history support interactions network quality retention campaigns telecom subscriber", cx: "High" },
+  { id: "92", name: "Telecom Fraud Shield", services: ["Event Hubs", "Stream Analytics", "OpenAI", "Cosmos DB", "Functions"], pattern: "telecom fraud detection SIM swap international revenue share subscription fraud Wangiri callback toll fraud real-time blocking explainable alerts", cx: "High" },
+  { id: "93", name: "Continual Learning Agent", services: ["OpenAI", "Cosmos DB", "AI Search", "Redis Cache", "Functions"], pattern: "continual learning memory persistence session reflection failure analysis pattern detection knowledge distillation ever-improving agent", cx: "Very High" },
+  { id: "94", name: "AI Podcast Generator", services: ["AI Speech", "OpenAI", "Blob Storage", "CDN", "Functions"], pattern: "text to podcast multi-speaker voice synthesis music transitions chapter markers content safety audio narration blog research meeting notes", cx: "High" },
+  { id: "95", name: "Multimodal Search Engine v2", services: ["AI Search", "AI Vision", "AI Speech", "OpenAI", "Container Apps"], pattern: "multimodal search images text code audio cross-modal reasoning vector index fusion query expansion relevance feedback unified", cx: "Very High" },
+  { id: "96", name: "Real-Time Voice Agent v2", services: ["AI Voice Live", "OpenAI", "Container Apps", "Functions", "Cosmos DB"], pattern: "real-time voice agent bidirectional websocket VAD voice activity detection function calling avatar rendering transcription sub-200ms latency conversational", cx: "Very High" },
+  { id: "97", name: "AI Data Marketplace", services: ["Machine Learning", "Blob Storage", "API Management", "Cosmos DB", "Functions"], pattern: "data marketplace synthetic anonymized datasets differential privacy statistical fidelity usage billing API access training testing monetization", cx: "High" },
+  { id: "98", name: "Agent Evaluation Platform", services: ["OpenAI", "Container Apps", "Cosmos DB", "Machine Learning", "Functions"], pattern: "agent evaluation benchmarks regression testing A/B experimentation human preference scoring leaderboard quality safety speed cost satisfaction", cx: "High" },
+  { id: "99", name: "Enterprise AI Governance Hub", services: ["API Management", "Policy", "Monitor", "Cosmos DB", "Machine Learning", "Key Vault"], pattern: "enterprise AI governance model registry approval gates policy enforcement cost attribution safety monitoring regulatory compliance SOX EU AI Act ISO 42001", cx: "Very High" },
+  { id: "100", name: "FAI Meta-Agent", services: ["OpenAI", "MCP Server", "Container Apps", "Cosmos DB", "AI Search", "Key Vault"], pattern: "meta-agent self-orchestrating super-agent play selection chain assembly infrastructure provisioning primitive configuration evaluation delivery autonomous", cx: "Very High" },
 ];
 
 const PRICING = {
@@ -1522,8 +1624,8 @@ server.tool(
       ["Name", ...selected.map(p => p.name)],
       ["Complexity", ...selected.map(p => p.cx)],
       ["Azure Services", ...selected.map(p => p.services.join(", "))],
-      ["Dev Cost/mo", ...selected.map(p => { let t=0; p.services.forEach(s => { const pr=PRICING[s]; if(pr) t+=pr.dev; }); return `$${t}`; })],
-      ["Prod Cost/mo", ...selected.map(p => { let t=0; p.services.forEach(s => { const pr=PRICING[s]; if(pr) t+=pr.prod; }); return `$${t}`; })],
+      ["Dev Cost/mo", ...selected.map(p => { let t = 0; p.services.forEach(s => { const pr = PRICING[s]; if (pr) t += pr.dev; }); return `$${t}`; })],
+      ["Prod Cost/mo", ...selected.map(p => { let t = 0; p.services.forEach(s => { const pr = PRICING[s]; if (pr) t += pr.prod; }); return `$${t}`; })],
       ["Team Size", ...selected.map(p => teamSize[p.cx] || "1-2 devs")],
       ["Deploy Time", ...selected.map(p => deployTime[p.cx] || "2-3 days")],
       ["Best For", ...selected.map(p => p.pattern.split(" ").slice(0, 5).join(", "))],
@@ -1649,6 +1751,156 @@ server.tool(
   }
 );
 
+// ── T24: List Primitives ──────────────────────────────────────────
+
+server.tool(
+  "list_primitives",
+  "PRIMITIVES CATALOG — Browse all 830+ FrootAI primitives by type: agents (201), instructions (176), skills (282), hooks (10), plugins (77), workflows (13), cookbook (17). Returns name, description, WAF alignment, and compatible plays for each primitive.",
+  {
+    type: z.enum(["agents", "instructions", "skills", "hooks", "plugins", "workflows", "cookbook"]).describe("Primitive type to list"),
+    limit: z.number().optional().default(20).describe("Max results to return (default 20)"),
+  },
+  async ({ type, limit }) => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const counts = { agents: 201, instructions: 176, skills: 282, hooks: 10, plugins: 77, workflows: 13, cookbook: 17 };
+    const dirs = {
+      agents: "agents", instructions: "instructions", skills: "skills",
+      hooks: "hooks", plugins: "plugins", workflows: "workflows", cookbook: "cookbook"
+    };
+    const dirPath = path.default.join(process.cwd(), dirs[type] || type);
+    let items = [];
+    try {
+      const entries = fs.default.readdirSync(dirPath, { withFileTypes: true });
+      for (const entry of entries.slice(0, limit)) {
+        const name = entry.name.replace(/\.(agent|instructions)\.md$/, "").replace(/\.md$/, "");
+        let desc = "";
+        const filePath = entry.isDirectory()
+          ? path.default.join(dirPath, entry.name, "SKILL.md")
+          : path.default.join(dirPath, entry.name);
+        if (fs.default.existsSync(filePath)) {
+          const content = fs.default.readFileSync(filePath, "utf8").substring(0, 500);
+          const descMatch = content.match(/description:\s*["'](.+?)["']/);
+          if (descMatch) desc = descMatch[1];
+          else {
+            const firstLine = content.split("\n").find(l => l.startsWith("#"));
+            if (firstLine) desc = firstLine.replace(/^#+\s*/, "");
+          }
+        }
+        items.push({ name, description: desc || name });
+      }
+    } catch (e) {
+      items = [{ name: "Directory not found", description: `${type} directory not accessible from current working directory` }];
+    }
+    const total = counts[type] || items.length;
+    const listing = items.map((it, i) => `${i + 1}. **${it.name}** — ${it.description}`).join("\n");
+    return { content: [{ type: "text", text: `## ${type.charAt(0).toUpperCase() + type.slice(1)} Catalog (${Math.min(limit, total)} of ${total})\n\n${listing}\n\n---\n📊 **Total ${type}**: ${total} | 🌐 [Browse all on frootai.dev](https://frootai.dev/primitives/${type})` }] };
+  }
+);
+
+// ── T25: Get Play Detail ──────────────────────────────────────────
+
+server.tool(
+  "get_play_detail",
+  "PLAY DEEP DIVE — Get detailed architecture, services, config, evaluation metrics, and file structure for a specific solution play (01-100). Returns everything needed to implement or customize the play.",
+  {
+    play_number: z.string().describe("Play number (01-100) or partial name to search for"),
+  },
+  async ({ play_number }) => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const playsDir = path.default.join(process.cwd(), "solution-plays");
+    let playDir = null;
+    let playFolder = null;
+    try {
+      const dirs = fs.default.readdirSync(playsDir).filter(d => {
+        return fs.default.statSync(path.default.join(playsDir, d)).isDirectory();
+      });
+      playFolder = dirs.find(d => d.startsWith(play_number.padStart(2, "0") + "-")) ||
+        dirs.find(d => d.toLowerCase().includes(play_number.toLowerCase()));
+      if (playFolder) playDir = path.default.join(playsDir, playFolder);
+    } catch (e) { /* ignore */ }
+
+    if (!playDir || !playFolder) {
+      return { content: [{ type: "text", text: `Play "${play_number}" not found. Use list_community_plays to browse all 100 plays.` }] };
+    }
+
+    const readFile = (rel) => {
+      const fp = path.default.join(playDir, rel);
+      try { return fs.default.readFileSync(fp, "utf8"); } catch { return null; }
+    };
+
+    // Gather play data
+    const readme = readFile("README.md");
+    const manifest = readFile("fai-manifest.json");
+    const openaiConfig = readFile("config/openai.json");
+    const guardrails = readFile("config/guardrails.json");
+
+    // Count files
+    let fileCount = 0;
+    const countFiles = (dir) => {
+      try {
+        for (const e of fs.default.readdirSync(dir, { withFileTypes: true })) {
+          if (e.isFile()) fileCount++;
+          else if (e.isDirectory()) countFiles(path.default.join(dir, e.name));
+        }
+      } catch { /* ignore */ }
+    };
+    countFiles(playDir);
+
+    const playName = playFolder.replace(/^\d+-/, "").replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    const playId = playFolder.split("-")[0];
+
+    let output = `## Play ${playId}: ${playName}\n\n`;
+    output += `📁 **Files**: ${fileCount} | 📂 **Folder**: solution-plays/${playFolder}\n\n`;
+
+    // README excerpt (first 30 lines)
+    if (readme) {
+      const excerpt = readme.split("\n").slice(0, 30).join("\n");
+      output += `### Overview\n${excerpt}\n\n`;
+    }
+
+    // Config summary
+    if (openaiConfig) {
+      try {
+        const cfg = JSON.parse(openaiConfig);
+        output += `### Model Configuration\n| Setting | Value |\n|---------|-------|\n`;
+        output += `| Model | ${cfg.model || "gpt-4o"} |\n`;
+        output += `| Temperature | ${cfg.temperature ?? 0.1} |\n`;
+        output += `| Max Tokens | ${cfg.max_tokens ?? 4096} |\n`;
+        output += `| API Version | ${cfg.api_version || "2024-12-01-preview"} |\n\n`;
+      } catch { /* skip */ }
+    }
+
+    // Manifest summary
+    if (manifest) {
+      try {
+        const m = JSON.parse(manifest);
+        output += `### FAI Manifest\n`;
+        output += `- **Play**: ${m.play || playFolder}\n`;
+        output += `- **Version**: ${m.version || "1.0.0"}\n`;
+        if (m.context?.waf) output += `- **WAF Pillars**: ${m.context.waf.join(", ")}\n`;
+        if (m.primitives) output += `- **Primitives**: ${Object.keys(m.primitives).join(", ")}\n`;
+        output += "\n";
+      } catch { /* skip */ }
+    }
+
+    // DevKit structure
+    output += `### DevKit Structure\n`;
+    output += `- \`.github/agents/\` — builder, reviewer, tuner (chained workflow)\n`;
+    output += `- \`.github/instructions/\` — coding standards, security, Azure patterns\n`;
+    output += `- \`.github/prompts/\` — /deploy, /evaluate, /review, /test\n`;
+    output += `- \`.github/skills/\` — deploy-azure, evaluate, tune\n`;
+    output += `- \`config/\` — openai.json, guardrails.json, agents.json\n`;
+    output += `- \`evaluation/\` — eval.py, test-set.jsonl\n`;
+    output += `- \`infra/\` — main.bicep, parameters.json\n\n`;
+
+    output += `🔗 [View on website](https://frootai.dev/solution-plays/${playFolder}) | [User Guide](https://frootai.dev/user-guide?play=${playId})`;
+
+    return { content: [{ type: "text", text: output }] };
+  }
+);
+
 // ── Resources: Module listing ──────────────────────────────────────
 
 server.resource(
@@ -1668,7 +1920,7 @@ The open glue that binds infrastructure, platform, and application.
 🏗️ O — Operations: Azure AI Platform, Infrastructure, Copilot
 🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
-18 modules | 200+ AI terms | 22 tools (6 static + 4 live + 3 chain + 3 AI ecosystem + 6 compute) | 20 solution plays
+18 modules | 200+ AI terms | 25 tools (6 static + 4 live + 3 chain + 6 AI ecosystem + 6 compute) | 100 solution plays
 https://frootai.dev`,
       },
     ],

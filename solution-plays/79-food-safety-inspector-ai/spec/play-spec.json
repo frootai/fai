@@ -1,0 +1,28 @@
+{
+  "name": "79-food-safety-inspector-ai",
+  "version": "1.0.0",
+  "description": "> HACCP compliance automation with contamination detection across the food supply chain — farm to fo",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "food-safety-inspector-ai"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "operational-excellence": "See README"
+  }
+}

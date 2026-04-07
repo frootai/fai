@@ -1,0 +1,52 @@
+{
+  "name": "67-ai-knowledge-management",
+  "description": "FrootAI solution play: Ai Knowledge Management",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-knowledge-management",
+    "security",
+    "reliability",
+    "operational-excellence",
+    "cost-optimization",
+    "performance-efficiency",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "67-ai-knowledge-management"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-knowledge-management-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "operational-excellence",
+    "cost-optimization",
+    "performance-efficiency"
+  ],
+  "install": "npx frootai install 67-ai-knowledge-management"
+}

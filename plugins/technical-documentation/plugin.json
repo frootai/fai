@@ -1,0 +1,49 @@
+{
+  "name": "technical-documentation",
+  "description": "Technical Documentation — API references, architecture guides, README generation, changelog automation, tutorials, and ADRs. AI-assisted writing with Mermaid diagrams, PlantUML, and DrawIO integration.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "api-reference",
+    "readme",
+    "changelog",
+    "tutorial",
+    "mermaid",
+    "plantuml",
+    "drawio"
+  ],
+  "agents": [
+    "../../agents/frootai-technical-writer.agent.md",
+    "../../agents/frootai-adr-writer.agent.md",
+    "../../agents/frootai-mermaid-diagram-expert.agent.md",
+    "../../agents/frootai-markdown-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/markdown-waf.instructions.md",
+    "../../instructions/drawio-waf.instructions.md",
+    "../../instructions/self-documenting-code-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-documentation-writer/",
+    "../../skills/frootai-readme-generator/",
+    "../../skills/frootai-changelog-generator/",
+    "../../skills/frootai-api-docs-generator/",
+    "../../skills/frootai-tutorial-generator/",
+    "../../skills/frootai-mermaid-generator/",
+    "../../skills/frootai-plantuml-generator/",
+    "../../skills/frootai-drawio-generator/",
+    "../../skills/frootai-excalidraw-generator/",
+    "../../skills/frootai-component-docs/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

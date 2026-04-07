@@ -1,0 +1,3 @@
+{"query": "What does this play do?", "expected": "Agentic RAG — Autonomous RAG where the AI agent controls retrieval — decides when to search, w..."}
+{"query": "What Azure services are used?", "expected": "Azure OpenAI, Azure AI Search, Azure Container Apps, Azure Key Vault"}
+{"query": "Which WAF pillars are covered?", "expected": "security, reliability, cost-optimization, operational-excellence, responsible-ai"}

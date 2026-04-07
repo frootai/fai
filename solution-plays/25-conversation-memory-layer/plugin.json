@@ -1,0 +1,52 @@
+{
+  "name": "25-conversation-memory-layer",
+  "description": "FrootAI solution play: Conversation Memory Layer",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "conversation-memory-layer",
+    "security",
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "responsible-ai",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "25-conversation-memory-layer"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/conversation-memory-layer-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "responsible-ai"
+  ],
+  "install": "npx frootai install 25-conversation-memory-layer"
+}

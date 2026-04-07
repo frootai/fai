@@ -1,0 +1,29 @@
+{
+  "name": "67-ai-knowledge-management",
+  "version": "1.0.0",
+  "description": "Enterprise knowledge capture and retrieval — automatic knowledge ingestion from documents, wikis, emails, and meetings. AI-powered freshness detection, gap analysis, expert identification, contextual Q&A, and organizational memory that learns and grows with the team.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "knowledge-mgmt"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "reliability": "See README",
+    "operational-excellence": "See README",
+    "cost-optimization": "See README",
+    "performance-efficiency": "See README"
+  }
+}

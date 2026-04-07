@@ -1,0 +1,268 @@
+{
+  "program": "FAI Certification",
+  "version": "1.0.0",
+  "description": "Professional certification for AI architects using FrootAI — validates competency in FAI Protocol, solution plays, and WAF-aligned AI development",
+  "levels": [
+    {
+      "id": "L1",
+      "name": "FAI Foundations",
+      "badge": "🌱",
+      "duration_hours": 4,
+      "prerequisites": [],
+      "study_modules": [
+        "L1-quick-start",
+        "L2-primitive-primer",
+        "L3-agent-patterns",
+        "L4-skills-workshop",
+        "L5-hooks-deep-dive"
+      ],
+      "lab": {
+        "title": "Deploy Play 01 (Enterprise RAG)",
+        "description": "Deploy the Enterprise RAG play with full DevKit + TuneKit in a sandbox environment",
+        "steps": [
+          "Clone the frootai repo and navigate to solution-plays/01-enterprise-rag",
+          "Run az bicep build -f infra/main.bicep to validate infrastructure",
+          "Deploy with azd up --environment sandbox",
+          "Verify health endpoint returns 200",
+          "Run python evaluation/eval.py --ci-gate",
+          "Generate evaluation report: python evaluation/eval.py --report html"
+        ],
+        "pass_criteria": "Health check 200 + all evaluation metrics above threshold"
+      },
+      "exam": {
+        "questions": 30,
+        "type": "multiple_choice",
+        "time_limit_minutes": 45,
+        "pass_score": 80,
+        "topics": [
+          {
+            "topic": "FAI Protocol fundamentals",
+            "weight": 20
+          },
+          {
+            "topic": "Primitive types (agents, instructions, skills, hooks, plugins)",
+            "weight": 25
+          },
+          {
+            "topic": "fai-manifest.json structure",
+            "weight": 15
+          },
+          {
+            "topic": "WAF 6 pillars basics",
+            "weight": 20
+          },
+          {
+            "topic": "DevKit workflow (builder → reviewer → tuner)",
+            "weight": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": "L2",
+      "name": "FAI Practitioner",
+      "badge": "🌿",
+      "duration_hours": 8,
+      "prerequisites": [
+        "L1"
+      ],
+      "study_modules": [
+        "L6-instructions-authoring",
+        "L7-context-wiring",
+        "L8-mcp-integration",
+        "L9-plugins",
+        "L10-development-workflows"
+      ],
+      "lab": {
+        "title": "Create Custom Primitives for Play 01",
+        "description": "Create a custom agent, instruction, and skill that wire into Play 01 via fai-manifest.json",
+        "steps": [
+          "Create a new agent: custom-analyst.agent.md with frontmatter and 200+ lines",
+          "Create a new instruction: data-quality.instructions.md with applyTo patterns",
+          "Create a new skill: analyze-data/SKILL.md with multi-step procedure",
+          "Wire all three into solution-plays/01/fai-manifest.json primitives section",
+          "Run npm run validate:primitives to verify all pass",
+          "Test the agent chain: @custom-analyst → @reviewer → @tuner"
+        ],
+        "pass_criteria": "Validator passes 0 errors + all three primitives wired in manifest"
+      },
+      "exam": {
+        "questions": 50,
+        "type": "mixed",
+        "time_limit_minutes": 75,
+        "pass_score": 85,
+        "topics": [
+          {
+            "topic": "Creating agents (.agent.md frontmatter, tools, model)",
+            "weight": 15
+          },
+          {
+            "topic": "Writing instructions (applyTo, domain patterns)",
+            "weight": 15
+          },
+          {
+            "topic": "Building skills (SKILL.md, multi-step procedures)",
+            "weight": 15
+          },
+          {
+            "topic": "MCP integration (25 tools, tool calling)",
+            "weight": 15
+          },
+          {
+            "topic": "Plugin architecture (plugin.json, marketplace)",
+            "weight": 10
+          },
+          {
+            "topic": "Context wiring (fai-manifest.json, fai-context.json)",
+            "weight": 15
+          },
+          {
+            "topic": "Practical: create a primitive from scratch",
+            "weight": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "L3",
+      "name": "FAI Architect",
+      "badge": "🍎",
+      "duration_hours": 16,
+      "prerequisites": [
+        "L2",
+        "3_play_deployments"
+      ],
+      "study_modules": [
+        "L11-evaluation-frameworks",
+        "L12-security-patterns",
+        "L13-cost-optimization",
+        "L14-advanced-rag",
+        "L15-production-patterns"
+      ],
+      "lab": {
+        "title": "Design and Deploy a Custom Solution Play",
+        "description": "Create a new solution play from scratch with full 43-file structure, DevKit, TuneKit, evaluation, and infrastructure",
+        "steps": [
+          "Design architecture for a novel use case (not from existing 100 plays)",
+          "Scaffold 43-file structure using npm run scaffold",
+          "Implement builder/reviewer/tuner agents with domain expertise",
+          "Write 4 instruction files (copilot, azure-coding, security, domain-patterns)",
+          "Create evaluation pipeline with 10+ test cases",
+          "Deploy to Azure with Bicep IaC",
+          "Run evaluation: all metrics must pass production thresholds",
+          "Document: README (200+ lines), architecture diagram, cost estimate"
+        ],
+        "pass_criteria": "43 files + audit-33-3.js passes + evaluation passes + deployed to Azure"
+      },
+      "exam": {
+        "questions": 40,
+        "type": "mixed_with_architecture",
+        "time_limit_minutes": 120,
+        "pass_score": 85,
+        "topics": [
+          {
+            "topic": "Architecture design for AI workloads",
+            "weight": 20
+          },
+          {
+            "topic": "Azure AI Services configuration",
+            "weight": 15
+          },
+          {
+            "topic": "Evaluation metrics (relevance, groundedness, safety)",
+            "weight": 15
+          },
+          {
+            "topic": "Security (OWASP LLM Top 10, content safety)",
+            "weight": 15
+          },
+          {
+            "topic": "Cost optimization (model routing, caching, PTUs)",
+            "weight": 10
+          },
+          {
+            "topic": "Infrastructure as Code (Bicep patterns)",
+            "weight": 10
+          },
+          {
+            "topic": "Practical: design a play architecture for a given scenario",
+            "weight": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "L4",
+      "name": "FAI Expert",
+      "badge": "🌳",
+      "duration_hours": 40,
+      "prerequisites": [
+        "L3",
+        "community_contribution"
+      ],
+      "study_modules": [
+        "All L1-L15",
+        "Cookbook recipes",
+        "Partner integrations"
+      ],
+      "lab": {
+        "title": "Contribute to the FrootAI Ecosystem",
+        "description": "Make a significant open-source contribution: new play, new agent category, or new MCP tool",
+        "steps": [
+          "Identify a gap in the FrootAI ecosystem (new vertical, new pattern, new tool)",
+          "Propose the contribution via GitHub issue using the appropriate template",
+          "Implement the contribution following all primitive naming conventions",
+          "Ensure npm run validate:primitives passes with 0 errors",
+          "Submit a pull request with full PR template checklist completed",
+          "Address reviewer feedback and iterate until merged",
+          "Write a blog post or tutorial about the contribution",
+          "Present at a FrootAI community meeting or hackathon"
+        ],
+        "pass_criteria": "Merged PR + blog/tutorial + community presentation"
+      },
+      "exam": {
+        "questions": 30,
+        "type": "oral_defense",
+        "time_limit_minutes": 60,
+        "pass_score": 90,
+        "topics": [
+          {
+            "topic": "Defend your contribution design decisions",
+            "weight": 30
+          },
+          {
+            "topic": "Explain FAI Protocol evolution and roadmap",
+            "weight": 20
+          },
+          {
+            "topic": "Cross-play integration patterns",
+            "weight": 15
+          },
+          {
+            "topic": "Enterprise deployment strategies",
+            "weight": 15
+          },
+          {
+            "topic": "Community leadership and mentoring",
+            "weight": 20
+          }
+        ]
+      }
+    }
+  ],
+  "badge_verification": {
+    "method": "blockchain_hash",
+    "platform": "GitHub Achievements + LinkedIn",
+    "verification_url": "https://frootai.dev/certifications/verify/{badge_hash}"
+  },
+  "renewal": {
+    "period_months": 24,
+    "renewal_method": "continuing_education",
+    "credits_required": {
+      "L1": 4,
+      "L2": 8,
+      "L3": 16,
+      "L4": 24
+    }
+  }
+}

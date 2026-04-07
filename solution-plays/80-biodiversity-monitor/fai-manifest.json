@@ -1,0 +1,61 @@
+{
+  "play": "80-biodiversity-monitor",
+  "version": "1.0.0",
+  "description": "AI-powered species identification from camera trap, drone, and acoustic sensor data with ecosystem health scoring, population trend tracking, and conservation priority alerts.",
+  "context": {
+    "knowledge": [
+      "F1-GenAI-Foundations",
+      "O2-AI-Agents",
+      "T3-Production-Patterns"
+    ],
+    "waf": [
+      "responsible-ai",
+      "reliability",
+      "cost-optimization",
+      "performance-efficiency"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "80-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-80/",
+      "evaluate-80/",
+      "tune-80/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure AI Vision",
+      "Azure OpenAI",
+      "Azure IoT Hub",
+      "Azure Cosmos DB",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

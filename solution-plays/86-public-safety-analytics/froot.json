@@ -1,0 +1,39 @@
+{
+  "name": "86-public-safety-analytics",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Public Safety Analytics",
+  "description": "> Crime pattern prediction with resource allocation optimization, community sentiment analysis from ",
+  "complexity": "Medium",
+  "tags": [
+    "responsible-ai",
+    "security",
+    "reliability",
+    "performance-efficiency"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

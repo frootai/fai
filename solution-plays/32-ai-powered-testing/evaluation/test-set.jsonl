@@ -1,0 +1,3 @@
+{"query": "What does this play do?", "expected": "AI-Powered Testing — Autonomous test generation — unit, integration, E2E, and property-based tests cr..."}
+{"query": "What Azure services are used?", "expected": "Azure OpenAI, GitHub Actions, Azure Container Apps, Azure Monitor"}
+{"query": "Which WAF pillars are covered?", "expected": "security, reliability, operational-excellence, performance-efficiency"}

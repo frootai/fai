@@ -1,0 +1,28 @@
+{
+  "name": "69-carbon-footprint-tracker",
+  "version": "1.0.0",
+  "description": "> Real-time carbon accounting across cloud resources and supply chain with automated ESG reporting a",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "carbon-footprint-tracker"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "cost-optimization": "See README",
+    "operational-excellence": "See README",
+    "responsible-ai": "See README",
+    "reliability": "See README"
+  }
+}

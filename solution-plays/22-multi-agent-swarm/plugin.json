@@ -1,0 +1,52 @@
+{
+  "name": "22-multi-agent-swarm",
+  "description": "FrootAI solution play: Multi Agent Swarm",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "multi-agent-swarm",
+    "security",
+    "reliability",
+    "cost-optimization",
+    "performance-efficiency",
+    "operational-excellence",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "22-multi-agent-swarm"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/multi-agent-swarm-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "cost-optimization",
+    "performance-efficiency",
+    "operational-excellence"
+  ],
+  "install": "npx frootai install 22-multi-agent-swarm"
+}

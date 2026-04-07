@@ -1,0 +1,29 @@
+{
+  "name": "49-creative-ai-studio",
+  "version": "1.0.0",
+  "description": "Unified content creation platform — orchestrate text, image, audio from a single campaign brief with brand voice tuning, content safety gates, asset versioning, and multi-channel export for enterprise marketing teams.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "creative-studio"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "cost-optimization": "See README",
+    "responsible-ai": "See README",
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "operational-excellence": "See README"
+  }
+}

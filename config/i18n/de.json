@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "locale": "de",
+    "name": "Deutsch",
+    "direction": "ltr"
+  },
+  "common": {
+    "brand": "FrootAI",
+    "tagline": "Von den Wurzeln zu den Früchten",
+    "description": "Das Open-Source FAI-Protokoll für die Vereinheitlichung von KI-Primitiven — 100 Lösungen, 780+ Primitive, 25 MCP-Tools",
+    "cta_get_started": "Loslegen",
+    "cta_install": "Installieren",
+    "nav_home": "Startseite",
+    "nav_solution_plays": "Lösungen",
+    "nav_primitives": "Primitive",
+    "nav_learning_hub": "Lernzentrum",
+    "search_placeholder": "Lösungen, Primitive, Dokumentation suchen...",
+    "loading": "Wird geladen...",
+    "error_not_found": "Seite nicht gefunden"
+  },
+  "home": {
+    "hero_title": "100 KI-Lösungen, Bereit zum Einsatz",
+    "hero_subtitle": "Produktionsreife KI-Lösungen mit Azure, basierend auf dem FAI-Protokoll.",
+    "hero_cta_primary": "Lösungen Entdecken",
+    "features_title": "Warum FrootAI?"
+  },
+  "chatbot": {
+    "title": "Frage Agent FAI",
+    "greeting": "Hallo! Ich bin Agent FAI. Ich kenne alle 100 Lösungen und 780+ Primitive. Wie kann ich helfen?"
+  }
+}

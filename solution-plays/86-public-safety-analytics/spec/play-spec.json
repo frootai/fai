@@ -1,0 +1,28 @@
+{
+  "name": "86-public-safety-analytics",
+  "version": "1.0.0",
+  "description": "> Crime pattern prediction with resource allocation optimization, community sentiment analysis from ",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "public-safety-analytics"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "security": "See README",
+    "reliability": "See README",
+    "performance-efficiency": "See README"
+  }
+}

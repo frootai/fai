@@ -1,0 +1,129 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Validate Primitives",
+      "type": "shell",
+      "command": "node scripts/validate-primitives.js --verbose",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Generate Marketplace",
+      "type": "shell",
+      "command": "node scripts/generate-marketplace.js",
+      "problemMatcher": []
+    },
+    {
+      "label": "Scaffold Agent",
+      "type": "shell",
+      "command": "node scripts/scaffold-primitive.js agent",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Scaffold Skill",
+      "type": "shell",
+      "command": "node scripts/scaffold-primitive.js skill",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Scaffold Instruction",
+      "type": "shell",
+      "command": "node scripts/scaffold-primitive.js instruction",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Scaffold Hook",
+      "type": "shell",
+      "command": "node scripts/scaffold-primitive.js hook",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "FAI Engine — Load Play 01",
+      "type": "shell",
+      "command": "node engine/index.js solution-plays/01-enterprise-rag/fai-manifest.json --status",
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate Consistency",
+      "type": "shell",
+      "command": "node scripts/validate-consistency.js",
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Website Data",
+      "type": "shell",
+      "command": "node scripts/generate-website-data.js",
+      "problemMatcher": []
+    },
+    {
+      "label": "Update README Counts",
+      "type": "shell",
+      "command": "node scripts/update-readme.js",
+      "problemMatcher": []
+    },
+    {
+      "label": "Materialize Plugins",
+      "type": "shell",
+      "command": "node scripts/materialize-plugins.js",
+      "problemMatcher": []
+    },
+    {
+      "label": "Materialize Plugins (Dry Run)",
+      "type": "shell",
+      "command": "node scripts/materialize-plugins.js --dry-run",
+      "problemMatcher": []
+    },
+    {
+      "label": "Full Build Pipeline",
+      "type": "shell",
+      "command": "node scripts/validate-primitives.js && node scripts/generate-marketplace.js && node scripts/generate-website-data.js && node scripts/update-readme.js",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Sync Content",
+      "type": "shell",
+      "command": "node scripts/sync-content.js",
+      "problemMatcher": []
+    },
+    {
+      "label": "Ecosystem Scorecard",
+      "type": "shell",
+      "command": "node -e \"const a=require('fs').readdirSync('agents').filter(f=>f.endsWith('.agent.md')).length;const i=require('fs').readdirSync('instructions').filter(f=>f.endsWith('.instructions.md')).length;const s=require('fs').readdirSync('skills').filter(f=>require('fs').statSync('skills/'+f).isDirectory()).length;const h=require('fs').readdirSync('hooks').filter(f=>require('fs').statSync('hooks/'+f).isDirectory()).length;const p=require('fs').readdirSync('plugins').filter(f=>require('fs').statSync('plugins/'+f).isDirectory()).length;const w=require('fs').readdirSync('workflows').filter(f=>f.endsWith('.md')&&f!=='README.md').length;const c=require('fs').readdirSync('cookbook').filter(f=>f.endsWith('.md')&&f!=='README.md').length;console.log('\\n  FrootAI Ecosystem Scorecard');console.log('  '+'-'.repeat(35));console.log('  Agents:       '+a+' (vs 187)');console.log('  Instructions: '+i+' (vs 175)');console.log('  Skills:       '+s+' (vs 271)');console.log('  Hooks:        '+h+' (vs 6)');console.log('  Plugins:      '+p+' (vs 65)');console.log('  Workflows:    '+w+' (vs 7)');console.log('  Cookbook:      '+c+' (vs 7)');console.log('  '+'-'.repeat(35)+'\\n');\"",
+      "problemMatcher": []
+    }
+  ]
+}

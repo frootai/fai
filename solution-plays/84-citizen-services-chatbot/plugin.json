@@ -1,0 +1,50 @@
+{
+  "name": "84-citizen-services-chatbot",
+  "description": "FrootAI solution play: Citizen Services Chatbot",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "citizen-services-chatbot",
+    "responsible-ai",
+    "reliability",
+    "security",
+    "performance-efficiency",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "84-citizen-services-chatbot"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/citizen-services-chatbot-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "responsible-ai",
+    "reliability",
+    "security",
+    "performance-efficiency"
+  ],
+  "install": "npx frootai install 84-citizen-services-chatbot"
+}

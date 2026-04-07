@@ -1,0 +1,47 @@
+{
+  "name": "azure-data-services",
+  "description": "Azure Data Services — Cosmos DB, SQL Database, Blob Storage, Data Explorer, and Redis Cache patterns. Schema design, partition strategies, query optimization, and data lifecycle management.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "azure",
+    "cosmos-db",
+    "sql-database",
+    "storage",
+    "data-explorer",
+    "redis",
+    "data-services",
+    "schema-design"
+  ],
+  "agents": [
+    "../../agents/frootai-azure-cosmos-db-expert.agent.md",
+    "../../agents/frootai-azure-sql-expert.agent.md",
+    "../../agents/frootai-azure-storage-expert.agent.md",
+    "../../agents/frootai-data-engineer.agent.md",
+    "../../agents/frootai-redis-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/azure-cosmos-waf.instructions.md",
+    "../../instructions/azure-redis-waf.instructions.md",
+    "../../instructions/sql-optimization-waf.instructions.md",
+    "../../instructions/mongodb-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-azure-cosmos-modeling/",
+    "../../skills/frootai-azure-sql-setup/",
+    "../../skills/frootai-azure-storage-patterns/",
+    "../../skills/frootai-azure-data-explorer/",
+    "../../skills/frootai-build-nosql-data-model/",
+    "../../skills/frootai-build-sql-migration/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

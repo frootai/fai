@@ -1,123 +1,238 @@
+// Model Serving Aks (Play 12) — Azure Infrastructure
+// FrootAI Solution Play — Bicep IaC Template
+// Deploy with: az deployment group create -g rg-frootai-{env} -f infra/main.bicep -p infra/parameters.json
+
 targetScope = 'resourceGroup'
+
+// ─── PARAMETERS ──────────────────────────────────────────────────
+
+@description('Environment name (dev, staging, prod)')
+@allowed(['dev', 'staging', 'prod'])
+param environment string = 'dev'
 
 @description('Azure region for all resources')
 param location string = resourceGroup().location
 
-@description('Environment name (dev, staging, prod)')
-param environment string = 'dev'
+@description('Resource name prefix')
+param prefix string = 'model-servin'
 
-@description('Project name used for resource naming')
-param projectName string = 'frootai-12'
-
-@description('Azure OpenAI model to deploy')
-param openAiModelName string = 'gpt-4o'
-
-@description('System node pool VM size')
-param systemNodeVmSize string = 'Standard_D4s_v5'
-
-@description('GPU node pool VM size')
-param gpuNodeVmSize string = 'Standard_NC6s_v3'
-
-var suffix = uniqueString(resourceGroup().id)
-var tags = {
-  environment: environment
+@description('Tags applied to all resources')
+param tags object = {
   project: 'frootai'
-  play: '12-model-serving-aks'
+  play: '12'
+  playName: 'Model Serving Aks'
+  environment: environment
+  managedBy: 'bicep'
+  createdDate: utcNow('yyyy-MM-dd')
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: 'log-${projectName}-${suffix}'
+// ─── VARIABLES ───────────────────────────────────────────────────
+
+var uniqueSuffix = uniqueString(resourceGroup().id, prefix)
+var resourcePrefix = '${prefix}-${environment}'
+var isProduction = environment == 'prod'
+
+// ─── LOG ANALYTICS WORKSPACE ─────────────────────────────────────
+
+@description('Log Analytics workspace for monitoring and diagnostics')
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+  name: '${resourcePrefix}-logs'
   location: location
   tags: tags
   properties: {
-    sku: { name: 'PerGB2018' }
-    retentionInDays: 30
+    sku: {
+      name: isProduction ? 'PerGB2018' : 'PerGB2018'
+    }
+    retentionInDays: isProduction ? 90 : 30
+    features: {
+      enableLogAccessUsingOnlyResourcePermissions: true
+    }
   }
 }
 
-resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
-  name: take('acr${replace(projectName, '-', '')}${suffix}', 50)
+// ─── APPLICATION INSIGHTS ────────────────────────────────────────
+
+@description('Application Insights for application monitoring and telemetry')
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: '${resourcePrefix}-insights'
   location: location
   tags: tags
-  sku: { name: 'Standard' }
-  identity: { type: 'SystemAssigned' }
+  kind: 'web'
   properties: {
-    adminUserEnabled: false
-    publicNetworkAccess: 'Enabled'
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+    RetentionInDays: isProduction ? 90 : 30
+    IngestionMode: 'LogAnalytics'
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
   }
 }
 
-resource openAi 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
-  name: 'oai-${projectName}-${suffix}'
+// ─── KEY VAULT ───────────────────────────────────────────────────
+
+@description('Azure Key Vault for secret management')
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: 'kv-${prefix}-${uniqueSuffix}'
+  location: location
+  tags: tags
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: subscription().tenantId
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: isProduction ? 90 : 7
+    enablePurgeProtection: isProduction
+    networkAcls: {
+      defaultAction: isProduction ? 'Deny' : 'Allow'
+      bypass: 'AzureServices'
+    }
+  }
+}
+
+// ─── AZURE OPENAI ────────────────────────────────────────────────
+
+@description('Azure OpenAI Service for AI model inference')
+resource openai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
+  name: '${resourcePrefix}-openai'
   location: location
   tags: tags
   kind: 'OpenAI'
-  sku: { name: 'S0' }
-  identity: { type: 'SystemAssigned' }
+  sku: {
+    name: 'S0'
+  }
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
-    customSubDomainName: 'oai-${projectName}-${suffix}'
-    publicNetworkAccess: 'Enabled'
+    customSubDomainName: '${prefix}-${uniqueSuffix}'
+    publicNetworkAccess: isProduction ? 'Disabled' : 'Enabled'
+    networkAcls: {
+      defaultAction: isProduction ? 'Deny' : 'Allow'
+    }
   }
 }
 
-resource openAiDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: openAi
-  name: openAiModelName
-  sku: { name: 'Standard', capacity: 10 }
+// ─── OPENAI MODEL DEPLOYMENTS ────────────────────────────────────
+
+@description('GPT-4o model deployment for generation')
+resource gpt4oDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: openai
+  name: 'gpt-4o'
+  sku: {
+    name: 'GlobalStandard'
+    capacity: isProduction ? 30 : 10
+  }
   properties: {
-    model: { format: 'OpenAI', name: openAiModelName, version: '2024-08-06' }
+    model: {
+      format: 'OpenAI'
+      name: 'gpt-4o'
+      version: '2024-11-20'
+    }
   }
 }
 
-resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
-  name: 'aks-${projectName}-${suffix}'
+@description('Embedding model deployment for vector search')
+resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: openai
+  name: 'text-embedding-3-large'
+  sku: {
+    name: 'Standard'
+    capacity: isProduction ? 120 : 30
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'text-embedding-3-large'
+      version: '1'
+    }
+  }
+  dependsOn: [gpt4oDeployment]
+}
+
+// ─── STORAGE ACCOUNT ─────────────────────────────────────────────
+
+@description('Storage account for data and artifacts')
+resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: 'st${replace(prefix, '-', '')}${uniqueSuffix}'
   location: location
   tags: tags
-  identity: { type: 'SystemAssigned' }
+  kind: 'StorageV2'
+  sku: {
+    name: isProduction ? 'Standard_GRS' : 'Standard_LRS'
+  }
   properties: {
-    dnsPrefix: 'aks-${projectName}'
-    enableRBAC: true
-    agentPoolProfiles: [
-      {
-        name: 'system'
-        count: 2
-        vmSize: systemNodeVmSize
-        mode: 'System'
-        osType: 'Linux'
-        osSKU: 'Ubuntu'
-        type: 'VirtualMachineScaleSets'
-        enableAutoScaling: true
-        minCount: 2
-        maxCount: 5
-      }
-      {
-        name: 'gpu'
-        count: 1
-        vmSize: gpuNodeVmSize
-        mode: 'User'
-        osType: 'Linux'
-        osSKU: 'Ubuntu'
-        type: 'VirtualMachineScaleSets'
-        enableAutoScaling: true
-        minCount: 0
-        maxCount: 3
-        nodeLabels: { 'gpu': 'true' }
-        nodeTaints: [ 'nvidia.com/gpu=true:NoSchedule' ]
-      }
-    ]
-    addonProfiles: {
-      omsagent: {
-        enabled: true
-        config: { logAnalyticsWorkspaceResourceID: logAnalytics.id }
-      }
-    }
-    networkProfile: {
-      networkPlugin: 'azure'
-      loadBalancerSku: 'standard'
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+    allowBlobPublicAccess: false
+    networkAcls: {
+      defaultAction: isProduction ? 'Deny' : 'Allow'
+      bypass: 'AzureServices'
     }
   }
 }
 
-output aksClusterName string = aks.name
-output acrLoginServer string = acr.properties.loginServer
-output openAiEndpoint string = openAi.properties.endpoint
+// ─── RBAC ROLE ASSIGNMENTS ───────────────────────────────────────
+
+@description('Cognitive Services OpenAI User role for the app')
+var cognitiveServicesOpenAIUser = 'a97b65f3-24c7-4388-baec-2e87135dc908'
+
+@description('Key Vault Secrets User role for the app')
+var keyVaultSecretsUser = '4633458b-17de-408a-b874-0445c86b69e6'
+
+@description('Storage Blob Data Reader role for the app')
+var storageBlobDataReader = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+
+// ─── DIAGNOSTIC SETTINGS ─────────────────────────────────────────
+
+@description('Diagnostic settings for Azure OpenAI')
+resource openaiDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'openai-diagnostics'
+  scope: openai
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [
+      { categoryGroup: 'allLogs', enabled: true }
+    ]
+    metrics: [
+      { category: 'AllMetrics', enabled: true }
+    ]
+  }
+}
+
+@description('Diagnostic settings for Key Vault')
+resource kvDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'kv-diagnostics'
+  scope: keyVault
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [
+      { categoryGroup: 'allLogs', enabled: true }
+    ]
+    metrics: [
+      { category: 'AllMetrics', enabled: true }
+    ]
+  }
+}
+
+// ─── OUTPUTS ─────────────────────────────────────────────────────
+
+@description('Azure OpenAI endpoint URL')
+output openaiEndpoint string = openai.properties.endpoint
+
+@description('Key Vault URI')
+output keyVaultUri string = keyVault.properties.vaultUri
+
+@description('Application Insights connection string')
+output appInsightsConnectionString string = appInsights.properties.ConnectionString
+
+@description('Storage account name')
+output storageAccountName string = storage.name
+
+@description('Log Analytics workspace ID')
+output logAnalyticsWorkspaceId string = logAnalytics.id
+
+@description('OpenAI principal ID (for RBAC)')
+output openaiPrincipalId string = openai.identity.principalId

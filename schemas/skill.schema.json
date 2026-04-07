@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://frootai.dev/schemas/skill.schema.json",
+  "title": "FrootAI Skill Schema",
+  "description": "Validates YAML frontmatter for SKILL.md files — self-contained capabilities bundled as folders.",
+  "type": "object",
+  "required": ["name", "description"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+      "minLength": 3,
+      "maxLength": 64,
+      "description": "Kebab-case identifier that MUST match the parent folder name. Example: 'frootai-play-initializer' must live in skills/frootai-play-initializer/."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 1024,
+      "description": "Single-line description of what this skill does. Displayed in marketplace and discovery UI."
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,36 @@
+{
+  "name": "25-conversation-memory-layer",
+  "version": "1.0.0",
+  "play": "25-conversation-memory-layer",
+  "description": "Persistent agent memory with short-term, long-term, and episodic memory stores — enabling agents to remember context across sessions, learn from interactions, and personalize responses.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "memory-layer",
+    "data_flow": "See README.md for architecture diagram"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "performance-efficiency": "See README.md",
+    "cost-optimization": "See README.md",
+    "responsible-ai": "See README.md"
+  }
+}

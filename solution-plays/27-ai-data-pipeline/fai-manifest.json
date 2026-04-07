@@ -1,0 +1,55 @@
+{
+  "play": "27-ai-data-pipeline",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "T1-Fine-Tuning-MLOps",
+      "T3-Production-Patterns",
+      "R2-RAG-Architecture"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "cost-optimization",
+      "operational-excellence",
+      "responsible-ai"
+    ],
+    "scope": "ai-data-pipeline-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-data-pipeline-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-ai-data-pipeline/",
+      "./.github/skills/evaluate-ai-data-pipeline/",
+      "./.github/skills/tune-ai-data-pipeline/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "safety": 0,
+      "costPerQuery": 0.05,
+      "relevance": 0.8,
+      "groundedness": 0.85,
+      "coherence": 0.8
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

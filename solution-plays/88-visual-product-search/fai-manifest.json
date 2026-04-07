@@ -1,0 +1,61 @@
+{
+  "play": "88-visual-product-search",
+  "version": "1.0.0",
+  "description": "Image-based product discovery combining reverse image search, visual similarity matching, style recommendations, and virtual try-on capabilities for fashion, furniture, and home decor retailers.",
+  "context": {
+    "knowledge": [
+      "R2-RAG-Architecture",
+      "F1-GenAI-Foundations",
+      "O2-AI-Agents"
+    ],
+    "waf": [
+      "performance-efficiency",
+      "reliability",
+      "responsible-ai",
+      "cost-optimization"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "88-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-88/",
+      "evaluate-88/",
+      "tune-88/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure AI Vision",
+      "Azure OpenAI",
+      "Azure AI Search",
+      "Azure Container Apps",
+      "Azure Cosmos DB"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

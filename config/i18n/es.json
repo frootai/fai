@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "locale": "es",
+    "name": "Español",
+    "direction": "ltr"
+  },
+  "common": {
+    "brand": "FrootAI",
+    "tagline": "De las Raíces a los Frutos",
+    "description": "El protocolo FAI de código abierto para la unificación de primitivas de IA — 100 soluciones, 780+ primitivas, 25 herramientas MCP",
+    "cta_get_started": "Comenzar",
+    "cta_install": "Instalar",
+    "cta_try_free": "Probar Gratis",
+    "cta_learn_more": "Más Información",
+    "nav_home": "Inicio",
+    "nav_solution_plays": "Soluciones",
+    "nav_primitives": "Primitivas",
+    "nav_learning_hub": "Centro de Aprendizaje",
+    "nav_fai_protocol": "Protocolo FAI",
+    "nav_marketplace": "Mercado",
+    "nav_contribute": "Contribuir",
+    "search_placeholder": "Buscar soluciones, primitivas, documentación...",
+    "search_no_results": "No se encontraron resultados.",
+    "loading": "Cargando...",
+    "error_generic": "Algo salió mal. Inténtalo de nuevo.",
+    "error_not_found": "Página no encontrada"
+  },
+  "home": {
+    "hero_title": "100 Soluciones de IA, Listas para Desplegar",
+    "hero_subtitle": "Soluciones de IA de nivel producción con Azure, construidas sobre el Protocolo FAI.",
+    "hero_cta_primary": "Explorar Soluciones",
+    "hero_cta_secondary": "Instalar Extensión VS Code",
+    "features_title": "¿Por qué FrootAI?",
+    "feature_1_title": "100 Soluciones",
+    "feature_1_desc": "Arquitecturas de IA listas para producción: RAG, agentes, voz, procesamiento de documentos y más.",
+    "feature_2_title": "Protocolo FAI",
+    "feature_2_desc": "El pegamento que falta entre agentes, instrucciones, habilidades, hooks y flujos de trabajo.",
+    "feature_3_title": "DevKit + TuneKit",
+    "feature_3_desc": "Cada solución incluye agentes constructor/revisor/afinador, pipeline de evaluación e IaC.",
+    "feature_4_title": "6 Pilares WAF",
+    "feature_4_desc": "Cada primitiva se alinea con Fiabilidad, Seguridad, Costo, Excelencia Operativa, Rendimiento e IA Responsable."
+  },
+  "solution_plays": {
+    "title": "100 Soluciones",
+    "subtitle": "Arquitecturas de IA de nivel producción para cada caso de uso",
+    "filter_all": "Todas las Categorías",
+    "view_play": "Ver Solución",
+    "user_guide": "Guía de Usuario"
+  },
+  "chatbot": {
+    "title": "Pregunta al Agente FAI",
+    "placeholder": "Pregúntame sobre arquitectura de IA, soluciones o FrootAI...",
+    "greeting": "¡Hola! Soy el Agente FAI. Conozco las 100 soluciones y 780+ primitivas. ¿En qué puedo ayudarte?"
+  }
+}

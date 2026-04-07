@@ -1,0 +1,36 @@
+{
+  "name": "22-multi-agent-swarm",
+  "version": "1.0.0",
+  "play": "22-multi-agent-swarm",
+  "description": "Distributed agent teams with supervisor patterns, tool delegation, shared memory, and conflict resolution for complex multi-step tasks.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "multi-agent",
+    "data_flow": "See README.md for architecture diagram"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "operational-excellence": "See README.md",
+    "performance-efficiency": "See README.md"
+  }
+}

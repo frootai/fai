@@ -1,0 +1,27 @@
+{
+  "name": "41-ai-red-teaming",
+  "version": "1.0.0",
+  "description": "Automated adversarial testing of AI systems — prompt injection attacks, jailbreak simulations, harmful output detection, and compliance-ready safety scorecards for EU AI Act and NIST AI RMF.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "red-teaming"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "responsible-ai": "See README",
+    "operational-excellence": "See README"
+  }
+}

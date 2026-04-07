@@ -1,0 +1,52 @@
+{
+  "name": "49-creative-ai-studio",
+  "description": "FrootAI solution play: Creative Ai Studio",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "creative-ai-studio",
+    "cost-optimization",
+    "responsible-ai",
+    "performance-efficiency",
+    "reliability",
+    "operational-excellence",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "49-creative-ai-studio"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/creative-ai-studio-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "cost-optimization",
+    "responsible-ai",
+    "performance-efficiency",
+    "reliability",
+    "operational-excellence"
+  ],
+  "install": "npx frootai install 49-creative-ai-studio"
+}

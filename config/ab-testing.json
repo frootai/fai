@@ -1,0 +1,83 @@
+{
+  "version": "1.0.0",
+  "description": "A/B testing configuration for frootai.dev website copy — privacy-first, cookie-free, deterministic hashing",
+  "split_method": "deterministic_hash",
+  "split_comment": "variant = hash(visitorFingerprint + testName) % 100 < splitPercent ? 'B' : 'A'",
+  "minimum_sample_size": 100,
+  "significance_level": 0.05,
+  "tests": {
+    "hero_headline": {
+      "status": "ready",
+      "element": "home.hero_title",
+      "variants": {
+        "A": "100 AI Solutions, Ready to Deploy",
+        "B": "Build AI Like LEGO — 100 Plays, Zero Glue Code"
+      },
+      "split_percent": 50,
+      "metric": "cta_click_rate",
+      "goal": "increase_hero_cta_clicks"
+    },
+    "cta_button_text": {
+      "status": "ready",
+      "element": "home.hero_cta_primary",
+      "variants": {
+        "A": "Browse Solution Plays",
+        "B": "Start Building Now"
+      },
+      "split_percent": 50,
+      "metric": "solution_plays_page_visits",
+      "goal": "increase_plays_page_navigation"
+    },
+    "chatbot_greeting": {
+      "status": "ready",
+      "element": "chatbot.greeting",
+      "variants": {
+        "A": "Hi! I'm Agent FAI. I know all 100 solution plays, 780+ primitives, and Azure AI best practices. How can I help you build?",
+        "B": "What are you building today? I can help you pick from 100 AI solution plays and guide you through architecture, deployment, and evaluation."
+      },
+      "split_percent": 50,
+      "metric": "chatbot_message_count",
+      "goal": "increase_chatbot_engagement"
+    },
+    "plays_card_layout": {
+      "status": "ready",
+      "element": "solution_plays.card_style",
+      "variants": {
+        "A": "compact",
+        "B": "expanded_with_services"
+      },
+      "split_percent": 50,
+      "metric": "play_detail_click_rate",
+      "goal": "increase_play_detail_views"
+    },
+    "setup_guide_steps": {
+      "status": "planned",
+      "element": "setup_guide.flow",
+      "variants": {
+        "A": "5_step_linear",
+        "B": "3_step_simplified"
+      },
+      "split_percent": 50,
+      "metric": "setup_completion_rate",
+      "goal": "increase_setup_completions"
+    }
+  },
+  "analytics_integration": {
+    "provider": "plausible",
+    "event_prefix": "ab_",
+    "track_variant_assignment": true,
+    "track_conversion": true,
+    "privacy": {
+      "no_cookies": true,
+      "no_pii": true,
+      "gdpr_compliant": true,
+      "data_stays_on_infrastructure": true
+    }
+  },
+  "winner_promotion": {
+    "auto_promote": false,
+    "require_significance": true,
+    "minimum_duration_days": 7,
+    "promotion_process": "Update this config → set winning variant as default → redeploy"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "89-retail-inventory-predictor",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Retail Inventory Predictor",
+  "description": "> Demand forecasting and inventory optimization combining historical sales data, weather patterns, s",
+  "complexity": "Medium",
+  "tags": [
+    "cost-optimization",
+    "reliability",
+    "operational-excellence",
+    "performance-efficiency"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

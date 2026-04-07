@@ -1,0 +1,28 @@
+{
+  "name": "61-content-moderation-v2",
+  "version": "1.0.0",
+  "description": "Advanced content moderation with cultural context awareness, multi-modal analysis (text + image + video), severity-based routing, human appeal workflows, custom category training, and real-time dashboard with false-positive tracking.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "moderation-v2"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "security": "See README",
+    "reliability": "See README",
+    "operational-excellence": "See README"
+  }
+}

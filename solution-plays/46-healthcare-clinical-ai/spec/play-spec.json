@@ -1,0 +1,29 @@
+{
+  "name": "46-healthcare-clinical-ai",
+  "version": "1.0.0",
+  "description": "HIPAA-compliant clinical decision support — medical coding (ICD-10/CPT), clinical note summarization, drug interaction checking, patient triage, with audit trails for HIPAA/HITRUST and human-in-the-loop approval.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "clinical-ai"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "operational-excellence": "See README",
+    "cost-optimization": "See README"
+  }
+}

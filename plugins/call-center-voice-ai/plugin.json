@@ -1,0 +1,47 @@
+{
+  "name": "call-center-voice-ai",
+  "description": "Call Center Voice AI — real-time speech-to-text, intent classification, sentiment analysis, and AI-assisted agent coaching. Integrates Azure AI Speech, Azure Communication Services, and GPT-4o for voice-driven customer service.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "voice-ai",
+    "call-center",
+    "speech-to-text",
+    "sentiment",
+    "azure-communication-services",
+    "real-time",
+    "customer-service"
+  ],
+  "agents": [
+    "../../agents/frootai-play-04-builder.agent.md",
+    "../../agents/frootai-play-04-reviewer.agent.md",
+    "../../agents/frootai-play-04-tuner.agent.md",
+    "../../agents/frootai-streaming-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/play-04-call-center-voice-ai-patterns.instructions.md",
+    "../../instructions/python-waf.instructions.md",
+    "../../instructions/rai-content-safety.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-deploy-04-call-center-voice-ai/",
+    "../../skills/frootai-evaluate-04-call-center-voice-ai/",
+    "../../skills/frootai-tune-04-call-center-voice-ai/",
+    "../../skills/frootai-build-genai-rag/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-pii-redactor/",
+    "../../hooks/frootai-cost-tracker/"
+  ],
+  "plays": [
+    "04-call-center-voice-ai"
+  ]
+}

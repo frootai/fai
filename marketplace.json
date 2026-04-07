@@ -1,0 +1,2362 @@
+{
+  "$schema": "https://frootai.dev/schemas/marketplace.schema.json",
+  "name": "FrootAI Plugin Marketplace",
+  "description": "Registry of all FrootAI plugins — themed bundles of agents, instructions, skills, and hooks.",
+  "version": "1.0.0",
+  "generated": "2026-04-05T19:37:41.015Z",
+  "plugins": [
+    {
+      "name": "agentic-rag",
+      "description": "Autonomous RAG where the AI agent controls retrieval — decides when to search, which sources to query, iterates on results, and synthesizes across multiple knowledge bases with citations.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/agentic-rag",
+      "keywords": [
+        "agentic-rag",
+        "autonomous-retrieval",
+        "multi-source",
+        "azure-ai-search",
+        "openai",
+        "evaluated"
+      ],
+      "plays": [
+        "21-agentic-rag"
+      ],
+      "items": {
+        "agents": 1,
+        "instructions": 1,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "ai-evaluation-suite",
+      "description": "AI Evaluation Suite — groundedness, coherence, relevance, fluency, and safety scoring. Build evaluation pipelines with Azure AI Evaluation SDK, custom metrics, regression tracking, and CI/CD integration.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/ai-evaluation-suite",
+      "keywords": [
+        "evaluation",
+        "groundedness",
+        "coherence",
+        "relevance",
+        "safety",
+        "metrics",
+        "regression",
+        "ci-cd",
+        "quality"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "ai-landing-zone",
+      "description": "Azure AI Landing Zone — subscription vending, network topology, RBAC, policy enforcement, and hub-spoke architecture for enterprise AI workloads. Includes Bicep IaC modules validated against all 6 WAF pillars.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/ai-landing-zone",
+      "keywords": [
+        "azure",
+        "landing-zone",
+        "bicep",
+        "rbac",
+        "policy",
+        "hub-spoke",
+        "enterprise",
+        "iac",
+        "waf-aligned"
+      ],
+      "plays": [
+        "02-ai-landing-zone"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "ai-landing-zone-advanced",
+      "description": "Advanced AI Landing Zone — multi-region deployment, private endpoints, Azure Firewall, DDoS protection, sovereign cloud patterns, and compliance-ready infrastructure for regulated industries.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/ai-landing-zone-advanced",
+      "keywords": [
+        "landing-zone",
+        "multi-region",
+        "private-endpoints",
+        "firewall",
+        "compliance",
+        "sovereign-cloud",
+        "regulated",
+        "enterprise"
+      ],
+      "plays": [
+        "11-ai-landing-zone-advanced"
+      ],
+      "items": {
+        "agents": 6,
+        "instructions": 4,
+        "skills": 5,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "ai-observability",
+      "description": "AI Observability — distributed tracing for LLM calls, token usage dashboards, latency monitoring, evaluation score tracking, and alerting. Build full observability for AI workloads with Azure Monitor and OpenTelemetry.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/ai-observability",
+      "keywords": [
+        "observability",
+        "monitoring",
+        "tracing",
+        "opentelemetry",
+        "azure-monitor",
+        "token-usage",
+        "latency",
+        "dashboards"
+      ],
+      "plays": [
+        "17-ai-observability"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 4,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "ai-search-portal",
+      "description": "AI Search Portal — full-text and vector hybrid search with semantic ranking, faceted navigation, autocomplete, and personalized results. Build a production search experience on Azure AI Search with RAG integration.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/ai-search-portal",
+      "keywords": [
+        "ai-search",
+        "vector-search",
+        "semantic-ranking",
+        "hybrid-search",
+        "faceted-navigation",
+        "azure-ai-search",
+        "rag"
+      ],
+      "plays": [
+        "09-ai-search-portal"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "anomaly-detection",
+      "description": "Anomaly Detection — real-time and batch anomaly detection for time-series, metrics, and log data. Uses Azure AI Anomaly Detector, custom ML models, and event-driven alerting with Azure Event Hubs.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/anomaly-detection",
+      "keywords": [
+        "anomaly-detection",
+        "time-series",
+        "metrics",
+        "alerting",
+        "event-hubs",
+        "azure-ai",
+        "real-time",
+        "ml"
+      ],
+      "plays": [
+        "20-anomaly-detection"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 4,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "architecture-patterns",
+      "description": "Architecture Patterns — cloud design patterns, domain-driven design, microservices, event sourcing, CQRS, and hexagonal architecture. Generate architecture blueprints, C4 diagrams, and ADRs.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/architecture-patterns",
+      "keywords": [
+        "architecture",
+        "design-patterns",
+        "ddd",
+        "microservices",
+        "cqrs",
+        "event-sourcing",
+        "hexagonal",
+        "c4-diagram"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 4,
+        "skills": 6,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "azure-ai-services",
+      "description": "Azure AI Services — OpenAI, AI Search, Document Intelligence, Language, Speech, Vision, and Content Safety integration patterns. Production-ready wrappers with retry, circuit breaker, and cost tracking.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-ai-services",
+      "keywords": [
+        "azure",
+        "ai-services",
+        "openai",
+        "ai-search",
+        "document-intelligence",
+        "language",
+        "speech",
+        "vision",
+        "content-safety"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 5,
+        "instructions": 4,
+        "skills": 5,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "azure-containers",
+      "description": "Azure Containers — AKS, Container Apps, Container Registry, and Dockerized deployment patterns. GPU workloads, KEDA autoscaling, Dapr sidecar integration, and multi-arch builds for AI model serving.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-containers",
+      "keywords": [
+        "azure",
+        "aks",
+        "container-apps",
+        "acr",
+        "docker",
+        "keda",
+        "dapr",
+        "gpu",
+        "kubernetes"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 4,
+        "instructions": 3,
+        "skills": 4,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "azure-data-services",
+      "description": "Azure Data Services — Cosmos DB, SQL Database, Blob Storage, Data Explorer, and Redis Cache patterns. Schema design, partition strategies, query optimization, and data lifecycle management.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-data-services",
+      "keywords": [
+        "azure",
+        "cosmos-db",
+        "sql-database",
+        "storage",
+        "data-explorer",
+        "redis",
+        "data-services",
+        "schema-design"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 5,
+        "instructions": 4,
+        "skills": 6,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "azure-identity-security",
+      "description": "Azure Identity & Security — Managed Identity, Key Vault, RBAC, Conditional Access, and zero-trust architecture. Secure AI workloads with certificate-based auth, secret rotation, and compliance auditing.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-identity-security",
+      "keywords": [
+        "azure",
+        "identity",
+        "security",
+        "key-vault",
+        "managed-identity",
+        "rbac",
+        "zero-trust",
+        "conditional-access"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 4,
+        "instructions": 4,
+        "skills": 5,
+        "hooks": 10
+      }
+    },
+    {
+      "name": "azure-infrastructure",
+      "description": "Azure Infrastructure — landing zones, hub-spoke networking, private endpoints, Azure Policy, RBAC, and subscription vending. Enterprise-grade Bicep IaC for AI workloads validated against all 6 WAF pillars.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-infrastructure",
+      "keywords": [
+        "azure",
+        "infrastructure",
+        "landing-zone",
+        "bicep",
+        "networking",
+        "policy",
+        "rbac",
+        "private-endpoints",
+        "hub-spoke"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 5,
+        "instructions": 5,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "azure-messaging",
+      "description": "Azure Messaging — Service Bus, Event Hubs, and Event Grid patterns for async communication, event sourcing, and CQRS. Build reliable message-driven architectures with dead-letter handling and partitioning.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-messaging",
+      "keywords": [
+        "azure",
+        "service-bus",
+        "event-hubs",
+        "event-grid",
+        "messaging",
+        "async",
+        "cqrs",
+        "event-sourcing"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 2,
+        "skills": 3,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "azure-monitoring",
+      "description": "Azure Monitoring — Application Insights, Log Analytics, KQL queries, alert rules, workbooks, and dashboards. Full observability for AI workloads with custom metrics, distributed tracing, and SLO tracking.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-monitoring",
+      "keywords": [
+        "azure",
+        "monitoring",
+        "application-insights",
+        "log-analytics",
+        "kql",
+        "alerts",
+        "dashboards",
+        "observability"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "azure-serverless",
+      "description": "Azure Serverless — Functions, Logic Apps, Event Grid, and Durable Functions patterns. Event-driven architectures with consumption-based scaling, cold start mitigation, and cost optimization.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/azure-serverless",
+      "keywords": [
+        "azure",
+        "serverless",
+        "functions",
+        "logic-apps",
+        "event-grid",
+        "durable-functions",
+        "event-driven",
+        "consumption"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "browser-automation",
+      "description": "AI-driven web task execution using Playwright MCP and GPT-4o Vision — navigate websites, extract data, fill forms, and automate multi-step web workflows from natural language.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/browser-automation",
+      "keywords": [
+        "browser-automation",
+        "playwright",
+        "web-scraping",
+        "vision",
+        "mcp",
+        "headless"
+      ],
+      "plays": [
+        "23-browser-automation-agent"
+      ],
+      "items": {
+        "agents": 1,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "call-center-voice-ai",
+      "description": "Call Center Voice AI — real-time speech-to-text, intent classification, sentiment analysis, and AI-assisted agent coaching. Integrates Azure AI Speech, Azure Communication Services, and GPT-4o for voice-driven customer service.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/call-center-voice-ai",
+      "keywords": [
+        "voice-ai",
+        "call-center",
+        "speech-to-text",
+        "sentiment",
+        "azure-communication-services",
+        "real-time",
+        "customer-service"
+      ],
+      "plays": [
+        "04-call-center-voice-ai"
+      ],
+      "items": {
+        "agents": 4,
+        "instructions": 3,
+        "skills": 4,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "cicd-automation",
+      "description": "CI/CD Automation — GitHub Actions, Azure DevOps pipelines, build matrices, deployment gates, and release management. Automate test → build → deploy → evaluate pipelines for AI workloads.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/cicd-automation",
+      "keywords": [
+        "cicd",
+        "github-actions",
+        "azure-devops",
+        "pipelines",
+        "deployment",
+        "release",
+        "automation"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 3,
+        "skills": 3,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "code-quality",
+      "description": "Code Quality — automated code review, refactoring suggestions, dead code removal, complexity analysis, and technical debt tracking. AI-powered quality gates with custom rulesets and team coding standards.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/code-quality",
+      "keywords": [
+        "code-quality",
+        "code-review",
+        "refactoring",
+        "dead-code",
+        "complexity",
+        "tech-debt",
+        "linting"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 4,
+        "skills": 6,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "content-moderation",
+      "description": "Content Moderation — real-time text, image, and multi-modal content safety with Azure AI Content Safety. Includes severity scoring, blocklist management, custom categories, and human-in-the-loop review workflows.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/content-moderation",
+      "keywords": [
+        "content-moderation",
+        "content-safety",
+        "azure-ai",
+        "image-moderation",
+        "text-moderation",
+        "blocklist",
+        "responsible-ai"
+      ],
+      "plays": [
+        "10-content-moderation"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "content-safety-toolkit",
+      "description": "Content Safety Toolkit — Azure AI Content Safety integration, custom blocklists, severity thresholds, image moderation, prompt injection detection, and jailbreak defense patterns for production AI.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/content-safety-toolkit",
+      "keywords": [
+        "content-safety",
+        "moderation",
+        "blocklist",
+        "prompt-injection",
+        "jailbreak",
+        "image-moderation",
+        "azure-ai"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "context-engineering",
+      "description": "Context Engineering — maximize AI effectiveness with structured context, memory banks, knowledge wiring, and smart prompt assembly. Build context-aware agents that retrieve the right information at the right time.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/context-engineering",
+      "keywords": [
+        "context-engineering",
+        "memory-bank",
+        "knowledge-wiring",
+        "rag",
+        "context-assembly",
+        "prompt-context"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "copilot-studio-bot",
+      "description": "Copilot Studio Bot — custom copilot experiences with Microsoft Copilot Studio, Power Virtual Agents, and Teams integration. Build conversational AI with enterprise SSO, Dataverse, and multi-channel deployment.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/copilot-studio-bot",
+      "keywords": [
+        "copilot-studio",
+        "power-virtual-agents",
+        "teams",
+        "dataverse",
+        "conversational-ai",
+        "sso",
+        "enterprise"
+      ],
+      "plays": [
+        "08-copilot-studio-bot"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "copilot-teams-extension",
+      "description": "Copilot for Teams Extension — declarative agents, API plugins, message extensions, and adaptive cards for Microsoft 365 Copilot. Build custom AI experiences that surface inside Teams, Outlook, and M365 apps.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/copilot-teams-extension",
+      "keywords": [
+        "teams",
+        "copilot-extension",
+        "declarative-agent",
+        "api-plugin",
+        "message-extension",
+        "adaptive-cards",
+        "m365"
+      ],
+      "plays": [
+        "16-copilot-teams-extension"
+      ],
+      "items": {
+        "agents": 4,
+        "instructions": 3,
+        "skills": 4,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "cost-optimized-ai-gateway",
+      "description": "Cost-Optimized AI Gateway — intelligent model routing, token budget enforcement, request caching, rate limiting, and usage analytics. Route between GPT-4o, GPT-4o-mini, and Phi models based on complexity and cost.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/cost-optimized-ai-gateway",
+      "keywords": [
+        "cost-optimization",
+        "ai-gateway",
+        "model-routing",
+        "token-budget",
+        "caching",
+        "rate-limiting",
+        "apim",
+        "usage-analytics"
+      ],
+      "plays": [
+        "14-cost-optimized-ai-gateway"
+      ],
+      "items": {
+        "agents": 6,
+        "instructions": 3,
+        "skills": 6,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "csharp-dotnet-development",
+      "description": "C# .NET Development — ASP.NET Core, Minimal API, Blazor, MAUI, EF Core, xUnit/NUnit testing, and architecture patterns. Full-stack .NET with WAF-aligned coding standards and code review agents.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/csharp-dotnet-development",
+      "keywords": [
+        "csharp",
+        "dotnet",
+        "aspnet",
+        "blazor",
+        "maui",
+        "ef-core",
+        "xunit",
+        "minimal-api"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 6,
+        "skills": 5,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "csharp-mcp-development",
+      "description": "C# MCP Development — build Model Context Protocol servers in C# with .NET SDK, ASP.NET Core hosting, dependency injection, and Azure deployment patterns.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/csharp-mcp-development",
+      "keywords": [
+        "csharp",
+        "dotnet",
+        "mcp",
+        "aspnet",
+        "sdk",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "database-management",
+      "description": "Database administration and optimization — PostgreSQL, SQL Server, Cosmos DB modeling, query optimization, migration planning, and data pipeline patterns.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/database-management",
+      "keywords": [
+        "database",
+        "postgresql",
+        "sql-server",
+        "cosmos-db",
+        "migration",
+        "optimization",
+        "schema-design"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 0,
+        "instructions": 0
+      }
+    },
+    {
+      "name": "design-system",
+      "description": "Design System — UI components, design tokens, theming, responsive layouts, accessibility, animations, and form patterns. Build consistent, accessible UIs with AI-generated component variants and Storybook docs.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/design-system",
+      "keywords": [
+        "design-system",
+        "ui-components",
+        "design-tokens",
+        "theming",
+        "accessibility",
+        "responsive",
+        "storybook"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 3,
+        "skills": 15,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "deterministic-agent",
+      "description": "Deterministic AI Agent — finite state machines, rule-based routing, guardrailed tool use, and reproducible conversation flows. Build agents that produce consistent outputs regardless of LLM temperature.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/deterministic-agent",
+      "keywords": [
+        "deterministic",
+        "finite-state-machine",
+        "guardrails",
+        "reproducible",
+        "rule-based",
+        "agent",
+        "waf-aligned"
+      ],
+      "plays": [
+        "03-deterministic-agent"
+      ],
+      "items": {
+        "agents": 4,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "devops-oncall",
+      "description": "DevOps and on-call operations — incident triage, Azure resource diagnostics, KQL query generation, deployment automation, and SRE patterns for AI workloads.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/devops-oncall",
+      "keywords": [
+        "devops",
+        "oncall",
+        "incident",
+        "sre",
+        "kubernetes",
+        "monitoring",
+        "kql",
+        "deployment"
+      ],
+      "plays": [
+        "17-ai-observability"
+      ],
+      "items": {
+        "agents": 0,
+        "instructions": 0
+      }
+    },
+    {
+      "name": "docker-containerization",
+      "description": "Docker Containerization — multi-stage builds, distroless images, BuildKit caching, health checks, and security scanning. Containerize any workload with optimized images for AI inference and web services.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/docker-containerization",
+      "keywords": [
+        "docker",
+        "containerization",
+        "multi-stage",
+        "distroless",
+        "buildkit",
+        "health-checks",
+        "security-scanning"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 1,
+        "instructions": 2,
+        "skills": 4,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "document-intelligence",
+      "description": "Document Intelligence — OCR, form extraction, table recognition, and intelligent document processing. Uses Azure AI Document Intelligence with custom models for invoices, receipts, contracts, and domain-specific forms.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/document-intelligence",
+      "keywords": [
+        "document-intelligence",
+        "ocr",
+        "form-extraction",
+        "table-recognition",
+        "azure-ai",
+        "invoice",
+        "contract",
+        "waf-aligned"
+      ],
+      "plays": [
+        "06-document-intelligence"
+      ],
+      "items": {
+        "agents": 4,
+        "instructions": 3,
+        "skills": 4,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "edge-ai-phi4",
+      "description": "Edge AI with Phi-4 — deploy small language models on edge devices, IoT hubs, and local inference servers. Quantization, ONNX optimization, and offline-capable AI with Microsoft Phi-4 models.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/edge-ai-phi4",
+      "keywords": [
+        "edge-ai",
+        "phi-4",
+        "onnx",
+        "quantization",
+        "iot",
+        "local-inference",
+        "small-language-model",
+        "offline"
+      ],
+      "plays": [
+        "19-edge-ai-phi4"
+      ],
+      "items": {
+        "agents": 4,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "enterprise-rag",
+      "description": "Production-grade Retrieval-Augmented Generation pipeline with Azure AI Search, OpenAI embeddings, Container Apps deployment, and WAF-aligned evaluation. Includes the RAG Architect agent, Python + Bicep instructions, play initializer skill, and all 3 security hooks.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/enterprise-rag",
+      "keywords": [
+        "rag",
+        "retrieval-augmented-generation",
+        "azure-ai-search",
+        "openai",
+        "embeddings",
+        "vector-search",
+        "enterprise",
+        "container-apps",
+        "waf-aligned",
+        "evaluated"
+      ],
+      "plays": [
+        "01-enterprise-rag"
+      ],
+      "items": {
+        "agents": 1,
+        "instructions": 2,
+        "skills": 1,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "fai-protocol-starter",
+      "description": "FAI Protocol Starter — quickstart for the FAI Protocol ecosystem. Scaffold fai-manifest.json, fai-context.json, and connect primitives into wired solution plays. The entry point for building FAI Protocol compliant solutions.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/fai-protocol-starter",
+      "keywords": [
+        "fai-protocol",
+        "fai-manifest",
+        "fai-context",
+        "scaffold",
+        "quickstart",
+        "wiring",
+        "solution-play"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 4,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "fine-tuning-mlops",
+      "description": "Fine-Tuning & MLOps — dataset curation, model training, hyperparameter optimization, model registry, and deployment pipelines. End-to-end ML lifecycle with Azure AI Foundry, MLflow, and evaluation gates.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/fine-tuning-mlops",
+      "keywords": [
+        "fine-tuning",
+        "mlops",
+        "model-training",
+        "dataset",
+        "hyperparameter",
+        "mlflow",
+        "model-registry",
+        "azure-ai-foundry"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 2,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "fine-tuning-workflow",
+      "description": "Fine-Tuning Workflow — dataset preparation, training job orchestration, evaluation pipelines, model registry, and deployment automation. Fine-tune GPT, Phi, and open-source models on Azure AI Foundry.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/fine-tuning-workflow",
+      "keywords": [
+        "fine-tuning",
+        "mlops",
+        "dataset-preparation",
+        "model-registry",
+        "azure-ai-foundry",
+        "evaluation",
+        "training"
+      ],
+      "plays": [
+        "13-fine-tuning-workflow"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "frontend-web-development",
+      "description": "Frontend Web Development — React, Angular, Vue, Svelte, Astro, and Tailwind CSS patterns. Component architecture, state management, accessibility, and performance optimization for modern web apps.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/frontend-web-development",
+      "keywords": [
+        "frontend",
+        "react",
+        "angular",
+        "vue",
+        "svelte",
+        "astro",
+        "tailwind",
+        "accessibility",
+        "responsive"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 6,
+        "instructions": 7,
+        "skills": 6,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "frootai-discovery",
+      "description": "FrootAI Discovery — meta-plugin for exploring and recommending agents, instructions, skills, hooks, and plugins. Suggests the right primitives for your task based on project context and WAF alignment.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/frootai-discovery",
+      "keywords": [
+        "discovery",
+        "meta",
+        "recommendation",
+        "suggest",
+        "explore",
+        "catalog",
+        "primitives",
+        "marketplace"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 6,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "frootai-essentials",
+      "description": "The essential FrootAI toolkit — WAF-aligned agents (security reviewer, cost optimizer, architect), cross-cutting instructions (OWASP, agent-safety, testing), and security hooks (secrets scanner, tool guardian, governance audit). The recommended starting plugin for every FrootAI project.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/frootai-essentials",
+      "keywords": [
+        "essentials",
+        "waf",
+        "security",
+        "cost",
+        "owasp",
+        "agent-safety",
+        "testing",
+        "hooks",
+        "starter"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 3,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "go-development",
+      "description": "Go Development — high-performance services, gRPC APIs, concurrent patterns, and cloud-native tooling. Idiomatic Go with table-driven tests, error handling, and minimal dependency builds.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/go-development",
+      "keywords": [
+        "go",
+        "golang",
+        "grpc",
+        "concurrency",
+        "cloud-native",
+        "microservices",
+        "minimal"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 1,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "go-mcp-development",
+      "description": "Go MCP Development — build high-performance MCP servers in Go with goroutine concurrency, gRPC transport, and minimal memory footprint for edge deployment.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/go-mcp-development",
+      "keywords": [
+        "go",
+        "golang",
+        "mcp",
+        "gin",
+        "grpc",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "incident-response",
+      "description": "Incident Response — on-call triage, KQL query generation, Azure resource diagnostics, runbook automation, and post-incident reviews. AI-assisted SRE with intelligent alerting and root cause analysis.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/incident-response",
+      "keywords": [
+        "incident-response",
+        "on-call",
+        "sre",
+        "kql",
+        "diagnostics",
+        "runbook",
+        "root-cause",
+        "alerting"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 1,
+        "skills": 2,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "it-ticket-resolution",
+      "description": "IT Ticket Resolution — automated incident classification, knowledge base search, resolution suggestion, and escalation routing. Uses RAG over IT documentation with Azure AI Search and Semantic Kernel orchestration.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/it-ticket-resolution",
+      "keywords": [
+        "it-service-management",
+        "incident-resolution",
+        "rag",
+        "knowledge-base",
+        "semantic-kernel",
+        "escalation",
+        "waf-aligned"
+      ],
+      "plays": [
+        "05-it-ticket-resolution"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "java-development",
+      "description": "Java Development — Spring Boot, Quarkus, JUnit 5, Gradle/Maven builds, and microservice patterns. Enterprise Java with reactive streams, GraalVM native images, and cloud-native deployment.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/java-development",
+      "keywords": [
+        "java",
+        "spring-boot",
+        "quarkus",
+        "junit",
+        "maven",
+        "gradle",
+        "microservices",
+        "graalvm"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "java-mcp-development",
+      "description": "Java MCP Development — build MCP servers in Java with Spring Boot, reactive streams, Maven/Gradle builds, and enterprise middleware integration.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/java-mcp-development",
+      "keywords": [
+        "java",
+        "spring-boot",
+        "mcp",
+        "maven",
+        "reactor",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "kotlin-mcp-development",
+      "description": "Kotlin MCP Development — build MCP servers in Kotlin with Ktor, coroutines, multiplatform support, and Android-compatible tool implementations.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/kotlin-mcp-development",
+      "keywords": [
+        "kotlin",
+        "ktor",
+        "mcp",
+        "coroutines",
+        "multiplatform",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "kubernetes-orchestration",
+      "description": "Kubernetes Orchestration — cluster setup, Helm charts, KEDA autoscaling, Dapr sidecars, Istio service mesh, and GPU scheduling. Production K8s patterns for AI model serving and microservices.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/kubernetes-orchestration",
+      "keywords": [
+        "kubernetes",
+        "helm",
+        "keda",
+        "dapr",
+        "istio",
+        "gpu",
+        "autoscaling",
+        "service-mesh"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 1,
+        "skills": 1,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "llm-observability",
+      "description": "LLM Observability — trace every LLM call with input/output logging, token counts, latency percentiles, cost attribution, and evaluation score trends. OpenTelemetry-based tracing for Azure OpenAI and open-source models.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/llm-observability",
+      "keywords": [
+        "llm-observability",
+        "tracing",
+        "token-counting",
+        "latency",
+        "cost-attribution",
+        "opentelemetry",
+        "azure-openai"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 6
+      }
+    },
+    {
+      "name": "mobile-development",
+      "description": "Mobile Development — Swift/SwiftUI for iOS, Kotlin for Android, .NET MAUI for cross-platform, and Flutter/Dart for hybrid apps. Native AI integration with on-device inference and platform-specific UX patterns.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/mobile-development",
+      "keywords": [
+        "mobile",
+        "ios",
+        "android",
+        "swift",
+        "kotlin",
+        "maui",
+        "flutter",
+        "dart",
+        "cross-platform"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 4,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "model-serving-aks",
+      "description": "Model Serving on AKS — GPU-accelerated inference, autoscaling with KEDA, model versioning, A/B deployment, and canary rollouts. Deploy open-source LLMs (Phi-4, Llama, Mistral) on Azure Kubernetes Service.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/model-serving-aks",
+      "keywords": [
+        "model-serving",
+        "aks",
+        "kubernetes",
+        "gpu",
+        "keda",
+        "inference",
+        "llm-deployment",
+        "canary",
+        "autoscaling"
+      ],
+      "plays": [
+        "12-model-serving-aks"
+      ],
+      "items": {
+        "agents": 6,
+        "instructions": 3,
+        "skills": 6,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "multi-agent-service",
+      "description": "Multi-Agent Service — orchestrated agent teams with supervisor patterns, tool delegation, shared memory, and conflict resolution. Build production agent services on Azure Container Apps with Semantic Kernel or AutoGen.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/multi-agent-service",
+      "keywords": [
+        "multi-agent",
+        "orchestration",
+        "supervisor",
+        "autogen",
+        "semantic-kernel",
+        "shared-memory",
+        "container-apps"
+      ],
+      "plays": [
+        "07-multi-agent-service"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 5,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "multi-agent-swarm",
+      "description": "Deploy specialized AI agents that collaborate via supervisor, pipeline, and debate patterns — a distributed agent team for complex workflows that no single agent can handle.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/multi-agent-swarm",
+      "keywords": [
+        "multi-agent",
+        "swarm",
+        "collaboration",
+        "supervisor",
+        "pipeline",
+        "semantic-kernel"
+      ],
+      "plays": [
+        "22-multi-agent-swarm"
+      ],
+      "items": {
+        "agents": 1,
+        "instructions": 1,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "multi-modal-docproc",
+      "description": "Multi-Modal Document Processing — combine OCR, vision, speech, and text analysis for complex document workflows. Extract structured data from PDFs, images, audio, and video using Azure AI multi-modal capabilities.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/multi-modal-docproc",
+      "keywords": [
+        "multi-modal",
+        "document-processing",
+        "ocr",
+        "vision",
+        "speech",
+        "pdf-extraction",
+        "azure-ai",
+        "structured-data"
+      ],
+      "plays": [
+        "15-multi-modal-docproc"
+      ],
+      "items": {
+        "agents": 4,
+        "instructions": 4,
+        "skills": 4,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "oracle-migration",
+      "description": "Oracle Migration — Oracle-to-PostgreSQL and Oracle-to-Azure SQL migration patterns. Schema conversion, PL/SQL translation, data pipeline design, and validation testing for database modernization.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/oracle-migration",
+      "keywords": [
+        "oracle",
+        "migration",
+        "postgresql",
+        "azure-sql",
+        "schema-conversion",
+        "plsql",
+        "database-modernization"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 1,
+        "skills": 6,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "php-mcp-development",
+      "description": "PHP MCP Development — build MCP servers in PHP with Laravel integration, Composer packaging, Swoole async runtime, and WordPress compatibility.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/php-mcp-development",
+      "keywords": [
+        "php",
+        "laravel",
+        "mcp",
+        "composer",
+        "swoole",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "power-bi-analytics",
+      "description": "Power BI Analytics — DAX formulas, data modeling, report design, dashboard layout, and performance optimization. Build self-service AI analytics with DirectQuery, incremental refresh, and composite models.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/power-bi-analytics",
+      "keywords": [
+        "power-bi",
+        "dax",
+        "data-modeling",
+        "report-design",
+        "dashboard",
+        "directquery",
+        "analytics"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 1,
+        "instructions": 1,
+        "skills": 5,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "power-platform",
+      "description": "Power Platform AI integration — Power Apps code components, Power BI DAX and modeling, Power Automate flow design, Dataverse SDK patterns, and Copilot Studio custom connectors.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/power-platform",
+      "keywords": [
+        "power-platform",
+        "power-apps",
+        "power-bi",
+        "power-automate",
+        "dataverse",
+        "copilot-studio",
+        "pcf",
+        "dax"
+      ],
+      "plays": [
+        "08-copilot-studio-bot"
+      ],
+      "items": {
+        "agents": 0,
+        "instructions": 0
+      }
+    },
+    {
+      "name": "project-planning",
+      "description": "Project Planning — PRDs, epic breakdown, implementation plans, technical spikes, and rollout strategies. AI-assisted project management with architecture decision records and feature decomposition.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/project-planning",
+      "keywords": [
+        "project-planning",
+        "prd",
+        "epic-breakdown",
+        "implementation-plan",
+        "technical-spike",
+        "roadmap",
+        "adr"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 4,
+        "instructions": 1,
+        "skills": 8,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "prompt-engineering",
+      "description": "Prompt Engineering — chain-of-thought, few-shot, tree-of-thought, and meta-prompting patterns. Template management, dynamic prompt assembly, safety guardrails, and evaluation-driven prompt optimization.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/prompt-engineering",
+      "keywords": [
+        "prompt-engineering",
+        "chain-of-thought",
+        "few-shot",
+        "templates",
+        "safety",
+        "optimization",
+        "meta-prompting"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 3,
+        "skills": 7,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "prompt-management",
+      "description": "Prompt Management — version-controlled prompt templates, A/B testing, evaluation pipelines, and dynamic prompt assembly. Manage hundreds of prompts across models with Semantic Kernel prompt functions.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/prompt-management",
+      "keywords": [
+        "prompt-management",
+        "prompt-engineering",
+        "template",
+        "ab-testing",
+        "evaluation",
+        "semantic-kernel",
+        "versioning"
+      ],
+      "plays": [
+        "18-prompt-management"
+      ],
+      "items": {
+        "agents": 5,
+        "instructions": 3,
+        "skills": 6,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "python-fullstack",
+      "description": "Python Full-Stack — FastAPI, Django, Flask, Pydantic, SQLAlchemy, pytest, and async patterns. Data science to web APIs with type safety, dependency injection, and production deployment.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/python-fullstack",
+      "keywords": [
+        "python",
+        "fastapi",
+        "django",
+        "flask",
+        "pydantic",
+        "sqlalchemy",
+        "pytest",
+        "async"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 7,
+        "skills": 3,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "python-mcp-development",
+      "description": "Python MCP Development — build MCP servers in Python with FastMCP, asyncio, Pydantic models, type-safe tool schemas, and Azure Functions hosting.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/python-mcp-development",
+      "keywords": [
+        "python",
+        "fastmcp",
+        "mcp",
+        "asyncio",
+        "pydantic",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "responsible-ai",
+      "description": "Responsible AI — content safety, bias testing, fairness metrics, transparency cards, and human-in-the-loop review. Build ethical AI systems aligned with Microsoft Responsible AI Standard and EU AI Act requirements.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/responsible-ai",
+      "keywords": [
+        "responsible-ai",
+        "content-safety",
+        "bias",
+        "fairness",
+        "transparency",
+        "human-in-the-loop",
+        "eu-ai-act",
+        "ethics"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 4,
+        "skills": 4,
+        "hooks": 5
+      }
+    },
+    {
+      "name": "ruby-mcp-development",
+      "description": "Ruby MCP Development — build MCP servers in Ruby with Rails integration, Rack middleware, Sorbet typing, and Bundler gem packaging.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/ruby-mcp-development",
+      "keywords": [
+        "ruby",
+        "rails",
+        "mcp",
+        "rack",
+        "sorbet",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "rust-development",
+      "description": "Rust Development — systems programming, zero-cost abstractions, async with Tokio, WASM targets, and memory-safe concurrency. Build high-performance tools, CLIs, and servers without garbage collection.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/rust-development",
+      "keywords": [
+        "rust",
+        "tokio",
+        "wasm",
+        "systems-programming",
+        "memory-safety",
+        "async",
+        "cli"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 1,
+        "skills": 1,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "rust-mcp-development",
+      "description": "Rust MCP Development — build blazing-fast MCP servers in Rust with Tokio async runtime, RMCP SDK, WASM compilation, and zero-allocation tool handlers.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/rust-mcp-development",
+      "keywords": [
+        "rust",
+        "tokio",
+        "mcp",
+        "rmcp",
+        "wasm",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "salesforce-integration",
+      "description": "Salesforce Integration — Apex development, Lightning Web Components, SOQL optimization, Salesforce MCP connectors, and AI-powered CRM workflows. Bridge Salesforce data with Azure AI services.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/salesforce-integration",
+      "keywords": [
+        "salesforce",
+        "apex",
+        "lwc",
+        "soql",
+        "crm",
+        "mcp-connector",
+        "salesforce-ai"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 1,
+        "instructions": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "security-hardening",
+      "description": "Security Hardening — OWASP Top 10, secrets scanning, dependency auditing, supply chain security, threat modeling, and penetration testing patterns. Harden AI applications with defense-in-depth and zero-trust.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/security-hardening",
+      "keywords": [
+        "security",
+        "owasp",
+        "secrets-scanning",
+        "supply-chain",
+        "threat-modeling",
+        "penetration-testing",
+        "zero-trust"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 3,
+        "instructions": 5,
+        "skills": 4,
+        "hooks": 10
+      }
+    },
+    {
+      "name": "swift-mcp-development",
+      "description": "Swift MCP Development — build MCP servers in Swift with Vapor framework, SwiftUI tool previews, iOS/macOS native integration, and Apple silicon optimization.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/swift-mcp-development",
+      "keywords": [
+        "swift",
+        "mcp",
+        "ios",
+        "macos",
+        "vapor",
+        "swiftui",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "technical-documentation",
+      "description": "Technical Documentation — API references, architecture guides, README generation, changelog automation, tutorials, and ADRs. AI-assisted writing with Mermaid diagrams, PlantUML, and DrawIO integration.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/technical-documentation",
+      "keywords": [
+        "documentation",
+        "api-reference",
+        "readme",
+        "changelog",
+        "tutorial",
+        "mermaid",
+        "plantuml",
+        "drawio"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 4,
+        "instructions": 3,
+        "skills": 10,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "terraform-iac",
+      "description": "Terraform IaC — module authoring, state management, workspace strategies, provider configuration, and drift detection. Multi-cloud infrastructure as code with Azure-optimized patterns and cost estimation.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/terraform-iac",
+      "keywords": [
+        "terraform",
+        "iac",
+        "infrastructure-as-code",
+        "modules",
+        "state",
+        "multi-cloud",
+        "drift-detection"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 1,
+        "instructions": 2,
+        "skills": 3,
+        "hooks": 4
+      }
+    },
+    {
+      "name": "testing-automation",
+      "description": "AI-powered testing — unit test generation, integration testing, E2E with Playwright, AI evaluation pipelines, and TDD workflow agents for polyglot codebases.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/testing-automation",
+      "keywords": [
+        "testing",
+        "unit-test",
+        "integration",
+        "playwright",
+        "tdd",
+        "evaluation",
+        "polyglot",
+        "ci-cd"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 0,
+        "instructions": 1,
+        "skills": 1
+      }
+    },
+    {
+      "name": "typescript-fullstack",
+      "description": "TypeScript Full-Stack — Next.js, React, NestJS, Prisma, Zod, Vitest, and end-to-end type safety. Modern web development with server components, tRPC, and Tailwind CSS.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/typescript-fullstack",
+      "keywords": [
+        "typescript",
+        "nextjs",
+        "react",
+        "nestjs",
+        "prisma",
+        "zod",
+        "vitest",
+        "tailwind"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 8,
+        "skills": 4,
+        "hooks": 3
+      }
+    },
+    {
+      "name": "typescript-mcp-development",
+      "description": "TypeScript MCP Development — build MCP servers in TypeScript with Node.js, Express/Fastify hosting, Zod schema validation, and npm package distribution.",
+      "version": "1.0.0",
+      "author": "FrootAI Contributors",
+      "license": "MIT",
+      "source": "./plugins/typescript-mcp-development",
+      "keywords": [
+        "typescript",
+        "nodejs",
+        "mcp",
+        "express",
+        "zod",
+        "model-context-protocol",
+        "tool-server"
+      ],
+      "plays": [],
+      "items": {
+        "agents": 2,
+        "instructions": 2,
+        "skills": 2,
+        "hooks": 3
+      }
+    }
+  ],
+  "external": [],
+  "stats": {
+    "totalPlugins": 77,
+    "totalItems": 1008,
+    "categories": [
+      "ab-testing",
+      "accessibility",
+      "acr",
+      "adaptive-cards",
+      "adr",
+      "agent",
+      "agent-safety",
+      "agentic-rag",
+      "ai-gateway",
+      "ai-search",
+      "ai-services",
+      "aks",
+      "alerting",
+      "alerts",
+      "analytics",
+      "android",
+      "angular",
+      "anomaly-detection",
+      "apex",
+      "api-plugin",
+      "api-reference",
+      "apim",
+      "application-insights",
+      "architecture",
+      "aspnet",
+      "astro",
+      "async",
+      "asyncio",
+      "autogen",
+      "automation",
+      "autonomous-retrieval",
+      "autoscaling",
+      "azure",
+      "azure-ai",
+      "azure-ai-foundry",
+      "azure-ai-search",
+      "azure-communication-services",
+      "azure-devops",
+      "azure-monitor",
+      "azure-openai",
+      "azure-sql",
+      "bias",
+      "bicep",
+      "blazor",
+      "blocklist",
+      "browser-automation",
+      "buildkit",
+      "c4-diagram",
+      "caching",
+      "call-center",
+      "canary",
+      "catalog",
+      "chain-of-thought",
+      "changelog",
+      "ci-cd",
+      "cicd",
+      "cli",
+      "cloud-native",
+      "code-quality",
+      "code-review",
+      "coherence",
+      "collaboration",
+      "complexity",
+      "compliance",
+      "composer",
+      "concurrency",
+      "conditional-access",
+      "consumption",
+      "container-apps",
+      "containerization",
+      "content-moderation",
+      "content-safety",
+      "context-assembly",
+      "context-engineering",
+      "contract",
+      "conversational-ai",
+      "copilot-extension",
+      "copilot-studio",
+      "coroutines",
+      "cosmos-db",
+      "cost",
+      "cost-attribution",
+      "cost-optimization",
+      "cqrs",
+      "crm",
+      "cross-platform",
+      "csharp",
+      "customer-service",
+      "dapr",
+      "dart",
+      "dashboard",
+      "dashboards",
+      "data-explorer",
+      "data-modeling",
+      "data-services",
+      "database",
+      "database-modernization",
+      "dataset",
+      "dataset-preparation",
+      "dataverse",
+      "dax",
+      "ddd",
+      "dead-code",
+      "declarative-agent",
+      "deployment",
+      "design-patterns",
+      "design-system",
+      "design-tokens",
+      "deterministic",
+      "devops",
+      "diagnostics",
+      "directquery",
+      "discovery",
+      "distroless",
+      "django",
+      "docker",
+      "document-intelligence",
+      "document-processing",
+      "documentation",
+      "dotnet",
+      "drawio",
+      "drift-detection",
+      "durable-functions",
+      "edge-ai",
+      "ef-core",
+      "embeddings",
+      "enterprise",
+      "epic-breakdown",
+      "escalation",
+      "essentials",
+      "ethics",
+      "eu-ai-act",
+      "evaluated",
+      "evaluation",
+      "event-driven",
+      "event-grid",
+      "event-hubs",
+      "event-sourcing",
+      "explore",
+      "express",
+      "faceted-navigation",
+      "fai-context",
+      "fai-manifest",
+      "fai-protocol",
+      "fairness",
+      "fastapi",
+      "fastmcp",
+      "few-shot",
+      "fine-tuning",
+      "finite-state-machine",
+      "firewall",
+      "flask",
+      "flutter",
+      "form-extraction",
+      "frontend",
+      "functions",
+      "gin",
+      "github-actions",
+      "go",
+      "golang",
+      "gpu",
+      "graalvm",
+      "gradle",
+      "groundedness",
+      "grpc",
+      "guardrails",
+      "headless",
+      "health-checks",
+      "helm",
+      "hexagonal",
+      "hooks",
+      "hub-spoke",
+      "human-in-the-loop",
+      "hybrid-search",
+      "hyperparameter",
+      "iac",
+      "identity",
+      "image-moderation",
+      "implementation-plan",
+      "incident",
+      "incident-resolution",
+      "incident-response",
+      "inference",
+      "infrastructure",
+      "infrastructure-as-code",
+      "integration",
+      "invoice",
+      "ios",
+      "iot",
+      "istio",
+      "it-service-management",
+      "jailbreak",
+      "java",
+      "junit",
+      "keda",
+      "key-vault",
+      "knowledge-base",
+      "knowledge-wiring",
+      "kotlin",
+      "kql",
+      "ktor",
+      "kubernetes",
+      "landing-zone",
+      "language",
+      "laravel",
+      "latency",
+      "linting",
+      "llm-deployment",
+      "llm-observability",
+      "local-inference",
+      "log-analytics",
+      "logic-apps",
+      "lwc",
+      "m365",
+      "macos",
+      "managed-identity",
+      "marketplace",
+      "maui",
+      "maven",
+      "mcp",
+      "mcp-connector",
+      "memory-bank",
+      "memory-safety",
+      "mermaid",
+      "message-extension",
+      "messaging",
+      "meta",
+      "meta-prompting",
+      "metrics",
+      "microservices",
+      "migration",
+      "minimal",
+      "minimal-api",
+      "ml",
+      "mlflow",
+      "mlops",
+      "mobile",
+      "model-context-protocol",
+      "model-registry",
+      "model-routing",
+      "model-serving",
+      "model-training",
+      "moderation",
+      "modules",
+      "monitoring",
+      "multi-agent",
+      "multi-cloud",
+      "multi-modal",
+      "multi-region",
+      "multi-source",
+      "multi-stage",
+      "multiplatform",
+      "nestjs",
+      "networking",
+      "nextjs",
+      "nodejs",
+      "observability",
+      "ocr",
+      "offline",
+      "on-call",
+      "oncall",
+      "onnx",
+      "openai",
+      "opentelemetry",
+      "optimization",
+      "oracle",
+      "orchestration",
+      "owasp",
+      "pcf",
+      "pdf-extraction",
+      "penetration-testing",
+      "phi-4",
+      "php",
+      "pipeline",
+      "pipelines",
+      "plantuml",
+      "playwright",
+      "plsql",
+      "policy",
+      "polyglot",
+      "postgresql",
+      "power-apps",
+      "power-automate",
+      "power-bi",
+      "power-platform",
+      "power-virtual-agents",
+      "prd",
+      "primitives",
+      "prisma",
+      "private-endpoints",
+      "project-planning",
+      "prompt-context",
+      "prompt-engineering",
+      "prompt-injection",
+      "prompt-management",
+      "pydantic",
+      "pytest",
+      "python",
+      "quality",
+      "quantization",
+      "quarkus",
+      "quickstart",
+      "rack",
+      "rag",
+      "rails",
+      "rate-limiting",
+      "rbac",
+      "react",
+      "reactor",
+      "readme",
+      "real-time",
+      "recommendation",
+      "redis",
+      "refactoring",
+      "regression",
+      "regulated",
+      "release",
+      "relevance",
+      "report-design",
+      "reproducible",
+      "responsible-ai",
+      "responsive",
+      "retrieval-augmented-generation",
+      "rmcp",
+      "roadmap",
+      "root-cause",
+      "ruby",
+      "rule-based",
+      "runbook",
+      "rust",
+      "safety",
+      "salesforce",
+      "salesforce-ai",
+      "scaffold",
+      "schema-conversion",
+      "schema-design",
+      "sdk",
+      "secrets-scanning",
+      "security",
+      "security-scanning",
+      "semantic-kernel",
+      "semantic-ranking",
+      "sentiment",
+      "serverless",
+      "service-bus",
+      "service-mesh",
+      "shared-memory",
+      "small-language-model",
+      "solution-play",
+      "soql",
+      "sorbet",
+      "sovereign-cloud",
+      "speech",
+      "speech-to-text",
+      "spring-boot",
+      "sql-database",
+      "sql-server",
+      "sqlalchemy",
+      "sre",
+      "sso",
+      "starter",
+      "state",
+      "storage",
+      "storybook",
+      "structured-data",
+      "suggest",
+      "supervisor",
+      "supply-chain",
+      "svelte",
+      "swarm",
+      "swift",
+      "swiftui",
+      "swoole",
+      "systems-programming",
+      "table-recognition",
+      "tailwind",
+      "tdd",
+      "teams",
+      "tech-debt",
+      "technical-spike",
+      "template",
+      "templates",
+      "terraform",
+      "testing",
+      "text-moderation",
+      "theming",
+      "threat-modeling",
+      "time-series",
+      "token-budget",
+      "token-counting",
+      "token-usage",
+      "tokio",
+      "tool-server",
+      "tracing",
+      "training",
+      "transparency",
+      "tutorial",
+      "typescript",
+      "ui-components",
+      "unit-test",
+      "usage-analytics",
+      "vapor",
+      "vector-search",
+      "versioning",
+      "vision",
+      "vitest",
+      "voice-ai",
+      "vue",
+      "waf",
+      "waf-aligned",
+      "wasm",
+      "web-scraping",
+      "wiring",
+      "xunit",
+      "zero-trust",
+      "zod"
+    ]
+  }
+}

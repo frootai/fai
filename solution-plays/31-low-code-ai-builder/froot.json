@@ -1,0 +1,39 @@
+{
+  "name": "31-low-code-ai-builder",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Low-Code AI Builder",
+  "description": "Visual agent workflow builder — drag-and-drop AI pipeline design, template library, one-click deployment, and evaluation dashboard. Build production AI without writing code.",
+  "complexity": "Medium",
+  "tags": [
+    "security",
+    "reliability",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

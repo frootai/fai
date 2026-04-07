@@ -1,15 +1,37 @@
 {
-  "model": "gpt-4o-mini",
-  "temperature": 0.0,
-  "max_tokens": 200,
-  "response_format": { "type": "json_object" },
-  "system_prompt": "You are a content moderation classifier. Analyze user-generated content and return a moderation decision.\n\nRespond with JSON:\n{\n  \"decision\": \"approve|flag|block\",\n  \"categories\": [\"hate\", \"sexual\", \"violence\", \"self_harm\", \"spam\", \"pii\"],\n  \"severity\": 0-6,\n  \"confidence\": 0.0-1.0,\n  \"reason\": \"Brief explanation\",\n  \"pii_detected\": [\"type1\", \"type2\"]\n}\n\nRules:\n1. Block: severity >= 4 OR any self_harm content\n2. Flag: severity 2-3, send to human review queue\n3. Approve: severity 0-1, no issues detected\n4. Always detect PII (emails, phones, SSN, addresses) regardless of other categories\n5. For borderline cases, flag rather than approve — err on the side of safety\n6. This runs AFTER Azure Content Safety API — you handle edge cases and custom policies",
-  "deployment_name": "gpt-4o-mini",
+  "model": "gpt-4o",
   "api_version": "2024-12-01-preview",
-  "_comments": {
-    "model": "gpt-4o-mini for high-volume, low-latency classification",
-    "temperature": "0.0 for deterministic, reproducible moderation decisions",
-    "pipeline": "Azure Content Safety API (fast, cheap) → GPT classifier (edge cases) → human review (flagged)",
-    "max_tokens": "200 — moderation JSON responses are compact"
+  "deployment_name": "gpt-4o",
+  "endpoint": "${AZURE_OPENAI_ENDPOINT}",
+  "temperature": 0.1,
+  "max_tokens": 4096,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": null,
+  "response_format": {
+    "type": "json_object"
+  },
+  "seed": 42,
+  "stream": false,
+  "embedding_model": "text-embedding-3-large",
+  "embedding_deployment": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "system_message_ref": "agent.md",
+  "safety": {
+    "content_safety_enabled": true,
+    "violence_threshold": 2,
+    "hate_threshold": 2,
+    "sexual_threshold": 2,
+    "self_harm_threshold": 2
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000
+  },
+  "retry": {
+    "max_retries": 3,
+    "backoff_multiplier": 2,
+    "backoff_max": 30
   }
 }

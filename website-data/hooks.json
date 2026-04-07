@@ -1,0 +1,86 @@
+[
+  {
+    "id": "frootai-cost-tracker",
+    "name": "FrootAI Cost Tracker\r",
+    "events": [
+      "sessionEnd"
+    ],
+    "folder": "hooks/frootai-cost-tracker/"
+  },
+  {
+    "id": "frootai-governance-audit",
+    "name": "FrootAI Governance Audit\r",
+    "events": [
+      "userPromptSubmitted",
+      "sessionStart",
+      "sessionEnd"
+    ],
+    "folder": "hooks/frootai-governance-audit/"
+  },
+  {
+    "id": "frootai-license-checker",
+    "name": "FrootAI License Checker\r",
+    "events": [
+      "sessionEnd"
+    ],
+    "folder": "hooks/frootai-license-checker/"
+  },
+  {
+    "id": "frootai-output-validator",
+    "name": "FrootAI Output Validator\r",
+    "events": [
+      "sessionEnd"
+    ],
+    "folder": "hooks/frootai-output-validator/"
+  },
+  {
+    "id": "frootai-pii-redactor",
+    "name": "FrootAI PII Redactor\r",
+    "events": [
+      "sessionEnd"
+    ],
+    "folder": "hooks/frootai-pii-redactor/"
+  },
+  {
+    "id": "frootai-secrets-scanner",
+    "name": "FrootAI Secrets Scanner\r",
+    "events": [
+      "sessionEnd"
+    ],
+    "folder": "hooks/frootai-secrets-scanner/"
+  },
+  {
+    "id": "frootai-session-logger",
+    "name": "FrootAI Session Logger\r",
+    "events": [
+      "sessionStart",
+      "sessionEnd",
+      "userPromptSubmitted"
+    ],
+    "folder": "hooks/frootai-session-logger/"
+  },
+  {
+    "id": "frootai-token-budget-enforcer",
+    "name": "FrootAI Token Budget Enforcer\r",
+    "events": [
+      "preToolUse"
+    ],
+    "folder": "hooks/frootai-token-budget-enforcer/"
+  },
+  {
+    "id": "frootai-tool-guardian",
+    "name": "FrootAI Tool Guardian\r",
+    "events": [
+      "preToolUse"
+    ],
+    "folder": "hooks/frootai-tool-guardian/"
+  },
+  {
+    "id": "frootai-waf-compliance",
+    "name": "FrootAI WAF Compliance\r",
+    "events": [
+      "sessionEnd"
+    ],
+    "folder": "hooks/frootai-waf-compliance/"
+  }
+]

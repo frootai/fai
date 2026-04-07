@@ -177,6 +177,54 @@ solution-play/
 | 18 | Prompt Management | Versioning + A/B testing |
 | 19 | Edge AI Phi-4 | On-device inference, no cloud |
 | 20 | Anomaly Detection | Time-series + pattern recognition |
+| 21 | Agentic RAG | Autonomous retrieval with self-evaluation |
+| 22 | Multi-Agent Swarm | Supervisor, pipeline, debate patterns |
+| 23 | Browser Automation | Vision + Playwright web navigation |
+| 24 | AI Code Review | CodeQL + OWASP + inline suggestions |
+| 25 | Conversation Memory | 3-tier memory (short/long/episodic) |
+| 26 | Semantic Search Engine | Hybrid search + reranking + answer gen |
+| 27 | AI Data Pipeline | LLM-augmented ETL with PII redaction |
+| 28 | Knowledge Graph RAG | Graph entities + vector fusion |
+| 29 | MCP Gateway | APIM proxy for MCP governance |
+| 30 | AI Security Hardening | OWASP LLM Top 10 defense |
+| 31 | Low-Code AI Builder | Visual drag-and-drop pipelines |
+| 32 | AI-Powered Testing | Autonomous test generation |
+| 33 | Voice AI Agent | Real-time STT → LLM → TTS |
+| 34 | Edge AI Deployment | ONNX quantization + fleet mgmt |
+| 35 | AI Compliance Engine | GDPR, HIPAA, SOC 2, EU AI Act |
+| 36 | Multimodal Agent | Vision + text + code understanding |
+| 37 | AI-Powered DevOps | Incident triage + runbook automation |
+| 38 | Document Understanding v2 | Multi-page + entity linking |
+| 39 | AI Meeting Assistant | Transcription + action items |
+| 40 | Copilot Studio Advanced | TypeSpec agents + M365 SSO |
+| 41 | AI Red Teaming | Adversarial testing + safety scorecards |
+| 42 | Computer Use Agent | Vision-based desktop automation |
+| 43 | AI Video Generation | Text-to-video + content safety |
+| 44 | Foundry Local On-Device | Air-gapped LLM inference |
+| 45 | Real-Time Event AI | Streaming fraud/IoT/sentiment |
+| 46 | Healthcare Clinical AI | HIPAA-compliant decision support |
+| 47 | Synthetic Data Factory | Privacy-safe data generation |
+| 48 | AI Model Governance | Registry + approval gates + A/B |
+| 49 | Creative AI Studio | Multi-modal content creation |
+| 50 | Financial Risk Intelligence | Market analysis + fraud detection |
+| 51 | Autonomous Coding Agent | Issue-to-PR pipeline |
+| 52 | AI API Gateway v2 | Semantic caching + smart routing |
+| 53 | Legal Document AI | Contract review + clause extraction |
+| 54 | AI Customer Support v2 | Multi-channel + sentiment routing |
+| 55 | Supply Chain AI | Demand forecasting + disruption alerts |
+| 56 | Semantic Code Search | Natural language code discovery |
+| 57 | AI Translation Engine | 100+ languages + glossaries |
+| 58 | Digital Twin Agent | IoT simulation + predictive modeling |
+| 59 | AI Recruiter Agent | Bias-free screening + matching |
+| 60 | Responsible AI Dashboard | Fairness metrics + EU AI Act |
+| 61 | Content Moderation v2 | Multi-modal + cultural context |
+| 62 | Federated Learning | Privacy-preserving distributed training |
+| 63 | Fraud Detection Agent | Sub-100ms real-time detection |
+| 64 | AI Sales Assistant | CRM + lead scoring + outreach |
+| 65 | AI Training Curriculum | Adaptive learning + micro-certs |
+| 66 | AI Infra Optimizer | FinOps + right-sizing + GPU analysis |
+| 67 | AI Knowledge Management | Freshness detection + expert routing |
+| 68 | Predictive Maintenance | IoT RUL estimation + scheduling |
 
 </details>
 

@@ -1,0 +1,35 @@
+{
+  "name": "34-edge-ai-deployment",
+  "version": "1.0.0",
+  "play": "34-edge-ai-deployment",
+  "description": "Deploy AI models to edge devices — ONNX quantization, model compression, offline inference, IoT Hub sync, and fleet management for on-premise and disconnected environments.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "edge-deployment",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "performance-efficiency": "See README.md"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "typescript-fullstack",
+  "description": "TypeScript Full-Stack — Next.js, React, NestJS, Prisma, Zod, Vitest, and end-to-end type safety. Modern web development with server components, tRPC, and Tailwind CSS.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "nextjs",
+    "react",
+    "nestjs",
+    "prisma",
+    "zod",
+    "vitest",
+    "tailwind"
+  ],
+  "agents": [
+    "../../agents/frootai-typescript-expert.agent.md",
+    "../../agents/frootai-react-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/typescript-waf.instructions.md",
+    "../../instructions/nextjs-waf.instructions.md",
+    "../../instructions/nestjs-waf.instructions.md",
+    "../../instructions/prisma-waf.instructions.md",
+    "../../instructions/zod-waf.instructions.md",
+    "../../instructions/vitest-waf.instructions.md",
+    "../../instructions/tailwind-waf.instructions.md",
+    "../../instructions/trpc-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-nextjs-scaffold/",
+    "../../skills/frootai-react-component-scaffold/",
+    "../../skills/frootai-jest-test/",
+    "../../skills/frootai-playwright-test/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

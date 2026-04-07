@@ -1,0 +1,64 @@
+{
+  "play": "99-enterprise-ai-governance-hub",
+  "version": "1.0.0",
+  "description": "Central control plane for all AI models, agents, and APIs across an enterprise. Model registry with approval gates, policy enforcement via Azure Policy, cost attribution dashboards, safety monitoring, and regulatory compliance tracking for SOX, EU AI Act, and ISO 42001.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "T2-Responsible-AI",
+      "O4-Azure-AI",
+      "O5-Infrastructure"
+    ],
+    "waf": [
+      "security",
+      "responsible-ai",
+      "operational-excellence",
+      "reliability",
+      "cost-optimization"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "99-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-99/",
+      "evaluate-99/",
+      "tune-99/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure API Management",
+      "Azure Policy",
+      "Azure Monitor",
+      "Azure Cosmos DB",
+      "Azure Machine Learning",
+      "Azure Key Vault"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.85,
+    "relevance": 0.85,
+    "safety": 0,
+    "costPerQuery": 0.10
+  }
+}

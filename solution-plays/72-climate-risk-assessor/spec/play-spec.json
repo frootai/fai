@@ -1,0 +1,28 @@
+{
+  "name": "72-climate-risk-assessor",
+  "version": "1.0.0",
+  "description": "> Climate scenario modeling for financial risk assessment — physical risk, transition risk, and insu",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "climate-risk-assessor"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "security": "See README",
+    "cost-optimization": "See README"
+  }
+}

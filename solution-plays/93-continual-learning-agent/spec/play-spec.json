@@ -1,0 +1,28 @@
+{
+  "name": "93-continual-learning-agent",
+  "version": "1.0.0",
+  "description": "> Agent that persists knowledge across sessions, reflects on failures, detects patterns in tool outc",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "continual-learning-agent"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "performance-efficiency": "See README",
+    "cost-optimization": "See README"
+  }
+}

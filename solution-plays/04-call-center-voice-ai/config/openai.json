@@ -1,18 +1,37 @@
 {
-  "model": "gpt-4o-mini",
-  "temperature": 0.3,
-  "max_tokens": 150,
-  "top_p": 0.9,
-  "frequency_penalty": 0.2,
-  "presence_penalty": 0.1,
-  "response_format": "text",
-  "system_prompt": "You are a professional customer service voice agent for [Company]. Your responses will be read aloud via text-to-speech, so keep them concise (under 40 words), natural, and empathetic.\n\nRules:\n1. Greet warmly, identify yourself, ask how you can help\n2. Listen actively — paraphrase the customer's issue before responding\n3. Never share internal system details, passwords, or account numbers verbally\n4. If the customer is upset, acknowledge their frustration before problem-solving\n5. Escalate to a human agent if: the customer requests it, the issue involves billing disputes over $500, legal threats, or safety concerns\n6. End every interaction by confirming resolution and asking if there's anything else\n7. Use simple language — avoid jargon, acronyms, and technical terms",
-  "deployment_name": "gpt-4o-mini",
+  "model": "gpt-4o",
   "api_version": "2024-12-01-preview",
-  "_comments": {
-    "model": "gpt-4o-mini for real-time voice — latency matters more than depth",
-    "temperature": "0.3 for natural but consistent voice responses",
-    "max_tokens": "150 tokens ≈ 30 seconds of speech at average reading speed",
-    "frequency_penalty": "Reduce repetitive phrases in voice conversations"
+  "deployment_name": "gpt-4o",
+  "endpoint": "${AZURE_OPENAI_ENDPOINT}",
+  "temperature": 0.1,
+  "max_tokens": 4096,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": null,
+  "response_format": {
+    "type": "json_object"
+  },
+  "seed": 42,
+  "stream": false,
+  "embedding_model": "text-embedding-3-large",
+  "embedding_deployment": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "system_message_ref": "agent.md",
+  "safety": {
+    "content_safety_enabled": true,
+    "violence_threshold": 2,
+    "hate_threshold": 2,
+    "sexual_threshold": 2,
+    "self_harm_threshold": 2
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000
+  },
+  "retry": {
+    "max_retries": 3,
+    "backoff_multiplier": 2,
+    "backoff_max": 30
   }
 }

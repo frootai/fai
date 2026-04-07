@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💬 Discussions"
+    url: https://github.com/frootai/frootai/discussions
+    about: Ask questions and share ideas with the community
+  - name: "📖 Documentation"
+    url: https://frootai.dev/docs
+    about: Browse knowledge modules and learning hub
+  - name: "🎯 Solution Configurator"
+    url: https://frootai.dev/configurator
+    about: Find the right solution play for your use case

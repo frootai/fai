@@ -1,0 +1,28 @@
+{
+  "name": "83-building-energy-optimizer",
+  "version": "1.0.0",
+  "description": "> HVAC, lighting, and occupancy optimization via digital twin simulation of commercial buildings. Re",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "building-energy-optimizer"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "cost-optimization": "See README",
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README"
+  }
+}

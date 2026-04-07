@@ -1,0 +1,108 @@
+# FrootAI — LLM-Readable Index
+# https://frootai.dev
+# FAI Protocol: The missing context-wiring layer for AI primitives
+
+## Solution Plays (68)
+- 01-enterprise-rag: WAF=[security,reliability,cost-optimization,performance-efficiency,responsible-ai] Knowledge=[R2-RAG-Architecture,O3-MCP-Tools-Functions,T3-Production-Patterns,F1-GenAI-Foundations]
+- 02-ai-landing-zone: WAF=[security,reliability,cost-optimization,operational-excellence] Knowledge=[O5-GPU-Infra,T3-Production-Patterns]
+- 03-deterministic-agent: WAF=[security,reliability,responsible-ai] Knowledge=[R3-Deterministic-AI,O2-Agent-Coding]
+- 04-call-center-voice-ai: WAF=[security,reliability,cost-optimization,responsible-ai] Knowledge=[F1-GenAI-Foundations,R2-RAG-Architecture]
+- 05-it-ticket-resolution: WAF=[security,reliability,cost-optimization] Knowledge=[R2-RAG-Architecture,O1-Semantic-Kernel]
+- 06-document-intelligence: WAF=[security,reliability,responsible-ai] Knowledge=[F1-GenAI-Foundations,T3-Production-Patterns]
+- 07-multi-agent-service: WAF=[security,reliability,cost-optimization,performance-efficiency] Knowledge=[O2-Agent-Coding,O1-Semantic-Kernel]
+- 08-copilot-studio-bot: WAF=[security,reliability,operational-excellence] Knowledge=[F4-GitHub-Agentic-OS,O6-Copilot-Extend]
+- 09-ai-search-portal: WAF=[security,reliability,performance-efficiency,cost-optimization] Knowledge=[R2-RAG-Architecture,F1-GenAI-Foundations]
+- 10-content-moderation: WAF=[security,responsible-ai,reliability] Knowledge=[T2-Responsible-AI,F1-GenAI-Foundations]
+- 11-ai-landing-zone-advanced: WAF=[security,reliability,cost-optimization,operational-excellence,performance-efficiency] Knowledge=[O5-GPU-Infra,T3-Production-Patterns]
+- 12-model-serving-aks: WAF=[security,reliability,cost-optimization,performance-efficiency] Knowledge=[O5-GPU-Infra,T1-Fine-Tuning-MLOps,T3-Production-Patterns]
+- 13-fine-tuning-workflow: WAF=[security,cost-optimization,operational-excellence] Knowledge=[T1-Fine-Tuning-MLOps,F1-GenAI-Foundations]
+- 14-cost-optimized-ai-gateway: WAF=[cost-optimization,performance-efficiency,reliability,security] Knowledge=[T3-Production-Patterns,F2-LLM-Selection]
+- 15-multi-modal-docproc: WAF=[security,reliability,responsible-ai] Knowledge=[F1-GenAI-Foundations,R2-RAG-Architecture]
+- 16-copilot-teams-extension: WAF=[security,reliability,operational-excellence] Knowledge=[F4-GitHub-Agentic-OS,O6-Copilot-Extend,O3-MCP-Tools-Functions]
+- 17-ai-observability: WAF=[operational-excellence,reliability,cost-optimization] Knowledge=[T3-Production-Patterns,O5-GPU-Infra]
+- 18-prompt-management: WAF=[security,cost-optimization,operational-excellence] Knowledge=[R1-Prompt-Patterns,O1-Semantic-Kernel]
+- 19-edge-ai-phi4: WAF=[cost-optimization,performance-efficiency,security] Knowledge=[F2-LLM-Selection,T1-Fine-Tuning-MLOps]
+- 20-anomaly-detection: WAF=[reliability,security,operational-excellence] Knowledge=[T3-Production-Patterns,F1-GenAI-Foundations]
+- 21-agentic-rag: WAF=[security,reliability,cost-optimization,performance-efficiency,responsible-ai] Knowledge=[R2-RAG-Architecture,O2-AI-Agents,O3-MCP-Tools-Functions,T3-Production-Patterns]
+- 22-multi-agent-swarm: WAF=[security,reliability,cost-optimization,performance-efficiency,operational-excellence] Knowledge=[O2-AI-Agents,O1-Semantic-Kernel,O3-MCP-Tools-Functions,T3-Production-Patterns]
+- 23-browser-automation-agent: WAF=[security,reliability,performance-efficiency,responsible-ai] Knowledge=[O2-AI-Agents,O3-MCP-Tools-Functions,R1-Prompt-Engineering,T3-Production-Patterns]
+- 24-ai-code-review-pipeline: WAF=[security,reliability,operational-excellence,responsible-ai] Knowledge=[O2-Agent-Coding,T3-Production-Patterns,F4-GitHub-Agentic-OS]
+- 25-conversation-memory-layer: WAF=[security,reliability,performance-efficiency,cost-optimization,responsible-ai] Knowledge=[R2-RAG-Architecture,O2-Agent-Coding,O1-Semantic-Kernel,F1-GenAI-Foundations]
+- 26-semantic-search-engine: WAF=[security,reliability,performance-efficiency,cost-optimization] Knowledge=[R2-RAG-Architecture,F1-GenAI-Foundations,T3-Production-Patterns]
+- 27-ai-data-pipeline: WAF=[security,reliability,cost-optimization,operational-excellence,responsible-ai] Knowledge=[T1-Fine-Tuning-MLOps,T3-Production-Patterns,R2-RAG-Architecture]
+- 28-knowledge-graph-rag: WAF=[security,reliability,performance-efficiency,cost-optimization,responsible-ai] Knowledge=[R2-RAG-Architecture,F1-GenAI-Foundations,O2-Agent-Coding,R3-Deterministic-AI]
+- 29-mcp-gateway: WAF=[security,reliability,cost-optimization,operational-excellence,performance-efficiency] Knowledge=[O3-MCP-Tools-Functions,F4-GitHub-Agentic-OS,T3-Production-Patterns]
+- 30-ai-security-hardening: WAF=[security,reliability,responsible-ai,operational-excellence] Knowledge=[T2-Responsible-AI,R3-Deterministic-AI,T3-Production-Patterns,F1-GenAI-Foundations]
+- 31-low-code-ai-builder: WAF=[security,reliability,cost-optimization,operational-excellence] Knowledge=[O2-Agent-Coding,F1-GenAI-Foundations,T3-Production-Patterns]
+- 32-ai-powered-testing: WAF=[security,reliability,operational-excellence,performance-efficiency] Knowledge=[O2-Agent-Coding,T3-Production-Patterns,F4-GitHub-Agentic-OS]
+- 33-voice-ai-agent: WAF=[security,reliability,cost-optimization,responsible-ai] Knowledge=[F1-GenAI-Foundations,R2-RAG-Architecture,T2-Responsible-AI]
+- 34-edge-ai-deployment: WAF=[security,reliability,cost-optimization,performance-efficiency] Knowledge=[F2-LLM-Selection,T1-Fine-Tuning-MLOps,T3-Production-Patterns]
+- 35-ai-compliance-engine: WAF=[security,reliability,responsible-ai,operational-excellence] Knowledge=[T2-Responsible-AI,T3-Production-Patterns,R3-Deterministic-AI]
+- 36-multimodal-agent: WAF=[security,reliability,cost-optimization,responsible-ai] Knowledge=[F1-GenAI-Foundations,O2-Agent-Coding,R2-RAG-Architecture]
+- 37-ai-powered-devops: WAF=[security,reliability,operational-excellence,cost-optimization] Knowledge=[T3-Production-Patterns,O2-Agent-Coding,F4-GitHub-Agentic-OS]
+- 38-document-understanding-v2: WAF=[security,reliability,responsible-ai,performance-efficiency] Knowledge=[F1-GenAI-Foundations,R2-RAG-Architecture,T3-Production-Patterns]
+- 39-ai-meeting-assistant: WAF=[security,reliability,responsible-ai,cost-optimization] Knowledge=[F1-GenAI-Foundations,O2-Agent-Coding,T2-Responsible-AI]
+- 40-copilot-studio-advanced: WAF=[security,reliability,operational-excellence,responsible-ai] Knowledge=[F4-GitHub-Agentic-OS,O6-Copilot-Extend,O3-MCP-Tools-Functions]
+- 41-ai-red-teaming: WAF=[security,responsible-ai,operational-excellence] Knowledge=[T2-Responsible-AI,T3-Production-Patterns,R1-Prompt-Patterns,O2-Agent-Coding]
+- 42-computer-use-agent: WAF=[security,reliability,cost-optimization,operational-excellence] Knowledge=[O2-Agent-Coding,O3-MCP-Tools-Functions,F2-LLM-Selection,T3-Production-Patterns,R3-Deterministic-AI]
+- 43-ai-video-generation: WAF=[cost-optimization,responsible-ai,performance-efficiency,reliability] Knowledge=[F1-GenAI-Foundations,F2-LLM-Selection,T2-Responsible-AI,T3-Production-Patterns,R1-Prompt-Patterns]
+- 44-foundry-local-on-device: WAF=[security,reliability,performance-efficiency,cost-optimization] Knowledge=[O5-GPU-Infra,F2-LLM-Selection,T3-Production-Patterns,R3-Deterministic-AI,F1-GenAI-Foundations]
+- 45-realtime-event-ai: WAF=[performance-efficiency,reliability,cost-optimization,operational-excellence] Knowledge=[T3-Production-Patterns,O1-Semantic-Kernel,F1-GenAI-Foundations,R3-Deterministic-AI]
+- 46-healthcare-clinical-ai: WAF=[security,responsible-ai,reliability,operational-excellence,cost-optimization] Knowledge=[R2-RAG-Architecture,T2-Responsible-AI,O2-Agent-Coding,T3-Production-Patterns,R3-Deterministic-AI]
+- 47-synthetic-data-factory: WAF=[security,responsible-ai,cost-optimization,operational-excellence] Knowledge=[F1-GenAI-Foundations,F2-LLM-Selection,T1-Fine-Tuning-MLOps,T2-Responsible-AI,T3-Production-Patterns]
+- 48-ai-model-governance: WAF=[operational-excellence,security,responsible-ai,reliability,cost-optimization] Knowledge=[T3-Production-Patterns,T2-Responsible-AI,T1-Fine-Tuning-MLOps,O5-GPU-Infra]
+- 49-creative-ai-studio: WAF=[cost-optimization,responsible-ai,performance-efficiency,reliability,operational-excellence] Knowledge=[F1-GenAI-Foundations,F2-LLM-Selection,R1-Prompt-Patterns,T2-Responsible-AI,T3-Production-Patterns]
+- 50-financial-risk-intelligence: WAF=[security,reliability,responsible-ai,cost-optimization,operational-excellence,performance-efficiency] Knowledge=[R2-RAG-Architecture,O2-Agent-Coding,R3-Deterministic-AI,T2-Responsible-AI,T3-Production-Patterns,F2-LLM-Selection]
+- 51-autonomous-coding-agent: WAF=[security,reliability,operational-excellence,cost-optimization] Knowledge=[O2-Agent-Coding,F4-GitHub-Agentic-OS,T3-Production-Patterns,O3-MCP-Tools-Functions]
+- 52-ai-api-gateway-v2: WAF=[security,performance-efficiency,cost-optimization,reliability] Knowledge=[T3-Production-Patterns,F2-LLM-Selection,R3-Deterministic-AI]
+- 53-legal-document-ai: WAF=[security,reliability,responsible-ai,cost-optimization] Knowledge=[R2-RAG-Architecture,T2-Responsible-AI,O2-Agent-Coding,R3-Deterministic-AI]
+- 54-ai-customer-support-v2: WAF=[security,reliability,cost-optimization,responsible-ai,performance-efficiency] Knowledge=[R2-RAG-Architecture,O2-Agent-Coding,T2-Responsible-AI,T3-Production-Patterns]
+- 55-supply-chain-ai: WAF=[reliability,cost-optimization,operational-excellence,security] Knowledge=[T3-Production-Patterns,O2-Agent-Coding,F1-GenAI-Foundations]
+- 56-semantic-code-search: WAF=[security,performance-efficiency,reliability,operational-excellence] Knowledge=[R2-RAG-Architecture,F1-GenAI-Foundations,O3-MCP-Tools-Functions]
+- 57-ai-translation-engine: WAF=[performance-efficiency,cost-optimization,reliability,responsible-ai] Knowledge=[F1-GenAI-Foundations,F2-LLM-Selection,T2-Responsible-AI,T3-Production-Patterns]
+- 58-digital-twin-agent: WAF=[reliability,performance-efficiency,cost-optimization,operational-excellence] Knowledge=[T3-Production-Patterns,O2-Agent-Coding,F1-GenAI-Foundations]
+- 59-ai-recruiter-agent: WAF=[security,responsible-ai,reliability,cost-optimization] Knowledge=[O2-Agent-Coding,T2-Responsible-AI,R2-RAG-Architecture]
+- 60-responsible-ai-dashboard: WAF=[responsible-ai,security,operational-excellence,reliability] Knowledge=[T2-Responsible-AI,T3-Production-Patterns,F1-GenAI-Foundations,T1-Fine-Tuning-MLOps]
+- 61-content-moderation-v2: WAF=[responsible-ai,security,reliability,operational-excellence] Knowledge=[T2-Responsible-AI,F1-GenAI-Foundations,O2-Agent-Coding,T3-Production-Patterns,R3-Deterministic-AI]
+- 62-federated-learning-pipeline: WAF=[security,responsible-ai,reliability,cost-optimization,performance-efficiency] Knowledge=[T1-Fine-Tuning-MLOps,T2-Responsible-AI,T3-Production-Patterns,F1-GenAI-Foundations,O5-GPU-Infra]
+- 63-fraud-detection-agent: WAF=[security,reliability,performance-efficiency,cost-optimization,operational-excellence] Knowledge=[R3-Deterministic-AI,O2-Agent-Coding,T3-Production-Patterns,F1-GenAI-Foundations]
+- 64-ai-sales-assistant: WAF=[security,reliability,cost-optimization,operational-excellence] Knowledge=[O2-Agent-Coding,R2-RAG-Architecture,T3-Production-Patterns,F1-GenAI-Foundations]
+- 65-ai-training-curriculum: WAF=[responsible-ai,reliability,cost-optimization,operational-excellence] Knowledge=[F1-GenAI-Foundations,T2-Responsible-AI,O2-Agent-Coding,R1-Prompt-Patterns]
+- 66-ai-infrastructure-optimizer: WAF=[cost-optimization,performance-efficiency,reliability,operational-excellence,security] Knowledge=[T3-Production-Patterns,O5-GPU-Infra,F2-LLM-Selection]
+- 67-ai-knowledge-management: WAF=[security,reliability,operational-excellence,cost-optimization,performance-efficiency] Knowledge=[R2-RAG-Architecture,O2-Agent-Coding,T3-Production-Patterns,F1-GenAI-Foundations,O1-Semantic-Kernel]
+- 68-predictive-maintenance-ai: WAF=[reliability,cost-optimization,operational-excellence,performance-efficiency,security] Knowledge=[T3-Production-Patterns,F1-GenAI-Foundations,O2-Agent-Coding,T1-Fine-Tuning-MLOps]
+
+## Agents (201)
+- frootai-accessibility-expert
+- frootai-adr-writer
+- frootai-agentic-retriever
+- frootai-ai-agents-expert
+- frootai-ai-infra-expert
+- frootai-angular-expert
+- frootai-api-gateway-designer
+- frootai-architect
+- frootai-azure-ai-foundry-expert
+- frootai-azure-ai-search-expert
+- frootai-azure-aks-expert
+- frootai-azure-apim-expert
+- frootai-azure-cdn-expert
+- frootai-azure-container-apps-expert
+- frootai-azure-cosmos-db-expert
+- frootai-azure-devops-expert
+- frootai-azure-event-hubs-expert
+- frootai-azure-functions-expert
+- frootai-azure-identity-expert
+- frootai-azure-key-vault-expert
+- ... and more
+
+## Plugins (77)
+
+## FAI Protocol
+- fai-manifest.json: Context-wiring for 9 primitive types
+- fai-context.json: LEGO block auto-wiring
+- FAI Engine: 7 modules, 12ms load
+- Validation: 2800+ checks
+
+# Install: npx frootai-mcp@latest
+# Website: https://frootai.dev
+# GitHub: https://github.com/frootai/frootai

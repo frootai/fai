@@ -1,0 +1,28 @@
+{
+  "name": "98-agent-evaluation-platform",
+  "version": "1.0.0",
+  "description": "> Automated evaluation suite for any AI agent — standardized benchmarks, regression testing, A/B exp",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "agent-evaluation-platform"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "operational-excellence": "See README",
+    "cost-optimization": "See README"
+  }
+}

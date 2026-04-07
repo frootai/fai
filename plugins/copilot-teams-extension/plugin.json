@@ -1,0 +1,46 @@
+{
+  "name": "copilot-teams-extension",
+  "description": "Copilot for Teams Extension — declarative agents, API plugins, message extensions, and adaptive cards for Microsoft 365 Copilot. Build custom AI experiences that surface inside Teams, Outlook, and M365 apps.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "teams",
+    "copilot-extension",
+    "declarative-agent",
+    "api-plugin",
+    "message-extension",
+    "adaptive-cards",
+    "m365"
+  ],
+  "agents": [
+    "../../agents/frootai-play-16-builder.agent.md",
+    "../../agents/frootai-play-16-reviewer.agent.md",
+    "../../agents/frootai-play-16-tuner.agent.md",
+    "../../agents/frootai-copilot-ecosystem-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/play-16-copilot-teams-extension-patterns.instructions.md",
+    "../../instructions/typescript-waf.instructions.md",
+    "../../instructions/froot-o6-copilot-extend.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-deploy-16-copilot-teams-extension/",
+    "../../skills/frootai-evaluate-16-copilot-teams-extension/",
+    "../../skills/frootai-tune-16-copilot-teams-extension/",
+    "../../skills/frootai-copilot-sdk-integration/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-waf-compliance/"
+  ],
+  "plays": [
+    "16-copilot-teams-extension"
+  ]
+}

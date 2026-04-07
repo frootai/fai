@@ -1,0 +1,35 @@
+{
+  "name": "33-voice-ai-agent",
+  "version": "1.0.0",
+  "play": "33-voice-ai-agent",
+  "description": "Real-time voice-driven AI agent — speech-to-text, intent recognition, conversational AI, and text-to-speech. Build voice bots for customer service, IVR, and accessibility.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "voice-agent",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "responsible-ai": "See README.md"
+  }
+}

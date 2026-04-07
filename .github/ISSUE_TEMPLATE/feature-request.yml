@@ -1,0 +1,61 @@
+name: "💡 Feature Request"
+description: Suggest a new feature or improvement for FrootAI
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of FrootAI does this affect?
+      options:
+        - Solution Plays
+        - FAI Protocol / Engine
+        - VS Code Extension
+        - MCP Server (npm)
+        - Python SDK
+        - CLI
+        - Website (frootai.dev)
+        - Knowledge Modules
+        - Primitives (agents/instructions/skills/hooks)
+        - Plugin Marketplace
+        - Docker Image
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Clear, concise description of the feature you'd like.
+      placeholder: "I'd like FrootAI to..."
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Why is this feature valuable? What problem does it solve?
+      placeholder: "This would help because..."
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Nice to have
+        - Important
+        - Critical
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any workarounds or alternatives?
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to submit a PR for this feature

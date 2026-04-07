@@ -1,0 +1,61 @@
+{
+  "play": "83-building-energy-optimizer",
+  "version": "1.0.0",
+  "description": "HVAC, lighting, and occupancy optimization via digital twin simulation of commercial buildings. Reduces energy consumption 20-40% through AI-driven scheduling, predictive maintenance, and renewable integration.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "O5-AI-Infrastructure",
+      "F1-GenAI-Foundations"
+    ],
+    "waf": [
+      "cost-optimization",
+      "performance-efficiency",
+      "reliability",
+      "responsible-ai"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "83-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-83/",
+      "evaluate-83/",
+      "tune-83/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure Digital Twins",
+      "Azure IoT Hub",
+      "Azure OpenAI",
+      "Azure Functions",
+      "Azure Cosmos DB"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "45-realtime-event-ai",
+  "version": "1.0.0",
+  "description": "Streaming AI pipeline for continuous event processing — fraud alerts, IoT anomalies, live sentiment, supply chain disruptions with sub-second inference, windowed aggregation, and real-time WebSocket dashboards.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "realtime-events"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README",
+    "operational-excellence": "See README"
+  }
+}

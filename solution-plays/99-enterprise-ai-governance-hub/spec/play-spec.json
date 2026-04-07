@@ -1,0 +1,29 @@
+{
+  "name": "99-enterprise-ai-governance-hub",
+  "version": "1.0.0",
+  "description": "> Central control plane for all AI models, agents, and APIs across an enterprise. Model registry wit",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "enterprise-ai-governance-hub"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "responsible-ai": "See README",
+    "operational-excellence": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README"
+  }
+}

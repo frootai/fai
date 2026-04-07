@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "track-cost.sh",
+        "cwd": ".",
+        "env": {
+          "COST_MODE": "log"
+        },
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

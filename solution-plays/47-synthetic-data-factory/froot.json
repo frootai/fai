@@ -1,0 +1,39 @@
+{
+  "name": "47-synthetic-data-factory",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Synthetic Data Generation Factory",
+  "description": "Privacy-safe synthetic dataset generation for AI training and testing — realistic tabular, text, and structured data preserving statistical properties with zero real PII, differential privacy validation, and bias detection.",
+  "complexity": "High",
+  "tags": [
+    "security",
+    "responsible-ai",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

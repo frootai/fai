@@ -1,0 +1,95 @@
+name: "🏆 Hackathon Submission"
+description: Submit your hackathon contribution — new primitives, plugins, or play enhancements
+title: "[Hackathon] "
+labels: ["hackathon", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🏆 FrootAI Hackathon Submission
+        Thank you for participating! Please fill out this form to submit your contribution.
+
+  - type: input
+    id: hackathon_theme
+    attributes:
+      label: Hackathon Theme
+      description: Which monthly hackathon theme is this for?
+      placeholder: "e.g., RAG & Search Primitives (May 2026)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution_type
+    attributes:
+      label: Contribution Type
+      description: What type of primitive(s) are you submitting?
+      multiple: true
+      options:
+        - Agent (.agent.md)
+        - Instruction (.instructions.md)
+        - Skill (SKILL.md)
+        - Hook (hooks.json)
+        - Plugin (plugin.json)
+        - Workflow
+        - Cookbook Recipe
+        - Solution Play Enhancement
+    validations:
+      required: true
+
+  - type: input
+    id: primitive_count
+    attributes:
+      label: Number of Primitives
+      description: How many new primitives does this submission include?
+      placeholder: "e.g., 3"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what your contribution does and why it's useful
+      placeholder: "I created 3 new agents for..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: files_changed
+    attributes:
+      label: Files Added/Changed
+      description: List the files in your PR
+      placeholder: |
+        - agents/frootai-my-agent.agent.md (NEW)
+        - skills/my-skill/SKILL.md (NEW)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: All files follow lowercase-hyphen naming convention
+          required: true
+        - label: Frontmatter has all required fields per primitive type
+          required: true
+        - label: "`npm run validate:primitives` passes with 0 errors"
+          required: true
+        - label: No secrets, API keys, or connection strings in any file
+          required: true
+        - label: WAF pillar references use valid 6-pillar values
+          required: true
+        - label: Documentation/README included for new primitives
+          required: true
+
+  - type: textarea
+    id: waf_alignment
+    attributes:
+      label: WAF Pillar Alignment
+      description: Which WAF pillars do your primitives align with?
+      placeholder: |
+        - Reliability: retry patterns
+        - Security: managed identity
+    validations:
+      required: false

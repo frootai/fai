@@ -1,0 +1,42 @@
+{
+  "name": "java-development",
+  "description": "Java Development — Spring Boot, Quarkus, JUnit 5, Gradle/Maven builds, and microservice patterns. Enterprise Java with reactive streams, GraalVM native images, and cloud-native deployment.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "java",
+    "spring-boot",
+    "quarkus",
+    "junit",
+    "maven",
+    "gradle",
+    "microservices",
+    "graalvm"
+  ],
+  "agents": [
+    "../../agents/frootai-java-expert.agent.md",
+    "../../agents/frootai-java-mcp-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/java-waf.instructions.md",
+    "../../instructions/springboot-waf.instructions.md",
+    "../../instructions/quarkus-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-springboot-scaffold/",
+    "../../skills/frootai-springboot-kotlin-scaffold/",
+    "../../skills/frootai-springboot-test/",
+    "../../skills/frootai-junit-test/",
+    "../../skills/frootai-java-extract-method/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

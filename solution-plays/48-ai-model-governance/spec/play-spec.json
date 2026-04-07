@@ -1,0 +1,29 @@
+{
+  "name": "48-ai-model-governance",
+  "version": "1.0.0",
+  "description": "Centralized model lifecycle management — model registry, version control, approval gates, A/B testing, safety evaluation, and audit trails satisfying SOX, EU AI Act, and enterprise risk governance requirements.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "model-governance"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "operational-excellence": "See README",
+    "security": "See README",
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README"
+  }
+}

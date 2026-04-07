@@ -1,0 +1,28 @@
+{
+  "name": "44-foundry-local-on-device",
+  "version": "1.0.0",
+  "description": "On-device LLM inference for air-gapped and data-sovereign environments — local model handles routine queries, cloud escalates for complex reasoning, with automatic fallback, sync, and fleet management via IoT Hub.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "on-device"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "reliability": "See README",
+    "performance-efficiency": "See README",
+    "cost-optimization": "See README"
+  }
+}

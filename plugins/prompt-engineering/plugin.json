@@ -1,0 +1,45 @@
+{
+  "name": "prompt-engineering",
+  "description": "Prompt Engineering — chain-of-thought, few-shot, tree-of-thought, and meta-prompting patterns. Template management, dynamic prompt assembly, safety guardrails, and evaluation-driven prompt optimization.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "prompt-engineering",
+    "chain-of-thought",
+    "few-shot",
+    "templates",
+    "safety",
+    "optimization",
+    "meta-prompting"
+  ],
+  "agents": [
+    "../../agents/frootai-prompt-engineer.agent.md",
+    "../../agents/frootai-genai-foundations-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/froot-r1-prompt-patterns.instructions.md",
+    "../../instructions/ai-prompt-safety-waf.instructions.md",
+    "../../instructions/froot-f1-genai-foundations.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-prompt-builder/",
+    "../../skills/frootai-dynamic-prompt/",
+    "../../skills/frootai-basic-prompt-optimization/",
+    "../../skills/frootai-boost-prompt/",
+    "../../skills/frootai-tldr-prompt/",
+    "../../skills/frootai-finalize-agent-prompt/",
+    "../../skills/frootai-build-prompting-system/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-output-validator/",
+    "../../hooks/frootai-token-budget-enforcer/"
+  ]
+}

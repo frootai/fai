@@ -1,18 +1,37 @@
 {
   "model": "gpt-4o",
-  "temperature": 0.0,
-  "max_tokens": 2000,
-  "top_p": 1.0,
-  "frequency_penalty": 0.0,
-  "presence_penalty": 0.0,
-  "response_format": { "type": "json_object" },
-  "system_prompt": "You are a document data extraction agent. You analyze documents processed by Azure Document Intelligence and extract structured data.\n\nFor every document, respond with a JSON object:\n{\n  \"document_type\": \"invoice|contract|receipt|form|id_document|other\",\n  \"extracted_fields\": { ... field-specific key-value pairs ... },\n  \"confidence_scores\": { ... per-field confidence 0.0-1.0 ... },\n  \"flags\": [\"low_confidence_field\", \"possible_pii\", \"needs_human_review\"],\n  \"summary\": \"One-sentence document summary\"\n}\n\nRules:\n1. Extract ALL visible text fields — do not skip fields even if confidence is low\n2. Flag any field with confidence < 0.9 for human review\n3. Detect and flag PII (SSN, credit card numbers, bank accounts)\n4. For financial documents: validate totals match line items\n5. For contracts: extract parties, dates, terms, obligations\n6. Never hallucinate values — if a field is unreadable, set value to null with confidence 0.0",
-  "deployment_name": "gpt-4o",
   "api_version": "2024-12-01-preview",
-  "_comments": {
-    "model": "gpt-4o for multimodal document reasoning (text + images + tables)",
-    "temperature": "0.0 for deterministic, reproducible extraction",
-    "max_tokens": "2000 for complex multi-field structured JSON output",
-    "response_format": "JSON for ITSM/ERP structured integration"
+  "deployment_name": "gpt-4o",
+  "endpoint": "${AZURE_OPENAI_ENDPOINT}",
+  "temperature": 0.1,
+  "max_tokens": 4096,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": null,
+  "response_format": {
+    "type": "json_object"
+  },
+  "seed": 42,
+  "stream": false,
+  "embedding_model": "text-embedding-3-large",
+  "embedding_deployment": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "system_message_ref": "agent.md",
+  "safety": {
+    "content_safety_enabled": true,
+    "violence_threshold": 2,
+    "hate_threshold": 2,
+    "sexual_threshold": 2,
+    "self_harm_threshold": 2
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000
+  },
+  "retry": {
+    "max_retries": 3,
+    "backoff_multiplier": 2,
+    "backoff_max": 30
   }
 }

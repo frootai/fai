@@ -1,0 +1,50 @@
+{
+  "name": "43-ai-video-generation",
+  "description": "FrootAI solution play: Ai Video Generation",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-video-generation",
+    "cost-optimization",
+    "responsible-ai",
+    "performance-efficiency",
+    "reliability",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "43-ai-video-generation"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-video-generation-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "cost-optimization",
+    "responsible-ai",
+    "performance-efficiency",
+    "reliability"
+  ],
+  "install": "npx frootai install 43-ai-video-generation"
+}

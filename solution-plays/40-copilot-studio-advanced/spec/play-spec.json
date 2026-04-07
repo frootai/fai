@@ -1,0 +1,35 @@
+{
+  "name": "40-copilot-studio-advanced",
+  "version": "1.0.0",
+  "play": "40-copilot-studio-advanced",
+  "description": "Enterprise Copilot extensions — declarative agents with TypeSpec, API plugins, adaptive cards, multi-turn conversations, enterprise SSO, and M365 data integration via Graph API.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "copilot-studio-adv",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "operational-excellence": "See README.md",
+    "responsible-ai": "See README.md"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "81-property-valuation-ai",
+  "version": "1.0.0",
+  "description": "> Automated property appraisal combining comparable sales analysis, market trend prediction, neighbo",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "property-valuation-ai"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "security": "See README",
+    "cost-optimization": "See README"
+  }
+}

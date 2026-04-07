@@ -1,0 +1,45 @@
+{
+  "name": "azure-containers",
+  "description": "Azure Containers — AKS, Container Apps, Container Registry, and Dockerized deployment patterns. GPU workloads, KEDA autoscaling, Dapr sidecar integration, and multi-arch builds for AI model serving.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "azure",
+    "aks",
+    "container-apps",
+    "acr",
+    "docker",
+    "keda",
+    "dapr",
+    "gpu",
+    "kubernetes"
+  ],
+  "agents": [
+    "../../agents/frootai-azure-aks-expert.agent.md",
+    "../../agents/frootai-azure-container-apps-expert.agent.md",
+    "../../agents/frootai-kubernetes-expert.agent.md",
+    "../../agents/frootai-docker-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/kubernetes-waf.instructions.md",
+    "../../instructions/docker-waf.instructions.md",
+    "../../instructions/containerization-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-build-kubernetes-manifest/",
+    "../../skills/frootai-multi-stage-docker/",
+    "../../skills/frootai-azure-container-registry/",
+    "../../skills/frootai-containerize-aspnet/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-cost-tracker/"
+  ]
+}

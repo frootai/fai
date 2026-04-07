@@ -1,0 +1,41 @@
+{
+  "name": "context-engineering",
+  "description": "Context Engineering — maximize AI effectiveness with structured context, memory banks, knowledge wiring, and smart prompt assembly. Build context-aware agents that retrieve the right information at the right time.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "context-engineering",
+    "memory-bank",
+    "knowledge-wiring",
+    "rag",
+    "context-assembly",
+    "prompt-context"
+  ],
+  "agents": [
+    "../../agents/frootai-rag-expert.agent.md",
+    "../../agents/frootai-prompt-engineer.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/context-engineering-waf.instructions.md",
+    "../../instructions/memory-bank-waf.instructions.md",
+    "../../instructions/copilot-thought-logging-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-what-context-needed/",
+    "../../skills/frootai-context-map/",
+    "../../skills/frootai-contextual-rag/",
+    "../../skills/frootai-remember/",
+    "../../skills/frootai-build-genai-rag/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-session-logger/"
+  ]
+}

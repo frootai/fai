@@ -1,0 +1,56 @@
+{
+  "play": "28-knowledge-graph-rag",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "R2-RAG-Architecture",
+      "F1-GenAI-Foundations",
+      "O2-Agent-Coding",
+      "R3-Deterministic-AI"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "performance-efficiency",
+      "cost-optimization",
+      "responsible-ai"
+    ],
+    "scope": "knowledge-graph-rag-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/knowledge-graph-rag-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-knowledge-graph-rag/",
+      "./.github/skills/evaluate-knowledge-graph-rag/",
+      "./.github/skills/tune-knowledge-graph-rag/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "safety": 0,
+      "costPerQuery": 0.05,
+      "relevance": 0.8,
+      "groundedness": 0.85,
+      "coherence": 0.8
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

@@ -1,7 +1,7 @@
 """FrootAI MCP Server — Python Implementation.
 
 AI architecture knowledge + compute tools.
-22 tools, 18 modules, 200+ terms, 20 solution plays.
+25 tools, 18 modules, 200+ terms, 100 solution plays.
 
 Usage:
     pip install frootai-mcp
@@ -13,7 +13,7 @@ Or in Python:
     server.run()
 """
 
-__version__ = "3.2.0"
+__version__ = "3.5.0"
 __author__ = "Pavleen Bali"
 
 from frootai_mcp.server import FrootAIMCP, main

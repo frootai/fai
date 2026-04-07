@@ -1,0 +1,30 @@
+{
+  "name": "50-financial-risk-intelligence",
+  "version": "1.0.0",
+  "description": "Financial services AI agent — real-time market analysis, credit risk assessment, regulatory document processing (SEC/Basel III), fraud detection, with explainable AI decisions, audit trails, and human-in-the-loop escalation.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "financial-risk"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "cost-optimization": "See README",
+    "operational-excellence": "See README",
+    "performance-efficiency": "See README"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "96-realtime-voice-agent-v2",
+  "description": "FrootAI solution play: Realtime Voice Agent V2",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "realtime-voice-agent-v2",
+    "performance-efficiency",
+    "reliability",
+    "responsible-ai",
+    "security",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "96-realtime-voice-agent-v2"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/realtime-voice-agent-v2-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "performance-efficiency",
+    "reliability",
+    "responsible-ai",
+    "security"
+  ],
+  "install": "npx frootai install 96-realtime-voice-agent-v2"
+}

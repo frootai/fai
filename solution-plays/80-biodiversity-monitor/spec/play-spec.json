@@ -1,0 +1,28 @@
+{
+  "name": "80-biodiversity-monitor",
+  "version": "1.0.0",
+  "description": "> AI-powered species identification from camera trap, drone, and acoustic sensor data with ecosystem",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "biodiversity-monitor"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README",
+    "performance-efficiency": "See README"
+  }
+}

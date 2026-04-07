@@ -1,0 +1,61 @@
+{
+  "play": "74-ai-tutoring-agent",
+  "version": "1.0.0",
+  "description": "1-on-1 personalized AI tutoring with Socratic method, knowledge gap detection, adaptive difficulty, and progress tracking across subjects.",
+  "context": {
+    "knowledge": [
+      "F1-GenAI-Foundations",
+      "O2-AI-Agents",
+      "T2-Responsible-AI"
+    ],
+    "waf": [
+      "responsible-ai",
+      "reliability",
+      "cost-optimization",
+      "performance-efficiency"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "74-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-74/",
+      "evaluate-74/",
+      "tune-74/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure Cosmos DB",
+      "Azure AI Search",
+      "Azure Static Web Apps",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

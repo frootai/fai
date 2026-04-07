@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "locale": "pt",
+    "name": "Português",
+    "direction": "ltr"
+  },
+  "common": {
+    "brand": "FrootAI",
+    "tagline": "Das Raízes aos Frutos",
+    "cta_get_started": "Começar",
+    "nav_home": "Início",
+    "nav_solution_plays": "Soluções",
+    "search_placeholder": "Buscar soluções, primitivas, documentação...",
+    "loading": "Carregando..."
+  },
+  "home": {
+    "hero_title": "100 Soluções de IA, Prontas para Implantar",
+    "hero_subtitle": "Soluções de IA de nível de produção com Azure, baseadas no Protocolo FAI.",
+    "features_title": "Por que FrootAI?"
+  },
+  "chatbot": {
+    "greeting": "Olá! Sou o Agente FAI. Conheço todas as 100 soluções e 780+ primitivas. Como posso ajudar?"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://frootai.dev/schemas/hook.schema.json",
+  "title": "FrootAI Hook Schema",
+  "description": "Validates hooks.json — security automation triggered at session lifecycle events (secrets scanning, tool guarding, governance audit).",
+  "type": "object",
+  "required": ["version", "hooks"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version. Currently always 1."
+    },
+    "hooks": {
+      "type": "object",
+      "properties": {
+        "sessionStart": {
+          "$ref": "#/definitions/hookArray"
+        },
+        "sessionEnd": {
+          "$ref": "#/definitions/hookArray"
+        },
+        "userPromptSubmitted": {
+          "$ref": "#/definitions/hookArray"
+        },
+        "preToolUse": {
+          "$ref": "#/definitions/hookArray"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Map of event names to hook command arrays. At least one event must be configured."
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "hookCommand": {
+      "type": "object",
+      "required": ["type", "bash"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "command",
+          "description": "Hook type. Currently only 'command' (bash script execution) is supported."
+        },
+        "bash": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to the bash script to execute, relative to the hook folder."
+        },
+        "cwd": {
+          "type": "string",
+          "default": ".",
+          "description": "Working directory for script execution. Defaults to hook folder."
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables passed to the script. Use for MODE (warn/block), GUARD_MODE, AUDIT_LEVEL, etc."
+        },
+        "timeoutSec": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120,
+          "default": 30,
+          "description": "Maximum execution time in seconds. Script is killed if exceeded."
+        }
+      },
+      "additionalProperties": false
+    },
+    "hookArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/hookCommand"
+      },
+      "minItems": 1,
+      "description": "One or more commands to run for this event."
+    }
+  }
+}

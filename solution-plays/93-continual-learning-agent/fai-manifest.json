@@ -1,0 +1,61 @@
+{
+  "play": "93-continual-learning-agent",
+  "version": "1.0.0",
+  "description": "Agent that persists knowledge across sessions, reflects on failures, detects patterns in tool outcomes, and surfaces accumulated learnings so each session starts smarter. Implements memory hooks, reflection patterns, and knowledge distillation for ever-improving AI assistance.",
+  "context": {
+    "knowledge": [
+      "O2-AI-Agents",
+      "T3-Production-Patterns",
+      "R2-RAG"
+    ],
+    "waf": [
+      "reliability",
+      "responsible-ai",
+      "performance-efficiency",
+      "cost-optimization"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "93-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-93/",
+      "evaluate-93/",
+      "tune-93/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure Cosmos DB",
+      "Azure AI Search",
+      "Azure Redis Cache",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.85,
+    "safety": 0,
+    "costPerQuery": 0.08
+  }
+}

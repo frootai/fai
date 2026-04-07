@@ -1,0 +1,28 @@
+{
+  "name": "58-digital-twin-agent",
+  "version": "1.0.0",
+  "description": "AI-powered digital twins — physical system simulation, predictive modeling, anomaly detection, scenario testing, and optimization recommendations for manufacturing, energy, and infrastructure.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "digital-twin"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "reliability": "See README",
+    "performance-efficiency": "See README",
+    "cost-optimization": "See README",
+    "operational-excellence": "See README"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "validate-output.sh",
+        "cwd": ".",
+        "env": {
+          "VALIDATE_MODE": "warn"
+        },
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

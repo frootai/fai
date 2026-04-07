@@ -1,0 +1,50 @@
+{
+  "name": "79-food-safety-inspector-ai",
+  "description": "FrootAI solution play: Food Safety Inspector Ai",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "food-safety-inspector-ai",
+    "security",
+    "reliability",
+    "responsible-ai",
+    "operational-excellence",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "79-food-safety-inspector-ai"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/food-safety-inspector-ai-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "responsible-ai",
+    "operational-excellence"
+  ],
+  "install": "npx frootai install 79-food-safety-inspector-ai"
+}

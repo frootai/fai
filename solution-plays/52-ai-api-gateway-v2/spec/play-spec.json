@@ -1,0 +1,28 @@
+{
+  "name": "52-ai-api-gateway-v2",
+  "version": "1.0.0",
+  "description": "Intelligent API gateway — semantic caching, smart model routing (GPT-4o vs GPT-4o-mini), token budget enforcement, rate limiting, and real-time usage analytics for AI endpoints.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "api-gateway"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "performance-efficiency": "See README",
+    "cost-optimization": "See README",
+    "reliability": "See README"
+  }
+}

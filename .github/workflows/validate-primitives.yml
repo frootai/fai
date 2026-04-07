@@ -1,0 +1,232 @@
+name: Validate Primitives (PR)
+
+on:
+  pull_request:
+    paths:
+      - 'agents/**'
+      - 'instructions/**'
+      - 'skills/**'
+      - 'hooks/**'
+      - 'workflows/**'
+      - 'plugins/**'
+      - 'schemas/**'
+      - 'solution-plays/**/fai-manifest.json'
+      - 'marketplace.json'
+  push:
+    branches: [main, staged]
+    paths:
+      - 'agents/**'
+      - 'instructions/**'
+      - 'skills/**'
+      - 'hooks/**'
+      - 'workflows/**'
+      - 'plugins/**'
+      - 'schemas/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-primitives:
+    name: Validate All Primitives
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+
+      - name: Run Primitive Validator
+        id: validate
+        run: |
+          echo "## 🍊 FrootAI Primitive Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if node scripts/validate-primitives.js --verbose 2>&1 | tee /tmp/validation.log; then
+            echo "✅ All primitive checks passed" >> $GITHUB_STEP_SUMMARY
+            echo "validation_passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Primitive validation failed" >> $GITHUB_STEP_SUMMARY
+            echo "validation_passed=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/validation.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Check naming conventions
+        run: |
+          ERRORS=0
+
+          # Check agents follow kebab-case.agent.md
+          for f in agents/*.agent.md; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f" .agent.md)
+            if ! echo "$base" | grep -qE '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'; then
+              echo "❌ Agent naming error: $f (must be kebab-case)"
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+
+          # Check instructions follow kebab-case.instructions.md
+          for f in instructions/*.instructions.md; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f" .instructions.md)
+            if ! echo "$base" | grep -qE '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'; then
+              echo "❌ Instruction naming error: $f (must be kebab-case)"
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+
+          # Check skill folders follow kebab-case
+          for d in skills/*/; do
+            [ -d "$d" ] || continue
+            base=$(basename "$d")
+            [ "$base" = "README.md" ] && continue
+            if ! echo "$base" | grep -qE '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'; then
+              echo "❌ Skill folder naming error: $d (must be kebab-case)"
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+
+          # Check hook folders follow kebab-case
+          for d in hooks/*/; do
+            [ -d "$d" ] || continue
+            base=$(basename "$d")
+            if ! echo "$base" | grep -qE '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'; then
+              echo "❌ Hook folder naming error: $d (must be kebab-case)"
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ $ERRORS naming convention violations found"
+            exit 1
+          else
+            echo "✅ All naming conventions pass"
+          fi
+
+      - name: Validate JSON schemas parse
+        run: |
+          for f in schemas/*.json; do
+            if ! node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))"; then
+              echo "❌ Invalid JSON: $f"
+              exit 1
+            fi
+          done
+          echo "✅ All schemas are valid JSON"
+
+      - name: Validate marketplace.json
+        if: hashFiles('marketplace.json') != ''
+        run: |
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('marketplace.json','utf8'));
+            if (!m.plugins || !Array.isArray(m.plugins)) {
+              console.error('❌ marketplace.json missing plugins array');
+              process.exit(1);
+            }
+            console.log('✅ marketplace.json valid:', m.plugins.length, 'plugins');
+          "
+
+      - name: Validate fai-manifest.json files
+        run: |
+          MANIFESTS=$(find solution-plays -name "fai-manifest.json" 2>/dev/null || true)
+          if [ -z "$MANIFESTS" ]; then
+            echo "ℹ️ No fai-manifest.json files found"
+            exit 0
+          fi
+
+          ERRORS=0
+          for f in $MANIFESTS; do
+            if ! node -e "
+              const m = JSON.parse(require('fs').readFileSync('$f','utf8'));
+              if (!m.play) { console.error('Missing play field in $f'); process.exit(1); }
+              if (!m.version) { console.error('Missing version in $f'); process.exit(1); }
+              if (!m.context || !m.context.knowledge) { console.error('Missing context.knowledge in $f'); process.exit(1); }
+              if (!m.primitives) { console.error('Missing primitives in $f'); process.exit(1); }
+              console.log('✅', '$f', '—', m.play, 'v' + m.version);
+            "; then
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            exit 1
+          fi
+
+  secrets-scan:
+    name: Secrets Scan (Primitives)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Scan for secrets in primitives
+        run: |
+          FOUND=0
+
+          # Scan all primitive files for common secret patterns
+          for pattern in \
+            'AKIA[0-9A-Z]{16}' \
+            'ghp_[0-9A-Za-z]{36}' \
+            'github_pat_[0-9A-Za-z_]{82}' \
+            'sk_live_[0-9A-Za-z]{24,}' \
+            'azure[_-]?client[_-]?secret' \
+            '-----BEGIN.*PRIVATE KEY-----'; do
+
+            MATCHES=$(grep -rlE "$pattern" agents/ instructions/ skills/ hooks/ plugins/ 2>/dev/null || true)
+            if [ -n "$MATCHES" ]; then
+              echo "⛔ Potential secret found matching pattern: $pattern"
+              echo "$MATCHES"
+              FOUND=$((FOUND+1))
+            fi
+          done
+
+          if [ $FOUND -gt 0 ]; then
+            echo "❌ $FOUND potential secret pattern(s) detected. Remove before merging."
+            exit 1
+          else
+            echo "✅ No secrets detected in primitives"
+          fi
+
+  pr-comment:
+    name: Post Validation Results to PR
+    if: github.event_name == 'pull_request'
+    needs: [validate-primitives, secrets-scan]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post validation summary
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const validateResult = '${{ needs.validate-primitives.result }}';
+            const secretsResult = '${{ needs.secrets-scan.result }}';
+            const allPassed = validateResult === 'success' && secretsResult === 'success';
+
+            const icon = allPassed ? '✅' : '❌';
+            const status = allPassed ? 'ALL CHECKS PASSED' : 'CHECKS FAILED — fix before merging';
+
+            const body = `## 🍊 FrootAI Primitive Validation ${icon}
+
+            | Check | Result |
+            |-------|--------|
+            | Schema + naming + frontmatter | ${validateResult === 'success' ? '✅ Passed' : '❌ Failed'} |
+            | Secrets scan | ${secretsResult === 'success' ? '✅ Clean' : '❌ Secrets detected'} |
+
+            **${status}**
+
+            Run \`npm run validate:primitives\` locally to see details.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body.split('\n').map(l => l.trim()).join('\n')
+            });

@@ -1,0 +1,28 @@
+{
+  "name": "57-ai-translation-engine",
+  "version": "1.0.0",
+  "description": "Real-time multilingual AI translation — context-aware, domain-specific glossaries, quality scoring, human review queues, batch processing, and cultural adaptation for 100+ languages.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "translation"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "performance-efficiency": "See README",
+    "cost-optimization": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README"
+  }
+}

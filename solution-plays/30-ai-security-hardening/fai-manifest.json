@@ -1,0 +1,55 @@
+{
+  "play": "30-ai-security-hardening",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "T2-Responsible-AI",
+      "R3-Deterministic-AI",
+      "T3-Production-Patterns",
+      "F1-GenAI-Foundations"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "responsible-ai",
+      "operational-excellence"
+    ],
+    "scope": "ai-security-hardening-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-security-hardening-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-ai-security-hardening/",
+      "./.github/skills/evaluate-ai-security-hardening/",
+      "./.github/skills/tune-ai-security-hardening/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "safety": 0,
+      "costPerQuery": 0.05,
+      "relevance": 0.8,
+      "groundedness": 0.85,
+      "coherence": 0.8
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

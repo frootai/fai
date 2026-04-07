@@ -1,0 +1,52 @@
+{
+  "name": "21-agentic-rag",
+  "description": "FrootAI solution play: Agentic Rag",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "agentic-rag",
+    "security",
+    "reliability",
+    "cost-optimization",
+    "performance-efficiency",
+    "responsible-ai",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "21-agentic-rag"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/agentic-rag-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "cost-optimization",
+    "performance-efficiency",
+    "responsible-ai"
+  ],
+  "install": "npx frootai install 21-agentic-rag"
+}

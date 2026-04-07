@@ -1,0 +1,52 @@
+{
+  "name": "ai-landing-zone-advanced",
+  "description": "Advanced AI Landing Zone — multi-region deployment, private endpoints, Azure Firewall, DDoS protection, sovereign cloud patterns, and compliance-ready infrastructure for regulated industries.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "landing-zone",
+    "multi-region",
+    "private-endpoints",
+    "firewall",
+    "compliance",
+    "sovereign-cloud",
+    "regulated",
+    "enterprise"
+  ],
+  "agents": [
+    "../../agents/frootai-play-11-builder.agent.md",
+    "../../agents/frootai-play-11-reviewer.agent.md",
+    "../../agents/frootai-play-11-tuner.agent.md",
+    "../../agents/frootai-landing-zone.agent.md",
+    "../../agents/frootai-azure-networking-expert.agent.md",
+    "../../agents/frootai-compliance-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/play-11-ai-landing-zone-advanced-patterns.instructions.md",
+    "../../instructions/bicep-waf.instructions.md",
+    "../../instructions/security-bicep.instructions.md",
+    "../../instructions/azure-front-door-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-deploy-11-ai-landing-zone-advanced/",
+    "../../skills/frootai-evaluate-11-ai-landing-zone-advanced/",
+    "../../skills/frootai-tune-11-ai-landing-zone-advanced/",
+    "../../skills/frootai-build-bicep-module/",
+    "../../skills/frootai-threat-model/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-waf-compliance/",
+    "../../hooks/frootai-cost-tracker/"
+  ],
+  "plays": [
+    "11-ai-landing-zone-advanced"
+  ]
+}

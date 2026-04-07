@@ -1,0 +1,56 @@
+{
+  "play": "68-predictive-maintenance-ai",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "F1-GenAI-Foundations",
+      "O2-Agent-Coding",
+      "T1-Fine-Tuning-MLOps"
+    ],
+    "waf": [
+      "reliability",
+      "cost-optimization",
+      "operational-excellence",
+      "performance-efficiency",
+      "security"
+    ],
+    "scope": "predictive-maintenance-ai-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/predictive-maintenance-ai-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-predictive-maintenance-ai/",
+      "./.github/skills/evaluate-predictive-maintenance-ai/",
+      "./.github/skills/tune-predictive-maintenance-ai/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "groundedness": 0.85,
+      "coherence": 0.8,
+      "relevance": 0.8,
+      "safety": 0,
+      "costPerQuery": 0.05
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

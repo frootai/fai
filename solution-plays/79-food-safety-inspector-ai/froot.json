@@ -1,0 +1,39 @@
+{
+  "name": "79-food-safety-inspector-ai",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Food Safety Inspector Ai",
+  "description": "> HACCP compliance automation with contamination detection across the food supply chain — farm to fo",
+  "complexity": "Medium",
+  "tags": [
+    "security",
+    "reliability",
+    "responsible-ai",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

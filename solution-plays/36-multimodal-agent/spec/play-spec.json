@@ -1,0 +1,35 @@
+{
+  "name": "36-multimodal-agent",
+  "version": "1.0.0",
+  "play": "36-multimodal-agent",
+  "description": "Vision + text + code agent — analyze images, screenshots, diagrams, and documents alongside natural language. Build AI that sees, reads, and acts across modalities.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "multimodal",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "responsible-ai": "See README.md"
+  }
+}

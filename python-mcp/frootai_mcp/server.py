@@ -28,6 +28,77 @@ PLAYS = [
     {"id":"18","name":"Prompt Management","desc":"Version-controlled prompt library","cx":"Low","infra":"Blob Storage · Container Apps · Cosmos DB","tune":"Prompt templates · A/B config"},
     {"id":"19","name":"Edge AI Phi-4","desc":"On-device AI with Phi models","cx":"High","infra":"ONNX Runtime · Phi-4-mini · Edge devices","tune":"Quantization · edge config"},
     {"id":"20","name":"Anomaly Detection","desc":"Real-time anomaly detection in streams","cx":"High","infra":"Event Hub · Stream Analytics · Azure OpenAI","tune":"Threshold config · detection windows"},
+    {"id":"21","name":"Agentic RAG","desc":"Autonomous multi-step RAG with iterative retrieval","cx":"High","infra":"OpenAI · AI Search · Container Apps · Key Vault","tune":"retrieval strategy · source ranking · iteration depth"},
+    {"id":"22","name":"Multi-Agent Swarm","desc":"Swarm-based multi-agent with dynamic delegation","cx":"Very High","infra":"OpenAI · Container Apps · Service Bus · Cosmos DB","tune":"team topology · delegation rules · max turns"},
+    {"id":"23","name":"Browser Automation","desc":"AI-driven browser automation with vision models","cx":"High","infra":"OpenAI Vision · Container Apps · Playwright","tune":"domain allowlist · vision prompts · action timeout"},
+    {"id":"24","name":"AI Code Review","desc":"Automated code review with LLM + CodeQL","cx":"Medium","infra":"OpenAI · GitHub Actions · CodeQL","tune":"severity thresholds · review depth · OWASP rules"},
+    {"id":"25","name":"Conversation Memory","desc":"Tiered conversation memory across sessions","cx":"High","infra":"OpenAI · Cosmos DB · AI Search · Redis","tune":"memory tier TTLs · recall strategy · embedding config"},
+    {"id":"26","name":"Semantic Search Engine","desc":"Enterprise semantic search with hybrid retrieval","cx":"Medium","infra":"AI Search · OpenAI · Blob Storage","tune":"hybrid weights · reranker · personalization"},
+    {"id":"27","name":"AI Data Pipeline","desc":"LLM-powered data classification and enrichment","cx":"High","infra":"OpenAI mini · Data Factory · Cosmos DB · Event Hubs","tune":"classification prompts · PII rules · batch size"},
+    {"id":"28","name":"Knowledge Graph RAG","desc":"Graph-enhanced RAG with knowledge graph traversal","cx":"High","infra":"OpenAI · Cosmos DB Gremlin · AI Search","tune":"graph depth · entity types · fusion ratio"},
+    {"id":"29","name":"MCP Gateway","desc":"Centralized MCP tool gateway with API management","cx":"Medium","infra":"APIM · Container Apps · Monitor","tune":"rate limits · auth policies · tool registry"},
+    {"id":"30","name":"AI Security Hardening","desc":"AI security with content safety and red teaming","cx":"High","infra":"Content Safety · OpenAI · Container Apps","tune":"severity thresholds · blocklists · red team scenarios"},
+    {"id":"31","name":"Low-Code AI Builder","desc":"Visual AI pipeline builder with one-click deploy","cx":"Medium","infra":"OpenAI · Container Apps · Cosmos DB · Static Web Apps","tune":"pipeline templates · deployment targets"},
+    {"id":"32","name":"AI-Powered Testing","desc":"AI test generation and mutation testing","cx":"Medium","infra":"OpenAI · GitHub Actions · Container Apps","tune":"coverage targets · mutation rules · framework configs"},
+    {"id":"33","name":"Voice AI Agent","desc":"Conversational voice agent with real-time speech","cx":"High","infra":"AI Speech · OpenAI · Communication Services","tune":"voice models · intent thresholds · fallback chains"},
+    {"id":"34","name":"Edge AI Deployment","desc":"Edge-optimized AI with quantization and cloud sync","cx":"High","infra":"IoT Hub · ONNX Runtime · Container Instances","tune":"quantization level · sync schedule · memory budget"},
+    {"id":"35","name":"AI Compliance Engine","desc":"Automated compliance checking and audit trails","cx":"High","infra":"OpenAI · Azure Policy · Key Vault · Cosmos DB","tune":"compliance frameworks · audit schedules · risk thresholds"},
+    {"id":"36","name":"Multimodal Agent","desc":"Agent handling text, image, and audio inputs","cx":"Medium","infra":"OpenAI Vision · AI Vision · Blob Storage","tune":"vision prompts · image resolution · routing"},
+    {"id":"37","name":"AI-Powered DevOps","desc":"AIOps with incident detection and auto-remediation","cx":"Medium","infra":"OpenAI · Monitor · DevOps · GitHub Actions","tune":"severity rules · runbook config · scaling thresholds"},
+    {"id":"38","name":"Document Understanding v2","desc":"Advanced document processing with custom schemas","cx":"High","infra":"Document Intelligence · OpenAI · Cosmos DB","tune":"extraction schemas · confidence thresholds · entity types"},
+    {"id":"39","name":"AI Meeting Assistant","desc":"Meeting intelligence with transcription and actions","cx":"Medium","infra":"AI Speech · OpenAI · Graph · Container Apps","tune":"transcription config · action item rules · scheduling"},
+    {"id":"40","name":"Copilot Studio Advanced","desc":"Advanced Copilot Studio with custom agents","cx":"High","infra":"Copilot Studio · OpenAI · Dataverse · Graph","tune":"agent config · permissions · scoping · multi-turn rules"},
+    {"id":"41","name":"AI Red Teaming","desc":"Systematic AI red teaming and safety evaluation","cx":"High","infra":"AI Foundry · Content Safety · OpenAI","tune":"attack diversity · severity thresholds · jailbreak detection"},
+    {"id":"42","name":"Computer Use Agent","desc":"Vision-based desktop automation agent","cx":"Very High","infra":"OpenAI Vision · Container Apps · Blob Storage","tune":"vision confidence · action retry · screenshot resolution"},
+    {"id":"43","name":"AI Video Generation","desc":"AI video generation with safety and quality controls","cx":"Very High","infra":"OpenAI · Blob Storage · Content Safety · Service Bus","tune":"video quality · frame rate · content safety"},
+    {"id":"44","name":"Foundry Local On-Device","desc":"On-device AI with Foundry Local and cloud escalation","cx":"High","infra":"OpenAI · IoT Hub · Monitor","tune":"local model threshold · cloud escalation · sync interval"},
+    {"id":"45","name":"Real-Time Event AI","desc":"Real-time event processing with AI anomaly detection","cx":"Very High","infra":"Event Hubs · Functions · OpenAI · Cosmos DB · SignalR","tune":"latency SLA · window size · anomaly threshold"},
+    {"id":"46","name":"Healthcare Clinical AI","desc":"Clinical decision support with human-in-the-loop","cx":"Very High","infra":"OpenAI · Health Data Services · AI Search · Content Safety","tune":"clinical confidence · PII redaction · human approval"},
+    {"id":"47","name":"Synthetic Data Factory","desc":"Privacy-preserving synthetic data generation","cx":"High","infra":"OpenAI · ML · Blob Storage","tune":"privacy epsilon · statistical fidelity · bias threshold"},
+    {"id":"48","name":"AI Model Governance","desc":"Model lifecycle governance with drift detection","cx":"High","infra":"ML · AI Foundry · DevOps · Cosmos DB · Policy","tune":"approval gates · drift detection · evaluation frequency"},
+    {"id":"49","name":"Creative AI Studio","desc":"Creative content generation with brand voice","cx":"High","infra":"OpenAI · Blob Storage · Content Safety · Functions · CDN","tune":"brand voice · content safety · output quality"},
+    {"id":"50","name":"Financial Risk Intelligence","desc":"Financial risk analysis with real-time monitoring","cx":"Very High","infra":"OpenAI · AI Search · Cosmos DB · Event Hubs","tune":"risk confidence · regulatory compliance · fraud sensitivity"},
+    {"id":"51","name":"Autonomous Coding Agent","desc":"Self-directed coding agent with test validation","cx":"Very High","infra":"OpenAI · GitHub Actions · Container Apps","tune":"code gen temp · max iterations · test coverage"},
+    {"id":"52","name":"AI API Gateway v2","desc":"Advanced AI gateway with semantic caching","cx":"High","infra":"APIM · OpenAI · Redis · Monitor","tune":"cache similarity · routing score · token budget"},
+    {"id":"53","name":"Legal Document AI","desc":"Legal document analysis with risk assessment","cx":"Very High","infra":"OpenAI · AI Search · Blob Storage · Cosmos DB","tune":"clause confidence · risk threshold · privilege sensitivity"},
+    {"id":"54","name":"AI Customer Support v2","desc":"Advanced AI support with sentiment and escalation","cx":"High","infra":"OpenAI · AI Search · Communication Services · Cosmos DB","tune":"sentiment threshold · auto-resolution · escalation priority"},
+    {"id":"55","name":"Supply Chain AI","desc":"Supply chain optimization with demand forecasting","cx":"Very High","infra":"OpenAI · Cosmos DB · Event Hubs · ML","tune":"forecast horizon · safety stock · supplier risk"},
+    {"id":"56","name":"Semantic Code Search","desc":"Codebase semantic search with embedding retrieval","cx":"Medium","infra":"OpenAI · AI Search · Blob Storage","tune":"chunk size · relevance threshold · refresh interval"},
+    {"id":"57","name":"AI Translation Engine","desc":"Neural translation with glossary and cultural adaptation","cx":"High","infra":"OpenAI · AI Translator · Cosmos DB · CDN","tune":"quality threshold · glossary priority · cultural adaptation"},
+    {"id":"58","name":"Digital Twin Agent","desc":"Digital twin with IoT and predictive simulation","cx":"Very High","infra":"IoT Hub · Digital Twins · OpenAI · Functions","tune":"anomaly sensitivity · prediction horizon · simulation fidelity"},
+    {"id":"59","name":"AI Recruiter Agent","desc":"AI recruitment with matching and bias detection","cx":"High","infra":"OpenAI · AI Search · Cosmos DB · Graph","tune":"match threshold · bias sensitivity · skills weight"},
+    {"id":"60","name":"Responsible AI Dashboard","desc":"Responsible AI monitoring with fairness metrics","cx":"High","infra":"OpenAI · ML · Monitor · Cosmos DB · Static Web Apps","tune":"fairness threshold · bias granularity · report frequency"},
+    {"id":"61","name":"Content Moderation v2","desc":"Advanced content moderation with severity routing","cx":"High","infra":"Content Safety · OpenAI · Cosmos DB · Service Bus","tune":"safety threshold · severity routing · category weights"},
+    {"id":"62","name":"Federated Learning Pipeline","desc":"Privacy-preserving federated learning","cx":"Very High","infra":"ML · Confidential Computing · Blob Storage","tune":"privacy epsilon · aggregation rounds · convergence threshold"},
+    {"id":"63","name":"Fraud Detection Agent","desc":"Real-time fraud detection with streaming analysis","cx":"High","infra":"OpenAI · Event Hubs · Stream Analytics · Cosmos DB","tune":"risk score · velocity window · anomaly sensitivity"},
+    {"id":"64","name":"AI Sales Assistant","desc":"AI sales copilot with lead scoring and outreach","cx":"Medium","infra":"OpenAI · Cosmos DB · Graph · AI Search","tune":"lead score · persona temp · email tone · forecast confidence"},
+    {"id":"65","name":"AI Training Curriculum","desc":"Adaptive AI training with difficulty scaling","cx":"Medium","infra":"OpenAI · Cosmos DB · Static Web Apps","tune":"difficulty scaling · assessment threshold · feedback detail"},
+    {"id":"66","name":"AI Infrastructure Optimizer","desc":"AI-driven infra optimization and cost analysis","cx":"High","infra":"OpenAI · Monitor · Advisor · Cost Management","tune":"savings threshold · utilization floor · scaling aggressiveness"},
+    {"id":"67","name":"AI Knowledge Management","desc":"Enterprise knowledge management with contextual retrieval","cx":"High","infra":"OpenAI · AI Search · Cosmos DB · Graph","tune":"freshness decay · chunk overlap · expert threshold"},
+    {"id":"68","name":"Predictive Maintenance AI","desc":"Predictive maintenance with IoT sensor analysis","cx":"High","infra":"IoT Hub · OpenAI · ML · Stream Analytics · Cosmos DB","tune":"failure probability · sensor window · RUL confidence"},
+    {"id":"69","name":"Carbon Footprint Tracker","desc":"Real-time carbon accounting across cloud and supply chain","cx":"High","infra":"Azure Monitor · OpenAI · Cosmos DB · Event Hubs","tune":"emission factors · scope boundaries · reporting framework"},
+    {"id":"70","name":"ESG Compliance Agent","desc":"ESG reporting with GRI, SASB, TCFD, CSRD compliance","cx":"High","infra":"OpenAI · Document Intelligence · Cosmos DB · AI Search","tune":"regulatory frameworks · materiality matrix · disclosure rules"},
+    {"id":"71","name":"Smart Energy Grid AI","desc":"Energy demand prediction and grid balancing via digital twin","cx":"Very High","infra":"IoT Hub · OpenAI · Stream Analytics · Digital Twins","tune":"demand horizon · renewable mix · battery schedule"},
+    {"id":"72","name":"Climate Risk Assessor","desc":"Climate scenario modeling for financial risk assessment","cx":"High","infra":"OpenAI · ML · Cosmos DB · AI Search","tune":"climate scenarios · time horizons · risk tolerance"},
+    {"id":"73","name":"Waste & Recycling Optimizer","desc":"Waste classification, route optimization, contamination detection","cx":"Medium","infra":"AI Vision · OpenAI · IoT Hub · Container Apps","tune":"material categories · classification confidence · vehicle capacity"},{"id":"74","name":"AI Tutoring Agent","desc":"1-on-1 personalized tutoring with Socratic method and adaptive difficulty","cx":"High","infra":"Azure OpenAI · Cosmos DB · AI Search · Static Web Apps","tune":"difficulty scaling · knowledge gaps · progress tracking"},{"id":"75","name":"Exam Generation Engine","desc":"Auto-generate exams with difficulty calibration, rubrics, and answer keys","cx":"Medium","infra":"Azure OpenAI · Blob Storage · Cosmos DB · Functions","tune":"difficulty level · question variation · rubric detail"},{"id":"76","name":"Accessibility Learning Agent","desc":"Screen reader-first, dyslexia-aware learning with multi-modal adaptation","cx":"High","infra":"AI Speech · Azure OpenAI · AI Vision · Container Apps · Cosmos DB","tune":"accessibility profiles · content adaptation · speech rate"},{"id":"77","name":"Research Paper AI","desc":"Literature review, citation network, methodology critique, research gap analysis","cx":"Very High","infra":"Azure OpenAI · AI Search · Cosmos DB · Graph · Functions","tune":"citation depth · methodology rules · gap sensitivity"},{"id":"78","name":"Precision Agriculture Agent","desc":"Satellite imagery + IoT sensor fusion for crop health, irrigation, fertilization, yield prediction","cx":"Very High","infra":"Azure IoT Hub · AI Vision · Azure OpenAI · Digital Twins · ML","tune":"sensor sampling · imagery frequency · irrigation thresholds"},{"id":"79","name":"Food Safety Inspector AI","desc":"HACCP compliance, contamination detection, farm-to-fork traceability, pathogen risk scoring","cx":"High","infra":"Document Intelligence · Azure OpenAI · Cosmos DB · Event Hubs · IoT Hub","tune":"temperature alerts · pathogen models · audit retention"},{"id":"80","name":"Biodiversity Monitor","desc":"Species identification from camera trap, drone, acoustic data with conservation alerts","cx":"High","infra":"AI Vision · Azure OpenAI · IoT Hub · Cosmos DB · Functions","tune":"species confidence · camera schedule · acoustic frequency"},
+    {"id":"81","name":"Property Valuation AI","desc":"Automated property appraisal with comparable sales, market trends, neighborhood scoring, satellite imagery","cx":"High","infra":"Azure OpenAI · AI Search · Cosmos DB · Machine Learning · Functions","tune":"comparable radius · market trend window · neighborhood scores"},{"id":"82","name":"Construction Safety AI","desc":"Real-time site monitoring — PPE compliance, hazard detection, unauthorized zone alerts, incident reporting","cx":"High","infra":"AI Vision · IoT Hub · Azure OpenAI · Container Apps · Cosmos DB","tune":"PPE confidence · hazard zones · alert escalation"},{"id":"83","name":"Building Energy Optimizer","desc":"HVAC, lighting, occupancy optimization via digital twin — 20-40% energy reduction","cx":"Very High","infra":"Digital Twins · IoT Hub · Azure OpenAI · Functions · Cosmos DB","tune":"HVAC schedule · occupancy model · comfort vs efficiency"},
+    {"id":"84","name":"Citizen Services Chatbot","desc":"Multi-language municipal AI assistant — form filling, appointments, permits, FAQ, escalation","cx":"Medium","infra":"Azure OpenAI · AI Translator · Communication Services · AI Search · Cosmos DB","tune":"supported languages · escalation threshold · service catalog scope"},
+    {"id":"85","name":"Policy Impact Analyzer","desc":"Regulatory change detection with cross-sector impact, stakeholder mapping, briefing generation","cx":"High","infra":"Azure OpenAI · AI Search · Document Intelligence · Cosmos DB · Functions","tune":"regulatory feeds · impact depth · stakeholder categories"},
+    {"id":"86","name":"Public Safety Analytics","desc":"Crime pattern prediction, resource allocation, community sentiment, incident dashboard","cx":"Very High","infra":"Azure OpenAI · Machine Learning · Event Hubs · Cosmos DB · Stream Analytics","tune":"prediction window · allocation zones · sentiment feeds"},
+    {"id":"87","name":"Dynamic Pricing Engine","desc":"Real-time price optimization with demand signals, competitor pricing, and fairness guardrails","cx":"High","infra":"Azure OpenAI · Event Hubs · Cosmos DB · Redis Cache · Machine Learning","tune":"price elasticity · competitor frequency · fairness guardrails"},
+    {"id":"88","name":"Visual Product Search","desc":"Image-based product discovery with visual similarity, style recommendations, virtual try-on","cx":"High","infra":"AI Vision · Azure OpenAI · AI Search · Container Apps · Cosmos DB","tune":"similarity threshold · catalog refresh · try-on quality"},
+    {"id":"89","name":"Retail Inventory Predictor","desc":"Demand forecasting with weather, social trends, economic indicators, automated reordering","cx":"High","infra":"Azure OpenAI · Machine Learning · Cosmos DB · Event Hubs · Functions","tune":"forecast horizon · safety stock · reorder formula"},
+    {"id":"90","name":"Network Optimization Agent","desc":"5G/LTE network capacity planning with anomaly detection, self-healing, traffic prediction, and digital twin simulation","cx":"Very High","infra":"Azure IoT Hub · Stream Analytics · OpenAI · Digital Twins · Cosmos DB","tune":"traffic prediction horizon · anomaly sensitivity · self-healing triggers"},
+    {"id":"91","name":"Customer Churn Predictor","desc":"Multi-signal churn scoring with usage patterns, billing, support, network quality, and retention campaigns","cx":"High","infra":"Azure OpenAI · Machine Learning · Cosmos DB · Communication Services · Functions","tune":"churn risk threshold · retention budget · signal decay weights"},
+    {"id":"92","name":"Telecom Fraud Shield","desc":"Real-time telecom fraud detection for SIM swap, revenue share fraud, Wangiri, toll fraud with sub-second blocking","cx":"High","infra":"Azure Event Hubs · Stream Analytics · OpenAI · Cosmos DB · Functions","tune":"SIM swap detection window · fraud score threshold · velocity limits"},
+    {"id":"93","name":"Continual Learning Agent","desc":"Agent that persists knowledge across sessions, reflects on failures, and starts smarter every time","cx":"Very High","infra":"Azure OpenAI · Cosmos DB · AI Search · Redis Cache · Functions","tune":"Memory retention policy · reflection triggers · distillation frequency"},
+    {"id":"94","name":"AI Podcast Generator","desc":"Text-to-podcast with multi-speaker voice synthesis, music transitions, chapter markers, and content safety","cx":"High","infra":"Azure AI Speech · OpenAI · Blob Storage · CDN · Functions","tune":"Voice persona · speaking rate · music transition style"},
+    {"id":"95","name":"Multimodal Search Engine v2","desc":"Unified search across images, text, code, and audio with cross-modal reasoning and GPT-4o synthesis","cx":"Very High","infra":"Azure AI Search · AI Vision · AI Speech · OpenAI · Container Apps","tune":"Cross-modal fusion weights · index config · result diversity"},
+    {"id":"96","name":"Real-Time Voice Agent v2","desc":"Next-gen bidirectional voice agent with sub-200ms latency, MCP tools, avatar rendering, and transcription","cx":"Very High","infra":"Azure AI Voice Live · OpenAI · Container Apps · Functions · Cosmos DB","tune":"VAD mode · latency target · function calling timeout"},
+    {"id":"97","name":"AI Data Marketplace","desc":"Platform for publishing, discovering, and monetizing synthetic and anonymized datasets with differential privacy","cx":"High","infra":"Azure Machine Learning · Blob Storage · API Management · Cosmos DB · Functions","tune":"Privacy epsilon budget · pricing model · data quality thresholds"},
+    {"id":"98","name":"Agent Evaluation Platform","desc":"Automated evaluation suite with benchmarks, A/B testing, human scoring, and leaderboard ranking","cx":"High","infra":"Azure OpenAI · Container Apps · Cosmos DB · Machine Learning · Functions","tune":"Benchmark suite · regression threshold · A/B traffic split"},
+    {"id":"99","name":"Enterprise AI Governance Hub","desc":"Central control plane for AI models, agents, APIs — approval gates, policy, compliance tracking","cx":"Very High","infra":"Azure API Management · Policy · Monitor · Cosmos DB · ML · Key Vault","tune":"Approval thresholds · policy rules · compliance frameworks"},
+    {"id":"100","name":"FAI Meta-Agent","desc":"The crown jewel — self-orchestrating super-agent that selects plays, provisions infra, and delivers production AI","cx":"Very High","infra":"Azure OpenAI · MCP Server · Container Apps · Cosmos DB · AI Search · Key Vault","tune":"Play selection strategy · chain depth · budget per orchestration"},
 ]
 
 COST_DATA = {
@@ -68,7 +139,7 @@ class FrootAIMCP:
             {"name":"lookup_term","description":"Look up an AI term (200+ terms)","inputSchema":{"type":"object","properties":{"term":{"type":"string"}},"required":["term"]}},
             {"name":"get_architecture_pattern","description":"Get architecture patterns for a scenario","inputSchema":{"type":"object","properties":{"scenario":{"type":"string"}},"required":["scenario"]}},
             {"name":"get_froot_overview","description":"FrootAI platform overview","inputSchema":{"type":"object","properties":{}}},
-            {"name":"list_solution_plays","description":"List all 20 solution plays","inputSchema":{"type":"object","properties":{}}},
+            {"name":"list_solution_plays","description":"List all 100 solution plays","inputSchema":{"type":"object","properties":{}}},
             {"name":"get_solution_play","description":"Get a specific solution play","inputSchema":{"type":"object","properties":{"play_id":{"type":"string"}},"required":["play_id"]}},
             {"name":"estimate_cost","description":"Estimate Azure costs for a play","inputSchema":{"type":"object","properties":{"play":{"type":"string"},"scale":{"type":"string","enum":["dev","prod"]}},"required":["play"]}},
             {"name":"validate_config","description":"Validate AI configuration","inputSchema":{"type":"object","properties":{"config":{"type":"object"}},"required":["config"]}},
@@ -84,6 +155,9 @@ class FrootAIMCP:
             {"name":"fetch_azure_docs","description":"Azure docs summary","inputSchema":{"type":"object","properties":{"topic":{"type":"string"}},"required":["topic"]}},
             {"name":"fetch_external_mcp","description":"Find external MCP servers","inputSchema":{"type":"object","properties":{"query":{"type":"string"}},"required":["query"]}},
             {"name":"get_play_spec","description":"Get SpecKit for a play","inputSchema":{"type":"object","properties":{"play_id":{"type":"string"}},"required":["play_id"]}},
+            {"name":"compare_plays","description":"Compare two solution plays side by side","inputSchema":{"type":"object","properties":{"play1":{"type":"string"},"play2":{"type":"string"}},"required":["play1","play2"]}},
+            {"name":"generate_architecture_diagram","description":"Generate Mermaid.js architecture diagram for a solution play","inputSchema":{"type":"object","properties":{"play":{"type":"string"}},"required":["play"]}},
+            {"name":"embedding_playground","description":"Compare two texts for semantic similarity (educational tool)","inputSchema":{"type":"object","properties":{"text1":{"type":"string"},"text2":{"type":"string"}},"required":["text1","text2"]}},
         ]
 
     def handle_request(self, request):
@@ -103,7 +177,8 @@ class FrootAIMCP:
              "validate_config":self._validate,"semantic_search_plays":self._search_plays,"agent_build":self._build,
              "agent_review":self._review,"agent_tune":self._tune,"get_github_agentic_os":self._agentic_os,
              "list_community_plays":self._community,"get_model_catalog":self._models,"get_azure_pricing":self._pricing,
-             "compare_models":self._compare,"fetch_azure_docs":self._azure_docs,"fetch_external_mcp":self._ext_mcp,"get_play_spec":self._spec}
+             "compare_models":self._compare,"fetch_azure_docs":self._azure_docs,"fetch_external_mcp":self._ext_mcp,"get_play_spec":self._spec,
+             "compare_plays":self._compare_plays,"generate_architecture_diagram":self._generate_diagram,"embedding_playground":self._embedding_playground}
         fn = h.get(name)
         if not fn: return self._err(req_id, -32602, f"Unknown tool: {name}")
         try:
@@ -237,6 +312,28 @@ class FrootAIMCP:
         p = next((x for x in PLAYS if x["id"]==pid),PLAYS[0])
         return {"play":p["name"],"spec":{"pattern":p["desc"],"complexity":p["cx"],"infra":p["infra"],"waf":{"reliability":"retry + health","security":"managed identity + PE","cost":"right-sized SKUs","operations":"CI/CD + diagnostics","performance":"caching + streaming","responsible_ai":"content safety + guardrails"}}}
 
+    def _compare_plays(self, a):
+        p1 = a.get("play1","01").zfill(2); p2 = a.get("play2","02").zfill(2)
+        d1 = next((x for x in PLAYS if x["id"]==p1),PLAYS[0])
+        d2 = next((x for x in PLAYS if x["id"]==p2),PLAYS[1])
+        return {"play1":{"id":d1["id"],"name":d1["name"],"complexity":d1["cx"],"infra":d1["infra"]},"play2":{"id":d2["id"],"name":d2["name"],"complexity":d2["cx"],"infra":d2["infra"]},"differences":{"complexity":f"{d1['cx']} vs {d2['cx']}","infra_overlap":[s for s in d1["infra"].split(" · ") if s in d2["infra"]]}}
+
+    def _generate_diagram(self, a):
+        pid = a.get("play","01").zfill(2)
+        p = next((x for x in PLAYS if x["id"]==pid),PLAYS[0])
+        services = [s.strip() for s in p["infra"].split("·")]
+        nodes = "\n".join(f"    {s.replace(' ','_')}[{s}]" for s in services)
+        links = "\n".join(f"    {services[i].replace(' ','_')} --> {services[i+1].replace(' ','_')}" for i in range(len(services)-1))
+        mermaid = f"graph LR\n{nodes}\n{links}"
+        return {"play":p["name"],"diagram_type":"mermaid","mermaid":mermaid,"tip":"Paste into any Mermaid renderer to visualize."}
+
+    def _embedding_playground(self, a):
+        t1 = a.get("text1","").lower(); t2 = a.get("text2","").lower()
+        w1 = set(t1.split()); w2 = set(t2.split())
+        overlap = w1 & w2; union = w1 | w2
+        sim = len(overlap)/max(len(union),1)
+        return {"text1_words":len(w1),"text2_words":len(w2),"overlap":list(overlap)[:10],"jaccard_similarity":round(sim,3),"note":"Keyword-based approximation. Real embeddings use text-embedding-3-large with 3072 dimensions."}
+
     # ─── Protocol ───
     def _resp(self, rid, result): return {"jsonrpc":"2.0","id":rid,"result":result}
     def _err(self, rid, code, msg): return {"jsonrpc":"2.0","id":rid,"error":{"code":code,"message":msg}}
@@ -258,3 +355,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

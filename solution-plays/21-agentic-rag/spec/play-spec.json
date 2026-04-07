@@ -1,0 +1,36 @@
+{
+  "name": "21-agentic-rag",
+  "version": "1.0.0",
+  "play": "21-agentic-rag",
+  "description": "Autonomous RAG where the AI agent controls retrieval — decides when to search, which sources to query, iterates on results, and synthesizes across multiple knowledge bases with citations.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "agentic-rag",
+    "data_flow": "See README.md for architecture diagram"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "operational-excellence": "See README.md",
+    "responsible-ai": "See README.md"
+  }
+}

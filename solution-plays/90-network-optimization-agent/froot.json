@@ -1,0 +1,39 @@
+{
+  "name": "90-network-optimization-agent",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Network Optimization Agent",
+  "description": "> 5G/LTE network capacity planning with AI-driven anomaly detection, self-healing automation, traffi",
+  "complexity": "Medium",
+  "tags": [
+    "performance-efficiency",
+    "reliability",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

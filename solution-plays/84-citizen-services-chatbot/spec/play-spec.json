@@ -1,0 +1,28 @@
+{
+  "name": "84-citizen-services-chatbot",
+  "version": "1.0.0",
+  "description": "> Multi-language municipal services AI assistant with form filling guidance, appointment scheduling,",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "citizen-services-chatbot"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "security": "See README",
+    "performance-efficiency": "See README"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "hooks": [
+    {
+      "event": "preToolUse",
+      "command": "echo 'Guardrail check for ${slug}'",
+      "description": "Validates tool calls for Content Moderation V2 against security and cost policies",
+      "timeout": 10000,
+      "mode": "warn",
+      "rules": {
+        "blocked_tools": [
+          "rm -rf",
+          "DROP TABLE",
+          "kubectl delete namespace"
+        ],
+        "require_approval": [
+          "az group delete",
+          "az resource delete"
+        ],
+        "max_cost_per_call": 0.05,
+        "content_safety": {
+          "enabled": true,
+          "severity_threshold": 2
+        },
+        "allowed_azure_services": [
+          "Azure AI Content Safety",
+          "Azure OpenAI",
+          "Azure Cosmos DB",
+          "Azure Functions",
+          "Azure Monitor",
+          "Azure Key Vault"
+        ],
+        "pii_protection": {
+          "enabled": true,
+          "action": "redact"
+        }
+      }
+    },
+    {
+      "event": "sessionEnd",
+      "command": "echo 'Session audit for ${slug}'",
+      "description": "Audit trail for Content Moderation V2 session — logs tool calls, costs, and safety events",
+      "timeout": 5000,
+      "mode": "info"
+    }
+  ]
+}

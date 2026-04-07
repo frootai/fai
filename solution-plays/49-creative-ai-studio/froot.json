@@ -1,0 +1,40 @@
+{
+  "name": "49-creative-ai-studio",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Creative AI Multi-Modal Content Studio",
+  "description": "Unified content creation platform — orchestrate text, image, audio from a single campaign brief with brand voice tuning, content safety gates, asset versioning, and multi-channel export for enterprise marketing teams.",
+  "complexity": "High",
+  "tags": [
+    "cost-optimization",
+    "responsible-ai",
+    "performance-efficiency",
+    "reliability",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

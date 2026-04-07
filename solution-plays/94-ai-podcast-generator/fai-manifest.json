@@ -1,0 +1,61 @@
+{
+  "play": "94-ai-podcast-generator",
+  "version": "1.0.0",
+  "description": "Text-to-podcast pipeline with multi-speaker voice synthesis, music transitions, chapter markers, and content safety review. Converts blog posts, research papers, or meeting notes into professionally narrated audio content using Azure AI Voice Live SDK.",
+  "context": {
+    "knowledge": [
+      "F1-GenAI-Foundations",
+      "T3-Production-Patterns",
+      "T2-Responsible-AI"
+    ],
+    "waf": [
+      "responsible-ai",
+      "performance-efficiency",
+      "cost-optimization",
+      "reliability"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "94-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-94/",
+      "evaluate-94/",
+      "tune-94/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure AI Speech",
+      "Azure OpenAI",
+      "Azure Blob Storage",
+      "Azure CDN",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.80,
+    "coherence": 0.85,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.10
+  }
+}

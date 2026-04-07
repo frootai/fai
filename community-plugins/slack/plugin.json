@@ -1,0 +1,52 @@
+{
+  "name": "frootai-slack-plugin",
+  "description": "Slack integration plugin for FrootAI — 4 MCP tools, dedicated agent, compatible plays",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "agent": "frootai-slack-expert",
+  "tools": [
+    {
+      "name": "slack_message_send",
+      "description": "Send a message to a Slack channel or user with rich formatting and attachments"
+    },
+    {
+      "name": "slack_channel_create",
+      "description": "Create a Slack channel with topic, purpose, and initial members"
+    },
+    {
+      "name": "slack_thread_reply",
+      "description": "Reply in a Slack thread with context-aware AI-generated response"
+    },
+    {
+      "name": "slack_user_notify",
+      "description": "Send a direct notification to a Slack user with priority and action buttons"
+    }
+  ],
+  "compatible_plays": [
+    "all"
+  ],
+  "authentication": {
+    "type": "oauth2",
+    "token_url": "https://slack.com/oauth/token",
+    "scopes": [
+      "read",
+      "write"
+    ]
+  },
+  "configuration": {
+    "required": [
+      "base_url",
+      "client_id",
+      "client_secret_key_vault_ref"
+    ],
+    "optional": [
+      "timeout_ms",
+      "retry_max",
+      "rate_limit_per_minute"
+    ]
+  }
+}

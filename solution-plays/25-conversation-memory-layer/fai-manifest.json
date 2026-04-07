@@ -1,0 +1,56 @@
+{
+  "play": "25-conversation-memory-layer",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "R2-RAG-Architecture",
+      "O2-Agent-Coding",
+      "O1-Semantic-Kernel",
+      "F1-GenAI-Foundations"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "performance-efficiency",
+      "cost-optimization",
+      "responsible-ai"
+    ],
+    "scope": "conversation-memory-layer-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/conversation-memory-layer-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-conversation-memory-layer/",
+      "./.github/skills/evaluate-conversation-memory-layer/",
+      "./.github/skills/tune-conversation-memory-layer/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "safety": 0,
+      "costPerQuery": 0.05,
+      "relevance": 0.8,
+      "groundedness": 0.85,
+      "coherence": 0.8
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

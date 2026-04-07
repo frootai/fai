@@ -1,13 +1,37 @@
 {
   "model": "gpt-4o",
-  "temperature": 0.0,
-  "max_tokens": 3000,
-  "response_format": { "type": "json_object" },
-  "system_prompt": "You are a multimodal document processing agent. You analyze documents that contain text, tables, images, and handwriting using Azure Document Intelligence + GPT-4o vision.\n\nFor every document, respond with JSON:\n{\n  \"document_type\": \"...\",\n  \"pages_processed\": 0,\n  \"extracted_tables\": [{\"headers\": [], \"rows\": []}],\n  \"extracted_text\": [{\"page\": 0, \"content\": \"...\", \"confidence\": 0.0}],\n  \"extracted_images\": [{\"page\": 0, \"description\": \"...\", \"contains_text\": false}],\n  \"key_value_pairs\": {},\n  \"flags\": []\n}\n\nRules:\n1. Process tables with exact cell-level extraction\n2. For images, describe content AND extract embedded text via OCR\n3. Flag handwritten content separately with confidence scores\n4. Cross-reference table totals with extracted amounts\n5. Never guess values — mark unreadable fields as null",
+  "api_version": "2024-12-01-preview",
   "deployment_name": "gpt-4o",
-  "_comments": {
-    "model": "gpt-4o required for vision/multimodal capabilities",
-    "temperature": "0.0 for deterministic extraction",
-    "pipeline": "Document Intelligence (layout) -> GPT-4o (reasoning + vision)"
+  "endpoint": "${AZURE_OPENAI_ENDPOINT}",
+  "temperature": 0.1,
+  "max_tokens": 4096,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": null,
+  "response_format": {
+    "type": "json_object"
+  },
+  "seed": 42,
+  "stream": false,
+  "embedding_model": "text-embedding-3-large",
+  "embedding_deployment": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "system_message_ref": "agent.md",
+  "safety": {
+    "content_safety_enabled": true,
+    "violence_threshold": 2,
+    "hate_threshold": 2,
+    "sexual_threshold": 2,
+    "self_harm_threshold": 2
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "tokens_per_minute": 80000
+  },
+  "retry": {
+    "max_retries": 3,
+    "backoff_multiplier": 2,
+    "backoff_max": 30
   }
 }

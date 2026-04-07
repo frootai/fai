@@ -1,0 +1,28 @@
+{
+  "name": "78-precision-agriculture-agent",
+  "version": "1.0.0",
+  "description": "> Satellite imagery and IoT sensor fusion for crop health monitoring, irrigation scheduling, fertili",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "precision-agriculture-agent"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "reliability": "See README",
+    "cost-optimization": "See README",
+    "performance-efficiency": "See README",
+    "responsible-ai": "See README"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "32-ai-powered-testing",
+  "version": "1.0.0",
+  "play": "32-ai-powered-testing",
+  "description": "Autonomous test generation — unit, integration, E2E, and property-based tests created by AI. Polyglot support, mutation testing, coverage analysis, and CI/CD integration.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "ai-testing",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "operational-excellence": "See README.md",
+    "performance-efficiency": "See README.md"
+  }
+}

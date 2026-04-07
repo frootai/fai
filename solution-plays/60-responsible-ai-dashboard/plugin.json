@@ -1,0 +1,50 @@
+{
+  "name": "60-responsible-ai-dashboard",
+  "description": "FrootAI solution play: Responsible Ai Dashboard",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "responsible-ai-dashboard",
+    "responsible-ai",
+    "security",
+    "operational-excellence",
+    "reliability",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "60-responsible-ai-dashboard"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/responsible-ai-dashboard-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "responsible-ai",
+    "security",
+    "operational-excellence",
+    "reliability"
+  ],
+  "install": "npx frootai install 60-responsible-ai-dashboard"
+}

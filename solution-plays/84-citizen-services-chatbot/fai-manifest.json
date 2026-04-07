@@ -1,0 +1,61 @@
+{
+  "play": "84-citizen-services-chatbot",
+  "version": "1.0.0",
+  "description": "Multi-language municipal services AI assistant with form filling guidance, appointment scheduling, permit status tracking, FAQ resolution, and human agent escalation for complex cases.",
+  "context": {
+    "knowledge": [
+      "R2-RAG-Architecture",
+      "O2-AI-Agents",
+      "T2-Responsible-AI"
+    ],
+    "waf": [
+      "responsible-ai",
+      "reliability",
+      "security",
+      "performance-efficiency"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "84-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-84/",
+      "evaluate-84/",
+      "tune-84/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure AI Translator",
+      "Azure Communication Services",
+      "Azure AI Search",
+      "Azure Cosmos DB"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

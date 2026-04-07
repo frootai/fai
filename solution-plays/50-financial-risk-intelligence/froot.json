@@ -1,0 +1,41 @@
+{
+  "name": "50-financial-risk-intelligence",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Financial Risk Intelligence Agent",
+  "description": "Financial services AI agent — real-time market analysis, credit risk assessment, regulatory document processing (SEC/Basel III), fraud detection, with explainable AI decisions, audit trails, and human-in-the-loop escalation.",
+  "complexity": "High",
+  "tags": [
+    "security",
+    "reliability",
+    "responsible-ai",
+    "cost-optimization",
+    "operational-excellence",
+    "performance-efficiency"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

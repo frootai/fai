@@ -1,0 +1,37 @@
+{
+  "name": "typescript-mcp-development",
+  "description": "TypeScript MCP Development — build MCP servers in TypeScript with Node.js, Express/Fastify hosting, Zod schema validation, and npm package distribution.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "nodejs",
+    "mcp",
+    "express",
+    "zod",
+    "model-context-protocol",
+    "tool-server"
+  ],
+  "agents": [
+    "../../agents/frootai-typescript-mcp-expert.agent.md",
+    "../../agents/frootai-typescript-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/typescript-mcp-development.instructions.md",
+    "../../instructions/typescript-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-mcp-typescript-scaffold/",
+    "../../skills/frootai-mcp-typescript-generator/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

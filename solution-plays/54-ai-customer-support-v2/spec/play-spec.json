@@ -1,0 +1,29 @@
+{
+  "name": "54-ai-customer-support-v2",
+  "version": "1.0.0",
+  "description": "Multi-channel AI customer support — ticket classification, sentiment-aware routing, knowledge base search, automated resolution, escalation workflows, and CSAT prediction.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "customer-support"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README",
+    "responsible-ai": "See README",
+    "performance-efficiency": "See README"
+  }
+}

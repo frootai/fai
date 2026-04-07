@@ -1,0 +1,61 @@
+{
+  "play": "87-dynamic-pricing-engine",
+  "version": "1.0.0",
+  "description": "Real-time price optimization engine analyzing demand signals, competitor pricing, inventory levels, seasonality, and customer segments to maximize revenue while maintaining price fairness and brand perception.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "O2-AI-Agents",
+      "F1-GenAI-Foundations"
+    ],
+    "waf": [
+      "cost-optimization",
+      "performance-efficiency",
+      "reliability",
+      "responsible-ai"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "87-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-87/",
+      "evaluate-87/",
+      "tune-87/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure Event Hubs",
+      "Azure Cosmos DB",
+      "Azure Redis Cache",
+      "Azure Machine Learning"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

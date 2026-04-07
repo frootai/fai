@@ -1,0 +1,35 @@
+{
+  "name": "38-document-understanding-v2",
+  "version": "1.0.0",
+  "play": "38-document-understanding-v2",
+  "description": "Advanced document processing — multi-page PDF understanding, table extraction with relationships, handwriting recognition, cross-document entity linking, and structured output generation.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "doc-understanding-v2",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "responsible-ai": "See README.md",
+    "performance-efficiency": "See README.md"
+  }
+}

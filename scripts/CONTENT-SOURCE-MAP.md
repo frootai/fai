@@ -62,3 +62,46 @@ Code change (index.js, package.json, knowledge.json, solution-plays/)
 2. Add the sync logic to `sync-content.js` (read source → update downstream)
 3. Update this document
 4. Test: `node scripts/sync-content.js && node scripts/validate-consistency.js`
+
+---
+
+## Build Scripts Inventory (18 scripts)
+
+### Core Pipeline
+
+| Script | Purpose | npm Script |
+|--------|---------|-----------|
+| `validate-primitives.js` | Validate all agents/instructions/skills/hooks/plugins against schemas | `npm run validate:primitives` |
+| `validate-consistency.js` | Check version + count consistency across packages | `npm run validate` |
+| `generate-marketplace.js` | Build `marketplace.json` from plugins/ folder | `npm run generate:marketplace` |
+| `generate-website-data.js` | Extract metadata for frootai.dev website JSON feeds | `npm run generate:website-data` |
+| `update-readme.js` | Auto-update README badge counts | `npm run update:readme` |
+| `materialize-plugins.js` | Copy referenced primitives into plugin dist/ folders | `npm run materialize` |
+| `scaffold-primitive.js` | Interactive CLI to create agents, skills, instructions, hooks | `npm run scaffold` |
+| `sync-content.js` | Propagate version/count changes to downstream files | `npm run sync` |
+| `release.js` | Bump versions, sync, validate, commit, tag | `npm run release` |
+| `deploy-play.sh/.ps1` | Deploy play infrastructure to Azure | manual |
+| `export-skills.sh/.ps1` | Export skills for distribution | manual |
+| `rebuild-knowledge.sh/.ps1` | Rebuild MCP knowledge.json from docs/ | manual |
+
+### Content Sprint Scripts (6)
+
+| Script | What It Generated |
+|--------|-------------------|
+| `generate-agents-sprint.js` + sprint2 + sprint3 | 201 agents |
+| `generate-instructions-sprint.js` + sprint2 + sprint3 | 176 instructions |
+| `generate-skills-sprint.js` + sprint2 | 282 skills |
+| `generate-plugins-sprint.js` | 77 plugins |
+
+### Full Build Pipeline
+
+```bash
+# One command to validate + generate + update everything
+npm run build
+
+# Which runs:
+# 1. node scripts/validate-primitives.js    → 2510 checks
+# 2. node scripts/generate-marketplace.js   → marketplace.json
+# 3. node scripts/generate-website-data.js  → website-data/*.json
+# 4. node scripts/update-readme.js          → README badge counts
+```

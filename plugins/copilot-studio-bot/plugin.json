@@ -1,0 +1,48 @@
+{
+  "name": "copilot-studio-bot",
+  "description": "Copilot Studio Bot — custom copilot experiences with Microsoft Copilot Studio, Power Virtual Agents, and Teams integration. Build conversational AI with enterprise SSO, Dataverse, and multi-channel deployment.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "copilot-studio",
+    "power-virtual-agents",
+    "teams",
+    "dataverse",
+    "conversational-ai",
+    "sso",
+    "enterprise"
+  ],
+  "agents": [
+    "../../agents/frootai-play-08-builder.agent.md",
+    "../../agents/frootai-play-08-reviewer.agent.md",
+    "../../agents/frootai-play-08-tuner.agent.md",
+    "../../agents/frootai-power-platform-expert.agent.md",
+    "../../agents/frootai-copilot-ecosystem-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/play-08-copilot-studio-bot-patterns.instructions.md",
+    "../../instructions/copilot-studio-waf.instructions.md",
+    "../../instructions/dataverse-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-deploy-08-copilot-studio-bot/",
+    "../../skills/frootai-evaluate-08-copilot-studio-bot/",
+    "../../skills/frootai-tune-08-copilot-studio-bot/",
+    "../../skills/frootai-copilot-sdk-integration/",
+    "../../skills/frootai-power-platform-connector/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-waf-compliance/"
+  ],
+  "plays": [
+    "08-copilot-studio-bot"
+  ]
+}

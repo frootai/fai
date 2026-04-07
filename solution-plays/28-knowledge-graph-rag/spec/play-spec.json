@@ -1,0 +1,36 @@
+{
+  "name": "28-knowledge-graph-rag",
+  "version": "1.0.0",
+  "play": "28-knowledge-graph-rag",
+  "description": "Graph-enhanced retrieval using knowledge graphs, entity extraction, and relationship mapping. Combines Azure Cosmos DB Gremlin with vector search for contextual, explainable answers.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "graph-rag",
+    "data_flow": "See README.md for architecture diagram"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "performance-efficiency": "See README.md",
+    "cost-optimization": "See README.md",
+    "responsible-ai": "See README.md"
+  }
+}

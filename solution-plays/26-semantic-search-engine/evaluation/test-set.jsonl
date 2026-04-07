@@ -1,0 +1,3 @@
+{"query": "What does this play do?", "expected": "Semantic Search Engine — Full-text, vector, and hybrid search with reranking, query expansion, personaliz..."}
+{"query": "What Azure services are used?", "expected": "Azure AI Search, Azure OpenAI, Azure Blob Storage, Azure Container Apps"}
+{"query": "Which WAF pillars are covered?", "expected": "security, reliability, performance-efficiency, cost-optimization"}

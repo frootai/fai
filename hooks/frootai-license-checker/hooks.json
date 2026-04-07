@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "check-licenses.sh",
+        "cwd": ".",
+        "env": {
+          "CHECKER_MODE": "warn"
+        },
+        "timeoutSec": 60
+      }
+    ]
+  }
+}

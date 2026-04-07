@@ -1,0 +1,62 @@
+{
+  "play": "78-precision-agriculture-agent",
+  "version": "1.0.0",
+  "description": "Satellite imagery and IoT sensor fusion for crop health monitoring, irrigation scheduling, fertilization optimization, and yield prediction using digital twin simulation of farmland.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "O5-AI-Infrastructure",
+      "O2-AI-Agents",
+      "F1-GenAI-Foundations"
+    ],
+    "waf": [
+      "reliability",
+      "cost-optimization",
+      "performance-efficiency",
+      "responsible-ai"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "78-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-78/",
+      "evaluate-78/",
+      "tune-78/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure IoT Hub",
+      "Azure AI Vision",
+      "Azure OpenAI",
+      "Azure Digital Twins",
+      "Azure Machine Learning"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.80,
+    "relevance": 0.80,
+    "safety": 0,
+    "costPerQuery": 0.05
+  }
+}

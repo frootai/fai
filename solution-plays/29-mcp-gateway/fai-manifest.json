@@ -1,0 +1,55 @@
+{
+  "play": "29-mcp-gateway",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "O3-MCP-Tools-Functions",
+      "F4-GitHub-Agentic-OS",
+      "T3-Production-Patterns"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "cost-optimization",
+      "operational-excellence",
+      "performance-efficiency"
+    ],
+    "scope": "mcp-gateway-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/mcp-gateway-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-mcp-gateway/",
+      "./.github/skills/evaluate-mcp-gateway/",
+      "./.github/skills/tune-mcp-gateway/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "safety": 0,
+      "costPerQuery": 0.05,
+      "relevance": 0.8,
+      "groundedness": 0.85,
+      "coherence": 0.8
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

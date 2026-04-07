@@ -1,0 +1,50 @@
+{
+  "name": "69-carbon-footprint-tracker",
+  "description": "FrootAI solution play: Carbon Footprint Tracker",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "carbon-footprint-tracker",
+    "cost-optimization",
+    "operational-excellence",
+    "responsible-ai",
+    "reliability",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "69-carbon-footprint-tracker"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/carbon-footprint-tracker-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "cost-optimization",
+    "operational-excellence",
+    "responsible-ai",
+    "reliability"
+  ],
+  "install": "npx frootai install 69-carbon-footprint-tracker"
+}

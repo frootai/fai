@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "audit-prompt.sh",
+        "cwd": ".",
+        "env": {
+          "AUDIT_LEVEL": "standard"
+        },
+        "timeoutSec": 10
+      }
+    ],
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "audit-prompt.sh",
+        "cwd": ".",
+        "env": {
+          "AUDIT_LEVEL": "standard",
+          "AUDIT_EVENT": "sessionStart"
+        },
+        "timeoutSec": 5
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "audit-prompt.sh",
+        "cwd": ".",
+        "env": {
+          "AUDIT_LEVEL": "standard",
+          "AUDIT_EVENT": "sessionEnd"
+        },
+        "timeoutSec": 5
+      }
+    ]
+  }
+}

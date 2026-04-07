@@ -1,0 +1,53 @@
+{
+  "name": "frootai-datadog-plugin",
+  "description": "Datadog integration plugin for FrootAI — 4 MCP tools, dedicated agent, compatible plays",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "agent": "frootai-datadog-expert",
+  "tools": [
+    {
+      "name": "datadog_monitor_create",
+      "description": "Create a Datadog monitor with thresholds, notifications, and escalation policies"
+    },
+    {
+      "name": "datadog_event_search",
+      "description": "Search Datadog events by tags, time range, priority, and source"
+    },
+    {
+      "name": "datadog_metric_query",
+      "description": "Query Datadog metrics with aggregation, grouping, and time series"
+    },
+    {
+      "name": "datadog_dashboard_create",
+      "description": "Create a Datadog dashboard with widgets for AI system observability"
+    }
+  ],
+  "compatible_plays": [
+    "17",
+    "37"
+  ],
+  "authentication": {
+    "type": "oauth2",
+    "token_url": "https://datadog.com/oauth/token",
+    "scopes": [
+      "read",
+      "write"
+    ]
+  },
+  "configuration": {
+    "required": [
+      "base_url",
+      "client_id",
+      "client_secret_key_vault_ref"
+    ],
+    "optional": [
+      "timeout_ms",
+      "retry_max",
+      "rate_limit_per_minute"
+    ]
+  }
+}

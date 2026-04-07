@@ -1,0 +1,28 @@
+{
+  "name": "56-semantic-code-search",
+  "version": "1.0.0",
+  "description": "Natural language codebase search — understand code semantics, find functions by intent, cross-repo navigation, dependency mapping, and AI-powered code documentation generation.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "code-search"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "operational-excellence": "See README"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "92-telecom-fraud-shield",
+  "version": "1.0.0",
+  "description": "> Real-time telecom fraud detection covering SIM swap attacks, international revenue share fraud, su",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "telecom-fraud-shield"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "reliability": "See README",
+    "performance-efficiency": "See README",
+    "responsible-ai": "See README"
+  }
+}

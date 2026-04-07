@@ -1,0 +1,50 @@
+{
+  "name": "72-climate-risk-assessor",
+  "description": "FrootAI solution play: Climate Risk Assessor",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "climate-risk-assessor",
+    "responsible-ai",
+    "reliability",
+    "security",
+    "cost-optimization",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "72-climate-risk-assessor"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/climate-risk-assessor-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "responsible-ai",
+    "reliability",
+    "security",
+    "cost-optimization"
+  ],
+  "install": "npx frootai install 72-climate-risk-assessor"
+}

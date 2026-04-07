@@ -1,0 +1,39 @@
+{
+  "name": "69-carbon-footprint-tracker",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Carbon Footprint Tracker",
+  "description": "> Real-time carbon accounting across cloud resources and supply chain with automated ESG reporting a",
+  "complexity": "Medium",
+  "tags": [
+    "cost-optimization",
+    "operational-excellence",
+    "responsible-ai",
+    "reliability"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

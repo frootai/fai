@@ -1,0 +1,52 @@
+{
+  "name": "66-ai-infrastructure-optimizer",
+  "description": "FrootAI solution play: Ai Infrastructure Optimizer",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-infrastructure-optimizer",
+    "cost-optimization",
+    "performance-efficiency",
+    "reliability",
+    "operational-excellence",
+    "security",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "66-ai-infrastructure-optimizer"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-infrastructure-optimizer-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "cost-optimization",
+    "performance-efficiency",
+    "reliability",
+    "operational-excellence",
+    "security"
+  ],
+  "install": "npx frootai install 66-ai-infrastructure-optimizer"
+}

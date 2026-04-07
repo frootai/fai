@@ -1,0 +1,15 @@
+{
+  "metrics": [
+    "groundedness",
+    "relevance",
+    "coherence",
+    "fluency"
+  ],
+  "thresholds": {
+    "groundedness": 4,
+    "relevance": 4,
+    "coherence": 4,
+    "fluency": 4
+  },
+  "dataset": "evaluation/test-data.jsonl"
+}

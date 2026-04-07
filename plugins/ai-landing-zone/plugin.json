@@ -1,0 +1,50 @@
+{
+  "name": "ai-landing-zone",
+  "description": "Azure AI Landing Zone — subscription vending, network topology, RBAC, policy enforcement, and hub-spoke architecture for enterprise AI workloads. Includes Bicep IaC modules validated against all 6 WAF pillars.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "azure",
+    "landing-zone",
+    "bicep",
+    "rbac",
+    "policy",
+    "hub-spoke",
+    "enterprise",
+    "iac",
+    "waf-aligned"
+  ],
+  "agents": [
+    "../../agents/frootai-play-02-builder.agent.md",
+    "../../agents/frootai-play-02-reviewer.agent.md",
+    "../../agents/frootai-play-02-tuner.agent.md",
+    "../../agents/frootai-landing-zone.agent.md",
+    "../../agents/frootai-architect.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/play-02-ai-landing-zone-patterns.instructions.md",
+    "../../instructions/bicep-waf.instructions.md",
+    "../../instructions/security-bicep.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-deploy-02-ai-landing-zone/",
+    "../../skills/frootai-evaluate-02-ai-landing-zone/",
+    "../../skills/frootai-tune-02-ai-landing-zone/",
+    "../../skills/frootai-build-bicep-module/",
+    "../../skills/frootai-architecture-blueprint/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-waf-compliance/"
+  ],
+  "plays": [
+    "02-ai-landing-zone"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "64-ai-sales-assistant",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "AI Sales Assistant",
+  "description": "AI-powered sales enablement — CRM integration, lead scoring with behavioral signals, personalized email drafting, meeting preparation briefs, deal risk analysis, competitive intelligence summaries, and pipeline forecasting with confidence intervals.",
+  "complexity": "High",
+  "tags": [
+    "security",
+    "reliability",
+    "cost-optimization",
+    "operational-excellence"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

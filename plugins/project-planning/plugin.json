@@ -1,0 +1,44 @@
+{
+  "name": "project-planning",
+  "description": "Project Planning — PRDs, epic breakdown, implementation plans, technical spikes, and rollout strategies. AI-assisted project management with architecture decision records and feature decomposition.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "project-planning",
+    "prd",
+    "epic-breakdown",
+    "implementation-plan",
+    "technical-spike",
+    "roadmap",
+    "adr"
+  ],
+  "agents": [
+    "../../agents/frootai-product-manager.agent.md",
+    "../../agents/frootai-prd-writer.agent.md",
+    "../../agents/frootai-specification-writer.agent.md",
+    "../../agents/frootai-epic-breakdown-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/markdown-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-prd-generator/",
+    "../../skills/frootai-epic-breakdown-pm/",
+    "../../skills/frootai-epic-breakdown-arch/",
+    "../../skills/frootai-implementation-plan-generator/",
+    "../../skills/frootai-specification-generator/",
+    "../../skills/frootai-technical-spike/",
+    "../../skills/frootai-rollout-plan/",
+    "../../skills/frootai-feature-breakdown/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

@@ -1,0 +1,75 @@
+name: "🧩 New Primitive Request"
+description: Request or propose a new agent, instruction, skill, hook, or plugin
+labels: ["primitive", "community"]
+body:
+  - type: dropdown
+    id: primitive-type
+    attributes:
+      label: Primitive Type
+      description: What kind of primitive are you proposing?
+      options:
+        - Agent (.agent.md)
+        - Instruction (.instructions.md)
+        - Skill (SKILL.md)
+        - Hook (hooks.json)
+        - Plugin (plugin.json bundle)
+        - Workflow (.md)
+        - Cookbook Recipe
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Primitive Name
+      description: "Use kebab-case. Example: frootai-code-optimizer"
+      placeholder: "frootai-your-primitive-name"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this primitive do? What problem does it solve?
+      placeholder: "This agent/skill/instruction helps with..."
+    validations:
+      required: true
+  - type: dropdown
+    id: waf-pillars
+    attributes:
+      label: WAF Pillar Alignment
+      description: Which Well-Architected Framework pillars does this align with?
+      multiple: true
+      options:
+        - Security
+        - Reliability
+        - Cost Optimization
+        - Operational Excellence
+        - Performance Efficiency
+        - Responsible AI
+  - type: textarea
+    id: compatible-plays
+    attributes:
+      label: Compatible Solution Plays
+      description: Which solution plays could use this primitive?
+      placeholder: "Play 01 (Enterprise RAG), Play 07 (Multi-Agent), ..."
+  - type: textarea
+    id: example
+    attributes:
+      label: Example Usage
+      description: How would someone use this primitive? Show a snippet or scenario.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Naming Convention
+      description: Confirm the name follows FrootAI conventions
+      options:
+        - label: Name uses lowercase-hyphen (kebab-case)
+          required: true
+        - label: I've checked no duplicate exists in the repo
+          required: true
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to submit a PR for this primitive

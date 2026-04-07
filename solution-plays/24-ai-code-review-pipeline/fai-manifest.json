@@ -1,0 +1,54 @@
+{
+  "play": "24-ai-code-review-pipeline",
+  "version": "1.0.0",
+  "context": {
+    "knowledge": [
+      "O2-Agent-Coding",
+      "T3-Production-Patterns",
+      "F4-GitHub-Agentic-OS"
+    ],
+    "waf": [
+      "security",
+      "reliability",
+      "operational-excellence",
+      "responsible-ai"
+    ],
+    "scope": "ai-code-review-pipeline-solution"
+  },
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-code-review-pipeline-patterns.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-ai-code-review-pipeline/",
+      "./.github/skills/evaluate-ai-code-review-pipeline/",
+      "./.github/skills/tune-ai-code-review-pipeline/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ],
+    "guardrails": {
+      "safety": 0,
+      "costPerQuery": 0.05,
+      "relevance": 0.8,
+      "groundedness": 0.85,
+      "coherence": 0.8
+    }
+  },
+  "infrastructure": {
+    "bicep": "./infra/main.bicep",
+    "parameters": "./infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  }
+}

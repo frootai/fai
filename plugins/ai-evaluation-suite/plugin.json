@@ -1,0 +1,44 @@
+{
+  "name": "ai-evaluation-suite",
+  "description": "AI Evaluation Suite — groundedness, coherence, relevance, fluency, and safety scoring. Build evaluation pipelines with Azure AI Evaluation SDK, custom metrics, regression tracking, and CI/CD integration.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "evaluation",
+    "groundedness",
+    "coherence",
+    "relevance",
+    "safety",
+    "metrics",
+    "regression",
+    "ci-cd",
+    "quality"
+  ],
+  "agents": [
+    "../../agents/frootai-responsible-ai-reviewer.agent.md",
+    "../../agents/frootai-content-safety-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/rai-content-safety.instructions.md",
+    "../../instructions/rai-bias-testing.instructions.md",
+    "../../instructions/froot-t2-responsible-ai.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-eval-runner/",
+    "../../skills/frootai-evaluation-framework/",
+    "../../skills/frootai-build-llm-evaluator/",
+    "../../skills/frootai-agentic-eval/",
+    "../../skills/frootai-eval-driven-dev/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-output-validator/"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "name": "csharp-dotnet-development",
+  "description": "C# .NET Development — ASP.NET Core, Minimal API, Blazor, MAUI, EF Core, xUnit/NUnit testing, and architecture patterns. Full-stack .NET with WAF-aligned coding standards and code review agents.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "csharp",
+    "dotnet",
+    "aspnet",
+    "blazor",
+    "maui",
+    "ef-core",
+    "xunit",
+    "minimal-api"
+  ],
+  "agents": [
+    "../../agents/frootai-csharp-expert.agent.md",
+    "../../agents/frootai-dotnet-maui-expert.agent.md",
+    "../../agents/frootai-blazor-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/csharp-waf.instructions.md",
+    "../../instructions/aspnet-waf.instructions.md",
+    "../../instructions/blazor-waf.instructions.md",
+    "../../instructions/minimal-api-waf.instructions.md",
+    "../../instructions/ef-core-waf.instructions.md",
+    "../../instructions/xunit-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-aspnet-minimal-api/",
+    "../../skills/frootai-aspire-orchestration/",
+    "../../skills/frootai-xunit-test/",
+    "../../skills/frootai-nunit-test/",
+    "../../skills/frootai-mstest-test/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "78-precision-agriculture-agent",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Precision Agriculture Agent",
+  "description": "> Satellite imagery and IoT sensor fusion for crop health monitoring, irrigation scheduling, fertili",
+  "complexity": "Medium",
+  "tags": [
+    "reliability",
+    "cost-optimization",
+    "performance-efficiency",
+    "responsible-ai"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

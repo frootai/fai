@@ -1,0 +1,52 @@
+{
+  "name": "28-knowledge-graph-rag",
+  "description": "FrootAI solution play: Knowledge Graph Rag",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "knowledge-graph-rag",
+    "security",
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "responsible-ai",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "28-knowledge-graph-rag"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/knowledge-graph-rag-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "responsible-ai"
+  ],
+  "install": "npx frootai install 28-knowledge-graph-rag"
+}

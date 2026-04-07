@@ -1,0 +1,38 @@
+{
+  "name": "swift-mcp-development",
+  "description": "Swift MCP Development — build MCP servers in Swift with Vapor framework, SwiftUI tool previews, iOS/macOS native integration, and Apple silicon optimization.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "swift",
+    "mcp",
+    "ios",
+    "macos",
+    "vapor",
+    "swiftui",
+    "model-context-protocol",
+    "tool-server"
+  ],
+  "agents": [
+    "../../agents/frootai-swift-mcp-expert.agent.md",
+    "../../agents/frootai-swift-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/swift-mcp-development.instructions.md",
+    "../../instructions/swift-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-mcp-swift-scaffold/",
+    "../../skills/frootai-mcp-swift-scaffold/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

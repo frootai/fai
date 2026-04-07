@@ -1,0 +1,51 @@
+name: Auto-Generate on Merge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+      - 'agents/**'
+      - 'instructions/**'
+      - 'skills/**'
+      - 'hooks/**'
+      - 'solution-plays/**/fai-manifest.json'
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    name: Regenerate Marketplace & Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+
+      - name: Regenerate marketplace.json
+        run: node scripts/generate-marketplace.js
+
+      - name: Run content sync
+        run: node scripts/sync-content.js
+
+      - name: Validate consistency
+        run: node scripts/validate-consistency.js
+
+      - name: Commit changes (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add marketplace.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: auto-regenerate marketplace.json [skip ci]"
+            git push
+          fi

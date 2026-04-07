@@ -1,0 +1,50 @@
+{
+  "name": "51-autonomous-coding-agent",
+  "description": "FrootAI solution play: Autonomous Coding Agent",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "autonomous-coding-agent",
+    "security",
+    "reliability",
+    "operational-excellence",
+    "cost-optimization",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "51-autonomous-coding-agent"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/autonomous-coding-agent-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "security",
+    "reliability",
+    "operational-excellence",
+    "cost-optimization"
+  ],
+  "install": "npx frootai install 51-autonomous-coding-agent"
+}

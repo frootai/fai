@@ -1,0 +1,39 @@
+{
+  "name": "81-property-valuation-ai",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Property Valuation Ai",
+  "description": "> Automated property appraisal combining comparable sales analysis, market trend prediction, neighbo",
+  "complexity": "Medium",
+  "tags": [
+    "reliability",
+    "responsible-ai",
+    "security",
+    "cost-optimization"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

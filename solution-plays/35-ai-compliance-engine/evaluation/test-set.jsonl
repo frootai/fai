@@ -1,0 +1,3 @@
+{"query": "What does this play do?", "expected": "AI Compliance Engine — Automated regulatory compliance — GDPR data mapping, HIPAA audit trails, SOC 2 e..."}
+{"query": "What Azure services are used?", "expected": "Azure OpenAI, Azure Policy, Azure Key Vault, Azure Monitor, Azure Cosmos DB"}
+{"query": "Which WAF pillars are covered?", "expected": "security, reliability, responsible-ai, operational-excellence"}

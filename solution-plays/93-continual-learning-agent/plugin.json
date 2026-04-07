@@ -1,0 +1,50 @@
+{
+  "name": "93-continual-learning-agent",
+  "description": "FrootAI solution play: Continual Learning Agent",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "continual-learning-agent",
+    "reliability",
+    "responsible-ai",
+    "performance-efficiency",
+    "cost-optimization",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "93-continual-learning-agent"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/continual-learning-agent-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "reliability",
+    "responsible-ai",
+    "performance-efficiency",
+    "cost-optimization"
+  ],
+  "install": "npx frootai install 93-continual-learning-agent"
+}

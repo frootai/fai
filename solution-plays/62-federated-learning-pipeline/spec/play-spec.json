@@ -1,0 +1,29 @@
+{
+  "name": "62-federated-learning-pipeline",
+  "version": "1.0.0",
+  "description": "Privacy-preserving distributed model training — train across multiple data silos without sharing raw data. Differential privacy guarantees, secure aggregation, confidential computing enclaves, model convergence monitoring, and cross-organization collaboration for healthcare, finance, and government.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "federated-learning"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README",
+    "performance-efficiency": "See README"
+  }
+}

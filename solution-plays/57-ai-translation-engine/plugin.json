@@ -1,0 +1,50 @@
+{
+  "name": "57-ai-translation-engine",
+  "description": "FrootAI solution play: Ai Translation Engine",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-translation-engine",
+    "performance-efficiency",
+    "cost-optimization",
+    "reliability",
+    "responsible-ai",
+    "azure",
+    "ai",
+    "solution-play"
+  ],
+  "plays": [
+    "57-ai-translation-engine"
+  ],
+  "primitives": {
+    "agents": [
+      "./.github/agents/builder.agent.md",
+      "./.github/agents/reviewer.agent.md",
+      "./.github/agents/tuner.agent.md"
+    ],
+    "instructions": [
+      "./.github/instructions/ai-translation-engine-patterns.instructions.md",
+      "./.github/instructions/azure-coding.instructions.md",
+      "./.github/instructions/security.instructions.md"
+    ],
+    "skills": [
+      "./.github/skills/deploy-azure/",
+      "./.github/skills/evaluate/",
+      "./.github/skills/tune/"
+    ],
+    "hooks": [
+      "./.github/hooks/guardrails.json"
+    ]
+  },
+  "waf": [
+    "performance-efficiency",
+    "cost-optimization",
+    "reliability",
+    "responsible-ai"
+  ],
+  "install": "npx frootai install 57-ai-translation-engine"
+}

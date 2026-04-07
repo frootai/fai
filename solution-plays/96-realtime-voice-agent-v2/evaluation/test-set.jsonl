@@ -1,0 +1,2 @@
+{"query":"What does this play do?","expected":"Realtime Voice Agent V2 — > Next-generation bidirectional WebSocket voice agent using Azure AI Voice Live SDK with MCP tool in"}
+{"query":"Azure services?","expected":"AI Voice Live SDK with MCP tool integration, voice activity detection, function calling during conversation, avatar rendering, and real-time transcription. Sub-200ms response latency for natural conversational AI."}

@@ -85,7 +85,40 @@ Works with: **GitHub Copilot**  **Claude Desktop**  **Cursor**  **Windsurf**  **
 
 ---
 
-### MCP Server  23 Tools
+### FAI Protocol — The Binding Glue
+
+FrootAI introduces the **FAI Protocol** — a context-wiring specification that connects 9 AI primitives (agents, instructions, skills, hooks, workflows, plugins, tools, prompts, guardrails) into evaluated, deployed, production-ready systems.
+
+| Component | What It Is | File |
+|-----------|-----------|------|
+| **FAI Protocol** | The spec — how primitives declare context and wiring | `fai-manifest.json` |
+| **FAI Layer** | The conceptual glue — shared context across primitives | Design principle |
+| **FAI Engine** | The runtime — reads manifests, wires primitives, evaluates quality | `engine/index.js` |
+| **FAI Factory** | CI/CD — validates, builds, and packs primitives | `scripts/validate-primitives.js` |
+| **FAI Marketplace** | Discovery registry for plugins | `marketplace.json` |
+
+**Primitives:**
+
+| Folder | What Lives Here | Schema |
+|--------|----------------|--------|
+| `schemas/` | 7 JSON schemas validating all primitive types | Draft-07 |
+| `agents/` | Standalone `.agent.md` files with WAF alignment | `agent.schema.json` |
+| `instructions/` | `.instructions.md` files with `applyTo` globs | `instruction.schema.json` |
+| `skills/` | `SKILL.md` folders with optional bundled assets | `skill.schema.json` |
+| `hooks/` | Security hooks (secrets scanner, tool guardian, governance audit) | `hook.schema.json` |
+| `plugins/` | Themed bundles of agents + skills + hooks | `plugin.schema.json` |
+| `engine/` | FAI Engine v0.1 — manifest reader, context resolver, evaluator | — |
+
+```bash
+npm run validate:primitives     # Validate all primitives against schemas
+npm run generate:marketplace    # Generate marketplace.json from plugins/
+npm run scaffold                # Interactive CLI to create new primitives
+node engine/index.js <manifest> # Load a play with the FAI Engine
+```
+
+---
+
+### MCP Server — 25 Tools
 
 | Category | # | Tools |
 |----------|:-:|-------|
@@ -100,7 +133,7 @@ Works with: **GitHub Copilot**  **Claude Desktop**  **Cursor**  **Windsurf**  **
 ### Solution Plays
 
 <details>
-<summary><strong>20 pre-tuned, deployable AI solutions</strong>  click to expand</summary>
+<summary><strong>50 pre-tuned, deployable AI solutions</strong> — click to expand</summary>
 <br>
 
 | # | Solution | What It Deploys |
@@ -125,8 +158,38 @@ Works with: **GitHub Copilot**  **Claude Desktop**  **Cursor**  **Windsurf**  **
 | 18 | **Prompt Management** | Versioning + A/B testing + rollback |
 | 19 | **Edge AI with Phi-4** | On-device inference, no cloud |
 | 20 | **Anomaly Detection** | Time-series + pattern recognition |
+| 21 | **Agentic RAG** | Autonomous retrieval + multi-source |
+| 22 | **Multi-Agent Swarm** | Distributed teams + supervisor |
+| 23 | **Browser Automation** | Playwright MCP + vision |
+| 24 | **AI Code Review** | CodeQL + OWASP + AI comments |
+| 25 | **Conversation Memory** | Short/long/episodic memory |
+| 26 | **Semantic Search** | Vector + hybrid + reranking |
+| 27 | **AI Data Pipeline** | ETL + LLM augmentation |
+| 28 | **Knowledge Graph RAG** | Cosmos DB Gremlin + entities |
+| 29 | **MCP Gateway** | Proxy + rate limiting + discovery |
+| 30 | **AI Security Hardening** | OWASP LLM Top 10 + jailbreak defense |
+| 31 | **Low-Code AI Builder** | Visual AI pipeline design + deploy |
+| 32 | **AI-Powered Testing** | Autonomous test generation, polyglot |
+| 33 | **Voice AI Agent** | Speech-to-text + conversational AI |
+| 34 | **Edge AI Deployment** | ONNX quantization + IoT Hub |
+| 35 | **AI Compliance Engine** | GDPR, HIPAA, SOC 2, EU AI Act |
+| 36 | **Multimodal Agent** | GPT-4o Vision + text + code |
+| 37 | **AI-Powered DevOps** | Incident triage + runbook + GitOps |
+| 38 | **Document Understanding v2** | Multi-page PDF + entity linking |
+| 39 | **AI Meeting Assistant** | Transcription + action items |
+| 40 | **Copilot Studio Advanced** | Declarative agents + M365 Graph |
+| 41 | **AI Red Teaming** | Adversarial testing + safety scoring |
+| 42 | **Computer Use Agent** | Vision-based desktop automation |
+| 43 | **AI Video Generation** | Text-to-video pipeline |
+| 44 | **Foundry Local On-Device** | Air-gapped LLM inference |
+| 45 | **Real-Time Event AI** | Streaming event processing |
+| 46 | **Healthcare Clinical AI** | HIPAA-compliant decision support |
+| 47 | **Synthetic Data Factory** | Privacy-safe dataset generation |
+| 48 | **AI Model Governance** | Model registry + compliance |
+| 49 | **Creative AI Studio** | Multi-modal content creation |
+| 50 | **Financial Risk Intelligence** | Risk assessment + fraud detection |
 
-Every play ships with: `.github` Agentic OS (19 files)  DevKit  TuneKit  SpecKit  Bicep infra
+Every play ships with: `fai-manifest.json` + `.github` Agentic OS (agents, instructions, prompts, skills) + DevKit + TuneKit + SpecKit + Bicep infra + evaluation test set
 
 </details>
 
@@ -157,20 +220,33 @@ Every play ships with: `.github` Agentic OS (19 files)  DevKit  TuneKit  SpecKit
 
 ```
 frootai/frootai
- mcp-server/            MCP tools + knowledge.json
- vscode-extension/      VS Code extension
- python-sdk/            Python SDK — offline, zero deps
- python-mcp/            Python MCP Server
- functions/             REST API + Agent FAI chatbot
- solution-plays/        Deployable plays with .github Agentic OS
- docs/                  FROOT knowledge modules
- config/                Configurator data + spec templates
- scripts/               Build, sync, validate automation
- workshops/             Hands-on workshops
- community-plugins/     ServiceNow, Salesforce, SAP
- bicep-registry/        Azure Bicep modules
- CONTRIBUTING.md
- LICENSE (MIT)
+├── agents/               201 standalone .agent.md files (WAF-aligned)
+├── instructions/         176 standalone .instructions.md files
+├── skills/               282 skill folders with SKILL.md
+├── hooks/                10 security hooks (secrets, tools, governance, PII, cost...)
+├── plugins/              77 themed bundles (1,008 items, 416 categories)
+├── workflows/            12 agentic workflows (safe-outputs, NL → YAML)
+├── cookbook/              16 step-by-step recipes
+├── schemas/              7 JSON schemas validating all primitive types
+├── engine/               FAI Engine v0.1 (7 modules — manifest reader → evaluator)
+├── solution-plays/       50 deployable plays with DevKit+TuneKit+SpecKit+Bicep
+├── mcp-server/           MCP tools + knowledge.json (25 tools)
+├── vscode-extension/     VS Code extension (16 commands)
+├── python-sdk/           Python SDK — offline, zero deps
+├── python-mcp/           Python MCP Server
+├── functions/            REST API + Agent FAI chatbot
+├── docs/                 FROOT knowledge modules (18 modules, 664 KB)
+├── config/               Configurator data + spec templates
+├── scripts/              21 build/validate/generate scripts
+├── marketplace.json      Auto-generated plugin registry
+├── website-data/         8 JSON feeds for frootai.dev
+├── workshops/            Hands-on workshops
+├── community-plugins/    ServiceNow, Salesforce, SAP
+├── bicep-registry/       Azure Bicep modules
+├── .github/workflows/    15 CI/CD pipelines
+├── .vscode/              15 tasks + schema validation + MCP
+├── CONTRIBUTING.md
+└── LICENSE (MIT)
 ```
 
 </details>

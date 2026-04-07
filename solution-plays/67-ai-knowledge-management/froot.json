@@ -1,0 +1,40 @@
+{
+  "name": "67-ai-knowledge-management",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "AI Knowledge Management",
+  "description": "Enterprise knowledge capture and retrieval — automatic knowledge ingestion from documents, wikis, emails, and meetings. AI-powered freshness detection, gap analysis, expert identification, contextual Q&A, and organizational memory that learns and grows with the team.",
+  "complexity": "High",
+  "tags": [
+    "security",
+    "reliability",
+    "operational-excellence",
+    "cost-optimization",
+    "performance-efficiency"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

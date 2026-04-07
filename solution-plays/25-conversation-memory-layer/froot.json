@@ -1,0 +1,40 @@
+{
+  "name": "25-conversation-memory-layer",
+  "version": "1.0.0",
+  "framework": "frootai",
+  "title": "Conversation Memory Layer",
+  "description": "Persistent agent memory with short-term, long-term, and episodic memory stores — enabling agents to remember context across sessions, learn from interactions, and personalize responses.",
+  "complexity": "Medium",
+  "tags": [
+    "security",
+    "reliability",
+    "performance-efficiency",
+    "cost-optimization",
+    "responsible-ai"
+  ],
+  "status": "Active",
+  "kits": {
+    "devkit": {
+      "path": ".github/",
+      "includes": [
+        "agents",
+        "instructions",
+        "prompts",
+        "skills"
+      ]
+    },
+    "tunekit": {
+      "path": "config/",
+      "files": [
+        "openai.json",
+        "guardrails.json"
+      ]
+    },
+    "speckit": {
+      "path": "spec/",
+      "files": [
+        "play-spec.json"
+      ]
+    }
+  }
+}

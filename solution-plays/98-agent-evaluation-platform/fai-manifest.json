@@ -1,0 +1,61 @@
+{
+  "play": "98-agent-evaluation-platform",
+  "version": "1.0.0",
+  "description": "Automated evaluation suite for any AI agent — standardized benchmarks, regression testing, A/B experimentation, human preference scoring, and leaderboard ranking. Evaluates agents across quality, safety, speed, cost, and user satisfaction dimensions.",
+  "context": {
+    "knowledge": [
+      "T3-Production-Patterns",
+      "T2-Responsible-AI",
+      "O2-AI-Agents"
+    ],
+    "waf": [
+      "responsible-ai",
+      "reliability",
+      "operational-excellence",
+      "cost-optimization"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "98-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-98/",
+      "evaluate-98/",
+      "tune-98/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure OpenAI",
+      "Azure Container Apps",
+      "Azure Cosmos DB",
+      "Azure Machine Learning",
+      "Azure Functions"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.85,
+    "relevance": 0.85,
+    "safety": 0,
+    "costPerQuery": 0.08
+  }
+}

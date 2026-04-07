@@ -1,0 +1,28 @@
+{
+  "name": "95-multimodal-search-v2",
+  "version": "1.0.0",
+  "description": "> Unified search across images, text, code, and audio with cross-modal reasoning. A user can search ",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "multimodal-search-v2"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "cost-optimization": "See README"
+  }
+}

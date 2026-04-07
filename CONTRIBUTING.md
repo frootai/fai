@@ -93,9 +93,81 @@ Before submitting, verify your contribution:
 1. **Fork** the repository
 2. Create a **feature branch** (`feat/XX-your-solution-play`)
 3. Follow the file structure above — CI will validate all files
-4. Submit a **Pull Request** using the PR template below
-5. CI validation runs automatically (`validate-plays.yml`)
+4. Submit a **Pull Request** targeting the `main` branch
+5. CI validation runs automatically:
+   - `validate-primitives.yml` — schema, naming, frontmatter, secrets scan
+   - `validate-plays.yml` — solution play structure (23 plays)
+   - `auto-generate.yml` — marketplace.json regenerated on merge
 6. Address review feedback → merge
+
+---
+
+## Branching Strategy
+
+| Branch | Purpose | Who Pushes |
+|--------|---------|-----------|
+| `main` | Production — always stable, all CI passes | Merge from PRs only |
+| `feat/*` | Feature branches for new primitives, plays, or features | Contributors |
+| `fix/*` | Bug fixes | Contributors |
+| `docs/*` | Documentation updates | Contributors |
+
+**Rules:**
+- Never push directly to `main` — always via PR
+- All PRs require `validate-primitives` to pass (0 errors)
+- Squash merge preferred for clean history
+- Delete feature branches after merge
+
+**Future consideration:** As the community grows, we may adopt a **staged→main** model where:
+- `staged` is the development branch (PRs target here)
+- `main` is the published artifact (force-pushed from staged after CI build)
+- This ensures `main` always has regenerated marketplace.json, docs, and validated state
+- Currently not needed — direct-to-main with CI gates is sufficient for our scale
+
+---
+
+## Contributing Standalone Primitives
+
+Beyond solution plays, you can contribute individual primitives:
+
+### Agents (`agents/`)
+
+```bash
+node scripts/scaffold-primitive.js agent
+# Follow prompts → creates .agent.md + fai-context.json
+npm run validate:primitives     # Verify
+```
+
+Requirements: `description` (10+ chars), kebab-case filename, WAF alignment recommended.
+
+### Instructions (`instructions/`)
+
+```bash
+node scripts/scaffold-primitive.js instruction
+# Follow prompts → creates .instructions.md with applyTo
+npm run validate:primitives
+```
+
+Requirements: `description` + `applyTo` glob pattern in frontmatter.
+
+### Skills (`skills/`)
+
+```bash
+node scripts/scaffold-primitive.js skill
+# Follow prompts → creates folder/SKILL.md
+npm run validate:primitives
+```
+
+Requirements: `name` matches folder, `description` 10-1024 chars.
+
+### Hooks (`hooks/`)
+
+```bash
+node scripts/scaffold-primitive.js hook
+# Follow prompts → creates folder/hooks.json + script
+npm run validate:primitives
+```
+
+Requirements: `version: 1`, valid events, bash script exists.
 
 ---
 

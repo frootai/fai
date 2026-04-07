@@ -1,0 +1,61 @@
+{
+  "play": "95-multimodal-search-v2",
+  "version": "1.0.0",
+  "description": "Unified search across images, text, code, and audio with cross-modal reasoning. A user can search by uploading an image and get related code snippets, documentation, and audio explanations. Combines Azure AI Search vector indexes across modalities with GPT-4o for cross-modal synthesis.",
+  "context": {
+    "knowledge": [
+      "R2-RAG",
+      "F1-GenAI-Foundations",
+      "T3-Production-Patterns"
+    ],
+    "waf": [
+      "performance-efficiency",
+      "reliability",
+      "responsible-ai",
+      "cost-optimization"
+    ]
+  },
+  "primitives": {
+    "agents": [
+      "builder.agent.md",
+      "reviewer.agent.md",
+      "tuner.agent.md"
+    ],
+    "instructions": [
+      "95-patterns.instructions.md"
+    ],
+    "skills": [
+      "deploy-95/",
+      "evaluate-95/",
+      "tune-95/"
+    ],
+    "hooks": [
+      "../../hooks/frootai-secrets-scanner/",
+      "../../hooks/frootai-tool-guardian/",
+      "../../hooks/frootai-governance-audit/"
+    ]
+  },
+  "infrastructure": {
+    "services": [
+      "Azure AI Search",
+      "Azure AI Vision",
+      "Azure AI Speech",
+      "Azure OpenAI",
+      "Azure Container Apps"
+    ],
+    "template": "infra/main.bicep",
+    "parameters": "infra/parameters.json"
+  },
+  "toolkit": {
+    "devkit": ".github/",
+    "tunekit": "config/",
+    "speckit": "spec/"
+  },
+  "guardrails": {
+    "groundedness": 0.85,
+    "coherence": 0.85,
+    "relevance": 0.90,
+    "safety": 0,
+    "costPerQuery": 0.12
+  }
+}

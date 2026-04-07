@@ -1,0 +1,29 @@
+{
+  "name": "66-ai-infrastructure-optimizer",
+  "version": "1.0.0",
+  "description": "AI-driven cloud infrastructure optimization — automatic right-sizing recommendations, GPU utilization analysis, idle resource detection, reserved instance guidance, auto-scaling policy generation, cost anomaly alerting, and monthly FinOps reports with actionable savings.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "infra-optimizer"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "cost-optimization": "See README",
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "operational-excellence": "See README",
+    "security": "See README"
+  }
+}

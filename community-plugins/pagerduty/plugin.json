@@ -1,0 +1,48 @@
+{
+  "name": "frootai-pagerduty-plugin",
+  "description": "Pagerduty integration plugin for FrootAI — 3 MCP tools, dedicated agent, compatible plays",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "agent": "frootai-pagerduty-expert",
+  "tools": [
+    {
+      "name": "pagerduty_incident_create",
+      "description": "Create a PagerDuty incident with severity, service, and escalation policy"
+    },
+    {
+      "name": "pagerduty_oncall_query",
+      "description": "Query who is currently on-call for a specific PagerDuty service"
+    },
+    {
+      "name": "pagerduty_escalation_trigger",
+      "description": "Trigger an escalation for an existing PagerDuty incident"
+    }
+  ],
+  "compatible_plays": [
+    "37"
+  ],
+  "authentication": {
+    "type": "oauth2",
+    "token_url": "https://pagerduty.com/oauth/token",
+    "scopes": [
+      "read",
+      "write"
+    ]
+  },
+  "configuration": {
+    "required": [
+      "base_url",
+      "client_id",
+      "client_secret_key_vault_ref"
+    ],
+    "optional": [
+      "timeout_ms",
+      "retry_max",
+      "rate_limit_per_minute"
+    ]
+  }
+}

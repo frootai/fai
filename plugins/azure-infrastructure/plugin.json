@@ -1,0 +1,49 @@
+{
+  "name": "azure-infrastructure",
+  "description": "Azure Infrastructure — landing zones, hub-spoke networking, private endpoints, Azure Policy, RBAC, and subscription vending. Enterprise-grade Bicep IaC for AI workloads validated against all 6 WAF pillars.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "azure",
+    "infrastructure",
+    "landing-zone",
+    "bicep",
+    "networking",
+    "policy",
+    "rbac",
+    "private-endpoints",
+    "hub-spoke"
+  ],
+  "agents": [
+    "../../agents/frootai-landing-zone.agent.md",
+    "../../agents/frootai-architect.agent.md",
+    "../../agents/frootai-azure-networking-expert.agent.md",
+    "../../agents/frootai-azure-policy-expert.agent.md",
+    "../../agents/frootai-azure-identity-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/bicep-waf.instructions.md",
+    "../../instructions/security-bicep.instructions.md",
+    "../../instructions/bicep-code-best-practices.instructions.md",
+    "../../instructions/azure-bicep-avm.instructions.md",
+    "../../instructions/azure-front-door-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-build-bicep-module/",
+    "../../skills/frootai-architecture-blueprint/",
+    "../../skills/frootai-azure-resource-visualizer/",
+    "../../skills/frootai-threat-model/",
+    "../../skills/frootai-import-iac/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/",
+    "../../hooks/frootai-waf-compliance/"
+  ]
+}

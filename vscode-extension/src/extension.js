@@ -6,7 +6,7 @@ const https = require("https");
 // ════════════════════════════════════════════════════════════════════
 // FrootAI VS Code Extension v1.0 — Standalone Engine
 // From the Roots to the Fruits. The Open Glue for GenAI.
-// 22 MCP tools · 18 modules · 200+ terms · 20 solution plays
+// 25 MCP tools · 18 modules · 200+ terms · 100 solution plays
 // Works from ANY workspace — no clone needed.
 // ════════════════════════════════════════════════════════════════════
 
@@ -74,86 +74,222 @@ const SOLUTION_PLAYS = [
   { id: "18", name: "Prompt Management", icon: "📝", status: "Ready", dir: "18-prompt-management", layer: "T" },
   { id: "19", name: "Edge AI Phi-4", icon: "📱", status: "Ready", dir: "19-edge-ai-phi4", layer: "T" },
   { id: "20", name: "Anomaly Detection", icon: "🚨", status: "Ready", dir: "20-anomaly-detection", layer: "O" },
+  { id: "21", name: "Agentic RAG", icon: "🧠", status: "Ready", dir: "21-agentic-rag", layer: "R" },
+  { id: "22", name: "Multi-Agent Swarm", icon: "👥", status: "Ready", dir: "22-multi-agent-swarm", layer: "O" },
+  { id: "23", name: "Browser Automation", icon: "🖥️", status: "Ready", dir: "23-browser-automation-agent", layer: "O" },
+  { id: "24", name: "AI Code Review", icon: "🔧", status: "Ready", dir: "24-ai-code-review-pipeline", layer: "O" },
+  { id: "25", name: "Conversation Memory", icon: "🧩", status: "Ready", dir: "25-conversation-memory-layer", layer: "O" },
+  { id: "26", name: "Semantic Search Engine", icon: "🔍", status: "Ready", dir: "26-semantic-search-engine", layer: "R" },
+  { id: "27", name: "AI Data Pipeline", icon: "🏭", status: "Ready", dir: "27-ai-data-pipeline", layer: "T" },
+  { id: "28", name: "Knowledge Graph RAG", icon: "⚡", status: "Ready", dir: "28-knowledge-graph-rag", layer: "R" },
+  { id: "29", name: "MCP Gateway", icon: "⚙️", status: "Ready", dir: "29-mcp-gateway", layer: "O" },
+  { id: "30", name: "AI Security Hardening", icon: "🛡️", status: "Ready", dir: "30-ai-security-hardening", layer: "O" },
+  { id: "31", name: "Low-Code AI Builder", icon: "🧱", status: "Ready", dir: "31-low-code-ai-builder", layer: "O" },
+  { id: "32", name: "AI-Powered Testing", icon: "🧪", status: "Ready", dir: "32-ai-powered-testing", layer: "O" },
+  { id: "33", name: "Voice AI Agent", icon: "🎙️", status: "Ready", dir: "33-voice-ai-agent", layer: "O" },
+  { id: "34", name: "Edge AI Deployment", icon: "📲", status: "Ready", dir: "34-edge-ai-deployment", layer: "T" },
+  { id: "35", name: "AI Compliance Engine", icon: "📋", status: "Ready", dir: "35-ai-compliance-engine", layer: "O" },
+  { id: "36", name: "Multimodal Agent", icon: "👁️", status: "Ready", dir: "36-multimodal-agent", layer: "O" },
+  { id: "37", name: "AI-Powered DevOps", icon: "🔄", status: "Ready", dir: "37-ai-powered-devops", layer: "O" },
+  { id: "38", name: "Document Understanding v2", icon: "📑", status: "Ready", dir: "38-document-understanding-v2", layer: "O" },
+  { id: "39", name: "AI Meeting Assistant", icon: "📅", status: "Ready", dir: "39-ai-meeting-assistant", layer: "O" },
+  { id: "40", name: "Copilot Studio Advanced", icon: "🤖", status: "Ready", dir: "40-copilot-studio-advanced", layer: "O" },
+  { id: "41", name: "AI Red Teaming", icon: "🎯", status: "Ready", dir: "41-ai-red-teaming", layer: "T" },
+  { id: "42", name: "Computer Use Agent", icon: "🖱️", status: "Ready", dir: "42-computer-use-agent", layer: "O" },
+  { id: "43", name: "AI Video Generation", icon: "🎬", status: "Ready", dir: "43-ai-video-generation", layer: "T" },
+  { id: "44", name: "Foundry Local On-Device", icon: "💻", status: "Ready", dir: "44-foundry-local-on-device", layer: "T" },
+  { id: "45", name: "Real-Time Event AI", icon: "⚡", status: "Ready", dir: "45-realtime-event-ai", layer: "O" },
+  { id: "46", name: "Healthcare Clinical AI", icon: "🏥", status: "Ready", dir: "46-healthcare-clinical-ai", layer: "O" },
+  { id: "47", name: "Synthetic Data Factory", icon: "🏭", status: "Ready", dir: "47-synthetic-data-factory", layer: "T" },
+  { id: "48", name: "AI Model Governance", icon: "📊", status: "Ready", dir: "48-ai-model-governance", layer: "T" },
+  { id: "49", name: "Creative AI Studio", icon: "🎨", status: "Ready", dir: "49-creative-ai-studio", layer: "O" },
+  { id: "50", name: "Financial Risk Intelligence", icon: "💰", status: "Ready", dir: "50-financial-risk-intelligence", layer: "O" },
+  { id: "51", name: "Autonomous Coding Agent", icon: "💻", status: "Ready", dir: "51-autonomous-coding-agent", layer: "O" },
+  { id: "52", name: "AI API Gateway v2", icon: "🌐", status: "Ready", dir: "52-ai-api-gateway-v2", layer: "O" },
+  { id: "53", name: "Legal Document AI", icon: "⚖️", status: "Ready", dir: "53-legal-document-ai", layer: "O" },
+  { id: "54", name: "AI Customer Support v2", icon: "🎧", status: "Ready", dir: "54-ai-customer-support-v2", layer: "O" },
+  { id: "55", name: "Supply Chain AI", icon: "🚛", status: "Ready", dir: "55-supply-chain-ai", layer: "O" },
+  { id: "56", name: "Semantic Code Search", icon: "🔎", status: "Ready", dir: "56-semantic-code-search", layer: "R" },
+  { id: "57", name: "AI Translation Engine", icon: "🌍", status: "Ready", dir: "57-ai-translation-engine", layer: "O" },
+  { id: "58", name: "Digital Twin Agent", icon: "📦", status: "Ready", dir: "58-digital-twin-agent", layer: "O" },
+  { id: "59", name: "AI Recruiter Agent", icon: "👤", status: "Ready", dir: "59-ai-recruiter-agent", layer: "O" },
+  { id: "60", name: "Responsible AI Dashboard", icon: "📊", status: "Ready", dir: "60-responsible-ai-dashboard", layer: "T" },
+  { id: "61", name: "Content Moderation v2", icon: "🔒", status: "Ready", dir: "61-content-moderation-v2", layer: "O" },
+  { id: "62", name: "Federated Learning", icon: "🔗", status: "Ready", dir: "62-federated-learning-pipeline", layer: "T" },
+  { id: "63", name: "Fraud Detection Agent", icon: "🔍", status: "Ready", dir: "63-fraud-detection-agent", layer: "O" },
+  { id: "64", name: "AI Sales Assistant", icon: "📈", status: "Ready", dir: "64-ai-sales-assistant", layer: "O" },
+  { id: "65", name: "AI Training Curriculum", icon: "🎓", status: "Ready", dir: "65-ai-training-curriculum", layer: "F" },
+  { id: "66", name: "AI Infra Optimizer", icon: "🖥️", status: "Ready", dir: "66-ai-infrastructure-optimizer", layer: "O" },
+  { id: "67", name: "AI Knowledge Management", icon: "📚", status: "Ready", dir: "67-ai-knowledge-management", layer: "R" },
+  { id: "68", name: "Predictive Maintenance", icon: "🔧", status: "Ready", dir: "68-predictive-maintenance-ai", layer: "O" },
+  { id: "69", name: "Carbon Footprint Tracker", icon: "🌿", status: "Ready", dir: "69-carbon-footprint-tracker", layer: "O" },
+  { id: "70", name: "ESG Compliance Agent", icon: "📋", status: "Ready", dir: "70-esg-compliance-agent", layer: "O" },
+  { id: "71", name: "Smart Energy Grid AI", icon: "⚡", status: "Ready", dir: "71-smart-energy-grid-ai", layer: "O" },
+  { id: "72", name: "Climate Risk Assessor", icon: "🌍", status: "Ready", dir: "72-climate-risk-assessor", layer: "O" },
+  { id: "73", name: "Waste & Recycling Optimizer", icon: "♻️", status: "Ready", dir: "73-waste-recycling-optimizer", layer: "O" },
+  { id: "74", name: "AI Tutoring Agent", icon: "🎓", status: "Ready", dir: "74-ai-tutoring-agent", layer: "O" },
+  { id: "75", name: "Exam Generation Engine", icon: "📖", status: "Ready", dir: "75-exam-generation-engine", layer: "O" },
+  { id: "76", name: "Accessibility Learning Agent", icon: "📚", status: "Ready", dir: "76-accessibility-learning-agent", layer: "O" },
+  { id: "77", name: "Research Paper AI", icon: "🔬", status: "Ready", dir: "77-research-paper-ai", layer: "R" },
+  { id: "78", name: "Precision Agriculture Agent", icon: "🌾", status: "Ready", dir: "78-precision-agriculture-agent", layer: "O" },
+  { id: "79", name: "Food Safety Inspector AI", icon: "🍎", status: "Ready", dir: "79-food-safety-inspector-ai", layer: "O" },
+  { id: "80", name: "Biodiversity Monitor", icon: "🦋", status: "Ready", dir: "80-biodiversity-monitor", layer: "O" },
+  { id: "81", name: "Property Valuation AI", icon: "🏠", status: "Ready", dir: "81-property-valuation-ai", layer: "O" },
+  { id: "82", name: "Construction Safety AI", icon: "🚧", status: "Ready", dir: "82-construction-safety-ai", layer: "O" },
+  { id: "83", name: "Building Energy Optimizer", icon: "🏢", status: "Ready", dir: "83-building-energy-optimizer", layer: "O" },
+  { id: "84", name: "Citizen Services Chatbot", icon: "🏛️", status: "Ready", dir: "84-citizen-services-chatbot", layer: "R" },
+  { id: "85", name: "Policy Impact Analyzer", icon: "📜", status: "Ready", dir: "85-policy-impact-analyzer", layer: "T" },
+  { id: "86", name: "Public Safety Analytics", icon: "🚔", status: "Ready", dir: "86-public-safety-analytics", layer: "T" },
+  { id: "87", name: "Dynamic Pricing Engine", icon: "💰", status: "Ready", dir: "87-dynamic-pricing-engine", layer: "T" },
+  { id: "88", name: "Visual Product Search", icon: "🔍", status: "Ready", dir: "88-visual-product-search", layer: "R" },
+  { id: "89", name: "Retail Inventory Predictor", icon: "📦", status: "Ready", dir: "89-retail-inventory-predictor", layer: "T" },
+  { id: "90", name: "Network Optimization Agent", icon: "📡", status: "Ready", dir: "90-network-optimization-agent", layer: "T" },
+  { id: "91", name: "Customer Churn Predictor", icon: "👥", status: "Ready", dir: "91-customer-churn-predictor", layer: "T" },
+  { id: "92", name: "Telecom Fraud Shield", icon: "🛡️", status: "Ready", dir: "92-telecom-fraud-shield", layer: "T" },
+  { id: "93", name: "Continual Learning Agent", icon: "🧠", status: "Ready", dir: "93-continual-learning-agent", layer: "T" },
+  { id: "94", name: "AI Podcast Generator", icon: "🎙️", status: "Ready", dir: "94-ai-podcast-generator", layer: "T" },
+  { id: "95", name: "Multimodal Search Engine v2", icon: "🔍", status: "Ready", dir: "95-multimodal-search-v2", layer: "R" },
+  { id: "96", name: "Real-Time Voice Agent v2", icon: "📞", status: "Ready", dir: "96-realtime-voice-agent-v2", layer: "O" },
+  { id: "97", name: "AI Data Marketplace", icon: "📊", status: "Ready", dir: "97-ai-data-marketplace", layer: "T" },
+  { id: "98", name: "Agent Evaluation Platform", icon: "🏛️", status: "Ready", dir: "98-agent-evaluation-platform", layer: "T" },
+  { id: "99", name: "Enterprise AI Governance Hub", icon: "⚡", status: "Ready", dir: "99-enterprise-ai-governance-hub", layer: "T" },
+  { id: "100", name: "FAI Meta-Agent", icon: "🌟", status: "Ready", dir: "100-fai-meta-agent", layer: "O" },
 ];
 
 const FROOT_MODULES = [
-  { layer: "🌱 Foundations", color: "#f59e0b", modules: [
-    { id: "F1", name: "GenAI Foundations", file: "GenAI-Foundations.md" },
-    { id: "F2", name: "LLM Landscape", file: "LLM-Landscape.md" },
-    { id: "F3", name: "AI Glossary A–Z", file: "F3-AI-Glossary-AZ.md" },
-    { id: "F4", name: ".github Agentic OS", file: "F4-GitHub-Agentic-OS.md" },
-  ]},
-  { layer: "🪵 Reasoning", color: "#10b981", modules: [
-    { id: "R1", name: "Prompt Engineering", file: "Prompt-Engineering.md" },
-    { id: "R2", name: "RAG Architecture", file: "RAG-Architecture.md" },
-    { id: "R3", name: "Deterministic AI", file: "R3-Deterministic-AI.md" },
-  ]},
-  { layer: "🌿 Orchestration", color: "#06b6d4", modules: [
-    { id: "O1", name: "Semantic Kernel", file: "Semantic-Kernel.md" },
-    { id: "O2", name: "AI Agents", file: "AI-Agents-Deep-Dive.md" },
-    { id: "O3", name: "MCP & Tools", file: "O3-MCP-Tools-Functions.md" },
-  ]},
-  { layer: "🍃 Operations", color: "#6366f1", modules: [
-    { id: "O4", name: "Azure AI Platform", file: "Azure-AI-Foundry.md" },
-    { id: "O5", name: "AI Infrastructure", file: "AI-Infrastructure.md" },
-    { id: "O6", name: "Copilot Ecosystem", file: "Copilot-Ecosystem.md" },
-  ]},
-  { layer: "🍎 Transformation", color: "#7c3aed", modules: [
-    { id: "T1", name: "Fine-Tuning", file: "T1-Fine-Tuning-MLOps.md" },
-    { id: "T2", name: "Responsible AI", file: "Responsible-AI-Safety.md" },
-    { id: "T3", name: "Production Patterns", file: "T3-Production-Patterns.md" },
-  ]},
+  {
+    layer: "🌱 Foundations", color: "#f59e0b", modules: [
+      { id: "F1", name: "GenAI Foundations", file: "GenAI-Foundations.md" },
+      { id: "F2", name: "LLM Landscape", file: "LLM-Landscape.md" },
+      { id: "F3", name: "AI Glossary A–Z", file: "F3-AI-Glossary-AZ.md" },
+      { id: "F4", name: ".github Agentic OS", file: "F4-GitHub-Agentic-OS.md" },
+    ]
+  },
+  {
+    layer: "🪵 Reasoning", color: "#10b981", modules: [
+      { id: "R1", name: "Prompt Engineering", file: "Prompt-Engineering.md" },
+      { id: "R2", name: "RAG Architecture", file: "RAG-Architecture.md" },
+      { id: "R3", name: "Deterministic AI", file: "R3-Deterministic-AI.md" },
+    ]
+  },
+  {
+    layer: "🌿 Orchestration", color: "#06b6d4", modules: [
+      { id: "O1", name: "Semantic Kernel", file: "Semantic-Kernel.md" },
+      { id: "O2", name: "AI Agents", file: "AI-Agents-Deep-Dive.md" },
+      { id: "O3", name: "MCP & Tools", file: "O3-MCP-Tools-Functions.md" },
+    ]
+  },
+  {
+    layer: "🍃 Operations", color: "#6366f1", modules: [
+      { id: "O4", name: "Azure AI Platform", file: "Azure-AI-Foundry.md" },
+      { id: "O5", name: "AI Infrastructure", file: "AI-Infrastructure.md" },
+      { id: "O6", name: "Copilot Ecosystem", file: "Copilot-Ecosystem.md" },
+    ]
+  },
+  {
+    layer: "🍎 Transformation", color: "#7c3aed", modules: [
+      { id: "T1", name: "Fine-Tuning", file: "T1-Fine-Tuning-MLOps.md" },
+      { id: "T2", name: "Responsible AI", file: "Responsible-AI-Safety.md" },
+      { id: "T3", name: "Production Patterns", file: "T3-Production-Patterns.md" },
+    ]
+  },
 ];
 
 const MCP_TOOLS = [
-  { name: "list_modules", desc: "Browse 18 modules by FROOT layer", type: "static",
-    docs: "Returns all 18 FROOT knowledge modules organized by layer (Foundations, Reasoning, Orchestration, Operations, Transformation). Each module includes ID, name, and description. Use this to discover what knowledge is available.\n\n**Input:** none\n**Output:** Array of layers with modules\n**Example:** `list_modules` → [{layer: 'Foundations', modules: [{id: 'F1', name: 'GenAI Foundations'}, ...]}]" },
-  { name: "get_module", desc: "Read any module (F1–T3, F4)", type: "static",
-    docs: "Returns the full content of any FROOT knowledge module by ID. Supports F1-F4, R1-R3, O1-O3, O4-O6, T1-T3 (18 modules total).\n\n**Input:** `moduleId` (string) — e.g., 'F1', 'R2', 'T3'\n**Output:** Full markdown content of the module\n**Example:** `get_module({moduleId: 'F4'})` → Full GitHub Agentic OS guide" },
-  { name: "lookup_term", desc: "200+ AI/ML term definitions", type: "static",
-    docs: "Searches the AI Glossary (200+ terms) for a specific term or phrase. Returns the definition, related terms, and category. Fuzzy matching supported.\n\n**Input:** `term` (string) — e.g., 'RAG', 'temperature', 'embeddings'\n**Output:** Term definition with metadata\n**Example:** `lookup_term({term: 'RAG'})` → {term: 'RAG', definition: 'Retrieval-Augmented Generation...'}" },
-  { name: "search_knowledge", desc: "Full-text search all modules", type: "static",
-    docs: "Performs full-text search across all 18 knowledge modules. Returns matching excerpts with module IDs and context. Great for finding specific patterns, services, or concepts.\n\n**Input:** `query` (string) — search text\n**Output:** Array of matches with module, context, and relevance\n**Example:** `search_knowledge({query: 'vector database'})` → matches from RAG, AI Search modules" },
-  { name: "get_architecture_pattern", desc: "7 decision guides", type: "static",
-    docs: "Returns architecture decision guides for common AI patterns. Covers: RAG vs Fine-tuning, Agent frameworks, Model selection, Hosting options, Search strategies, Orchestration choices, Cost optimization.\n\n**Input:** `pattern` (string, optional) — specific pattern name\n**Output:** Decision matrix with pros/cons/when-to-use" },
-  { name: "get_froot_overview", desc: "Complete FROOT summary", type: "static",
-    docs: "Returns the complete FrootAI platform overview: mission, 6 layers, 20 solution plays list, DevKit/TuneKit model, and getting started guide.\n\n**Input:** none\n**Output:** Platform overview markdown" },
-  { name: "fetch_azure_docs", desc: "⛅ Live — Search Azure docs", type: "live",
-    docs: "Fetches documentation from Azure Learn. Queries the Azure documentation API for service-specific guidance. Falls back gracefully if offline.\n\n**Input:** `query` (string) — Azure service or topic\n**Output:** Documentation excerpts from learn.microsoft.com\n**Example:** `fetch_azure_docs({query: 'AI Search hybrid'})` → Azure AI Search hybrid query docs" },
-  { name: "fetch_external_mcp", desc: "⛅ Live — Find MCP servers", type: "live",
-    docs: "Queries external MCP server registries to find available MCP servers for specific tools or domains. Helps discover community MCP servers.\n\n**Input:** `query` (string) — tool or domain name\n**Output:** List of matching MCP servers with install instructions" },
-  { name: "list_community_plays", desc: "⛅ Live — List plays from GitHub", type: "live",
-    docs: "Fetches the list of solution plays from the FrootAI GitHub repository. Returns play names, statuses, and file counts. Useful for discovering what's available.\n\n**Input:** none\n**Output:** Array of 20 solution plays with metadata" },
-  { name: "get_github_agentic_os", desc: "⛅ Live — .github OS guide", type: "live",
-    docs: "Returns the complete .github Agentic OS implementation guide: 7 primitives, 4 layers, file structure, and how to implement per solution play.\n\n**Input:** none\n**Output:** Full .github Agentic OS guide" },
-  { name: "agent_build", desc: "🔗 Chain — Builder agent guidance", type: "chain",
-    docs: "Invokes the Builder agent persona. Returns structured guidance for building a solution: architecture decisions, service selection, code patterns, and implementation steps. Automatically suggests calling agent_review next.\n\n**Input:** `task` (string) — what to build\n**Output:** Builder guidance + suggestion to call agent_review\n**Example:** `agent_build({task: 'RAG pipeline with Azure AI Search'})` → architecture + code patterns + 'Now call agent_review'" },
-  { name: "agent_review", desc: "🔗 Chain — Reviewer agent guidance", type: "chain",
-    docs: "Invokes the Reviewer agent persona. Reviews architecture and code for: security, performance, cost, compliance, and best practices. Suggests calling agent_tune next.\n\n**Input:** `context` (string) — what to review\n**Output:** Review findings + suggestion to call agent_tune" },
-  { name: "agent_tune", desc: "🔗 Chain — Tuner agent guidance", type: "chain",
-    docs: "Invokes the Tuner agent persona. Provides AI parameter tuning guidance: temperature, top-k, chunk sizes, model selection, guardrails configuration. Terminal step in the agent chain.\n\n**Input:** `context` (string) — what to tune\n**Output:** Tuning recommendations for production" },
+  {
+    name: "list_modules", desc: "Browse 18 modules by FROOT layer", type: "static",
+    docs: "Returns all 18 FROOT knowledge modules organized by layer (Foundations, Reasoning, Orchestration, Operations, Transformation). Each module includes ID, name, and description. Use this to discover what knowledge is available.\n\n**Input:** none\n**Output:** Array of layers with modules\n**Example:** `list_modules` → [{layer: 'Foundations', modules: [{id: 'F1', name: 'GenAI Foundations'}, ...]}]"
+  },
+  {
+    name: "get_module", desc: "Read any module (F1–T3, F4)", type: "static",
+    docs: "Returns the full content of any FROOT knowledge module by ID. Supports F1-F4, R1-R3, O1-O3, O4-O6, T1-T3 (18 modules total).\n\n**Input:** `moduleId` (string) — e.g., 'F1', 'R2', 'T3'\n**Output:** Full markdown content of the module\n**Example:** `get_module({moduleId: 'F4'})` → Full GitHub Agentic OS guide"
+  },
+  {
+    name: "lookup_term", desc: "200+ AI/ML term definitions", type: "static",
+    docs: "Searches the AI Glossary (200+ terms) for a specific term or phrase. Returns the definition, related terms, and category. Fuzzy matching supported.\n\n**Input:** `term` (string) — e.g., 'RAG', 'temperature', 'embeddings'\n**Output:** Term definition with metadata\n**Example:** `lookup_term({term: 'RAG'})` → {term: 'RAG', definition: 'Retrieval-Augmented Generation...'}"
+  },
+  {
+    name: "search_knowledge", desc: "Full-text search all modules", type: "static",
+    docs: "Performs full-text search across all 18 knowledge modules. Returns matching excerpts with module IDs and context. Great for finding specific patterns, services, or concepts.\n\n**Input:** `query` (string) — search text\n**Output:** Array of matches with module, context, and relevance\n**Example:** `search_knowledge({query: 'vector database'})` → matches from RAG, AI Search modules"
+  },
+  {
+    name: "get_architecture_pattern", desc: "7 decision guides", type: "static",
+    docs: "Returns architecture decision guides for common AI patterns. Covers: RAG vs Fine-tuning, Agent frameworks, Model selection, Hosting options, Search strategies, Orchestration choices, Cost optimization.\n\n**Input:** `pattern` (string, optional) — specific pattern name\n**Output:** Decision matrix with pros/cons/when-to-use"
+  },
+  {
+    name: "get_froot_overview", desc: "Complete FROOT summary", type: "static",
+    docs: "Returns the complete FrootAI platform overview: mission, 6 layers, 100 solution plays list, DevKit/TuneKit model, and getting started guide.\n\n**Input:** none\n**Output:** Platform overview markdown"
+  },
+  {
+    name: "fetch_azure_docs", desc: "⛅ Live — Search Azure docs", type: "live",
+    docs: "Fetches documentation from Azure Learn. Queries the Azure documentation API for service-specific guidance. Falls back gracefully if offline.\n\n**Input:** `query` (string) — Azure service or topic\n**Output:** Documentation excerpts from learn.microsoft.com\n**Example:** `fetch_azure_docs({query: 'AI Search hybrid'})` → Azure AI Search hybrid query docs"
+  },
+  {
+    name: "fetch_external_mcp", desc: "⛅ Live — Find MCP servers", type: "live",
+    docs: "Queries external MCP server registries to find available MCP servers for specific tools or domains. Helps discover community MCP servers.\n\n**Input:** `query` (string) — tool or domain name\n**Output:** List of matching MCP servers with install instructions"
+  },
+  {
+    name: "list_community_plays", desc: "⛅ Live — List plays from GitHub", type: "live",
+    docs: "Fetches the list of solution plays from the FrootAI GitHub repository. Returns play names, statuses, and file counts. Useful for discovering what's available.\n\n**Input:** none\n**Output:** Array of 100 solution plays with metadata"
+  },
+  {
+    name: "get_github_agentic_os", desc: "⛅ Live — .github OS guide", type: "live",
+    docs: "Returns the complete .github Agentic OS implementation guide: 7 primitives, 4 layers, file structure, and how to implement per solution play.\n\n**Input:** none\n**Output:** Full .github Agentic OS guide"
+  },
+  {
+    name: "agent_build", desc: "🔗 Chain — Builder agent guidance", type: "chain",
+    docs: "Invokes the Builder agent persona. Returns structured guidance for building a solution: architecture decisions, service selection, code patterns, and implementation steps. Automatically suggests calling agent_review next.\n\n**Input:** `task` (string) — what to build\n**Output:** Builder guidance + suggestion to call agent_review\n**Example:** `agent_build({task: 'RAG pipeline with Azure AI Search'})` → architecture + code patterns + 'Now call agent_review'"
+  },
+  {
+    name: "agent_review", desc: "🔗 Chain — Reviewer agent guidance", type: "chain",
+    docs: "Invokes the Reviewer agent persona. Reviews architecture and code for: security, performance, cost, compliance, and best practices. Suggests calling agent_tune next.\n\n**Input:** `context` (string) — what to review\n**Output:** Review findings + suggestion to call agent_tune"
+  },
+  {
+    name: "agent_tune", desc: "🔗 Chain — Tuner agent guidance", type: "chain",
+    docs: "Invokes the Tuner agent persona. Provides AI parameter tuning guidance: temperature, top-k, chunk sizes, model selection, guardrails configuration. Terminal step in the agent chain.\n\n**Input:** `context` (string) — what to tune\n**Output:** Tuning recommendations for production"
+  },
   // ── Ecosystem Tools (3) ──
-  { name: "get_model_catalog", desc: "🌐 Ecosystem — Browse Azure AI model catalog", type: "ecosystem",
-    docs: "Returns the Azure AI model catalog with GPT, Claude, Llama, Phi, Mistral models. Includes capabilities, pricing tiers, hosted/managed options, and recommended use cases.\n\n**Input:** `filter` (string, optional) — filter by provider or capability\n**Output:** Array of models with metadata\n**Example:** `get_model_catalog({filter: 'code'})` → models optimized for code generation" },
-  { name: "get_azure_pricing", desc: "🌐 Ecosystem — Azure AI service pricing", type: "ecosystem",
-    docs: "Returns current pricing for 25+ Azure AI services: OpenAI models, AI Search, Cognitive Services, App Service tiers. Includes per-unit costs, free tiers, and cost optimization tips.\n\n**Input:** `service` (string, optional) — specific service name\n**Output:** Pricing table with tiers and rates\n**Example:** `get_azure_pricing({service: 'openai'})` → GPT-4o pricing per 1K tokens" },
-  { name: "compare_models", desc: "🌐 Ecosystem — Compare AI models side-by-side", type: "ecosystem",
-    docs: "Compares two or more AI models across dimensions: cost, latency, context window, capabilities, and recommended scenarios. Helps pick the right model for a use case.\n\n**Input:** `models` (string[]) — model names to compare\n**Output:** Comparison matrix\n**Example:** `compare_models({models: ['gpt-4o', 'gpt-4o-mini']})` → side-by-side comparison" },
+  {
+    name: "get_model_catalog", desc: "🌐 Ecosystem — Browse Azure AI model catalog", type: "ecosystem",
+    docs: "Returns the Azure AI model catalog with GPT, Claude, Llama, Phi, Mistral models. Includes capabilities, pricing tiers, hosted/managed options, and recommended use cases.\n\n**Input:** `filter` (string, optional) — filter by provider or capability\n**Output:** Array of models with metadata\n**Example:** `get_model_catalog({filter: 'code'})` → models optimized for code generation"
+  },
+  {
+    name: "get_azure_pricing", desc: "🌐 Ecosystem — Azure AI service pricing", type: "ecosystem",
+    docs: "Returns current pricing for 25+ Azure AI services: OpenAI models, AI Search, Cognitive Services, App Service tiers. Includes per-unit costs, free tiers, and cost optimization tips.\n\n**Input:** `service` (string, optional) — specific service name\n**Output:** Pricing table with tiers and rates\n**Example:** `get_azure_pricing({service: 'openai'})` → GPT-4o pricing per 1K tokens"
+  },
+  {
+    name: "compare_models", desc: "🌐 Ecosystem — Compare AI models side-by-side", type: "ecosystem",
+    docs: "Compares two or more AI models across dimensions: cost, latency, context window, capabilities, and recommended scenarios. Helps pick the right model for a use case.\n\n**Input:** `models` (string[]) — model names to compare\n**Output:** Comparison matrix\n**Example:** `compare_models({models: ['gpt-4o', 'gpt-4o-mini']})` → side-by-side comparison"
+  },
   // ── Compute Tools (6) ──
-  { name: "semantic_search_plays", desc: "🧮 Compute — Semantic search across 20 plays", type: "compute",
-    docs: "Performs keyword + semantic search across all 20 solution plays. Matches against play names, descriptions, services used, and architecture patterns. Returns ranked results with relevance scores.\n\n**Input:** `query` (string) — what to search for\n**Output:** Ranked matches with play ID, name, relevance, and excerpts\n**Example:** `semantic_search_plays({query: 'voice AI'})` → Play 04 (Call Center Voice AI) ranked first" },
-  { name: "estimate_cost", desc: "🧮 Compute — Estimate monthly Azure cost", type: "compute",
-    docs: "Calculates estimated monthly Azure costs for any solution play at different scales (small/medium/large). Uses real Azure retail pricing for 25+ services. Returns itemized cost breakdown.\n\n**Input:** `playNumber` (number), `scale` (string: 'small'|'medium'|'large')\n**Output:** Itemized cost breakdown with totals\n**Example:** `estimate_cost({playNumber: 1, scale: 'medium'})` → ~$850/mo breakdown" },
-  { name: "validate_config", desc: "🧮 Compute — Validate config files", type: "compute",
-    docs: "Validates FrootAI config files (openai.json, guardrails.json, routing.json) against production best practices. Checks for security issues, missing fields, suboptimal settings.\n\n**Input:** `configType` (string), `config` (object)\n**Output:** Array of findings: 🔴 Critical / 🟡 Warning / 🟢 Good\n**Example:** `validate_config({configType: 'openai', config: {...}})` → [{severity: 'warning', message: 'temperature > 0.3'}]" },
-  { name: "compare_plays", desc: "🧮 Compute — Compare solution plays", type: "compute",
-    docs: "Compares two or more solution plays side-by-side across dimensions: complexity, cost, services used, team size, and deployment time. Great for choosing between similar approaches.\n\n**Input:** `playIds` (number[]) — play numbers to compare\n**Output:** Comparison matrix with recommendations\n**Example:** `compare_plays({playIds: [1, 9]})` → RAG Q&A vs AI Search Portal comparison" },
-  { name: "generate_architecture_diagram", desc: "🧮 Compute — Generate Mermaid diagrams", type: "compute",
-    docs: "Generates Mermaid.js architecture diagrams for any solution play. Includes Azure services, data flows, and integration points. Renders in VS Code preview.\n\n**Input:** `playNumber` (number), `style` (string: 'flowchart'|'sequence'|'c4')\n**Output:** Mermaid diagram code\n**Example:** `generate_architecture_diagram({playNumber: 5})` → IT Ticket Resolution flowchart" },
-  { name: "embedding_playground", desc: "🧮 Compute — Experiment with embeddings", type: "compute",
-    docs: "Interactive playground for text embeddings. Compute similarity between texts, visualize embedding dimensions, and understand how vector search works under the hood.\n\n**Input:** `texts` (string[]) — texts to embed and compare\n**Output:** Similarity matrix + dimension analysis\n**Example:** `embedding_playground({texts: ['RAG pipeline', 'search system']})` → similarity: 0.87" },
-  { name: "run_evaluation", desc: "🧮 Compute — Quality evaluation with thresholds", type: "compute",
-    docs: "Run quality evaluation against configurable thresholds. Input actual scores from your evaluation, get pass/fail per metric with recommendations.\n\n**Input:** `scores` (object: {groundedness: 4.5, relevance: 3.8}), optional `thresholds`, optional `play` number\n**Output:** Pass/fail table + improvement recommendations\n**Example:** `run_evaluation({scores: {groundedness: 4.5, relevance: 3.2}, play: '01'})` → 1/2 passed, relevance needs improvement" },
+  {
+    name: "semantic_search_plays", desc: "🧮 Compute — Semantic search across 20 plays", type: "compute",
+    docs: "Performs keyword + semantic search across all 100 solution plays. Matches against play names, descriptions, services used, and architecture patterns. Returns ranked results with relevance scores.\n\n**Input:** `query` (string) — what to search for\n**Output:** Ranked matches with play ID, name, relevance, and excerpts\n**Example:** `semantic_search_plays({query: 'voice AI'})` → Play 04 (Call Center Voice AI) ranked first"
+  },
+  {
+    name: "estimate_cost", desc: "🧮 Compute — Estimate monthly Azure cost", type: "compute",
+    docs: "Calculates estimated monthly Azure costs for any solution play at different scales (small/medium/large). Uses real Azure retail pricing for 25+ services. Returns itemized cost breakdown.\n\n**Input:** `playNumber` (number), `scale` (string: 'small'|'medium'|'large')\n**Output:** Itemized cost breakdown with totals\n**Example:** `estimate_cost({playNumber: 1, scale: 'medium'})` → ~$850/mo breakdown"
+  },
+  {
+    name: "validate_config", desc: "🧮 Compute — Validate config files", type: "compute",
+    docs: "Validates FrootAI config files (openai.json, guardrails.json, routing.json) against production best practices. Checks for security issues, missing fields, suboptimal settings.\n\n**Input:** `configType` (string), `config` (object)\n**Output:** Array of findings: 🔴 Critical / 🟡 Warning / 🟢 Good\n**Example:** `validate_config({configType: 'openai', config: {...}})` → [{severity: 'warning', message: 'temperature > 0.3'}]"
+  },
+  {
+    name: "compare_plays", desc: "🧮 Compute — Compare solution plays", type: "compute",
+    docs: "Compares two or more solution plays side-by-side across dimensions: complexity, cost, services used, team size, and deployment time. Great for choosing between similar approaches.\n\n**Input:** `playIds` (number[]) — play numbers to compare\n**Output:** Comparison matrix with recommendations\n**Example:** `compare_plays({playIds: [1, 9]})` → RAG Q&A vs AI Search Portal comparison"
+  },
+  {
+    name: "generate_architecture_diagram", desc: "🧮 Compute — Generate Mermaid diagrams", type: "compute",
+    docs: "Generates Mermaid.js architecture diagrams for any solution play. Includes Azure services, data flows, and integration points. Renders in VS Code preview.\n\n**Input:** `playNumber` (number), `style` (string: 'flowchart'|'sequence'|'c4')\n**Output:** Mermaid diagram code\n**Example:** `generate_architecture_diagram({playNumber: 5})` → IT Ticket Resolution flowchart"
+  },
+  {
+    name: "embedding_playground", desc: "🧮 Compute — Experiment with embeddings", type: "compute",
+    docs: "Interactive playground for text embeddings. Compute similarity between texts, visualize embedding dimensions, and understand how vector search works under the hood.\n\n**Input:** `texts` (string[]) — texts to embed and compare\n**Output:** Similarity matrix + dimension analysis\n**Example:** `embedding_playground({texts: ['RAG pipeline', 'search system']})` → similarity: 0.87"
+  },
+  {
+    name: "run_evaluation", desc: "🧮 Compute — Quality evaluation with thresholds", type: "compute",
+    docs: "Run quality evaluation against configurable thresholds. Input actual scores from your evaluation, get pass/fail per metric with recommendations.\n\n**Input:** `scores` (object: {groundedness: 4.5, relevance: 3.8}), optional `thresholds`, optional `play` number\n**Output:** Pass/fail table + improvement recommendations\n**Example:** `run_evaluation({scores: {groundedness: 4.5, relevance: 3.2}, play: '01'})` → 1/2 passed, relevance needs improvement"
+  },
 ];
 
 // ─── Webview Panel: Render Modules as Rich HTML ────────────────────
@@ -419,6 +555,159 @@ function getModuleDescription(moduleId) {
   return descriptions[moduleId] || "";
 }
 
+// ─── Primitives Catalog Provider ──────────────────────────────────
+
+class PrimitivesCatalogProvider {
+  getTreeItem(element) { return element; }
+  getChildren(element) {
+    const categories = [
+      {
+        label: "Agents (201)", icon: "hubot", children: [
+          { label: "Install agent via VS Code", desc: "vscode://github.copilot-chat/createAgent", icon: "cloud-download" },
+          { label: "Browse on website", desc: "frootai.dev/primitives/agents", icon: "globe" },
+          { label: "WAF-aligned AI personas", desc: "Each agent has expertise + tools + WAF alignment", icon: "info" },
+        ]
+      },
+      {
+        label: "Instructions (176)", icon: "file-text", children: [
+          { label: "Auto-apply via applyTo globs", desc: "Match file patterns like **/*.tsx", icon: "regex" },
+          { label: "Browse on website", desc: "frootai.dev/primitives/instructions", icon: "globe" },
+          { label: "Scoped behavioral directives", desc: "Coding standards, security rules, best practices", icon: "info" },
+        ]
+      },
+      {
+        label: "Skills (282)", icon: "tools", children: [
+          { label: "SKILL.md folder structure", desc: "Parameters, steps, bundled assets", icon: "folder" },
+          { label: "Browse on website", desc: "frootai.dev/primitives/skills", icon: "globe" },
+          { label: "Reusable LEGO blocks", desc: "Auto-wire inside solution plays", icon: "info" },
+        ]
+      },
+      {
+        label: "Hooks (10)", icon: "shield", children: [
+          { label: "secrets-scanner", desc: "40+ secret patterns, entropy detection", icon: "lock" },
+          { label: "tool-guardian", desc: "Allowlist/blocklist, rate limiting", icon: "shield" },
+          { label: "governance-audit", desc: "OWASP LLM Top 10 checks", icon: "law" },
+          { label: "pii-redactor", desc: "12+ PII types, GDPR/HIPAA", icon: "eye-closed" },
+          { label: "cost-tracker", desc: "Per-model pricing, anomaly detection", icon: "graph" },
+          { label: "waf-compliance", desc: "6-pillar scoring, 36 checks", icon: "checklist" },
+          { label: "output-validator", desc: "Schema, safety, hallucination checks", icon: "check-all" },
+          { label: "token-budget-enforcer", desc: "Per-model budgets, sliding window", icon: "dashboard" },
+          { label: "session-logger", desc: "JSON Lines audit trail", icon: "output" },
+          { label: "license-checker", desc: "SPDX compliance, 4 ecosystems", icon: "file-certificate" },
+        ]
+      },
+      {
+        label: "Plugins (77)", icon: "package", children: [
+          { label: "npx frootai install <plugin>", desc: "One-command installation", icon: "terminal" },
+          { label: "Browse marketplace", desc: "frootai.dev/marketplace", icon: "globe" },
+          { label: "1,008 bundled items", desc: "Agents + instructions + skills + hooks per plugin", icon: "info" },
+        ]
+      },
+      {
+        label: "Workflows (12)", icon: "git-branch", children: [
+          { label: "Agentic workflows with safe-outputs", desc: "GitHub Copilot engine", icon: "github-action" },
+          { label: "Browse on website", desc: "frootai.dev/workflows", icon: "globe" },
+        ]
+      },
+      {
+        label: "Cookbook (16)", icon: "book", children: [
+          { label: "Step-by-step recipes", desc: "From play init to production deployment", icon: "list-ordered" },
+          { label: "Browse on website", desc: "frootai.dev/cookbook", icon: "globe" },
+        ]
+      },
+    ];
+
+    if (!element) {
+      return categories.map(cat => {
+        const item = new vscode.TreeItem(cat.label, vscode.TreeItemCollapsible.Collapsed);
+        item.iconPath = new vscode.ThemeIcon(cat.icon);
+        item.contextValue = "primitiveCategory";
+        item._children = cat.children;
+        return item;
+      });
+    }
+    if (element._children) {
+      return element._children.map(child => {
+        const item = new vscode.TreeItem(child.label, vscode.TreeItemCollapsible.None);
+        item.description = child.desc;
+        item.iconPath = new vscode.ThemeIcon(child.icon);
+        item.tooltip = child.desc;
+        return item;
+      });
+    }
+    return [];
+  }
+}
+
+// ─── FAI Protocol & Layer Provider ────────────────────────────────
+
+class FaiProtocolProvider {
+  getTreeItem(element) { return element; }
+  getChildren(element) {
+    const layers = [
+      {
+        label: "FAI Protocol", icon: "json", desc: "fai-manifest.json — the specification", children: [
+          { label: "fai-manifest.json", desc: "Full play wiring: context + primitives + infra + toolkit", icon: "file-code" },
+          { label: "fai-context.json", desc: "Lightweight LEGO block context reference", icon: "file" },
+          { label: "7 JSON schemas", desc: "agent, instruction, skill, hook, plugin, manifest, context", icon: "symbol-structure" },
+          { label: "Auto-wiring", desc: "Shared context propagates to all primitives in a play", icon: "link" },
+        ]
+      },
+      {
+        label: "FAI Layer", icon: "layers", desc: "The conceptual binding glue", children: [
+          { label: "Context Wiring", desc: "Knowledge modules + WAF pillars + compatible plays", icon: "git-merge" },
+          { label: "WAF Alignment", desc: "6 pillars: security, reliability, cost, ops, perf, RAI", icon: "shield" },
+          { label: "Standalone → Wired", desc: "LEGO blocks auto-wire when placed in a play", icon: "plug" },
+        ]
+      },
+      {
+        label: "FAI Engine", icon: "server-process", desc: "The runtime — 7 modules, 42 tests", children: [
+          { label: "manifest-reader", desc: "Loads and validates fai-manifest.json", icon: "file-code" },
+          { label: "context-resolver", desc: "Resolves shared context chain", icon: "search" },
+          { label: "primitive-wirer", desc: "Connects agents, instructions, skills, hooks", icon: "link" },
+          { label: "hook-runner", desc: "Executes hooks at lifecycle events", icon: "play" },
+          { label: "evaluator", desc: "Runs quality metrics (groundedness, coherence)", icon: "graph" },
+          { label: "mcp-bridge", desc: "Bridges to MCP protocol", icon: "cloud" },
+        ]
+      },
+      {
+        label: "FAI Factory", icon: "rocket", desc: "CI/CD — build, test, publish", children: [
+          { label: "validate-primitives.js", desc: "2,800+ checks across all primitives", icon: "check-all" },
+          { label: "GitHub Actions (15)", desc: "Automated CI/CD workflows", icon: "github-action" },
+          { label: "npm publish", desc: "frootai-mcp on npm registry", icon: "package" },
+        ]
+      },
+      {
+        label: "FAI Marketplace", icon: "store", desc: "77 plugins, 1,008 items", children: [
+          { label: "npx frootai install", desc: "One-command plugin installation", icon: "terminal" },
+          { label: "npx frootai list", desc: "Browse all 77 plugins", icon: "list-flat" },
+          { label: "frootai.dev/marketplace", desc: "Web-based marketplace with modals", icon: "globe" },
+        ]
+      },
+    ];
+
+    if (!element) {
+      return layers.map(layer => {
+        const item = new vscode.TreeItem(layer.label, vscode.TreeItemCollapsible.Collapsed);
+        item.description = layer.desc;
+        item.iconPath = new vscode.ThemeIcon(layer.icon);
+        item._children = layer.children;
+        return item;
+      });
+    }
+    if (element._children) {
+      return element._children.map(child => {
+        const item = new vscode.TreeItem(child.label, vscode.TreeItemCollapsible.None);
+        item.description = child.desc;
+        item.iconPath = new vscode.ThemeIcon(child.icon);
+        item.tooltip = child.desc;
+        return item;
+      });
+    }
+    return [];
+  }
+}
+
 class McpToolProvider {
   getTreeItem(element) { return element; }
   getChildren(element) {
@@ -495,11 +784,11 @@ function activate(context) {
   // Optional: find local repo if available (enhances but not required)
   const root = findFrootAIRoot();
 
-  // Register tree views (2 focused panels: Plays + MCP Tools)
+  // Register tree views (4 panels: Plays + Primitives + Protocol + MCP)
   vscode.window.registerTreeDataProvider("frootai.solutionPlays", new SolutionPlayProvider());
+  vscode.window.registerTreeDataProvider("frootai.primitivesCatalog", new PrimitivesCatalogProvider());
+  vscode.window.registerTreeDataProvider("frootai.faiProtocol", new FaiProtocolProvider());
   vscode.window.registerTreeDataProvider("frootai.mcpTools", new McpToolProvider());
-  // Knowledge Hub and Glossary available via command palette (lookupTerm, searchKnowledge)
-  // but removed from sidebar for cleaner UX
 
   // ── Command: Open Solution Play (action picker) ──
   context.subscriptions.push(
@@ -1093,7 +1382,7 @@ function activate(context) {
         const terminal = vscode.window.createTerminal("FrootAI MCP Docker");
         terminal.sendText("docker run -i ghcr.io/frootai/frootai-mcp");
         terminal.show();
-        vscode.window.showInformationMessage("🐳 Starting FrootAI MCP via Docker. 22 tools ready.");
+        vscode.window.showInformationMessage("🐳 Starting FrootAI MCP via Docker. 25 tools ready.");
         autoCreateMcpJson();
       } else if (choice.value === "pip") {
         const terminal = vscode.window.createTerminal("FrootAI MCP Python");
@@ -1127,7 +1416,7 @@ function activate(context) {
       const terminal = vscode.window.createTerminal("FrootAI MCP Server");
       terminal.sendText("npx --yes frootai-mcp@latest");
       terminal.show();
-      vscode.window.showInformationMessage("🔌 FrootAI MCP Server starting... 22 tools (6 static + 4 live + 3 chain + 3 ecosystem + 6 compute).");
+      vscode.window.showInformationMessage("🔌 FrootAI MCP Server starting... 25 tools (6 static + 4 live + 3 chain + 9 ecosystem + 3 compute).");
     })
   );
 
@@ -1413,7 +1702,7 @@ function activate(context) {
 
       await vscode.env.clipboard.writeText(buildPrompt);
       // Auto-open Copilot Chat
-      try { await vscode.commands.executeCommand("workbench.action.chat.open"); } catch {}
+      try { await vscode.commands.executeCommand("workbench.action.chat.open"); } catch { }
 
       // Show stage prompt at search bar level
       const stage1 = await vscode.window.showQuickPick([
@@ -1610,10 +1899,10 @@ function activate(context) {
       const statusHtml = evalStatus === "completed"
         ? `<div class="status" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#10b981;display:inline-block">✅ Evaluation complete${evalResults?._summary ? ` — ${evalResults._summary}` : ""}</div>`
         : evalStatus === "error"
-        ? `<div class="status" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:inline-block">❌ Evaluation failed</div>`
-        : evalStatus === "no-testset"
-        ? `<div class="status" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;display:inline-block">⚠️ No test-set.jsonl found — create evaluation/test-set.jsonl</div>`
-        : `<div class="status" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;display:inline-block">⏳ Awaiting evaluation run</div>`;
+          ? `<div class="status" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:inline-block">❌ Evaluation failed</div>`
+          : evalStatus === "no-testset"
+            ? `<div class="status" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;display:inline-block">⚠️ No test-set.jsonl found — create evaluation/test-set.jsonl</div>`
+            : `<div class="status" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;display:inline-block">⏳ Awaiting evaluation run</div>`;
 
       const outputHtml = evalOutput
         ? `<h2 style="margin-top:24px">Output</h2><pre style="background:#111;padding:12px;border-radius:8px;font-size:0.75rem;overflow-x:auto;color:#ccc;max-height:300px;overflow-y:auto">${evalOutput.replace(/</g, "&lt;")}</pre>`
@@ -1673,5 +1962,5 @@ function findFrootAIRoot() {
   return null;
 }
 
-function deactivate() {}
+function deactivate() { }
 module.exports = { activate, deactivate };

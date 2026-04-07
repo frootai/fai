@@ -1,0 +1,28 @@
+{
+  "name": "77-research-paper-ai",
+  "version": "1.0.0",
+  "description": "> AI-powered academic research assistant — literature review, citation network analysis, methodology",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "research-paper-ai"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "responsible-ai": "See README",
+    "reliability": "See README",
+    "performance-efficiency": "See README",
+    "security": "See README"
+  }
+}

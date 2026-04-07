@@ -1,0 +1,37 @@
+{
+  "name": "ruby-mcp-development",
+  "description": "Ruby MCP Development — build MCP servers in Ruby with Rails integration, Rack middleware, Sorbet typing, and Bundler gem packaging.",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI Contributors",
+    "url": "https://frootai.dev"
+  },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "keywords": [
+    "ruby",
+    "rails",
+    "mcp",
+    "rack",
+    "sorbet",
+    "model-context-protocol",
+    "tool-server"
+  ],
+  "agents": [
+    "../../agents/frootai-ruby-mcp-expert.agent.md",
+    "../../agents/frootai-ruby-expert.agent.md"
+  ],
+  "instructions": [
+    "../../instructions/ruby-mcp-development.instructions.md",
+    "../../instructions/ruby-waf.instructions.md"
+  ],
+  "skills": [
+    "../../skills/frootai-mcp-ruby-scaffold/",
+    "../../skills/frootai-mcp-ruby-scaffold/"
+  ],
+  "hooks": [
+    "../../hooks/frootai-secrets-scanner/",
+    "../../hooks/frootai-tool-guardian/",
+    "../../hooks/frootai-governance-audit/"
+  ]
+}

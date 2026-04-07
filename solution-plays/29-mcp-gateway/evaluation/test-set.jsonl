@@ -1,0 +1,3 @@
+{"query": "What does this play do?", "expected": "MCP Gateway — Centralized MCP server management — proxy, load balance, and govern multiple MCP..."}
+{"query": "What Azure services are used?", "expected": "Azure API Management, Azure Container Apps, Azure Monitor, Azure Key Vault"}
+{"query": "Which WAF pillars are covered?", "expected": "security, reliability, cost-optimization, operational-excellence, performance-efficiency"}

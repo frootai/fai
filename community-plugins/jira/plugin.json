@@ -1,0 +1,54 @@
+{
+  "name": "frootai-jira-plugin",
+  "description": "Jira integration plugin for FrootAI — 4 MCP tools, dedicated agent, compatible plays",
+  "version": "1.0.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev"
+  },
+  "license": "MIT",
+  "agent": "frootai-jira-expert",
+  "tools": [
+    {
+      "name": "jira_issue_create",
+      "description": "Create a Jira issue with type, priority, labels, components, and custom fields"
+    },
+    {
+      "name": "jira_sprint_query",
+      "description": "Query Jira sprint content — backlog, in-progress, done items with story points"
+    },
+    {
+      "name": "jira_board_update",
+      "description": "Update a Jira board — move items between columns, update status"
+    },
+    {
+      "name": "jira_release_track",
+      "description": "Track Jira release progress — issues resolved, remaining, blockers"
+    }
+  ],
+  "compatible_plays": [
+    "24",
+    "32",
+    "51"
+  ],
+  "authentication": {
+    "type": "oauth2",
+    "token_url": "https://jira.com/oauth/token",
+    "scopes": [
+      "read",
+      "write"
+    ]
+  },
+  "configuration": {
+    "required": [
+      "base_url",
+      "client_id",
+      "client_secret_key_vault_ref"
+    ],
+    "optional": [
+      "timeout_ms",
+      "retry_max",
+      "rate_limit_per_minute"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "90-network-optimization-agent",
+  "version": "1.0.0",
+  "description": "> 5G/LTE network capacity planning with AI-driven anomaly detection, self-healing automation, traffi",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "network-optimization-agent"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "performance-efficiency": "See README",
+    "reliability": "See README",
+    "cost-optimization": "See README",
+    "operational-excellence": "See README"
+  }
+}

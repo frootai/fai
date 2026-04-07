@@ -1,0 +1,28 @@
+{
+  "name": "53-legal-document-ai",
+  "version": "1.0.0",
+  "description": "Legal document analysis agent — contract review, clause extraction, risk identification, compliance checking, privilege detection, and redline comparison with audit trails.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "legal-ai"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README",
+    "reliability": "See README",
+    "responsible-ai": "See README",
+    "cost-optimization": "See README"
+  }
+}

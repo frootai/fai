@@ -1,0 +1,35 @@
+{
+  "name": "31-low-code-ai-builder",
+  "version": "1.0.0",
+  "play": "31-low-code-ai-builder",
+  "description": "Visual agent workflow builder — drag-and-drop AI pipeline design, template library, one-click deployment, and evaluation dashboard. Build production AI without writing code.",
+  "scale": "dev",
+  "architecture": {
+    "pattern": "low-code-builder",
+    "data_flow": "See README.md"
+  },
+  "config": {
+    "openai": "config/openai.json",
+    "guardrails": "config/guardrails.json"
+  },
+  "evaluation": {
+    "metrics": [
+      "groundedness",
+      "relevance",
+      "coherence",
+      "fluency",
+      "safety"
+    ],
+    "thresholds": {
+      "groundedness": 4,
+      "relevance": 4,
+      "safety": 5
+    }
+  },
+  "waf_alignment": {
+    "security": "See README.md",
+    "reliability": "See README.md",
+    "cost-optimization": "See README.md",
+    "operational-excellence": "See README.md"
+  }
+}

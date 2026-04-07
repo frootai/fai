@@ -1,0 +1,31 @@
+{
+  "generated": "2026-04-07T12:11:51.271Z",
+  "counts": {
+    "agents": 238,
+    "instructions": 176,
+    "skills": 322,
+    "hooks": 10,
+    "plugins": 77,
+    "workflows": 12,
+    "cookbook": 16,
+    "solutionPlays": 100,
+    "schemas": 7,
+    "engineModules": 8,
+    "cicdWorkflows": 15,
+    "mcpTools": 22
+  },
+  "marketplace": {
+    "plugins": 77,
+    "totalItems": 1008,
+    "avgItemsPerPlugin": 13.1
+  },
+  "competitor": {
+    "agents": 187,
+    "instructions": 175,
+    "skills": 271,
+    "hooks": 6,
+    "plugins": 65,
+    "workflows": 7,
+    "cookbook": 7
+  }
+}
