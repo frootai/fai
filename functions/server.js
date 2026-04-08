@@ -11,7 +11,8 @@ const AZURE_OPENAI_DEPLOYMENT = "gpt-4.1";
 const AZURE_OPENAI_API_VERSION = "2024-10-21";
 
 // ═══ SHARED SYSTEM PROMPT — imported from config/agent-fai-prompt.js ═══
-const { AGENT_FAI_SYSTEM_PROMPT } = require("../config/agent-fai-prompt");
+let AGENT_FAI_SYSTEM_PROMPT;
+try { AGENT_FAI_SYSTEM_PROMPT = require("./agent-fai-prompt").AGENT_FAI_SYSTEM_PROMPT; } catch { AGENT_FAI_SYSTEM_PROMPT = require("../config/agent-fai-prompt").AGENT_FAI_SYSTEM_PROMPT; }
 const SYSTEM_PROMPT = AGENT_FAI_SYSTEM_PROMPT;
 
 const PORT = process.env.PORT || 8080;

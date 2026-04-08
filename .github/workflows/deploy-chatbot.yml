@@ -27,8 +27,10 @@ jobs:
         run: npm install --omit=dev
 
       - name: Create deployment package
-        working-directory: functions
-        run: zip -r ../deploy.zip . -x "node_modules/.cache/*"
+        run: |
+          cp config/agent-fai-prompt.js functions/agent-fai-prompt.js
+          cd functions
+          zip -r ../deploy.zip . -x "node_modules/.cache/*"
 
       - name: Deploy to Azure App Service
         if: env.HAS_AZURE_SECRET != ''
