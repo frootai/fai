@@ -1,4 +1,5 @@
 ---
+name: "Pester Test Tuner"
 description: "Pester Test Development tuner — optimizes code coverage, eliminates flaky tests, configures CI/CD pipelines, tunes test performance"
 tools: ["codebase", "terminal"]
 model: "gpt-4o"

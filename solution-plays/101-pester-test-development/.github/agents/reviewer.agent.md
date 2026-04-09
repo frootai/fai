@@ -1,4 +1,5 @@
 ---
+name: "Pester Test Reviewer"
 description: "Pester Test Development reviewer — validates test quality, mock completeness, assertion correctness, coverage gaps, and CI/CD readiness"
 tools: ["codebase"]
 model: "gpt-4o"
