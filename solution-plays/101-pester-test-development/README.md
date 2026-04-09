@@ -310,21 +310,41 @@ Mock Get-AzPolicyState -ParameterFilter { $PolicyDefinitionName -eq 'noncomplian
 ## File Structure
 ```
 .
-├── .github/                 # DevKit (agents, instructions, prompts, skills, hooks, workflows)
-├── .vscode/                 # VS Code settings and MCP config
-├── config/                  # All configuration files (JSON)
-├── evaluation/              # Quality evaluation pipeline (eval.py, test-set.jsonl)
-├── infra/                   # Azure infrastructure (Bicep, ARM, parameters)
-├── mcp/                     # MCP server plugin integration
-├── plugins/                 # Plugin documentation
-├── spec/                    # Architecture specification
-├── agent.md                 # Root agent definition
-├── CHANGELOG.md             # Version history
-├── fai-manifest.json        # FAI Protocol manifest (primitives, context, guardrails)
-├── froot.json               # Play metadata
-├── instructions.md          # Root coding instructions
-├── plugin.json              # Plugin manifest
-└── README.md                # This file
+├── .github/
+│   ├── copilot-instructions.md    ← THE master brain (auto-injected every conversation)
+│   ├── agents/
+│   │   ├── builder.agent.md       ← Test generator (@builder)
+│   │   ├── reviewer.agent.md      ← Quality reviewer (@reviewer)
+│   │   └── tuner.agent.md         ← Coverage optimizer (@tuner)
+│   ├── instructions/
+│   │   ├── azure-coding.instructions.md      ← Az cmdlet mocking patterns
+│   │   ├── pester-test-development-patterns.instructions.md  ← 6 Pester patterns
+│   │   └── security.instructions.md          ← Mock isolation, credential safety
+│   ├── prompts/
+│   │   ├── test.prompt.md         ← /test (run Invoke-Pester)
+│   │   ├── review.prompt.md       ← /review (check quality)
+│   │   ├── deploy.prompt.md       ← /deploy (CI/CD setup)
+│   │   └── evaluate.prompt.md     ← /evaluate (coverage analysis)
+│   └── skills/
+│       ├── deploy-pester-test-development/SKILL.md
+│       ├── evaluate-pester-test-development/SKILL.md
+│       └── tune-pester-test-development/SKILL.md
+├── .vscode/
+│   ├── mcp.json                   ← FrootAI MCP server config
+│   └── settings.json              ← Pester code lens settings
+├── config/
+│   ├── agents.json                ← Agent chain configuration
+│   ├── guardrails.json            ← Coverage thresholds, mock rules
+│   ├── model-comparison.json      ← LLM model selection
+│   └── openai.json                ← Temperature, tokens for test generation
+├── spec/
+│   └── play-spec.json             ← Play specification
+├── agent.md                       ← Root agent mode (richest file)
+├── instructions.md                ← Pester 5.x coding standards (reference)
+├── README.md                      ← This file
+├── CHANGELOG.md                   ← Version history
+├── fai-manifest.json              ← FAI Protocol wiring
+└── plugin.json                    ← Plugin metadata
 ```
 
 ## Related Resources
