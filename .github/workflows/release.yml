@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-      - 'mcp-v*'
-      - 'ext-v*'
 
 permissions:
   contents: write
