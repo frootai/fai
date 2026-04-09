@@ -3,7 +3,8 @@ name: Publish VS Code Extension
 on:
   push:
     tags:
-      - 'v*'
+      - 'ext-v*'    # Channel-specific: ext-v5.0.2
+      - 'rel-v*'    # Unified release: triggers ALL channels
   workflow_dispatch:
 
 permissions:

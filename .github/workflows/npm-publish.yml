@@ -3,7 +3,8 @@ name: Publish MCP Server to npm
 on:
   push:
     tags:
-      - 'v*'
+      - 'mcp-v*'    # Channel-specific: mcp-v5.0.2
+      - 'rel-v*'    # Unified release: rel-v2025.04.09 triggers ALL channels
   workflow_dispatch:
 
 permissions:

@@ -3,7 +3,8 @@ name: Build & Push Docker Image
 on:
   push:
     tags:
-      - 'v*'
+      - 'mcp-v*'    # Same as npm (Docker = MCP server image)
+      - 'rel-v*'    # Unified release
   workflow_dispatch:
 
 env:

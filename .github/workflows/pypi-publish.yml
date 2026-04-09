@@ -3,7 +3,9 @@ name: Publish Python Packages to PyPI
 on:
   push:
     tags:
-      - 'v*'
+      - 'sdk-v*'     # Python SDK only: sdk-v5.0.2
+      - 'pymcp-v*'   # Python MCP only: pymcp-v5.0.2
+      - 'rel-v*'     # Unified release: triggers ALL channels
   workflow_dispatch:
 
 permissions:

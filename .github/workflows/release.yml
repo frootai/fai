@@ -3,7 +3,11 @@ name: Create GitHub Release
 on:
   push:
     tags:
-      - 'v*'
+      - 'rel-v*'    # Only unified releases get GitHub Release page
+      - 'mcp-v*'
+      - 'ext-v*'
+      - 'sdk-v*'
+      - 'pymcp-v*'
 
 permissions:
   contents: write

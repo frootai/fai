@@ -17,10 +17,14 @@
     "validate:fix": "node scripts/validate-consistency.js --fix",
     "build": "npm run validate:primitives && npm run generate:marketplace && npm run generate:website-data && npm run update:readme",
     "test:engine": "node engine/test.js",
-    "release": "node scripts/release.js",
-    "release:dry": "node scripts/release.js --dry-run",
-    "release:mcp": "node scripts/release.js --target mcp",
-    "release:ext": "node scripts/release.js --target ext",
+    "release": "node scripts/release-channel.js",
+    "release:dry": "node scripts/release-channel.js --dry-run",
+    "release:mcp": "node scripts/release-channel.js mcp patch",
+    "release:ext": "node scripts/release-channel.js ext patch",
+    "release:sdk": "node scripts/release-channel.js sdk patch",
+    "release:pymcp": "node scripts/release-channel.js pymcp patch",
+    "release:all": "node scripts/release-channel.js all patch",
+    "release:all:minor": "node scripts/release-channel.js all minor",
     "prepare": "husky"
   },
   "devDependencies": {
