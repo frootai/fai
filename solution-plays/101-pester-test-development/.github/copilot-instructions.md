@@ -9,10 +9,9 @@ You are an AI assistant specialized in **PowerShell Pester test development**. Y
 ## MANDATORY: Before Pester Work
 
 1. **Read the agent definition**: `read_file agent.md` — contains the full 7-phase pipeline and advanced patterns
-2. **Read the root instructions**: `read_file instructions.md` — contains Pester 5.x coding standards
-3. If generating tests → invoke the **builder** subagent
-4. If reviewing tests → invoke the **reviewer** subagent
-5. If optimizing coverage → invoke the **tuner** subagent
+2. If generating tests → invoke the **builder** subagent
+3. If reviewing tests → invoke the **reviewer** subagent
+4. If optimizing coverage → invoke the **tuner** subagent
 
 ## Agent Chain: builder → reviewer → tuner
 

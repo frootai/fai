@@ -1,6 +1,6 @@
 ---
-description: "PowerShell and Pester 5.x coding standards for Play 101 — Pester Test Development"
-applyTo: "**/*"
+description: "PowerShell and Pester 5.x coding standards — function design, test templates, assertion reference, coverage configuration, CI/CD commands"
+applyTo: "**/*.{ps1,psm1,psd1,Tests.ps1}"
 ---
 
 # Pester Test Development — Coding Standards
