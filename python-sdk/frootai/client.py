@@ -1,7 +1,7 @@
 """FrootAI Client — Main entry point for the SDK.
 
 Offline-first: queries bundled knowledge base (18 modules, 5 FROOT layers).
-100 solution plays, 830+ FAI primitives (238 agents, 176 instructions, 322 skills, 10 hooks),
+101 solution plays, 830+ FAI primitives (238 agents, 176 instructions, 322 skills, 10 hooks),
 77 plugins, 16 cookbook recipes, 12 workflows, 25 MCP tools.
 No network required for search, modules, glossary, or cost estimation.
 """
@@ -49,7 +49,7 @@ _PLAY_COSTS = {
 class FrootAI:
     """FrootAI SDK client — offline-first access to AI architecture knowledge.
 
-    100 solution plays, 830+ FAI primitives, 77 plugins, 25 MCP tools.
+    101 solution plays, 830+ FAI primitives, 77 plugins, 25 MCP tools.
 
     Usage:
         client = FrootAI()

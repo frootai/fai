@@ -40,7 +40,7 @@ Agents, instructions, skills, prompts, hooks, workflows, plugins, tools, guardra
 
 ---
 
-## 100 SOLUTION PLAYS — COMPLETE CATALOG
+## 101 SOLUTION PLAYS — COMPLETE CATALOG
 
 FrootAI ships **100 production-ready solution plays** across 20+ industries. Each play includes:
 - **DevKit**: 19 .github Agentic OS files (agents, instructions, skills, hooks, prompts, workflows)
@@ -170,6 +170,7 @@ For every play, these links work:
 | 98 | Agent Evaluation Platform | 98-agent-evaluation-platform | High | [View](/solution-plays/98-agent-evaluation-platform) | [Guide](/user-guide?play=98) |
 | 99 | Enterprise AI Governance Hub | 99-enterprise-ai-governance-hub | Very High | [View](/solution-plays/99-enterprise-ai-governance-hub) | [Guide](/user-guide?play=99) |
 | 100 | FAI Meta-Agent | 100-fai-meta-agent | Very High | [View](/solution-plays/100-fai-meta-agent) | [Guide](/user-guide?play=100) |
+| 101 | Pester Test Development | 101-pester-test-development | Medium | [View](/solution-plays/101-pester-test-development) | [Guide](/user-guide?play=101) |
 
 ---
 
@@ -286,6 +287,7 @@ When a user describes their need, recommend the BEST play(s) with View Play and 
 - AI observability → **Play 17** [View](/solution-plays/17-ai-observability) · [Guide](/user-guide?play=17)
 - AI-powered DevOps → **Play 37** [View](/solution-plays/37-ai-powered-devops) · [Guide](/user-guide?play=37)
 - AI-powered testing → **Play 32** [View](/solution-plays/32-ai-powered-testing) · [Guide](/user-guide?play=32)
+- Pester test development → **Play 101** [View](/solution-plays/101-pester-test-development) · [Guide](/user-guide?play=101)
 - Agent evaluation → **Play 98** [View](/solution-plays/98-agent-evaluation-platform) · [Guide](/user-guide?play=98)
 
 ### Data & Pipeline
@@ -375,7 +377,7 @@ Learn more: [/fai-protocol](/fai-protocol) · [/fai-engine](/fai-engine)
 | **CLI** | \`npx frootai <command>\` | v3.5.0 | [/cli](/cli) |
 
 ## VS CODE EXTENSION — v2.0.0, 4 Sidebar Views
-**Plays View**: Browse 100 plays, Init DevKit/TuneKit/SpecKit, open on GitHub
+**Plays View**: Browse 101 plays, Init DevKit/TuneKit/SpecKit, open on GitHub
 **Primitives View**: Browse 830+ agents, skills, instructions, hooks
 **Protocol View**: FAI manifest explorer, context wiring visualization
 **MCP View**: 25 tools, run directly from sidebar
@@ -528,7 +530,7 @@ Cost tips: Use Play 14 for FinOps patterns. Semantic caching saves 30-50%. Use g
 
 1. **Try the Configurator**: [/configurator](/configurator) → 3 questions → recommended play
 2. **Install VS Code Extension**: \`code --install-extension frootai.frootai-vscode\`
-3. **Browse Plays**: [/solution-plays](/solution-plays) → explore 100 plays
+3. **Browse Plays**: [/solution-plays](/solution-plays) → explore 101 plays
 4. **View a Play**: Click any play → see architecture, services, config, costs
 5. **Read the User Guide**: [/user-guide?play=XX](/user-guide?play=01) → step-by-step deployment
 6. **Init DevKit**: Click play → "Init DevKit" → 19 .github files in workspace

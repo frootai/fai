@@ -700,7 +700,7 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 **The Open Glue**: FrootAI removes silos between infrastructure, platform, and application teams.
 
 ## FAI Ecosystem — By The Numbers
-- **100 Solution Plays** — Pre-tuned Azure AI blueprints (DevKit + TuneKit + SpecKit)
+- **101 Solution Plays** — Pre-tuned Azure AI blueprints (DevKit + TuneKit + SpecKit)
 - **830+ FAI Primitives** — 238 agents, 176 instructions, 322 skills, 10 hooks
 - **77 Plugins** — Composable packages (1,008 bundled items) via \`npx frootai install\`
 - **25 MCP Tools** — 6 static + 4 live + 3 chain + 7 ecosystem + 2 dev tools
@@ -859,7 +859,7 @@ server.tool(
 
 server.tool(
   "list_community_plays",
-  "List FrootAI solution plays from the GitHub repository. Shows all 100 plays with status. Falls back to static list if offline.",
+  "List FrootAI solution plays from the GitHub repository. Shows all 101 plays with status. Falls back to static list if offline.",
   {
     filter: z.string().optional().describe("Filter by keyword (e.g., 'rag', 'agent', 'landing-zone')"),
   },
@@ -906,7 +906,7 @@ server.tool(
     return {
       content: [{
         type: "text",
-        text: `## FrootAI Solution Plays\n*Offline — showing bundled list*\n\n${formatted}\n\n---\n**100 plays** · Each with .github Agentic OS + DevKit + TuneKit\n🌐 https://frootai.dev/solution-plays`,
+        text: `## FrootAI Solution Plays\n*Offline — showing bundled list*\n\n${formatted}\n\n---\n**101 plays** · Each with .github Agentic OS + DevKit + TuneKit\n🌐 https://frootai.dev/solution-plays`,
       }],
     };
   }
@@ -944,7 +944,7 @@ server.tool(
 **Layer 4 — Distribution**
   7. Plugins → Bundle agents + skills + commands for marketplace
 
-FrootAI ships 19 files per solution play × 100 plays = 1,292 agentic OS files.
+FrootAI ships 19 files per solution play × 101 plays = 1,919 agentic OS files.
 📖 Full module: get_module module_id=F4`,
 
       instructions: `## Primitive 1: Instructions
@@ -1823,7 +1823,7 @@ server.tool(
     } catch (e) { /* ignore */ }
 
     if (!playDir || !playFolder) {
-      return { content: [{ type: "text", text: `Play "${play_number}" not found. Use list_community_plays to browse all 100 plays.` }] };
+      return { content: [{ type: "text", text: `Play "${play_number}" not found. Use list_community_plays to browse all 101 plays.` }] };
     }
 
     const readFile = (rel) => {
@@ -1921,7 +1921,7 @@ The open glue that binds infrastructure, platform, and application.
 🏗️ O — Operations: Azure AI Platform, Infrastructure, Copilot
 🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
-18 modules | 200+ AI terms | 25 tools (6 static + 4 live + 3 chain + 6 AI ecosystem + 6 compute) | 100 solution plays
+18 modules | 200+ AI terms | 25 tools (6 static + 4 live + 3 chain + 6 AI ecosystem + 6 compute) | 101 solution plays
 https://frootai.dev`,
       },
     ],

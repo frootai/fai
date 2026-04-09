@@ -109,6 +109,7 @@ _PLAYS_DATA = [
     {"id": "98", "name": "Agent Evaluation Platform", "description": "Automated evaluation suite for any AI agent — standardized benchmarks, regression testing, A/B experimentation, human preference scoring, and leaderboard ranking. Evaluates agents across quality, safety, speed, cost, and user satisfaction dimensions.", "complexity": "High", "status": "Ready", "layer": "T", "infra": ["Azure OpenAI", "Azure Container Apps", "Azure Cosmos DB", "Azure Machine Learning", "Azure Functions"], "tuning": ["benchmark_suite_selection", "regression_threshold", "ab_traffic_split"], "modules": ["T3", "T2", "O2"]},
     {"id": "99", "name": "Enterprise AI Governance Hub", "description": "Central control plane for all AI models, agents, and APIs across an enterprise. Model registry with approval gates, policy enforcement via Azure Policy, cost attribution dashboards, safety monitoring, and regulatory compliance tracking for SOX, EU AI Act, and ISO 42001.", "complexity": "Very High", "status": "Ready", "layer": "T", "infra": ["Azure API Management", "Azure Policy", "Azure Monitor", "Azure Cosmos DB", "Azure Machine Learning", "Azure Key Vault"], "tuning": ["approval_gate_thresholds", "policy_enforcement_rules", "cost_attribution_model"], "modules": ["T3", "T2", "O4", "O5"]},
     {"id": "100", "name": "FAI Meta-Agent", "description": "The crown jewel — a self-orchestrating super-agent that understands user goals, selects and chains the appropriate FAI solution plays, provisions infrastructure, configures primitives, runs evaluation, and delivers production-ready AI systems. It is the FAI Protocol made autonomous — the agent that builds agents.", "complexity": "Very High", "status": "Ready", "layer": "O", "infra": ["Azure OpenAI", "Azure MCP Server", "Azure Container Apps", "Azure Cosmos DB", "Azure AI Search", "Azure Key Vault"], "tuning": ["play_selection_strategy", "chain_depth_limit", "budget_per_orchestration"], "modules": ["O2", "O3", "T3", "O4", "R2"]},
+    {"id": "101", "name": "Pester Test Development", "description": "AI-assisted PowerShell test generation using Pester 5.x framework. 7-phase pipeline: AST-based discovery, testability assessment, dependency mapping, legacy code refactoring (Add-Type thin wrappers), comprehensive test generation with mocking, and coverage enforcement (>90% JaCoCo). Supports greenfield TDD, brownfield legacy code, Azure Policy testing, and CI/CD integration (Azure DevOps + GitHub Actions).", "complexity": "Medium", "status": "Ready", "layer": "T", "infra": ["Azure DevOps", "Azure Storage"], "tuning": ["coverage_target", "mock_verification_mode", "test_parallelism"], "modules": ["T3", "O3", "O4"]},
 ]
 
 
@@ -127,7 +128,7 @@ class SolutionPlay:
 
     @staticmethod
     def all() -> list["SolutionPlay"]:
-        """Get all 100 solution plays."""
+        """Get all 101 solution plays."""
         return [SolutionPlay(**p) for p in _PLAYS_DATA]
 
     @staticmethod
