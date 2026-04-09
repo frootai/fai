@@ -720,7 +720,8 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
     // Add ecosystem data from knowledge.json if available
     const eco = KNOWLEDGE.ecosystem;
     if (eco) {
-      overview += `\\n\\n## Primitives Catalog\\n${Object.entries(eco.primitives || {}).map(([k, v]) => \`- **\${k}**: \${v.count} (\${v.desc})\`).join("\\n")}`;
+      const primLines = Object.entries(eco.primitives || {}).map(([k, v]) => `- **${k}**: ${v.count} (${v.desc})`).join("\n");
+      overview += `\n\n## Primitives Catalog\n${primLines}`;
     }
 
     return {
