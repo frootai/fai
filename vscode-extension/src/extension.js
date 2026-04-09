@@ -1019,33 +1019,63 @@ function activate(context) {
       // Generate play-specific instruction filename  
       const playPatternFile = (playDir.replace(/^\d+-/, "")) + "-patterns.instructions.md";
 
-      // Define all files to download
-      const filesToDownload = [
+      // Core DevKit files — always deployed
+      const coreFiles = [
         ".github/copilot-instructions.md",
-        ".github/instructions/azure-coding.instructions.md",
-        ".github/instructions/security.instructions.md",
-        `.github/instructions/${playPatternFile}`,
-        ".github/prompts/deploy.prompt.md",
-        ".github/prompts/test.prompt.md",
-        ".github/prompts/review.prompt.md",
-        ".github/prompts/evaluate.prompt.md",
-        ".github/agents/builder.agent.md",
-        ".github/agents/reviewer.agent.md",
-        ".github/agents/tuner.agent.md",
-        ".github/skills/deploy-azure/SKILL.md",
-        ".github/skills/evaluate/SKILL.md",
-        ".github/skills/tune/SKILL.md",
-        ".github/hooks/guardrails.json",
-        ".github/workflows/ai-review.md",
-        ".github/workflows/ai-deploy.md",
         "agent.md",
-        "instructions.md",
         ".vscode/mcp.json",
-        "plugin.json",
-        // Infrastructure (part of DevKit — developer deploys infra)
-        "infra/main.bicep",
-        "infra/parameters.json",
       ];
+
+      // Dynamic discovery — scan the play's .github folder for all instruction/agent/prompt/skill files
+      const dynamicFiles = [];
+      const scanDirs = [
+        { dir: ".github/instructions", pattern: ".instructions.md" },
+        { dir: ".github/agents", pattern: ".agent.md" },
+        { dir: ".github/prompts", pattern: ".prompt.md" },
+      ];
+
+      // Skill directories (each has SKILL.md)
+      const addSkillDirs = (baseDir, playPath) => {
+        const skillsDir = path.join(playPath, ".github", "skills");
+        if (fs.existsSync(skillsDir)) {
+          for (const d of fs.readdirSync(skillsDir)) {
+            const skillFile = path.join(skillsDir, d, "SKILL.md");
+            if (fs.existsSync(skillFile)) {
+              dynamicFiles.push(`.github/skills/${d}/SKILL.md`);
+            }
+          }
+        }
+      };
+
+      // Build file list from local repo or use core files for GitHub download
+      const localPlayDir = root ? path.join(root, "solution-plays", playDir) : null;
+      if (localPlayDir && fs.existsSync(localPlayDir)) {
+        for (const { dir, pattern } of scanDirs) {
+          const fullDir = path.join(localPlayDir, dir);
+          if (fs.existsSync(fullDir)) {
+            for (const f of fs.readdirSync(fullDir)) {
+              if (f.endsWith(pattern)) dynamicFiles.push(`${dir}/${f}`);
+            }
+          }
+        }
+        addSkillDirs(localPlayDir, localPlayDir);
+      } else {
+        // Fallback: known patterns for GitHub download
+        dynamicFiles.push(
+          ".github/instructions/azure-coding.instructions.md",
+          ".github/instructions/security.instructions.md",
+          `.github/instructions/${playPatternFile}`,
+          ".github/agents/builder.agent.md",
+          ".github/agents/reviewer.agent.md",
+          ".github/agents/tuner.agent.md",
+          ".github/prompts/deploy.prompt.md",
+          ".github/prompts/test.prompt.md",
+          ".github/prompts/review.prompt.md",
+          ".github/prompts/evaluate.prompt.md",
+        );
+      }
+
+      const filesToDownload = [...coreFiles, ...dynamicFiles];
 
       // Try local repo first
       if (root) {
@@ -1203,16 +1233,33 @@ function activate(context) {
         selectedPlay = pick.value;
       }
 
-      const tuneKitFiles = [
+      // TuneKit files — only deploy what exists in the play
+      const tuneKitCandidates = [
         "config/openai.json",
         "config/guardrails.json",
-        "config/search.json",
-        "config/chunking.json",
         "config/agents.json",
         "config/model-comparison.json",
-        "evaluation/test-set.jsonl",
-        "evaluation/eval.py",
       ];
+
+      // Dynamically discover config and evaluation files
+      const tuneKitFiles = [];
+      const localPlay = root ? path.join(root, "solution-plays", selectedPlay.dir) : null;
+      if (localPlay && fs.existsSync(localPlay)) {
+        // Only add files that actually exist in this play
+        for (const f of tuneKitCandidates) {
+          if (fs.existsSync(path.join(localPlay, f))) tuneKitFiles.push(f);
+        }
+        // Scan evaluation/ if it exists
+        const evalDir = path.join(localPlay, "evaluation");
+        if (fs.existsSync(evalDir)) {
+          for (const f of fs.readdirSync(evalDir)) {
+            tuneKitFiles.push(`evaluation/${f}`);
+          }
+        }
+      } else {
+        // Fallback for GitHub download
+        tuneKitFiles.push(...tuneKitCandidates);
+      }
 
       let copied = 0;
       for (const f of tuneKitFiles) {
