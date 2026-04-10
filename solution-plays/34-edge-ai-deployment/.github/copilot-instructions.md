@@ -1,220 +1,86 @@
-You are an AI coding assistant working on the FrootAI Edge Ai Deployment solution play (Play 34).
+---
+description: "Edge AI Deployment domain knowledge — auto-injected into every Copilot conversation"
+applyTo: "**"
+---
 
-## Solution Play Overview
-This solution play implements a production-grade Edge Ai Deployment system on Azure, following the FrootAI FAI Protocol and Well-Architected Framework (WAF) principles across all six pillars: Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency, and Responsible AI.
+# Edge AI Deployment — Domain Knowledge
 
-## .github Agentic OS Structure
-This solution uses the full GitHub Copilot agentic OS:
-- **Layer 1 (Always-On):** `instructions/*.instructions.md` — coding standards, domain patterns, security
-- **Layer 2 (On-Demand):** `prompts/*.prompt.md` — /deploy, /test, /review, /evaluate
-- **Layer 2 (Agents):** `agents/*.agent.md` — builder, reviewer, tuner (chained workflow)
-- **Layer 2 (Skills):** `skills/*/SKILL.md` — deploy-azure, evaluate, tune
-- **Layer 3 (Hooks):** `hooks/guardrails.json` — preToolUse policy gates
-- **Layer 3 (Workflows):** `workflows/*.md` — AI-driven CI/CD pipelines
+This workspace implements edge AI deployment — containerized model serving on IoT/edge devices, model optimization (quantization, pruning), OTA updates, offline inference, and fleet management.
 
-## Agent Chain
-builder.agent.md → reviewer.agent.md → tuner.agent.md
-The builder implements features, the reviewer validates quality, the tuner optimizes for production.
+## Edge Deployment Architecture (What the Model Gets Wrong)
 
-## Architecture Context
-This play follows a modular architecture with clear separation of concerns:
-- **API Layer:** Handles incoming requests, input validation, and response formatting
-- **Processing Layer:** Core business logic, AI model interactions, data transformations
-- **Data Layer:** Storage, retrieval, caching, and state management
-- **Infrastructure Layer:** Azure resources defined in Bicep, networking, identity, monitoring
+### Containerized Edge Inference
+```yaml
+# Docker container for edge device (ARM64 or x86)
+FROM mcr.microsoft.com/onnxruntime:latest
+COPY model/ /app/model/
+COPY inference.py /app/
+EXPOSE 8080
+CMD ["python", "/app/inference.py"]
 
-## Your Expertise for This Play
-- Azure AI Services configuration and integration patterns
-- Infrastructure-as-Code with Bicep (modules, parameters, conditional resources)
-- Python/TypeScript application development with Azure SDKs
-- Production deployment patterns (blue-green, canary, rollback)
-- Evaluation and monitoring of AI system quality metrics
-- Cost optimization through model routing and caching strategies
+# Deploy via IoT Edge module
+# azure-iot-edge-module.json:
+{
+  "moduleName": "ai-inference",
+  "image": "myregistry.azurecr.io/ai-inference:v1.2.0",
+  "createOptions": { "HostConfig": { "Binds": ["/data:/data"] } },
+  "env": { "MODEL_PATH": "/app/model/phi-3-mini-q4.onnx" }
+}
+```
 
-## Rules for Code Generation
-1. **Authentication:** Always use `DefaultAzureCredential` / Managed Identity — never hardcode API keys
-2. **Configuration:** Use `config/` JSON files for all parameters — never hardcode values
-3. **Error Handling:** Wrap all Azure SDK calls with retry logic (exponential backoff, max 3 retries)
-4. **Logging:** Use structured logging with correlation IDs, send to Application Insights
-5. **Security:** Validate all inputs, sanitize outputs, use Content Safety for user-facing content
-6. **Testing:** Include unit tests for business logic, integration tests for Azure services
-7. **Documentation:** Add JSDoc/docstring comments on public functions and API endpoints
-8. **Performance:** Use async/await patterns, implement caching where appropriate
-9. **Cost:** Use model routing (cheap model for simple tasks, capable model for complex ones)
-10. **Observability:** Export custom metrics for latency, token usage, error rates, and quality scores
+### Model Optimization for Edge
+| Technique | Size Reduction | Quality Impact | When to Use |
+|-----------|---------------|----------------|-------------|
+| FP16 quantization | 50% | <1% loss | GPU edge devices |
+| INT8 quantization | 75% | 2-3% loss | CPU edge devices |
+| INT4 quantization | 87% | 5-8% loss | Severely constrained devices |
+| Pruning | 30-60% | Varies | After quantization |
+| Knowledge distillation | Model-dependent | Teacher→student | Train smaller model from larger |
+| ONNX conversion | Variable | None | Cross-platform compatibility |
 
-## Configuration Files Reference
-| File | Purpose | Key Fields |
-|------|---------|------------|
-| `config/openai.json` | Model parameters | model, temperature, max_tokens, top_p |
-| `config/agents.json` | Agent behavior config | roles, handoff rules, escalation |
-| `config/guardrails.json` | Content safety rules | thresholds, blocked categories, PII handling |
-| `config/model-comparison.json` | Model selection matrix | models, cost, latency, quality scores |
-| `config/chunking.json` | Data processing config | chunk_size, overlap, strategy |
-| `config/search.json` | Retrieval configuration | search_type, top_k, score_threshold |
+### OTA Model Updates via IoT Hub
+```python
+# Fleet-wide model update with rollback capability
+async def deploy_model_update(fleet: str, model_version: str):
+    # 1. Deploy to canary group first (5% of devices)
+    await iot_hub.update_twin(fleet, "canary", {"model_version": model_version})
+    
+    # 2. Monitor canary for 1 hour
+    metrics = await monitor_canary(fleet, duration_hours=1)
+    if metrics.error_rate > 0.05:
+        await rollback(fleet, "canary")
+        raise DeploymentError("Canary failed — rolling back")
+    
+    # 3. Progressive rollout: 25% → 50% → 100%
+    for pct in [25, 50, 100]:
+        await iot_hub.update_twin(fleet, f"ring-{pct}", {"model_version": model_version})
+        await asyncio.sleep(3600)  # Wait 1 hour between rings
+```
 
-## Infrastructure Reference
-| Resource | File | Purpose |
-|----------|------|---------|
-| Azure resources | `infra/main.bicep` | All Azure services for this play |
-| ARM template | `infra/main.json` | Generated ARM template |
-| Parameters | `infra/parameters.json` | Environment-specific values |
-| MCP plugin | `mcp/index.js` | MCP server integration |
+### Key Pitfalls
+| Mistake | Why Wrong | Fix |
+|---------|----------|-----|
+| Cloud-only inference | Fails offline, high latency | Local inference with ONNX Runtime |
+| No model versioning on device | Can't roll back bad updates | Version tracking in IoT Hub twin |
+| Big-bang deployment | All devices fail at once | Canary → progressive rollout (5% → 25% → 100%) |
+| No offline fallback | Device useless without cloud | Cache last-good model + responses |
+| x86 container on ARM device | Architecture mismatch, won't run | Multi-arch builds (buildx) |
+| No device telemetry | Blind to edge performance | IoT Hub D2C messages: latency, accuracy, errors |
+| Full model on constrained device | OOM crash | Quantize to INT4/INT8, measure memory first |
 
-## Evaluation & Quality
-- Run `python evaluation/eval.py` to evaluate solution quality
-- Metrics tracked: relevance, groundedness, coherence, fluency, safety
-- CI gate: all metrics must exceed thresholds in `config/guardrails.json`
-- Test cases in `evaluation/test-set.jsonl` (minimum 10 diverse scenarios)
+## Config Files (TuneKit)
+| File | What to Tune |
+|------|-------------|
+| `config/openai.json` | Model path, quantization level, inference settings |
+| `config/guardrails.json` | Memory limits, latency SLA, rollback thresholds |
+| `config/agents.json` | Fleet groups, rollout rings, update schedule |
 
-## Deployment Workflow
-1. Validate Bicep: `az bicep build -f infra/main.bicep`
-2. Deploy infrastructure: `azd up` or `az deployment group create`
-3. Configure application settings from `config/*.json`
-4. Run smoke tests to verify endpoints
-5. Run evaluation pipeline to verify quality metrics
-6. Monitor Application Insights for errors and performance
+## Available Specialist Agents (optional)
+| Agent | Use For |
+|-------|---------|
+| `@builder` | Package models, build containers, configure IoT Edge deployment |
+| `@reviewer` | Audit model size, memory usage, rollback capability, offline mode |
+| `@tuner` | Optimize quantization, container size, rollout strategy |
 
-## Agent Workflow
-When implementing features, follow the builder → reviewer → tuner chain:
-1. **Build:** Implement using config/ values and architecture patterns
-2. **Review:** Validate against reviewer.agent.md checklist (security, quality, WAF compliance)
-3. **Tune:** Optimize config values, verify evaluation thresholds, production-ready SKUs
-
-## Naming Conventions
-- Files: `lowercase-hyphen.ext` (e.g., `document-processor.py`)
-- Functions: `snake_case` for Python, `camelCase` for TypeScript
-- Classes: `PascalCase` (e.g., `DocumentProcessor`)
-- Azure resources: `{project}-{env}-{resource}` (e.g., `frootai-prod-openai`)
-- Config keys: `snake_case` in JSON files
-- Environment variables: `UPPER_SNAKE_CASE`
-
-## Error Handling Patterns
-- Use custom exception classes for domain-specific errors
-- Return structured error responses with error code, message, and correlation ID
-- Log errors with full context (request ID, user action, stack trace)
-- Implement circuit breaker for external service calls
-- Graceful degradation: return cached/default response when services are unavailable
-
-## Testing Strategy
-- **Unit tests:** Business logic, data transformations, validation rules
-- **Integration tests:** Azure SDK interactions with emulators or test resources
-- **E2E tests:** Full request-response cycle through deployed endpoints
-- **Load tests:** Baseline performance with 100 concurrent users
-- **Evaluation tests:** AI quality metrics via eval.py pipeline
-
-## WAF Alignment
-This play aligns with all 6 Well-Architected Framework pillars:
-- **Reliability:** Retry policies, health checks, graceful degradation
-- **Security:** Managed Identity, Key Vault, Content Safety, RBAC
-- **Cost Optimization:** Model routing, caching, right-sized SKUs
-- **Operational Excellence:** IaC, CI/CD, observability, incident runbooks
-- **Performance Efficiency:** Async patterns, connection pooling, CDN
-- **Responsible AI:** Content safety, groundedness checks, bias monitoring
-
-For explicit agent handoffs, use @builder, @reviewer, or @tuner in Copilot Chat.
-
-
-## Common Pitfalls
-- Do NOT use synchronous HTTP libraries — use async clients (httpx, aiohttp)
-- Do NOT create new Azure resources without checking config/agents.json first
-- Do NOT ignore evaluation results — all metrics must pass before deployment
-- Do NOT skip the reviewer step — every implementation must be reviewed
-- Do NOT use print statements — use structured logging with correlation IDs
-- Do NOT commit secrets — use Key Vault references and Managed Identity
-- Do NOT deploy without running Bicep lint first
-
-## Quick Reference Commands
-- Deploy infrastructure: `az bicep build -f infra/main.bicep && azd up`
-- Run evaluation: `python evaluation/eval.py`
-- Run tests: `pytest tests/ -v --cov=app`
-- Validate config: `node -e "require('./config/openai.json')"`
-- Check Bicep: `az bicep lint -f infra/main.bicep`
-
-## FAI Protocol Integration
-This play is wired through the FAI Protocol via `fai-manifest.json`:
-- **Context:** Knowledge modules and WAF pillar alignment defined
-- **Primitives:** Agent, instruction, skill, and hook references
-- **Infrastructure:** Azure resource requirements and deployment config
-- **Guardrails:** Quality thresholds, content safety rules, evaluation gates
-- **Toolkit:** DevKit (build), TuneKit (optimize), SpecKit (document)
-
-## Cross-Play Compatibility
-This play can be combined with other FrootAI solution plays:
-- Use shared agents from the agents/ directory for cross-play expertise
-- Reference shared instructions from instructions/ for coding standards
-- Import shared skills for common operations (deploy, evaluate, tune)
-- Wire plays together via fai-manifest.json compatible-plays field
-
-## Response Format
-When generating code or documentation:
-- Include inline comments explaining non-obvious logic
-- Add type hints on all function signatures
-- Return structured responses with metadata (latency, tokens, model)
-- Include error handling with meaningful error messages
-
-
-## Prompt Engineering Guidelines
-When crafting prompts for this solution:
-- Use clear delimiters between context, instructions, and user query
-- Include few-shot examples for complex tasks
-- Specify output format explicitly (JSON schema, markdown, bullet points)
-- Set persona context at the beginning of the system prompt
-- Include guardrails in system prompt: do not hallucinate, cite sources
-- Keep system prompts under 2000 tokens for optimal latency
-- Version-control all prompts alongside application code
-
-## Troubleshooting Quick Reference
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| 401 Unauthorized | Managed Identity not configured | Check RBAC role assignments |
-| 429 Too Many Requests | Rate limit exceeded | Implement retry with backoff |
-| 404 Model Not Found | Wrong deployment name | Verify openai.json deployment_name |
-| Content blocked | Safety threshold triggered | Review guardrails.json thresholds |
-| Slow responses | No caching, large max_tokens | Enable cache, reduce max_tokens |
-| Evaluation fails | Config mismatch | Ensure eval.py reads config/guardrails.json |
-| Bicep errors | Missing parameters | Check parameters.json completeness |
-| Health check 503 | Missing env vars | Verify app settings match config needs |
-
-## Environment Variables
-Required environment variables for this solution:
-| Variable | Description | Example |
-|----------|-------------|---------|
-| AZURE_OPENAI_ENDPOINT | OpenAI service endpoint | https://oai-frootai-prod.openai.azure.com/ |
-| AZURE_KEY_VAULT_URL | Key Vault URI | https://kv-frootai-xxx.vault.azure.net/ |
-| APPLICATIONINSIGHTS_CONNECTION_STRING | App Insights connection | InstrumentationKey=xxx |
-| AZURE_STORAGE_ACCOUNT | Storage account name | stfrootaiprod |
-| ENVIRONMENT | Deployment environment | dev, staging, prod |
-
-
-## Prompt Engineering Guidelines
-When crafting prompts for this solution:
-- Use clear delimiters between context, instructions, and user query
-- Include few-shot examples for complex tasks
-- Specify output format explicitly (JSON schema, markdown, bullet points)
-- Set persona context at the beginning of the system prompt
-- Include guardrails in system prompt: do not hallucinate, cite sources
-- Keep system prompts under 2000 tokens for optimal latency
-- Version-control all prompts alongside application code
-
-## Troubleshooting Quick Reference
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| 401 Unauthorized | Managed Identity not configured | Check RBAC role assignments |
-| 429 Too Many Requests | Rate limit exceeded | Implement retry with backoff |
-| 404 Model Not Found | Wrong deployment name | Verify openai.json deployment_name |
-| Content blocked | Safety threshold triggered | Review guardrails.json thresholds |
-| Slow responses | No caching, large max_tokens | Enable cache, reduce max_tokens |
-| Evaluation fails | Config mismatch | Ensure eval.py reads config/guardrails.json |
-| Bicep errors | Missing parameters | Check parameters.json completeness |
-| Health check 503 | Missing env vars | Verify app settings match config needs |
-
-## Environment Variables
-Required environment variables for this solution:
-| Variable | Description | Example |
-|----------|-------------|---------|
-| AZURE_OPENAI_ENDPOINT | OpenAI service endpoint | https://oai-frootai-prod.openai.azure.com/ |
-| AZURE_KEY_VAULT_URL | Key Vault URI | https://kv-frootai-xxx.vault.azure.net/ |
-| APPLICATIONINSIGHTS_CONNECTION_STRING | App Insights connection | InstrumentationKey=xxx |
-| AZURE_STORAGE_ACCOUNT | Storage account name | stfrootaiprod |
-| ENVIRONMENT | Deployment environment | dev, staging, prod |
+## Slash Commands
+`/deploy` — Deploy to edge fleet | `/test` — Test on single device | `/review` — Audit deployment | `/evaluate` — Measure edge metrics
