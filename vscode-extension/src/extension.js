@@ -1024,6 +1024,7 @@ function activate(context) {
         ".github/copilot-instructions.md",
         "agent.md",
         ".vscode/mcp.json",
+        ".vscode/settings.json",
       ];
 
       // Dynamic discovery — scan the play's .github folder for all instruction/agent/prompt/skill files
