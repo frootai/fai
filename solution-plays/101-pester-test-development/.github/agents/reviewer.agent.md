@@ -1,10 +1,11 @@
 ---
 name: "Pester Test Reviewer"
 description: "Pester Test Development reviewer — validates test quality, mock completeness, assertion correctness, coverage gaps, and CI/CD readiness"
-tools: ["codebase"]
+tools: ["read", "search"]
 model: "gpt-4o"
 waf: ["reliability", "operational-excellence"]
 plays: ["101-pester-test-development"]
+user-invocable: false
 ---
 
 # Pester Test Development — Reviewer Agent

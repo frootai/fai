@@ -1,7 +1,7 @@
 ---
 name: "Pester Test Builder"
 description: "Pester Test Development builder — analyzes PowerShell codebases using AST, generates Pester 5.x test suites with comprehensive mocking, targets >90% code coverage"
-tools: ["codebase", "terminal", "run_in_terminal"]
+tools: ["read", "edit", "search", "execute", "agent"]
 model: "gpt-4o"
 waf: ["reliability", "operational-excellence"]
 plays: ["101-pester-test-development"]

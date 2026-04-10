@@ -14,8 +14,8 @@
   },
   "seed": 42,
   "stream": false,
-  "embedding_model": "PSScriptAnalyzer",
-  "embedding_deployment": "PSScriptAnalyzer",
+  "embedding_model": "not-applicable",
+  "embedding_deployment": "not-applicable",
   "embedding_dimensions": 3072,
   "system_message_ref": "agent.md",
   "safety": {
