@@ -27,7 +27,7 @@ Produce a discovery report: file count, function count, dependency map, existing
 
 ### Phase 2: Assessment
 Score testability per file on a 0-100% scale:
-- **100%**: Pure functions with [CmdletBinding()], [OutputType()], proper parameters
+- **100%**: Pure functions with `[CmdletBinding()]`, `[OutputType()]`, proper parameters
 - **80-99%**: Functions with mockable external calls (Az.*, REST, AD)
 - **50-79%**: Scripts with some functions but also inline code
 - **20-49%**: Monolithic scripts with Write-Host, Read-Host, hardcoded paths
@@ -38,7 +38,7 @@ Flag anti-patterns: Write-Host (not testable), Read-Host (interactive), hardcode
 ### Phase 3: Requirement Mapping
 For each function, document:
 - **Parameters**: types, Mandatory, ValidateSet, ValidatePattern, ValueFromPipeline
-- **Return types**: [OutputType()], pipeline output, $null returns
+- **Return types**: `[OutputType()]`, pipeline output, $null returns
 - **Error scenarios**: what throws, what returns $null, ErrorAction behavior
 - **Edge cases**: empty input, $null, empty array, single vs collection, boundary values
 - **Dependencies**: which cmdlets/functions are called internally
@@ -53,7 +53,7 @@ Build the mock dependency graph:
 | Network | Invoke-RestMethod, Invoke-WebRequest, Test-NetConnection | Mock with JSON response objects |
 | Active Directory | Get-ADUser, Get-ADGroup, Get-ADComputer | Mock with @{} hashtables or PSCustomObject |
 | SQL | Invoke-Sqlcmd, Invoke-DbaQuery | Mock with DataTable or PSCustomObject |
-| .NET types | [System.IO.File], [System.Net.Http.HttpClient] | Add-Type thin wrapper → mock the wrapper |
+| .NET types | `[System.IO.File]`, `[System.Net.Http.HttpClient]` | Add-Type thin wrapper → mock the wrapper |
 | External processes | Start-Process, & operator | Mock with predefined exit codes + output |
 
 ### Phase 5: Refactoring (Legacy Code)

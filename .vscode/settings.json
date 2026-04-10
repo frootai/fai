@@ -55,5 +55,8 @@
       "strings": false
     }
   },
-  "markdown.validate.enabled": true
+  "markdown.validate.enabled": true,
+  "markdown.validate.unusedLinkDefinitions": "ignore",
+  "markdown.validate.undefinedLinkDefinitions": "ignore",
+  "markdown.validate.referenceLinks.enabled": "ignore"
 }
