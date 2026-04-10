@@ -1059,13 +1059,13 @@ function activate(context) {
         }
       };
 
-      // Workflows directory (CI/CD templates)
+      // Pipeline templates directory (CI/CD templates)
       const addWorkflowFiles = (playPath) => {
-        const workflowsDir = path.join(playPath, ".github", "workflows");
-        if (fs.existsSync(workflowsDir)) {
-          for (const f of fs.readdirSync(workflowsDir)) {
+        const templatesDir = path.join(playPath, ".github", "pipeline-templates");
+        if (fs.existsSync(templatesDir)) {
+          for (const f of fs.readdirSync(templatesDir)) {
             if (f.endsWith(".yml") || f.endsWith(".yaml")) {
-              dynamicFiles.push(`.github/workflows/${f}`);
+              dynamicFiles.push(`.github/pipeline-templates/${f}`);
             }
           }
         }
