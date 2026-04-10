@@ -22,6 +22,42 @@ When working with more than 3 source files:
 3. If reviewing tests → invoke the **reviewer** subagent
 4. If optimizing coverage → invoke the **tuner** subagent
 
+## MANDATORY: Use Instruction Files, Skills, Workflows, and Hooks
+
+This play ships with specialized resources. Use them — they contain curated domain knowledge.
+
+### Instruction Files (auto-fire when editing .ps1/.psm1 files)
+| File | When It Fires | What It Adds |
+|------|--------------|-------------|
+| `pester-coding-standards.instructions.md` | Editing any .ps1/.psm1 | Function design templates, project structure, naming conventions |
+| `pester-test-development-patterns.instructions.md` | Editing any .ps1/.psm1 | AST extraction, mock dependency graph, coverage analysis, CI/CD patterns |
+| `security.instructions.md` | Editing any .ps1/.psm1 | Mock isolation, credential safety, TestDrive, RBAC scope validation |
+| `azure-coding.instructions.md` | Editing any .ps1/.psm1 | Azure cmdlet mocking, Policy lifecycle testing, DiagnosticLogs validation |
+
+**Action:** When working on PowerShell code, these files auto-inject. Reference their patterns in your responses.
+
+### Skills (invoke when matching task)
+| Skill | When to Use |
+|-------|------------|
+| `generate-tests` | Writing, creating, or generating Pester tests for any PowerShell module |
+| `deploy-pester-test-development` | Deploying test suite to CI/CD (Azure DevOps or GitHub Actions) |
+| `evaluate-pester-test-development` | Evaluating test quality — coverage gaps, flaky tests, mock completeness |
+| `tune-pester-test-development` | Tuning, fixing, optimizing Pester tests for coverage and performance |
+
+### Workflows (CI/CD templates for customer)
+| File | Platform | Purpose |
+|------|----------|---------|
+| `.github/workflows/pester-ci-github.yml` | GitHub Actions | Multi-OS Pester CI with coverage gating, artifact upload, PR comments |
+| `.github/workflows/pester-ci-azure-devops.yml` | Azure DevOps | Pipeline with Pester, coverage gate, PublishTestResults, PublishCodeCoverage |
+
+**Action:** When customer asks about CI/CD, read and reference these workflow templates.
+
+### Hooks
+| Hook | Event | Effect |
+|------|-------|--------|
+| `pester-guardrails.json` | PreToolUse | Warns before destructive operations (Remove-Item, Stop-Process, etc.) |
+| `pester-guardrails.json` | SessionStart | Injects workspace reminder: use @builder, @reviewer, @tuner |
+
 ## Agent Chain: builder → reviewer → tuner
 
 | Agent | When to Use | How to Invoke |
@@ -158,6 +194,124 @@ Invoke-Pester -Configuration $config
     $config.CodeCoverage.CoveragePercentTarget = 90
     $config.Run.Exit = $true
     Invoke-Pester -Configuration $config
+```
+
+## MANDATORY: Report Generation
+
+When creating Pester tests for a PowerShell codebase, the following reports MUST be generated at each phase. These reports are the deliverables — they prove thoroughness and give the customer a traceable audit trail.
+
+### Report 1: Test Creation Report (Phase 1-2)
+Generate at the start — covers discovery and envisioning:
+- **Codebase scan results**: total files, total functions, module structure, existing test coverage
+- **Testability scores**: per-file 0-100% score with flagged anti-patterns (Write-Host, Read-Host, hardcoded paths, no param blocks)
+- **Test plan overview**: which files get tests, estimated test count per file, complexity rating
+
+**Format:**
+```
+## Test Creation Report
+| File | Functions | Testability | Anti-Patterns | Estimated Tests |
+|------|-----------|-------------|---------------|-----------------|
+| Get-Policy.ps1 | 3 | 95% | None | 12 |
+| Deploy-Infra.ps1 | 5 | 40% | Write-Host×4, hardcoded paths | 8 (after refactor) |
+**Total: X files, Y functions, Z estimated tests**
+```
+
+### Report 2: Dependency & Requirement Mapping Report (Phase 3-4)
+Generated after analyzing each function's inputs, outputs, and external dependencies:
+- **Requirement map**: per-function parameters (types, Mandatory, ValidateSet), return types ([OutputType]), error scenarios, edge cases
+- **Dependency map**: per-function external calls needing mocks (Az.*, file I/O, REST, AD, SQL, .NET types)
+- **Mock graph**: visual dependency tree showing which cmdlets need mocking and with what return shapes
+
+**Format:**
+```
+## Dependency & Requirement Mapping
+### Get-PolicyCompliance
+- **Parameters**: PolicyName (string, Mandatory), ScopeLevel (string, ValidateSet)
+- **Returns**: [PSCustomObject] with State, ResourceId, Timestamp
+- **Error paths**: throws on null PolicyName, returns $null on API timeout
+- **Dependencies to mock**:
+  - Connect-AzAccount → {} (void)
+  - Get-AzContext → @{ Subscription = @{ Id = '...' } }
+  - Get-AzPolicyState → [PSCustomObject]@{ ComplianceState = '...' }
+```
+
+### Report 3: Test Points Identification Report (Phase 5-6)
+After identifying what to test — the specific test points (It blocks) to create:
+- **Per-function test matrix**: success path, error paths, edge cases, parameter validation, mock verification
+- **Test categories**: Unit tests (-Tag 'Unit'), Integration tests (-Tag 'Integration')
+- **Data-driven candidates**: functions with multiple parameter combinations → -TestCases
+
+**Format:**
+```
+## Test Points Identification
+### Get-PolicyCompliance (8 test points)
+| # | Test Point | Category | Type |
+|---|-----------|----------|------|
+| 1 | Returns compliant status when policy is compliant | Happy path | Unit |
+| 2 | Returns non-compliant with resource details | Alternate path | Unit |
+| 3 | Throws when PolicyName is null/empty | Parameter validation | Unit |
+| 4 | Accepts pipeline input | Pipeline support | Unit |
+| 5 | Calls Get-AzPolicyState exactly once | Mock verification | Unit |
+| 6 | Handles API timeout gracefully | Error path | Unit |
+| 7 | Works with Management scope | Scope variation | Unit |
+| 8 | Works with Subscription scope | Scope variation | Unit |
+```
+
+### Report 4: Code Coverage Report (Phase 7 — after local test run)
+After running `Invoke-Pester` with coverage enabled:
+- **Coverage summary**: line %, branch %, function % with pass/fail against targets
+- **Uncovered lines**: specific files and line numbers not covered
+- **Gap analysis**: why those lines are uncovered and what tests would cover them
+
+**Format:**
+```
+## Code Coverage Report
+| Metric | Result | Target | Status |
+|--------|--------|--------|--------|
+| Line Coverage | 93.2% | ≥90% | ✅ PASS |
+| Branch Coverage | 85.1% | ≥80% | ✅ PASS |
+| Function Coverage | 100% | 100% | ✅ PASS |
+
+### Uncovered Lines (if any)
+| File | Line | Code | Reason |
+|------|------|------|--------|
+| Deploy-Infra.ps1 | 47 | catch { Write-Error $_ } | Error path not tested |
+```
+
+### Report 5: Final Validation Report (Phase 7 — completion)
+The final deliverable summarizing everything:
+- **Test suite summary**: total tests, pass rate, duration, files covered
+- **Coverage achieved** vs targets
+- **CI/CD readiness**: pipeline template provided, coverage gate configured
+- **Quality checklist**: mock isolation verified, no hardcoded paths, all assertions correct
+- **Recommendations**: remaining gaps, refactoring suggestions, next steps
+
+**Format:**
+```
+## Final Validation Report
+### Summary
+- Tests generated: 47 across 8 files
+- Pass rate: 100% (47/47)
+- Duration: 3.2 seconds
+- Coverage: 93.2% line / 85.1% branch / 100% function
+
+### Quality Checklist
+- [x] All external deps mocked (Az.*, file I/O)
+- [x] All mocks verified with Should -Invoke
+- [x] TestDrive used for file operations
+- [x] No hardcoded paths
+- [x] Tags applied (-Tag 'Unit'/'Integration')
+- [x] Data-driven tests where applicable
+
+### CI/CD
+- [x] GitHub Actions template provided
+- [x] Azure DevOps template provided
+- [x] Coverage gate: 90% line, 80% branch
+
+### Recommendations
+1. Add integration tests for live Azure connectivity (separate pipeline stage)
+2. Consider InModuleScope tests for private helper functions
+3. Set up coverage trending to track regression over time
 ```
 
 ## GUARDRAILS (Enforced)

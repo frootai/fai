@@ -1,0 +1,145 @@
+# Azure DevOps — Pester Test CI Pipeline
+# Copy this file to your repo as azure-pipelines.yml
+# Runs Pester tests on every push/PR with coverage gating
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - '**/*.psd1'
+      - '**/*.Tests.ps1'
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - '**/*.psd1'
+      - '**/*.Tests.ps1'
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  coverageTarget: 90
+  testPath: './tests'
+  srcPath: './src'
+  reportPath: './reports'
+
+stages:
+  - stage: Test
+    displayName: 'Pester Tests'
+    jobs:
+      - job: PesterTests
+        displayName: 'Run Pester Test Suite'
+        steps:
+          - task: PowerShell@2
+            displayName: 'Install Pester 5.x'
+            inputs:
+              targetType: inline
+              pwsh: true
+              script: |
+                Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser
+                Import-Module Pester
+                Write-Host "Pester $(Get-Module Pester -ListAvailable | Select-Object -First 1 -ExpandProperty Version) installed"
+
+          - task: PowerShell@2
+            displayName: 'Run Pester Tests with Coverage'
+            inputs:
+              targetType: inline
+              pwsh: true
+              script: |
+                # Create reports directory
+                New-Item -ItemType Directory -Path '$(reportPath)' -Force | Out-Null
+
+                $config = New-PesterConfiguration
+                $config.Run.Path = '$(testPath)'
+                $config.Run.Exit = $true
+                $config.Run.PassThru = $true
+                $config.Output.Verbosity = 'Detailed'
+
+                # Code coverage
+                $config.CodeCoverage.Enabled = $true
+                $config.CodeCoverage.Path = '$(srcPath)'
+                $config.CodeCoverage.OutputFormat = 'JaCoCo'
+                $config.CodeCoverage.OutputPath = '$(reportPath)/coverage.xml'
+                $config.CodeCoverage.CoveragePercentTarget = $(coverageTarget)
+
+                # Test results
+                $config.TestResult.Enabled = $true
+                $config.TestResult.OutputFormat = 'NUnitXml'
+                $config.TestResult.OutputPath = '$(reportPath)/test-results.xml'
+
+                $result = Invoke-Pester -Configuration $config
+
+                # Print summary
+                Write-Host "============================================"
+                Write-Host "Total Tests: $($result.TotalCount)"
+                Write-Host "Passed:      $($result.PassedCount)"
+                Write-Host "Failed:      $($result.FailedCount)"
+                Write-Host "Skipped:     $($result.SkippedCount)"
+                Write-Host "Duration:    $($result.Duration)"
+                Write-Host "============================================"
+
+                if ($result.FailedCount -gt 0) {
+                  Write-Error "$($result.FailedCount) test(s) failed"
+                  exit 1
+                }
+
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
+            condition: always()
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: '$(reportPath)/test-results.xml'
+              mergeTestResults: true
+              testRunTitle: 'Pester Tests'
+
+          - task: PublishCodeCoverageResults@2
+            displayName: 'Publish Code Coverage'
+            condition: always()
+            inputs:
+              summaryFileLocation: '$(reportPath)/coverage.xml'
+
+          - task: PowerShell@2
+            displayName: 'Coverage Gate Check'
+            condition: always()
+            inputs:
+              targetType: inline
+              pwsh: true
+              script: |
+                $coveragePath = '$(reportPath)/coverage.xml'
+                if (-not (Test-Path $coveragePath)) {
+                  Write-Warning "Coverage report not found at $coveragePath"
+                  exit 0
+                }
+
+                [xml]$coverage = Get-Content $coveragePath
+                $counters = $coverage.report.counter
+
+                $line = $counters | Where-Object { $_.type -eq 'LINE' }
+                $branch = $counters | Where-Object { $_.type -eq 'BRANCH' }
+                $method = $counters | Where-Object { $_.type -eq 'METHOD' }
+
+                $lineRate = if ($line) { [math]::Round(([int]$line.covered / ([int]$line.covered + [int]$line.missed)) * 100, 1) } else { 0 }
+                $branchRate = if ($branch) { [math]::Round(([int]$branch.covered / ([int]$branch.covered + [int]$branch.missed)) * 100, 1) } else { 0 }
+                $methodRate = if ($method) { [math]::Round(([int]$method.covered / ([int]$method.covered + [int]$method.missed)) * 100, 1) } else { 0 }
+
+                Write-Host "## Coverage Results"
+                Write-Host "Line Coverage:   ${lineRate}% (target: $(coverageTarget)%)"
+                Write-Host "Branch Coverage: ${branchRate}% (target: 80%)"
+                Write-Host "Method Coverage: ${methodRate}% (target: 100%)"
+
+                if ($lineRate -lt $(coverageTarget)) {
+                  Write-Error "Line coverage ${lineRate}% is below target $(coverageTarget)%"
+                  exit 1
+                }
+                Write-Host "Coverage gate PASSED"

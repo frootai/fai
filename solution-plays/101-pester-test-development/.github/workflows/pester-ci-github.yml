@@ -1,0 +1,110 @@
+# GitHub Actions — Pester Test CI Pipeline
+# Copy this file to your repo's .github/workflows/ directory
+# Runs Pester tests on every push/PR with coverage gating
+
+name: Pester Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['**/*.ps1', '**/*.psm1', '**/*.psd1', '**/*.Tests.ps1']
+  pull_request:
+    branches: [main]
+    paths: ['**/*.ps1', '**/*.psm1', '**/*.psd1', '**/*.Tests.ps1']
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  pester-tests:
+    name: Run Pester Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser
+          Import-Module Pester
+          Write-Host "Pester $(Get-Module Pester -ListAvailable | Select-Object -First 1 -ExpandProperty Version) installed"
+
+      - name: Run Pester Tests with Coverage
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+
+          # Code coverage
+          $config.CodeCoverage.Enabled = $true
+          $config.CodeCoverage.Path = './src'
+          $config.CodeCoverage.OutputFormat = 'JaCoCo'
+          $config.CodeCoverage.OutputPath = './reports/coverage.xml'
+          $config.CodeCoverage.CoveragePercentTarget = 90
+
+          # Test results
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.TestResult.OutputPath = './reports/test-results.xml'
+
+          # Ensure reports directory exists
+          New-Item -ItemType Directory -Path './reports' -Force | Out-Null
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: ./reports/test-results.xml
+          retention-days: 30
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}
+          path: ./reports/coverage.xml
+          retention-days: 30
+
+      - name: Publish Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Pester Results (${{ matrix.os }})
+          path: ./reports/test-results.xml
+          reporter: java-junit
+
+      - name: Coverage Summary Comment (PR only)
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          if (Test-Path './reports/coverage.xml') {
+            [xml]$coverage = Get-Content './reports/coverage.xml'
+            $counters = $coverage.report.counter
+            $line = $counters | Where-Object { $_.type -eq 'LINE' }
+            $branch = $counters | Where-Object { $_.type -eq 'BRANCH' }
+            $method = $counters | Where-Object { $_.type -eq 'METHOD' }
+
+            $lineRate = if ($line) { [math]::Round(([int]$line.covered / ([int]$line.covered + [int]$line.missed)) * 100, 1) } else { 'N/A' }
+            $branchRate = if ($branch) { [math]::Round(([int]$branch.covered / ([int]$branch.covered + [int]$branch.missed)) * 100, 1) } else { 'N/A' }
+            $methodRate = if ($method) { [math]::Round(([int]$method.covered / ([int]$method.covered + [int]$method.missed)) * 100, 1) } else { 'N/A' }
+
+            Write-Host "## Coverage Summary"
+            Write-Host "| Metric | Coverage |"
+            Write-Host "|--------|----------|"
+            Write-Host "| Line   | ${lineRate}% |"
+            Write-Host "| Branch | ${branchRate}% |"
+            Write-Host "| Method | ${methodRate}% |"
+          }
