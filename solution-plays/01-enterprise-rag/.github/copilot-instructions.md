@@ -1,220 +1,140 @@
-You are an AI coding assistant working on the FrootAI Enterprise Rag solution play (Play 01).
+---
+description: "Enterprise RAG domain knowledge — auto-injected into every Copilot conversation in this workspace"
+applyTo: "**"
+---
 
-## Solution Play Overview
-This solution play implements a production-grade Enterprise Rag system on Azure, following the FrootAI FAI Protocol and Well-Architected Framework (WAF) principles across all six pillars: Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency, and Responsible AI.
+# Enterprise RAG — Domain Knowledge
 
-## .github Agentic OS Structure
-This solution uses the full GitHub Copilot agentic OS:
-- **Layer 1 (Always-On):** `instructions/*.instructions.md` — coding standards, domain patterns, security
-- **Layer 2 (On-Demand):** `prompts/*.prompt.md` — /deploy, /test, /review, /evaluate
-- **Layer 2 (Agents):** `agents/*.agent.md` — builder, reviewer, tuner (chained workflow)
-- **Layer 2 (Skills):** `skills/*/SKILL.md` — deploy-azure, evaluate, tune
-- **Layer 3 (Hooks):** `hooks/guardrails.json` — preToolUse policy gates
-- **Layer 3 (Workflows):** `workflows/*.md` — AI-driven CI/CD pipelines
+This workspace implements a production-grade Enterprise RAG (Retrieval-Augmented Generation) system on Azure. The following rules supplement your existing knowledge with RAG-specific patterns, Azure AI integration pitfalls, and project conventions.
 
-## Agent Chain
-builder.agent.md → reviewer.agent.md → tuner.agent.md
-The builder implements features, the reviewer validates quality, the tuner optimizes for production.
+## RAG Architecture (What the Model Often Gets Wrong)
 
-## Architecture Context
-This play follows a modular architecture with clear separation of concerns:
-- **API Layer:** Handles incoming requests, input validation, and response formatting
-- **Processing Layer:** Core business logic, AI model interactions, data transformations
-- **Data Layer:** Storage, retrieval, caching, and state management
-- **Infrastructure Layer:** Azure resources defined in Bicep, networking, identity, monitoring
+### Chunking Strategy
+| Parameter | Value | Why |
+|-----------|-------|-----|
+| Chunk size | 512-1024 tokens | Too small = no context. Too large = irrelevant noise. |
+| Overlap | 10-15% of chunk size | Prevents splitting mid-sentence at chunk boundaries |
+| Strategy | Semantic (sentence-aware) | Character-based splitting breaks meaning |
 
-## Your Expertise for This Play
-- Azure AI Services configuration and integration patterns
-- Infrastructure-as-Code with Bicep (modules, parameters, conditional resources)
-- Python/TypeScript application development with Azure SDKs
-- Production deployment patterns (blue-green, canary, rollback)
-- Evaluation and monitoring of AI system quality metrics
-- Cost optimization through model routing and caching strategies
+### Retrieval Pattern (Hybrid Search — Not Just Vector)
+```python
+# ❌ WRONG — vector-only search misses keyword matches
+results = search_client.search(query, vector_queries=[vector])
 
-## Rules for Code Generation
-1. **Authentication:** Always use `DefaultAzureCredential` / Managed Identity — never hardcode API keys
-2. **Configuration:** Use `config/` JSON files for all parameters — never hardcode values
-3. **Error Handling:** Wrap all Azure SDK calls with retry logic (exponential backoff, max 3 retries)
-4. **Logging:** Use structured logging with correlation IDs, send to Application Insights
-5. **Security:** Validate all inputs, sanitize outputs, use Content Safety for user-facing content
-6. **Testing:** Include unit tests for business logic, integration tests for Azure services
-7. **Documentation:** Add JSDoc/docstring comments on public functions and API endpoints
-8. **Performance:** Use async/await patterns, implement caching where appropriate
-9. **Cost:** Use model routing (cheap model for simple tasks, capable model for complex ones)
-10. **Observability:** Export custom metrics for latency, token usage, error rates, and quality scores
+# ✅ CORRECT — hybrid: keyword + vector + semantic reranking
+results = search_client.search(
+    search_text=query,                    # BM25 keyword search
+    vector_queries=[vector],              # Vector similarity
+    query_type="semantic",                # Semantic reranking
+    semantic_configuration_name="default",
+    top=5
+)
+```
 
-## Configuration Files Reference
-| File | Purpose | Key Fields |
-|------|---------|------------|
-| `config/openai.json` | Model parameters | model, temperature, max_tokens, top_p |
-| `config/agents.json` | Agent behavior config | roles, handoff rules, escalation |
-| `config/guardrails.json` | Content safety rules | thresholds, blocked categories, PII handling |
-| `config/model-comparison.json` | Model selection matrix | models, cost, latency, quality scores |
-| `config/chunking.json` | Data processing config | chunk_size, overlap, strategy |
-| `config/search.json` | Retrieval configuration | search_type, top_k, score_threshold |
+### Grounding Pattern (Prevent Hallucination)
+```python
+system_prompt = """Answer based ONLY on the provided context.
+If the context doesn't contain the answer, say 'I don't have enough information.'
+Always cite the source document: [Source: {document_name}]
+Never make up facts not in the context."""
+```
 
-## Infrastructure Reference
-| Resource | File | Purpose |
-|----------|------|---------|
-| Azure resources | `infra/main.bicep` | All Azure services for this play |
-| ARM template | `infra/main.json` | Generated ARM template |
-| Parameters | `infra/parameters.json` | Environment-specific values |
-| MCP plugin | `mcp/index.js` | MCP server integration |
+## Azure AI SDK Pitfalls
 
-## Evaluation & Quality
-- Run `python evaluation/eval.py` to evaluate solution quality
-- Metrics tracked: relevance, groundedness, coherence, fluency, safety
-- CI gate: all metrics must exceed thresholds in `config/guardrails.json`
-- Test cases in `evaluation/test-set.jsonl` (minimum 10 diverse scenarios)
+### Authentication — Always DefaultAzureCredential
+```python
+# ❌ WRONG — hardcoded key
+client = AzureOpenAI(api_key="sk-xxx")
 
-## Deployment Workflow
-1. Validate Bicep: `az bicep build -f infra/main.bicep`
-2. Deploy infrastructure: `azd up` or `az deployment group create`
-3. Configure application settings from `config/*.json`
-4. Run smoke tests to verify endpoints
-5. Run evaluation pipeline to verify quality metrics
-6. Monitor Application Insights for errors and performance
+# ✅ CORRECT — Managed Identity
+from azure.identity import DefaultAzureCredential
+credential = DefaultAzureCredential()
+client = AzureOpenAI(azure_ad_token_provider=get_bearer_token_provider(credential, "https://cognitiveservices.azure.com/.default"))
+```
 
-## Agent Workflow
-When implementing features, follow the builder → reviewer → tuner chain:
-1. **Build:** Implement using config/ values and architecture patterns
-2. **Review:** Validate against reviewer.agent.md checklist (security, quality, WAF compliance)
-3. **Tune:** Optimize config values, verify evaluation thresholds, production-ready SKUs
+### Search Client — Use Semantic Configuration
+```python
+from azure.search.documents import SearchClient
+# semantic_configuration_name MUST match what's deployed in AI Search
+# Common mistake: "default" vs "my-semantic-config" — check Azure portal
+```
 
-## Naming Conventions
-- Files: `lowercase-hyphen.ext` (e.g., `document-processor.py`)
-- Functions: `snake_case` for Python, `camelCase` for TypeScript
-- Classes: `PascalCase` (e.g., `DocumentProcessor`)
-- Azure resources: `{project}-{env}-{resource}` (e.g., `frootai-prod-openai`)
-- Config keys: `snake_case` in JSON files
-- Environment variables: `UPPER_SNAKE_CASE`
+### Token Counting — tiktoken for Accurate Budgets
+```python
+import tiktoken
+enc = tiktoken.encoding_for_model("gpt-4o")
+token_count = len(enc.encode(text))
+# Rule: context window = system_prompt + retrieved_chunks + user_query + response
+# Budget: system ~500, chunks ~3000, query ~200, response ~1000 = ~4700 total
+```
 
-## Error Handling Patterns
-- Use custom exception classes for domain-specific errors
-- Return structured error responses with error code, message, and correlation ID
-- Log errors with full context (request ID, user action, stack trace)
-- Implement circuit breaker for external service calls
-- Graceful degradation: return cached/default response when services are unavailable
+### Embedding Model Mismatch
+```python
+# ❌ WRONG — query embedding model differs from index embedding model
+query_vector = embed("text-embedding-ada-002", query)  # Different model!
+# Index was built with text-embedding-3-large → dimension mismatch → 0 results
 
-## Testing Strategy
-- **Unit tests:** Business logic, data transformations, validation rules
-- **Integration tests:** Azure SDK interactions with emulators or test resources
-- **E2E tests:** Full request-response cycle through deployed endpoints
-- **Load tests:** Baseline performance with 100 concurrent users
-- **Evaluation tests:** AI quality metrics via eval.py pipeline
+# ✅ CORRECT — same model for query AND index
+query_vector = embed("text-embedding-3-large", query)  # Must match index
+```
 
-## WAF Alignment
-This play aligns with all 6 Well-Architected Framework pillars:
-- **Reliability:** Retry policies, health checks, graceful degradation
-- **Security:** Managed Identity, Key Vault, Content Safety, RBAC
-- **Cost Optimization:** Model routing, caching, right-sized SKUs
-- **Operational Excellence:** IaC, CI/CD, observability, incident runbooks
-- **Performance Efficiency:** Async patterns, connection pooling, CDN
-- **Responsible AI:** Content safety, groundedness checks, bias monitoring
+## Content Safety (Non-Negotiable for Enterprise)
+```python
+from azure.ai.contentsafety import ContentSafetyClient
+# Check BOTH user input AND model output
+# Categories: Hate, Violence, SelfHarm, Sexual
+# Severity threshold: reject >= 4 (Medium), log >= 2 (Low)
+```
 
-For explicit agent handoffs, use @builder, @reviewer, or @tuner in Copilot Chat.
+## Coverage Targets for RAG Evaluation
 
+| Metric | Target | Tool |
+|--------|--------|------|
+| Groundedness | ≥ 0.8 | Azure AI Evaluation SDK |
+| Relevance | ≥ 0.7 | Azure AI Evaluation SDK |
+| Coherence | ≥ 0.8 | Azure AI Evaluation SDK |
+| Fluency | ≥ 0.8 | Azure AI Evaluation SDK |
+| Content Safety | Pass all | Content Safety API |
 
-## Common Pitfalls
-- Do NOT use synchronous HTTP libraries — use async clients (httpx, aiohttp)
-- Do NOT create new Azure resources without checking config/agents.json first
-- Do NOT ignore evaluation results — all metrics must pass before deployment
-- Do NOT skip the reviewer step — every implementation must be reviewed
-- Do NOT use print statements — use structured logging with correlation IDs
-- Do NOT commit secrets — use Key Vault references and Managed Identity
-- Do NOT deploy without running Bicep lint first
+## File Naming Conventions
+- Python: `snake_case.py` (e.g., `document_processor.py`)
+- API routes: `kebab-case` (e.g., `/api/v1/chat-completion`)
+- Config: `kebab-case.json` (e.g., `model-comparison.json`)
+- Tests: `test_module_name.py` (e.g., `test_document_processor.py`)
+- Bicep: `kebab-case.bicep` (e.g., `ai-search.bicep`)
 
-## Quick Reference Commands
-- Deploy infrastructure: `az bicep build -f infra/main.bicep && azd up`
-- Run evaluation: `python evaluation/eval.py`
-- Run tests: `pytest tests/ -v --cov=app`
-- Validate config: `node -e "require('./config/openai.json')"`
-- Check Bicep: `az bicep lint -f infra/main.bicep`
+## Config Files (TuneKit)
+| File | What to Tune |
+|------|-------------|
+| `config/openai.json` | model, temperature (0.1 for factual, 0.7 for creative), max_tokens |
+| `config/chunking.json` | chunk_size, overlap, strategy |
+| `config/search.json` | search_type (hybrid), top_k, score_threshold |
+| `config/guardrails.json` | content_safety thresholds, groundedness_min, max_latency_ms |
 
-## FAI Protocol Integration
-This play is wired through the FAI Protocol via `fai-manifest.json`:
-- **Context:** Knowledge modules and WAF pillar alignment defined
-- **Primitives:** Agent, instruction, skill, and hook references
-- **Infrastructure:** Azure resource requirements and deployment config
-- **Guardrails:** Quality thresholds, content safety rules, evaluation gates
-- **Toolkit:** DevKit (build), TuneKit (optimize), SpecKit (document)
+## Common Mistakes in Enterprise RAG
 
-## Cross-Play Compatibility
-This play can be combined with other FrootAI solution plays:
-- Use shared agents from the agents/ directory for cross-play expertise
-- Reference shared instructions from instructions/ for coding standards
-- Import shared skills for common operations (deploy, evaluate, tune)
-- Wire plays together via fai-manifest.json compatible-plays field
+| Mistake | Why Wrong | Fix |
+|---------|----------|-----|
+| Vector-only search | Misses exact keyword matches (product codes, IDs) | Use hybrid search (BM25 + vector + semantic) |
+| No reranking | Top-5 vector results may not be the most relevant | Enable semantic reranking in AI Search |
+| Prompt with no grounding instruction | Model hallucinates beyond retrieved context | "Answer ONLY from context. If unsure, say so." |
+| Same temperature for all tasks | Factual queries need 0.1, creative need 0.7 | Model routing with per-task temperature |
+| No token budgeting | Response truncated or context overflow | Budget: system(500) + chunks(3000) + query(200) + response(1000) |
+| Embedding model mismatch | Query uses different model than index → 0 results | Same model for indexing and querying |
+| No evaluation pipeline | Ship without measuring quality | Run eval.py with groundedness/relevance/coherence gates |
 
-## Response Format
-When generating code or documentation:
-- Include inline comments explaining non-obvious logic
-- Add type hints on all function signatures
-- Return structured responses with metadata (latency, tokens, model)
-- Include error handling with meaningful error messages
+## Available Specialist Agents (optional)
 
+| Agent | Use For |
+|-------|---------|
+| `@builder` | Implement RAG pipeline features (chunking, retrieval, generation) |
+| `@reviewer` | Audit for security (Managed Identity, Content Safety), RAG quality |
+| `@tuner` | Optimize config values, model routing, caching, evaluation gates |
 
-## Prompt Engineering Guidelines
-When crafting prompts for this solution:
-- Use clear delimiters between context, instructions, and user query
-- Include few-shot examples for complex tasks
-- Specify output format explicitly (JSON schema, markdown, bullet points)
-- Set persona context at the beginning of the system prompt
-- Include guardrails in system prompt: do not hallucinate, cite sources
-- Keep system prompts under 2000 tokens for optimal latency
-- Version-control all prompts alongside application code
-
-## Troubleshooting Quick Reference
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| 401 Unauthorized | Managed Identity not configured | Check RBAC role assignments |
-| 429 Too Many Requests | Rate limit exceeded | Implement retry with backoff |
-| 404 Model Not Found | Wrong deployment name | Verify openai.json deployment_name |
-| Content blocked | Safety threshold triggered | Review guardrails.json thresholds |
-| Slow responses | No caching, large max_tokens | Enable cache, reduce max_tokens |
-| Evaluation fails | Config mismatch | Ensure eval.py reads config/guardrails.json |
-| Bicep errors | Missing parameters | Check parameters.json completeness |
-| Health check 503 | Missing env vars | Verify app settings match config needs |
-
-## Environment Variables
-Required environment variables for this solution:
-| Variable | Description | Example |
-|----------|-------------|---------|
-| AZURE_OPENAI_ENDPOINT | OpenAI service endpoint | https://oai-frootai-prod.openai.azure.com/ |
-| AZURE_KEY_VAULT_URL | Key Vault URI | https://kv-frootai-xxx.vault.azure.net/ |
-| APPLICATIONINSIGHTS_CONNECTION_STRING | App Insights connection | InstrumentationKey=xxx |
-| AZURE_STORAGE_ACCOUNT | Storage account name | stfrootaiprod |
-| ENVIRONMENT | Deployment environment | dev, staging, prod |
-
-
-## Prompt Engineering Guidelines
-When crafting prompts for this solution:
-- Use clear delimiters between context, instructions, and user query
-- Include few-shot examples for complex tasks
-- Specify output format explicitly (JSON schema, markdown, bullet points)
-- Set persona context at the beginning of the system prompt
-- Include guardrails in system prompt: do not hallucinate, cite sources
-- Keep system prompts under 2000 tokens for optimal latency
-- Version-control all prompts alongside application code
-
-## Troubleshooting Quick Reference
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| 401 Unauthorized | Managed Identity not configured | Check RBAC role assignments |
-| 429 Too Many Requests | Rate limit exceeded | Implement retry with backoff |
-| 404 Model Not Found | Wrong deployment name | Verify openai.json deployment_name |
-| Content blocked | Safety threshold triggered | Review guardrails.json thresholds |
-| Slow responses | No caching, large max_tokens | Enable cache, reduce max_tokens |
-| Evaluation fails | Config mismatch | Ensure eval.py reads config/guardrails.json |
-| Bicep errors | Missing parameters | Check parameters.json completeness |
-| Health check 503 | Missing env vars | Verify app settings match config needs |
-
-## Environment Variables
-Required environment variables for this solution:
-| Variable | Description | Example |
-|----------|-------------|---------|
-| AZURE_OPENAI_ENDPOINT | OpenAI service endpoint | https://oai-frootai-prod.openai.azure.com/ |
-| AZURE_KEY_VAULT_URL | Key Vault URI | https://kv-frootai-xxx.vault.azure.net/ |
-| APPLICATIONINSIGHTS_CONNECTION_STRING | App Insights connection | InstrumentationKey=xxx |
-| AZURE_STORAGE_ACCOUNT | Storage account name | stfrootaiprod |
-| ENVIRONMENT | Deployment environment | dev, staging, prod |
+## Slash Commands
+| Command | Action |
+|---------|--------|
+| `/deploy` | Deploy infrastructure with Bicep + configure app |
+| `/test` | Run pytest with coverage |
+| `/review` | Security + RAG quality review |
+| `/evaluate` | Run evaluation pipeline (groundedness, relevance, coherence) |
