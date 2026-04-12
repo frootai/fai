@@ -9,37 +9,39 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: consistency-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
 
-      - name: Auto-fix consistency issues
-        run: node scripts/validate-consistency.js --fix || true
+      - name: Run content sync (auto-fix)
+        run: node scripts/sync-content.js
 
-      - name: Sync content
-        run: node scripts/sync-content.js || true
-
-      - name: Check if fixes were made
+      - name: Check if sync made changes
         id: check_changes
         run: |
           if [ -n "$(git diff --name-only)" ]; then
             echo "changes=true" >> $GITHUB_OUTPUT
-            echo "Files changed:"
+            echo "Files changed by sync:"
             git diff --name-only
           else
             echo "changes=false" >> $GITHUB_OUTPUT
-            echo "No changes needed"
+            echo "All files already consistent"
           fi
 
-      - name: Auto-commit fixes
+      - name: Auto-commit sync fixes
         if: steps.check_changes.outputs.changes == 'true' && github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
@@ -48,5 +50,5 @@ jobs:
           git commit -m "fix(auto): sync versions + counts across ecosystem [skip ci]"
           git push
 
-      - name: Final validation
+      - name: Validate consistency
         run: node scripts/validate-consistency.js

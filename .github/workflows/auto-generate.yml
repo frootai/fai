@@ -14,10 +14,15 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: auto-generate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   regenerate:
     name: Regenerate Marketplace & Sync
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -32,20 +37,17 @@ jobs:
       - name: Regenerate marketplace.json
         run: node scripts/generate-marketplace.js
 
-      - name: Run content sync
+      - name: Run content sync (auto-fixes counts + versions)
         run: node scripts/sync-content.js
 
-      - name: Validate consistency
-        run: node scripts/validate-consistency.js
-
-      - name: Commit changes (if any)
+      - name: Commit all synced changes (if any)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add marketplace.json
+          git add -A
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: auto-regenerate marketplace.json [skip ci]"
+            git commit -m "chore: auto-regenerate marketplace + sync content [skip ci]"
             git push
           fi
