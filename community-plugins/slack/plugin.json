@@ -1,5 +1,5 @@
 {
-  "name": "frootai-slack-plugin",
+  "name": "fai-slack-plugin",
   "description": "Slack integration plugin for FrootAI — 4 MCP tools, dedicated agent, compatible plays",
   "version": "1.0.0",
   "author": {
@@ -7,7 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
-  "agent": "frootai-slack-expert",
+  "agent": "fai-slack-expert",
   "tools": [
     {
       "name": "slack_message_send",

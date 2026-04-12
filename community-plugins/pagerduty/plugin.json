@@ -1,5 +1,5 @@
 {
-  "name": "frootai-pagerduty-plugin",
+  "name": "fai-pagerduty-plugin",
   "description": "Pagerduty integration plugin for FrootAI — 3 MCP tools, dedicated agent, compatible plays",
   "version": "1.0.0",
   "author": {
@@ -7,7 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
-  "agent": "frootai-pagerduty-expert",
+  "agent": "fai-pagerduty-expert",
   "tools": [
     {
       "name": "pagerduty_incident_create",

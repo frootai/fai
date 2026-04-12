@@ -1,5 +1,5 @@
 {
-  "name": "frootai-datadog-plugin",
+  "name": "fai-datadog-plugin",
   "description": "Datadog integration plugin for FrootAI — 4 MCP tools, dedicated agent, compatible plays",
   "version": "1.0.0",
   "author": {
@@ -7,7 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
-  "agent": "frootai-datadog-expert",
+  "agent": "fai-datadog-expert",
   "tools": [
     {
       "name": "datadog_monitor_create",

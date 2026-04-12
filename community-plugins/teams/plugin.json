@@ -1,5 +1,5 @@
 {
-  "name": "frootai-teams-plugin",
+  "name": "fai-teams-plugin",
   "description": "Teams integration plugin for FrootAI — 3 MCP tools, dedicated agent, compatible plays",
   "version": "1.0.0",
   "author": {
@@ -7,7 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
-  "agent": "frootai-teams-expert",
+  "agent": "fai-teams-expert",
   "tools": [
     {
       "name": "teams_adaptive_card_send",

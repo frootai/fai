@@ -1,5 +1,5 @@
 {
-  "name": "frootai-jira-plugin",
+  "name": "fai-jira-plugin",
   "description": "Jira integration plugin for FrootAI — 4 MCP tools, dedicated agent, compatible plays",
   "version": "1.0.0",
   "author": {
@@ -7,7 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
-  "agent": "frootai-jira-expert",
+  "agent": "fai-jira-expert",
   "tools": [
     {
       "name": "jira_issue_create",
