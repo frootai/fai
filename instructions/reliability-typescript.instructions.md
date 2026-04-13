@@ -5,130 +5,250 @@ waf:
   - "reliability"
 ---
 
-# Reliability Typescript — WAF-Aligned Coding Standards
+# TypeScript Reliability Patterns — FAI Standards
 
-> TypeScript reliability standards — AbortSignal timeout, retry patterns, health endpoints, error boundaries.
+## Retry with Exponential Backoff
 
-## Core Rules
-
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
 ```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+// Custom retry — no dependencies
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  opts = { retries: 3, baseMs: 1000, maxMs: 30_000 }
+): Promise<T> {
+  for (let attempt = 0; attempt <= opts.retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === opts.retries) throw err;
+      const jitter = Math.random() * 200;
+      const delay = Math.min(opts.baseMs * 2 ** attempt + jitter, opts.maxMs);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw new Error("unreachable");
+}
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
+// p-retry — production-grade alternative
+import pRetry, { AbortError } from "p-retry";
+const data = await pRetry(() => fetchFromApi("/items"), {
+  retries: 4,
+  minTimeout: 1_000,
+  onFailedAttempt: (e) =>
+    console.error(`Attempt ${e.attemptNumber} failed: ${e.message}`),
+});
+```
+
+## Circuit Breaker (opossum)
+
+```typescript
+import CircuitBreaker from "opossum";
+const breaker = new CircuitBreaker(callExternalService, {
+  timeout: 5_000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30_000,
+  volumeThreshold: 10,
+});
+breaker.fallback(() => ({ source: "cache", stale: true }));
+breaker.on("open", () => logger.warn("Circuit OPEN — using fallback"));
+const result = await breaker.fire(requestPayload);
+```
+
+## AbortController Timeouts
+
+```typescript
+async function fetchWithTimeout(url: string, ms = 5_000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
   try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Graceful Shutdown
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```typescript
+const connections = new Set<import("net").Socket>();
+server.on("connection", (sock) => {
+  connections.add(sock);
+  sock.on("close", () => connections.delete(sock));
+});
 
-## Code Quality Standards
+async function shutdown(signal: string): Promise<void> {
+  logger.info(`${signal} received — draining`);
+  server.close();
+  for (const sock of connections) sock.destroy();
+  await db.end();
+  await telemetry.flush();
+  process.exit(0);
+}
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+```
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+## Health Check Endpoint
 
-## Testing Requirements
+```typescript
+// Express
+app.get("/health", async (_req, res) => {
+  const checks = await Promise.allSettled([
+    db.query("SELECT 1"),
+    redis.ping(),
+  ]);
+  const healthy = checks.every((c) => c.status === "fulfilled");
+  res.status(healthy ? 200 : 503).json({
+    status: healthy ? "healthy" : "degraded",
+    db: checks[0].status,
+    cache: checks[1].status,
+    uptime: process.uptime(),
+  });
+});
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Connection Pooling
 
-## Security Checklist
+```typescript
+// undici — HTTP connection pool
+import { Pool } from "undici";
+const httpPool = new Pool("https://api.example.com", { connections: 20, pipelining: 1 });
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+// pg — Postgres connection pool
+import { Pool as PgPool } from "pg";
+const pgPool = new PgPool({ max: 20, idleTimeoutMillis: 30_000 });
+pgPool.on("error", (err) => logger.error("Idle client error", err));
+```
+
+## Error Class Hierarchy
+
+```typescript
+abstract class AppError extends Error {
+  abstract readonly code: string;
+  abstract readonly statusCode: number;
+  readonly isOperational = true;
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
+class NotFoundError extends AppError {
+  readonly code = "NOT_FOUND";
+  readonly statusCode = 404;
+}
+class ConflictError extends AppError {
+  readonly code = "CONFLICT";
+  readonly statusCode = 409;
+}
+class UpstreamError extends AppError {
+  readonly code = "UPSTREAM_FAILURE";
+  readonly statusCode = 502;
+}
+```
+
+## Idempotency Middleware
+
+```typescript
+import type { RequestHandler } from "express";
+const seen = new Map<string, { status: number; body: unknown }>();
+
+const idempotent: RequestHandler = (req, res, next) => {
+  const key = req.headers["idempotency-key"] as string | undefined;
+  if (!key) return next();
+  if (seen.has(key)) {
+    const cached = seen.get(key)!;
+    return res.status(cached.status).json(cached.body);
+  }
+  const originalJson = res.json.bind(res);
+  res.json = (body: unknown) => {
+    seen.set(key, { status: res.statusCode, body });
+    return originalJson(body);
+  };
+  next();
+};
+```
+> Production: replace `Map` with Redis using `SET key NX EX 86400`.
+
+## Dead Letter Queue (Azure Service Bus)
+
+```typescript
+import { ServiceBusClient } from "@azure/service-bus";
+const sbClient = new ServiceBusClient(connStr);
+const receiver = sbClient.createReceiver("orders", { receiveMode: "peekLock" });
+receiver.subscribe({
+  processMessage: async (msg) => {
+    if (msg.deliveryCount > 5) {
+      await receiver.deadLetterMessage(msg, {
+        deadLetterReason: "MaxRetriesExceeded",
+      });
+      return;
+    }
+    await processOrder(msg.body);
+    await receiver.completeMessage(msg);
+  },
+  processError: async (err) => logger.error("SB error", err),
+});
+```
+
+## Partial Failure Handling
+
+```typescript
+const results = await Promise.allSettled(
+  urls.map((u) => fetchWithTimeout(u, 3_000))
+);
+const succeeded = results.filter((r) => r.status === "fulfilled");
+const failed = results.filter((r) => r.status === "rejected");
+if (failed.length) logger.warn(`${failed.length}/${results.length} calls failed`);
+```
+
+## Rate Limiting (bottleneck)
+
+```typescript
+import Bottleneck from "bottleneck";
+const limiter = new Bottleneck({ maxConcurrent: 5, minTime: 200 });
+const rateLimited = limiter.wrap(callExternalApi);
+const results = await Promise.all(items.map((i) => rateLimited(i)));
+```
+
+## Structured Error Responses (RFC 7807)
+
+```typescript
+interface ProblemDetail {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+  instance: string;
+}
+app.use((err: AppError, req: Request, res: Response, _next: NextFunction) => {
+  const problem: ProblemDetail = {
+    type: `https://api.example.com/errors/${err.code}`,
+    title: err.name,
+    status: err.statusCode,
+    detail: err.message,
+    instance: req.originalUrl,
+  };
+  res.status(err.statusCode).json(problem);
+});
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Bare `catch {}` that swallows errors — always log or rethrow
+- ❌ Unbounded `Promise.all` without concurrency limit — use `bottleneck` or `p-limit`
+- ❌ Missing `AbortController` timeout on outbound HTTP — one hung call blocks the event loop
+- ❌ `process.exit(1)` inside request handlers — kills in-flight requests; use graceful shutdown
+- ❌ Storing idempotency keys in memory across multiple instances — use Redis
+- ❌ Retrying non-idempotent writes without deduplication — causes duplicate side effects
+- ❌ Health check that returns 200 without probing dependencies — hides cascading failures
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Pattern | Benefit |
+|--------|---------|---------|
+| Reliability | Retry + backoff, circuit breaker, DLQ | Survives transient faults, prevents cascading failure |
+| Reliability | Graceful shutdown, health checks | Zero-downtime deploys, load balancer awareness |
+| Reliability | `Promise.allSettled`, partial failure | Degrades gracefully instead of all-or-nothing |
+| Performance | Connection pooling, rate limiting | Bounded resource usage, predictable throughput |
+| Security | Error hierarchy, RFC 7807 responses | No stack traces leaked, consistent error contract |
+| Operational Excellence | Structured logging, idempotency keys | Debuggable, safely retryable operations |

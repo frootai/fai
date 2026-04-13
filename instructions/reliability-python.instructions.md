@@ -5,130 +5,257 @@ waf:
   - "reliability"
 ---
 
-# Reliability Python — WAF-Aligned Coding Standards
+# Python Reliability Patterns — FAI Standards
 
-> Python reliability standards — retry with tenacity, circuit breakers, health checks, structured logging.
+## Retry with Tenacity
 
-## Core Rules
+```python
+from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
+import httpx
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+class TransientError(Exception): ...
+class UpstreamTimeout(TransientError): ...
+class RateLimited(TransientError): ...
 
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+@retry(
+    wait=wait_exponential(multiplier=1, min=1, max=30),
+    stop=stop_after_attempt(3),
+    retry=retry_if_exception_type((TransientError, httpx.TimeoutException)),
+    before_sleep=lambda r: logger.warning(f"Retry {r.attempt_number}: {r.outcome.exception()}"),
+)
+async def call_llm(prompt: str, config: dict) -> str:
+    response = await client.post("/chat/completions", json={"prompt": prompt, **config})
+    if response.status_code == 429:
+        raise RateLimited(response.headers.get("Retry-After", "unknown"))
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Circuit Breaker
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```python
+import pybreaker
 
-## Code Quality Standards
+ai_breaker = pybreaker.CircuitBreaker(
+    fail_max=5, reset_timeout=30,
+    listeners=[pybreaker.CircuitBreakerListener()],
+    exclude=[ValueError],  # don't trip on validation errors
+)
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+@ai_breaker
+async def query_search_index(query: str) -> list[dict]:
+    return await search_client.search(query, top=10)
+```
 
-## Testing Requirements
+## HTTP Client with Timeout + Retry Transport
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```python
+import httpx
 
-## Security Checklist
+transport = httpx.AsyncHTTPTransport(retries=2)
+client = httpx.AsyncClient(
+    transport=transport,
+    timeout=httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=5.0),
+    limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+    headers={"User-Agent": "fai-service/1.0"},
+)
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Graceful Shutdown
+
+```python
+import signal, asyncio
+
+shutdown_event = asyncio.Event()
+
+def _handle_sigterm(sig, frame):
+    logger.info("SIGTERM received — draining requests")
+    shutdown_event.set()
+
+signal.signal(signal.SIGTERM, _handle_sigterm)
+signal.signal(signal.SIGINT, _handle_sigterm)
+
+async def run_server(app):
+    server = uvicorn.Server(uvicorn.Config(app, host="0.0.0.0", port=8000))
+    asyncio.create_task(server.serve())
+    await shutdown_event.wait()
+    server.should_exit = True
+    await client.aclose()  # close httpx pool
+    await engine.dispose()  # close DB pool
+```
+
+## Context Managers for Resource Cleanup
+
+```python
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def managed_resources():
+    http = httpx.AsyncClient(timeout=30)
+    engine = create_async_engine(db_url, pool_size=10)
+    try:
+        yield {"http": http, "db": engine}
+    finally:
+        await http.aclose()
+        await engine.dispose()
+```
+
+## Health Check Endpoint
+
+```python
+from fastapi import FastAPI, status
+from fastapi.responses import JSONResponse
+
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health():
+    checks = {
+        "db": await _check_db(),
+        "redis": await _check_redis(),
+        "upstream_api": await _check_upstream(),
+    }
+    healthy = all(checks.values())
+    return JSONResponse(
+        status_code=status.HTTP_200_OK if healthy else status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"status": "healthy" if healthy else "degraded", "checks": checks},
+    )
+```
+
+## Connection Pooling
+
+```python
+from sqlalchemy.ext.asyncio import create_async_engine
+
+engine = create_async_engine(
+    db_url,
+    pool_size=20, max_overflow=10,
+    pool_timeout=30, pool_recycle=1800,
+    pool_pre_ping=True,  # verify connections before use
+)
+```
+
+## Idempotency Decorator
+
+```python
+import hashlib, functools
+
+def idempotent(key_fn):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            key = f"idem:{hashlib.sha256(key_fn(*args, **kwargs).encode()).hexdigest()}"
+            if cached := await redis.get(key):
+                return json.loads(cached)
+            result = await func(*args, **kwargs)
+            await redis.set(key, json.dumps(result), ex=3600)
+            return result
+        return wrapper
+    return decorator
+
+@idempotent(key_fn=lambda doc_id, **kw: doc_id)
+async def process_document(doc_id: str) -> dict: ...
+```
+
+## Dead Letter Queue Pattern
+
+```python
+async def consume_with_dlq(queue: str, handler, max_retries: int = 3):
+    while not shutdown_event.is_set():
+        msg = await broker.receive(queue, timeout=5)
+        if not msg:
+            continue
+        try:
+            await handler(msg.body)
+            await msg.ack()
+        except Exception as exc:
+            if msg.delivery_count >= max_retries:
+                await broker.send(f"{queue}-dlq", msg.body, headers={"error": str(exc)})
+                await msg.ack()
+                logger.error(f"DLQ: {queue}", extra={"msg_id": msg.id, "error": str(exc)})
+            else:
+                await msg.nack()
+```
+
+## Structured Error Hierarchy
+
+```python
+class ServiceError(Exception):
+    def __init__(self, message: str, *, code: str, retriable: bool = False):
+        super().__init__(message)
+        self.code, self.retriable = code, retriable
+
+class UpstreamError(ServiceError):
+    def __init__(self, msg: str): super().__init__(msg, code="UPSTREAM_FAILURE", retriable=True)
+
+class ValidationError(ServiceError):
+    def __init__(self, msg: str): super().__init__(msg, code="VALIDATION_ERROR", retriable=False)
+
+class QuotaExceeded(ServiceError):
+    def __init__(self, msg: str): super().__init__(msg, code="QUOTA_EXCEEDED", retriable=True)
+```
+
+## Concurrent Reliability with TaskGroup
+
+```python
+async def enrich_document(doc: dict) -> dict:
+    async with asyncio.TaskGroup() as tg:
+        embed_task = tg.create_task(generate_embedding(doc["text"]))
+        classify_task = tg.create_task(classify_content(doc["text"]))
+        safety_task = tg.create_task(check_content_safety(doc["text"]))
+    # If ANY task raises, TaskGroup cancels siblings and propagates ExceptionGroup
+    doc["embedding"] = embed_task.result()
+    doc["category"] = classify_task.result()
+    doc["safety"] = safety_task.result()
+    return doc
+```
+
+## Rate Limiting — Token Bucket
+
+```python
+import time, asyncio
+
+class TokenBucket:
+    def __init__(self, rate: float, capacity: int):
+        self.rate, self.capacity = rate, capacity
+        self._tokens, self._last = float(capacity), time.monotonic()
+        self._lock = asyncio.Lock()
+
+    async def acquire(self, tokens: int = 1) -> None:
+        async with self._lock:
+            now = time.monotonic()
+            self._tokens = min(self.capacity, self._tokens + (now - self._last) * self.rate)
+            self._last = now
+            if self._tokens < tokens:
+                wait = (tokens - self._tokens) / self.rate
+                await asyncio.sleep(wait)
+                self._tokens = 0
+            else:
+                self._tokens -= tokens
+
+llm_limiter = TokenBucket(rate=10, capacity=60)  # 10 req/s, burst 60
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Bare `except Exception: pass` — swallows errors, masks failures
+- ❌ Retry on non-retriable errors (400, 401, 403) — wastes quota, never succeeds
+- ❌ Unbounded retry without `stop_after_attempt` — infinite loops under failure
+- ❌ Creating new `httpx.Client` per request — no connection reuse, socket exhaustion
+- ❌ `asyncio.gather(return_exceptions=True)` without inspecting results — silent failures
+- ❌ Health endpoint that returns 200 when dependencies are down
+- ❌ Missing `pool_pre_ping` on long-lived DB connections — stale connection errors
+- ❌ Synchronous I/O inside `async def` — blocks the event loop
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Pattern | Detail |
+|--------|---------|--------|
+| Reliability | Tenacity retry | `wait_exponential(1,1,30)`, `stop_after_attempt(3)`, typed exceptions |
+| Reliability | Circuit breaker | `pybreaker` — `fail_max=5`, `reset_timeout=30`, exclude validation |
+| Reliability | Health checks | `/health` with per-dependency status, 503 on degraded |
+| Reliability | Graceful shutdown | SIGTERM → drain → close pools → flush telemetry |
+| Reliability | Dead letter queue | Route poison messages after `max_retries`, preserve error context |
+| Performance | Connection pooling | SQLAlchemy `pool_size=20`, httpx `max_connections=100` |
+| Performance | TaskGroup | Concurrent fan-out with automatic cancellation on failure |
+| Performance | Token bucket | Rate-limit outbound calls, prevent upstream throttling |
+| Security | Error hierarchy | Typed codes, no stack traces to clients, retriable flag |
+| Cost | Idempotency | SHA-256 key, Redis TTL — prevent duplicate expensive calls |

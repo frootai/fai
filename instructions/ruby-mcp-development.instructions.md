@@ -5,130 +5,223 @@ waf:
   - "reliability"
 ---
 
-# Ruby Mcp Development — WAF-Aligned Coding Standards
+# Ruby MCP Server Development — FAI Standards
 
-> Ruby MCP server development — mcp gem, block DSL, Rails integration.
+## Bundler Setup
 
-## Core Rules
+```ruby
+# Gemfile
+source "https://rubygems.org"
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+gem "mcp-ruby", "~> 0.3"
+gem "json", "~> 2.7"
 
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+group :development, :test do
+  gem "rspec", "~> 3.13"
+  gem "rspec-mocks", "~> 3.13"
+end
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+Run `bundle install`. Pin `mcp-ruby` to a minor range to avoid breaking changes.
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Server Class Setup
 
-## Code Quality Standards
+```ruby
+require "mcp"
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+server = MCP::Server.new(name: "fai-ruby-server", version: "1.0.0")
+```
 
-## Testing Requirements
+The server handles JSON-RPC 2.0 over stdio. Never write to `$stdout` directly — the transport owns it. All diagnostics go to `$stderr`.
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Tool Registration
 
-## Security Checklist
+```ruby
+server.register_tool(
+  name: "search_documents",
+  description: "Semantic search over indexed documents",
+  input_schema: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "Search query" },
+      top_k: { type: "integer", description: "Results to return", default: 5 }
+    },
+    required: ["query"]
+  }
+) do |args|
+  results = DocumentIndex.search(args["query"], limit: args.fetch("top_k", 5))
+  {
+    content: results.map { |r| { type: "text", text: "#{r.title}: #{r.snippet}" } }
+  }
+end
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+Always validate required fields before processing. Use `fetch` with defaults for optional params:
+
+```ruby
+) do |args|
+  raise MCP::McpError.new("query is required") unless args["query"]&.strip&.length&.positive?
+  limit = args.fetch("top_k", 5).clamp(1, 50)
+  # ...
+end
+```
+
+## Resource Handlers
+
+```ruby
+server.register_resource(
+  uri: "docs://api/openapi.yaml",
+  name: "API Specification",
+  description: "OpenAPI spec for the service",
+  mime_type: "application/yaml"
+) do
+  { content: File.read("openapi.yaml") }
+end
+```
+
+Use URI schemes that reflect the domain (`docs://`, `config://`). Return `mime_type` so clients render correctly.
+
+## Prompt Templates
+
+```ruby
+server.register_prompt(
+  name: "code_review",
+  description: "Review Ruby code for style and security issues",
+  arguments: [
+    { name: "code", description: "Ruby source to review", required: true },
+    { name: "severity", description: "Min severity: info|warn|error", required: false }
+  ]
+) do |args|
+  severity = args.fetch("severity", "warn")
+  {
+    messages: [
+      { role: "system", content: "You are a Ruby security reviewer. Report issues at #{severity} level or above." },
+      { role: "user", content: "Review this code:\n```ruby\n#{args['code']}\n```" }
+    ]
+  }
+end
+```
+
+## Tool Response Formatting
+
+Text and image content types:
+
+```ruby
+# Text response
+{ content: [{ type: "text", text: "Operation completed: 42 records processed" }] }
+
+# Image response (base64-encoded)
+{ content: [{ type: "image", data: Base64.strict_encode64(png_bytes), mimeType: "image/png" }] }
+
+# Mixed response
+{ content: [
+  { type: "text", text: "Chart generated from 1,200 data points:" },
+  { type: "image", data: chart_b64, mimeType: "image/png" }
+]}
+```
+
+## Error Handling
+
+```ruby
+) do |args|
+  begin
+    result = ExternalApi.call(args["endpoint"])
+    { content: [{ type: "text", text: result.to_json }] }
+  rescue ExternalApi::RateLimitError => e
+    raise MCP::McpError.new("Rate limited — retry after #{e.retry_after}s")
+  rescue ExternalApi::AuthError
+    raise MCP::McpError.new("Authentication failed — check API credentials")
+  rescue StandardError => e
+    $stderr.puts "[ERROR] Unhandled: #{e.class}: #{e.message}"
+    raise MCP::McpError.new("Internal error processing request")
+  end
+end
+```
+
+Never leak stack traces or credentials through `McpError` messages. Log details to `$stderr`, return sanitized messages to the client.
+
+## Stdio Transport and JSON-RPC
+
+```ruby
+# Start the server on stdio (blocking)
+server.run(transport: :stdio)
+```
+
+The transport reads JSON-RPC 2.0 from `$stdin` and writes responses to `$stdout`. Each message is newline-delimited. Do not mix `puts`/`print` calls — they corrupt the protocol stream.
+
+## Logging
+
+```ruby
+$stderr.puts "[#{Time.now.iso8601}] [INFO] Server started: #{server.name} v#{server.version}"
+$stderr.puts "[#{Time.now.iso8601}] [DEBUG] Tool called: search_documents, query=#{args['query']}"
+```
+
+Production: set log level via `ENV["LOG_LEVEL"]`. Never log full input payloads — they may contain PII.
+
+## Graceful Shutdown
+
+```ruby
+Signal.trap("INT")  { $stderr.puts "SIGINT received, shutting down...";  exit 0 }
+Signal.trap("TERM") { $stderr.puts "SIGTERM received, shutting down..."; exit 0 }
+
+server.run(transport: :stdio)
+```
+
+Trap signals before `server.run`. Clean up database connections or temp files in an `at_exit` block if needed.
+
+## Testing with RSpec
+
+```ruby
+RSpec.describe "search_documents tool" do
+  let(:server) { MCP::Server.new(name: "test", version: "0.0.1") }
+  let(:stdin)  { StringIO.new }
+  let(:stdout) { StringIO.new }
+
+  before do
+    server.register_tool(name: "search_documents", description: "Search", input_schema: {
+      type: "object", properties: { query: { type: "string" } }, required: ["query"]
+    }) { |args| { content: [{ type: "text", text: "found: #{args['query']}" }] } }
+  end
+
+  it "returns results for valid query" do
+    request = { jsonrpc: "2.0", id: 1, method: "tools/call",
+                params: { name: "search_documents", arguments: { query: "ruby" } } }.to_json
+    stdin.write(request + "\n")
+    stdin.rewind
+
+    $stdin = stdin; $stdout = stdout
+    # Drive one request through the server or invoke tool handler directly
+    result = server.handle_request(JSON.parse(request))
+    expect(result[:content].first[:text]).to include("ruby")
+  ensure
+    $stdin = STDIN; $stdout = STDOUT
+  end
+
+  it "raises McpError for missing query" do
+    expect {
+      server.handle_request({ "method" => "tools/call",
+        "params" => { "name" => "search_documents", "arguments" => {} } })
+    }.to raise_error(MCP::McpError)
+  end
+end
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- **`puts` in tool handlers** — corrupts JSON-RPC stdio stream; use `$stderr.puts`
+- **Unvalidated `args` access** — always check required keys and clamp numeric ranges
+- **Rescuing `Exception`** — catches `SignalException`/`SystemExit`; rescue `StandardError` instead
+- **Synchronous HTTP in tools without timeout** — use `Net::HTTP.open` with `read_timeout` / `open_timeout`
+- **Hardcoded secrets in tool blocks** — read from `ENV` or credential stores, never inline
+- **Skipping `bundle exec`** — always run via `bundle exec ruby server.rb` to lock gem versions
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Practice |
+|--------|----------|
+| Reliability | `Signal.trap` for graceful shutdown; rescue `StandardError` not `Exception`; retry with backoff on transient HTTP errors |
+| Security | Sanitize `McpError` messages; read secrets from `ENV`; validate/clamp all input; never log PII |
+| Cost Optimization | Cache expensive lookups in instance variables; set `top_k` ceilings to bound token usage |
+| Operational Excellence | Structured `$stderr` logging with ISO timestamps; `bundle exec` for reproducible deps; CI with `bundle exec rspec` |
+| Performance Efficiency | Stream large responses; use connection pooling for HTTP backends; avoid blocking the event loop with long computations |
+| Responsible AI | Log tool invocations for audit trail; enforce input length limits; return grounded citations in search results |

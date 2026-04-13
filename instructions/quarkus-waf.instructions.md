@@ -6,127 +6,192 @@ waf:
   - "reliability"
 ---
 
-# Quarkus Waf — WAF-Aligned Coding Standards
+# Quarkus — FAI Standards
 
-> Quarkus standards — Java 21, CDI, reactive, native compilation patterns.
+## CDI Dependency Injection
+- Use `@ApplicationScoped` for stateless services, `@RequestScoped` for per-request state
+- Constructor injection preferred; `@Inject` on fields only for framework-managed beans
+- Produce config-driven beans via `@Produces` methods in a central `AppProducer`
 
-## Core Rules
+```java
+@ApplicationScoped
+public class EmbeddingService {
+    private final OpenAIClient client;
+    @ConfigProperty(name = "ai.embedding.model") String model;
+    @ConfigProperty(name = "ai.embedding.dimensions", defaultValue = "1536") int dims;
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+    @Inject
+    public EmbeddingService(OpenAIClient client) {
+        this.client = client;
+    }
 
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+    public Uni<float[]> embed(String text) {
+        return client.embed(text, model, dims);
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## RESTEasy Reactive Endpoints
+- Return `Uni<T>` or `Multi<T>` — never block the event loop
+- Use `@RestPath`, `@RestQuery`, `@RestHeader` over JAX-RS `@PathParam`
+- Validate input with Hibernate Validator `@Valid`; return `ProblemDetail` on errors
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```java
+@Path("/api/documents")
+@ApplicationScoped
+public class DocumentResource {
+    @Inject DocumentService service;
 
-## Code Quality Standards
+    @POST @Consumes(MediaType.APPLICATION_JSON)
+    public Uni<Response> ingest(@Valid IngestRequest req) {
+        return service.ingest(req)
+            .onItem().transform(id -> Response.created(URI.create("/api/documents/" + id)).build())
+            .onFailure().recoverWithItem(err ->
+                Response.status(422).entity(ProblemDetail.of(err)).build());
+    }
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+    @GET @Path("/{id}")
+    public Uni<DocumentDto> get(@RestPath UUID id) {
+        return service.findById(id)
+            .onItem().ifNull().failWith(() -> new NotFoundException("Document not found"));
+    }
+}
+```
 
-## Testing Requirements
+## Panache Patterns
+- Active Record (`PanacheEntity`) for simple CRUD; Repository (`PanacheRepository`) for complex domains
+- Use `find("status", Sort.by("createdAt").descending(), Status.ACTIVE)` — never raw JPQL strings with concatenation
+- Always paginate: `.page(Page.of(index, size))` — no unbounded `listAll()` in API endpoints
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```java
+@ApplicationScoped
+public class PlayRepository implements PanacheRepository<SolutionPlay> {
+    public Uni<List<SolutionPlay>> findByWafPillar(String pillar, int page, int size) {
+        return find("wafPillar", Sort.descending("updatedAt"), pillar)
+            .page(Page.of(page, size)).list();
+    }
+}
+```
 
-## Security Checklist
+## Native Image Compilation
+- Register reflection targets: `@RegisterForReflection` on DTOs, config classes, and JSON-serialized records
+- Avoid runtime class loading — no `Class.forName()`, no dynamic proxies outside CDI
+- Test native builds in CI: `mvn verify -Pnative -Dquarkus.native.container-build=true`
+- Use `@BuildStep` for build-time initialization; move heavy init from runtime to static blocks
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```java
+@RegisterForReflection
+public record IngestRequest(
+    @NotBlank String content,
+    @Size(max = 50) List<String> tags,
+    @NotNull UUID sourceId
+) {}
+```
+
+## MicroProfile Config
+- Layer: `application.properties` → env vars → Kubernetes ConfigMaps — never hardcode
+- Prefix AI params: `ai.openai.endpoint`, `ai.search.index`, `ai.safety.threshold`
+- Fail fast on missing required config — `@ConfigProperty` without `defaultValue` throws at startup
+- Sensitive values via `${VAULT_SECRET}` placeholders resolved by the `quarkus-vault` extension
+
+## Health & Observability
+- Liveness at `/q/health/live` (process OK), readiness at `/q/health/ready` (dependencies OK)
+- Custom readiness checks for downstream services (DB, AI endpoints, message brokers)
+
+```java
+@Readiness @ApplicationScoped
+public class AiServiceHealthCheck implements HealthCheck {
+    @Inject OpenAIClient client;
+    @Override
+    public HealthCheckResponse call() {
+        try {
+            client.ping();
+            return HealthCheckResponse.up("ai-service");
+        } catch (Exception e) {
+            return HealthCheckResponse.down("ai-service");
+        }
+    }
+}
+```
+
+## OpenAPI & Documentation
+- `quarkus-smallrye-openapi` auto-generates from JAX-RS annotations — no manual spec files
+- Annotate with `@Operation(summary=...)`, `@Tag`, `@APIResponse` for accurate schema
+- Serve Swagger UI only in dev: `quarkus.swagger-ui.always-include=false`
+
+## Reactive Messaging (Kafka)
+- Use `@Incoming` / `@Outgoing` with SmallRye Reactive Messaging — no manual consumer loops
+- Acknowledge after processing: `Acknowledgment.Strategy.POST_PROCESSING`
+- Dead-letter topic for poison messages — never silently drop
+
+```java
+@ApplicationScoped
+public class EmbeddingPipeline {
+    @Inject EmbeddingService embeddings;
+
+    @Incoming("documents-in") @Outgoing("embeddings-out")
+    @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
+    public Uni<EmbeddingRecord> process(DocumentEvent event) {
+        return embeddings.embed(event.content())
+            .onItem().transform(vec -> new EmbeddingRecord(event.id(), vec));
+    }
+}
+```
+
+## Dev Services & Testing
+- Dev Services auto-start Kafka, PostgreSQL, Redis via Testcontainers — zero local install
+- Continuous testing: `quarkus dev` runs tests on save — keep feedback loop <5s
+- Use `@QuarkusTest` for CDI-integrated tests; `@QuarkusIntegrationTest` for native image
+- `@InjectMock` replaces beans in tests — never manual reflection hacks
+
+```java
+@QuarkusTest class DocumentResourceTest {
+    @InjectMock EmbeddingService embeddings;
+
+    @Test void ingestReturns201() {
+        when(embeddings.embed(anyString())).thenReturn(Uni.createFrom().item(new float[1536]));
+        given().contentType(JSON).body(new IngestRequest("text", List.of(), UUID.randomUUID()))
+            .when().post("/api/documents")
+            .then().statusCode(201).header("Location", notNullValue());
+    }
+}
+```
+
+## Qute Templating
+- Type-safe templates via `@CheckedTemplate` — compile-time validation of expressions
+- Keep logic in services, templates for rendering only — no business logic in `.html` files
+
+## Security
+- OIDC via `quarkus-oidc` — single `quarkus.oidc.auth-server-url` property configures Keycloak/Entra ID
+- `@RolesAllowed("admin")` on endpoints; `@PermissionsAllowed` for fine-grained resource-level checks
+- JWT propagation with `quarkus-oidc-token-propagation` for downstream service calls
+- Never disable CSRF or CORS in production — explicit allowlists only
+
+## Extension Ecosystem
+- Prefer official extensions (`quarkus-*`) over raw libraries — ensures native image compat
+- Check native support before adding deps: `quarkus extension list --installable`
+- Pin BOM version via `quarkus-bom` — never mix Quarkus versions across extensions
 
 ## Anti-Patterns
-
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Blocking calls (`Thread.sleep`, synchronous HTTP) inside reactive pipelines
+- ❌ `listAll()` without pagination in REST endpoints — OOM on large datasets
+- ❌ `Class.forName()` or runtime proxies — breaks native image
+- ❌ `@Singleton` instead of `@ApplicationScoped` — skips CDI proxy, breaks interception
+- ❌ Raw SQL string concatenation — use Panache typed queries or named parameters
+- ❌ Disabling Dev Services in tests — test with real containers, not mocks for infra
+- ❌ Catching `Exception` broadly — handle specific failures, let unknown errors propagate
+- ❌ Manual JSON serialization — use Jackson/JSON-B auto-binding with `@RegisterForReflection`
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
+| Pillar | Quarkus Practice |
+|---|---|
+| **Performance** | Reactive pipeline (`Uni`/`Multi`), native image <50ms startup, GraalVM AOT, connection pooling via Agroal |
+| **Reliability** | SmallRye Fault Tolerance (`@Retry`, `@CircuitBreaker`, `@Timeout`), health checks, dead-letter queues |
+| **Security** | OIDC/JWT with `@RolesAllowed`, Vault secrets, TLS, CORS allowlists, input validation |
+| **Cost** | Native image = lower memory (RSS ~30MB vs ~200MB JVM), faster cold starts, right-sized containers |
+| **Ops Excellence** | Dev Services (zero-config test infra), continuous testing, OpenAPI auto-gen, structured logging |
+| **Responsible AI** | Content Safety integration, PII redaction before logging, audit trail for AI decisions |
 
 ### Operational Excellence
 - Structured JSON logging with Application Insights + correlation IDs

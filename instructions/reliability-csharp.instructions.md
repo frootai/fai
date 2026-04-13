@@ -5,130 +5,215 @@ waf:
   - "reliability"
 ---
 
-# Reliability Csharp — WAF-Aligned Coding Standards
+# C# Reliability Patterns — FAI Standards
 
-> C# reliability standards — Polly retry/circuit breaker, health checks, exception handling, resilience.
+## Polly v8 Resilience Pipelines
 
-## Core Rules
+```csharp
+// Compose retry + circuit breaker + timeout + hedging in a single pipeline
+var pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
+    .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+    {
+        MaxRetryAttempts = 3,
+        BackoffType = DelayBackoffType.Exponential,
+        UseJitter = true,
+        Delay = TimeSpan.FromSeconds(1),
+        ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+            .Handle<HttpRequestException>()
+            .HandleResult(r => r.StatusCode == HttpStatusCode.TooManyRequests
+                            || r.StatusCode >= HttpStatusCode.InternalServerError)
+    })
+    .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
+    {
+        FailureRatio = 0.5,
+        SamplingDuration = TimeSpan.FromSeconds(30),
+        MinimumThroughput = 10,
+        BreakDuration = TimeSpan.FromSeconds(15)
+    })
+    .AddTimeout(TimeSpan.FromSeconds(10))
+    .Build();
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+// Rate limiter — token bucket shared across requests
+services.AddResiliencePipeline("ai-gateway", builder =>
+    builder.AddRateLimiter(new TokenBucketRateLimiterOptions
+    {
+        TokenLimit = 60, ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+        TokensPerPeriod = 60, QueueLimit = 10
+    }));
 
-## Implementation Patterns
+// Hedging — parallel speculative execution for latency-sensitive calls
+builder.AddHedging(new HedgingStrategyOptions<HttpResponseMessage>
+{
+    MaxHedgedAttempts = 2,
+    Delay = TimeSpan.FromMilliseconds(500) // fire hedge after 500ms
+});
+```
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+## IHttpClientFactory + Polly Integration
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+```csharp
+services.AddHttpClient("openai-client", c =>
+    { c.BaseAddress = new Uri(config["OpenAI:Endpoint"]); })
+    .AddStandardResilienceHandler()           // Polly v8 defaults: retry+CB+timeout
+    .ConfigureHttpClient((sp, client) =>
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer",
+                sp.GetRequiredService<IConfiguration>()["OpenAI:Key"]));
+```
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+## Health Checks
+
+```csharp
+public class AzureOpenAIHealthCheck(OpenAIClient client) : IHealthCheck
+{
+    public async Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext ctx, CancellationToken ct = default)
+    {
+        try
+        {
+            await client.GetChatCompletionsAsync(new ChatCompletionsOptions
+            {
+                DeploymentName = "gpt-4o-mini",
+                Messages = { new ChatRequestUserMessage("ping") },
+                MaxTokens = 1
+            }, ct);
+            return HealthCheckResult.Healthy();
+        }
+        catch (Exception ex)
+        {
+            return HealthCheckResult.Unhealthy("OpenAI unreachable", ex);
+        }
+    }
+}
+// Registration
+services.AddHealthChecks()
+    .AddCheck<AzureOpenAIHealthCheck>("openai", tags: ["ready"])
+    .AddAzureBlobStorage(config.GetConnectionString("Storage")!, tags: ["ready"])
+    .AddNpgSql(config.GetConnectionString("Postgres")!);
+app.MapHealthChecks("/health/live", new() { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new() { Predicate = c => c.Tags.Contains("ready") });
+```
+
+## Graceful Shutdown & Resource Cleanup
+
+```csharp
+public class IngestWorker(
+    IHostApplicationLifetime lifetime, ILogger<IngestWorker> log) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken ct)
+    {
+        lifetime.ApplicationStopping.Register(() => log.LogInformation("Draining..."));
+        await foreach (var msg in channel.Reader.ReadAllAsync(ct))
+        {
+            try { await ProcessAsync(msg, ct); }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { break; }
+            catch (Exception ex) { log.LogError(ex, "Msg {Id} failed", msg.Id); }
+        }
+    }
+}
+
+// IAsyncDisposable for deterministic cleanup
+public sealed class EmbeddingBatch : IAsyncDisposable
+{
+    private readonly SemaphoreSlim _gate = new(1, 1);
+    public async ValueTask DisposeAsync()
+    {
+        await FlushAsync();
+        _gate.Dispose();
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Distributed Locking & Idempotency
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```csharp
+// Redis distributed lock via StackExchange.Redis
+await using var locker = await db.LockTakeAsync($"lock:doc:{docId}",
+    Environment.MachineName, TimeSpan.FromSeconds(30));
+if (!locker) throw new ConcurrencyException($"Doc {docId} locked");
 
-## Code Quality Standards
+// Azure Blob lease lock (no Redis dependency)
+var lease = blobClient.GetBlobLeaseClient();
+await lease.AcquireAsync(TimeSpan.FromSeconds(30), cancellationToken: ct);
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+// Idempotency key — prevent duplicate processing
+public async Task<bool> TryClaimAsync(string idempotencyKey)
+{
+    var added = await db.StringSetAsync($"idem:{idempotencyKey}", "1",
+        TimeSpan.FromHours(24), When.NotExists);
+    return added; // false = already processed
+}
+```
 
-## Testing Requirements
+## Outbox Pattern & Connection Resiliency
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```csharp
+// Outbox — write domain event + message atomically, relay separately
+await using var tx = await dbContext.Database.BeginTransactionAsync(ct);
+dbContext.Orders.Add(order);
+dbContext.OutboxMessages.Add(new OutboxMessage
+{
+    Id = Guid.NewGuid(), Type = "OrderCreated",
+    Payload = JsonSerializer.Serialize(order), CreatedAt = DateTime.UtcNow
+});
+await dbContext.SaveChangesAsync(ct);
+await tx.CommitAsync(ct);
 
-## Security Checklist
+// EF Core retry-on-transient
+services.AddDbContext<AppDbContext>(o =>
+    o.UseNpgsql(connStr, npgsql =>
+        npgsql.EnableRetryOnFailure(maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(10), errorCodesToAdd: null)));
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Structured Exception Hierarchy
+
+```csharp
+public abstract class DomainException(string message, string code)
+    : Exception(message) { public string Code { get; } = code; }
+
+public class TransientServiceException(string svc, Exception inner)
+    : DomainException($"Transient failure calling {svc}", "TRANSIENT") { }
+
+public class ContentFilteredException(string category)
+    : DomainException($"Content blocked: {category}", "CONTENT_FILTERED") { }
+
+public class ConcurrencyException(string msg)
+    : DomainException(msg, "CONCURRENCY") { }
+
+// Middleware maps hierarchy to HTTP status codes
+app.UseExceptionHandler(err => err.Run(async ctx =>
+{
+    var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+    ctx.Response.StatusCode = ex switch
+    {
+        TransientServiceException => 503,
+        ContentFilteredException  => 451,
+        ConcurrencyException      => 409,
+        _ => 500
+    };
+    await ctx.Response.WriteAsJsonAsync(new { error = ex?.Message });
+}));
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `new HttpClient()` per request — use `IHttpClientFactory` to avoid socket exhaustion
+- ❌ Catching `Exception` and swallowing — always log, always rethrow or map to domain type
+- ❌ `Task.Result` or `.Wait()` — causes threadpool starvation; use `await` throughout
+- ❌ Retry without jitter — thundering herd on recovery; always `UseJitter = true`
+- ❌ No `CancellationToken` propagation — shutdown hangs; pass `ct` to every async call
+- ❌ Fire-and-forget `Task.Run` in request pipeline — lost exceptions, no backpressure
+- ❌ Inline transaction + message publish — use outbox; broker publish can silently fail
+- ❌ Health check that returns `Healthy` without testing downstream dependencies
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Patterns Applied |
+|--------|-----------------|
+| **Reliability** | Polly v8 pipelines (retry+CB+timeout+hedging), health probes (live/ready), graceful shutdown, outbox, EF Core retry, distributed locks |
+| **Security** | `DefaultAzureCredential`, Key Vault refs, no secrets in code, content-filtered exception hierarchy |
+| **Cost Optimization** | Rate limiter (token bucket), hedging with bounded attempts, right-sized health probe (1 token) |
+| **Operational Excellence** | Structured logging with correlation IDs, domain exception codes, `/health/ready` for orchestrators |
+| **Performance Efficiency** | `IAsyncDisposable` cleanup, `SemaphoreSlim` concurrency gates, channel-based `BackgroundService` |
+| **Responsible AI** | `ContentFilteredException` propagation, safety checks before response delivery |
