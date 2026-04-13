@@ -6,130 +6,165 @@ waf:
   - "security"
 ---
 
-# Play 02 Ai Landing Zone Patterns — WAF-Aligned Coding Standards
+# Play 02 — AI Landing Zone Patterns — FAI Standards
 
-> Play 02 patterns — Landing zone patterns — hub-spoke VNet, private endpoints on ALL PaaS, Managed Identity, tag enforcement, GPU quota.
+## Hub-Spoke Networking
 
-## Core Rules
+- Hub VNet hosts Azure Firewall, Bastion, VPN/ExpressRoute gateway, and shared DNS private zones
+- One spoke VNet per AI workload, peered to hub with `allowForwardedTraffic: true` and `useRemoteGateways: true`
+- AI spoke subnets: `snet-pe` (/24) for private endpoints, `snet-app` (/24) for compute, `snet-openai` (/27), `snet-search` (/27)
+- NSG on every subnet — default deny-all inbound, explicit allow for required flows only
+- UDR forces all spoke egress through Azure Firewall: `0.0.0.0/0 → AzureFirewall`
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+```bicep
+module spokeVnet 'br/public:avm/res/network/virtual-network:0.5.2' = {
+  params: {
+    name: 'vnet-ai-${env}'
+    addressPrefixes: ['10.1.0.0/16']
+    peerings: [{ remoteVirtualNetworkResourceId: hubVnet.outputs.resourceId
+                 allowForwardedTraffic: true, useRemoteGateways: true }]
+    subnets: [
+      { name: 'snet-pe', addressPrefix: '10.1.1.0/24' }
+      { name: 'snet-app', addressPrefix: '10.1.2.0/24', networkSecurityGroupResourceId: nsg.outputs.resourceId
+        routeTableResourceId: udrFirewall.outputs.resourceId }
+    ]
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Private Endpoints & DNS Private Zones
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Every PaaS resource gets a private endpoint in `snet-pe` — no public access in stg/prd. Required DNS zones linked to hub VNet: `privatelink.openai.azure.com`, `privatelink.search.windows.net`, `privatelink.blob.core.windows.net`, `privatelink.vaultcore.azure.net`, `privatelink.cognitiveservices.azure.com`.
 
-## Code Quality Standards
+```bicep
+module openaiPe 'br/public:avm/res/network/private-endpoint:0.9.1' = {
+  params: {
+    name: 'pe-oai-${namePrefix}-${env}'
+    subnetResourceId: snetPe.outputs.resourceId
+    privateLinkServiceConnections: [{
+      privateLinkServiceId: openai.outputs.resourceId, groupIds: ['account']
+    }]
+    privateDnsZoneGroup: { privateDnsZoneGroupConfigs: [
+      { privateDnsZoneResourceId: dnsZoneOpenai.outputs.resourceId }
+    ]}
+  }
+}
+```
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+## Azure Firewall — AI Service FQDNs
 
-## Testing Requirements
+Allowlist only required outbound FQDNs from the AI spoke:
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```bicep
+rules: [
+  { name: 'allow-azure-openai', sourceAddresses: ['10.1.0.0/16']
+    targetFqdns: ['*.openai.azure.com', '*.cognitiveservices.azure.com']
+    protocols: [{ protocolType: 'Https', port: 443 }] }
+  { name: 'allow-model-registry', sourceAddresses: ['10.1.0.0/16']
+    targetFqdns: ['*.huggingface.co', 'cdn-lfs-us-1.huggingface.co']
+    protocols: [{ protocolType: 'Https', port: 443 }] }
+]
+```
 
-## Security Checklist
+## Managed Identity & RBAC
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+User-assigned managed identity per workload — never system-assigned for resources shared across apps:
+
+```bicep
+module uami 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = {
+  params: { name: 'id-${namePrefix}-${env}', location: location, tags: tags }
+}
+```
+
+| Principal | Resource | Role | Justification |
+|-----------|----------|------|---------------|
+| Workload UAMI | Azure OpenAI | `Cognitive Services OpenAI User` | Data-plane only, no key access |
+| Workload UAMI | AI Search | `Search Index Data Reader` | Query-only, no index mutation |
+| Workload UAMI | Storage | `Storage Blob Data Reader` | Read chunks/documents |
+| Workload UAMI | Key Vault | `Key Vault Secrets User` | Read secrets, no management |
+| AI Search MI | Storage | `Storage Blob Data Reader` | Indexer blob crawl |
+| DevOps SPN | Resource Group | `Contributor` | Deploy only — no Owner |
+
+```bash
+# Assign Cognitive Services OpenAI User to workload UAMI
+az role assignment create \
+  --assignee-object-id "$(az identity show -n id-ailz-prd -g rg-ailz-prd --query principalId -o tsv)" \
+  --role "Cognitive Services OpenAI User" \
+  --scope "$(az cognitiveservices account show -n oai-ailz-prd -g rg-ailz-prd --query id -o tsv)" \
+  --assignee-principal-type ServicePrincipal
+```
+
+## Key Vault & Diagnostic Settings
+
+- Key Vault per environment — RBAC authorization model, soft-delete + purge protection enabled in stg/prd
+- Diagnostic settings on every resource → shared Log Analytics workspace (90-day retention minimum):
+
+```bicep
+resource diagOpenai 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-${openai.name}'
+  scope: openai
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [{ categoryGroup: 'allLogs', enabled: true }]
+    metrics: [{ category: 'AllMetrics', enabled: true }]
+  }
+}
+```
+
+## Resource Naming & Environment Parameters
+
+Convention: `{type}-{workload}-{env}` — e.g., `rg-ailz-prd`, `oai-ailz-prd`, `srch-ailz-prd`, `kv-ailz-prd`, `vnet-hub-prd`, `afw-hub-prd`, `law-ailz-prd`, `id-ailz-prd`. Separate `.bicepparam` files per environment:
+
+```bicep
+using './main.bicep'
+param env = 'prd'
+param location = 'eastus2'
+param openaiCapacity = 80            // PTU for prd, PAYG for dev
+param searchSku = 'standard'         // basic for dev
+param firewallSku = 'Standard'       // Basic for dev
+param enablePrivateEndpoints = true  // false acceptable in dev only
+param budgetAmount = 5000            // monthly USD alert threshold
+param tags = { environment: 'prd', workload: 'ai-landing-zone', costCenter: 'AI-Platform' }
+```
+
+## Budget Alerts
+
+```bicep
+resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
+  name: 'budget-${namePrefix}-${env}'
+  properties: {
+    amount: budgetAmount
+    category: 'Cost'
+    timeGrain: 'Monthly'
+    timePeriod: { startDate: '2026-01-01' }
+    notifications: {
+      actual80:    { enabled: true, threshold: 80, contactEmails: alertEmails }
+      forecast100: { enabled: true, threshold: 100, thresholdType: 'Forecasted', contactEmails: alertEmails }
+    }
+  }
+}
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Public endpoints on OpenAI / AI Search / Storage in stg/prd — always use private endpoints
+- ❌ System-assigned identity shared across workloads — use one UAMI per workload boundary
+- ❌ `Cognitive Services Contributor` at runtime — grants key regeneration; use `OpenAI User` (data-plane only)
+- ❌ Flat single VNet — no segmentation, no centralized egress control, blast radius is entire network
+- ❌ Missing DNS private zones — private endpoint resolves to public IP without A-record in the zone
+- ❌ Key Vault access policies — use RBAC authorization model for auditable, conditional access
+- ❌ No diagnostic settings — invisible throttling (HTTP 429), quota exhaustion, unauthorized access attempts
+- ❌ Hardcoded CIDRs in modules — parameterize address spaces in `.bicepparam` for multi-env reuse
+- ❌ No budget alerts — PTU reservations accrue silently; $10k+ surprise invoices
+- ❌ `Owner` role on Cognitive Services — violates least privilege, enables key rotation and network rule changes
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | AI Landing Zone Implementation |
+|--------|-------------------------------|
+| **Security** | Private endpoints on all PaaS, Firewall egress FQDN filtering, UAMI with least-privilege RBAC, Key Vault RBAC mode, NSG deny-all default |
+| **Reliability** | Zone-redundant Firewall + hub VNet, DNS private zones linked to hub, PE connectivity health probes |
+| **Cost Optimization** | Budget alerts at 80%/100%, Basic Firewall SKU for dev, PAYG→PTU promotion path, parameterized SKUs per env |
+| **Operational Excellence** | Centralized Log Analytics, diagnostic settings on every resource, AVM Bicep modules, `.bicepparam` per env, CI/CD pipelines |
+| **Performance Efficiency** | VNet-injected traffic avoids public internet latency, co-located spoke + PaaS in same region, right-sized PE subnets |
+| **Responsible AI** | Content Safety service behind private endpoint, 90-day audit log retention, RBAC prevents unauthorized model endpoint access |

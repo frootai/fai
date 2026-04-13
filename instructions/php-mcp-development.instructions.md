@@ -6,130 +6,207 @@ waf:
   - "security"
 ---
 
-# Php Mcp Development — WAF-Aligned Coding Standards
-
-> PHP MCP server development — attributes, typed properties, Composer.
+# PHP MCP Server Development — FAI Standards
 
 ## Core Rules
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+- Require PHP 8.2+ — use `readonly` properties, enums, named arguments, fibers
+- Use `logiscape/mcp-sdk-php` (or `modelcontextprotocol/php-sdk`) for protocol compliance
+- Stdio transport ONLY for MCP servers — never HTTP. All logging to `stderr` via PSR-3
+- Composer autoloading (`PSR-4`) for all classes — no manual `require` chains
+- Validate every tool input with typed DTOs before processing — reject at boundary
+- Never echo/print to stdout outside JSON-RPC — stdout IS the transport
+- Config from `config/*.json` — temperatures, thresholds, model names. Never hardcode
 
-## Implementation Patterns
+## Server Bootstrap
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+```php
+<?php
+// bin/server.php — MCP server entry point
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+use Logiscape\Mcp\Server\McpServer;
+use Logiscape\Mcp\Transport\StdioTransport;
+use Logiscape\Mcp\Server\ServerCapabilities;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+$logger = new Logger('mcp', [new StreamHandler('php://stderr', Logger::DEBUG)]);
+$transport = new StdioTransport();
+$server = new McpServer(
+    name: 'my-mcp-server',
+    version: '1.0.0',
+    capabilities: new ServerCapabilities(tools: true, resources: true, prompts: true),
+    logger: $logger,
+);
+$server->registerToolHandler(new \App\Tools\SearchToolHandler());
+$server->registerResourceHandler(new \App\Resources\ConfigResourceHandler());
+$server->registerPromptHandler(new \App\Prompts\ReviewPromptHandler());
+$server->listen($transport);
+```
+
+## Tool Registration
+
+```php
+use Logiscape\Mcp\Server\ToolHandlerInterface;
+use Logiscape\Mcp\Types\{Tool, ToolResult, CallToolRequest, McpError, ErrorCode};
+
+final readonly class SearchToolHandler implements ToolHandlerInterface
+{
+    public function getTools(): array
+    {
+        return [new Tool(
+            name: 'search_docs',
+            description: 'Search documentation by query',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'query' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 500],
+                    'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'default' => 10],
+                ],
+                'required' => ['query'],
+            ],
+        )];
+    }
+
+    public function callTool(CallToolRequest $request): ToolResult
+    {
+        $query = $request->params['query'] ?? throw new McpError(
+            ErrorCode::INVALID_PARAMS, 'Missing required parameter: query'
+        );
+        // Input validation at boundary
+        if (!is_string($query) || mb_strlen($query) > 500) {
+            throw new McpError(ErrorCode::INVALID_PARAMS, 'query must be string ≤500 chars');
+        }
+        $results = $this->searchService->search($query, (int)($request->params['limit'] ?? 10));
+        return new ToolResult(content: json_encode($results, JSON_THROW_ON_ERROR));
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Resource & Prompt Handlers
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```php
+// Resource handler — expose config files as readable resources
+final readonly class ConfigResourceHandler implements ResourceHandlerInterface
+{
+    public function listResources(): array
+    {
+        return [new Resource(
+            uri: 'config://openai',
+            name: 'OpenAI Configuration',
+            mimeType: 'application/json',
+        )];
+    }
 
-## Code Quality Standards
+    public function readResource(string $uri): ResourceContent
+    {
+        return match ($uri) {
+            'config://openai' => new ResourceContent(
+                text: file_get_contents(__DIR__ . '/../../config/openai.json')
+            ),
+            default => throw new McpError(ErrorCode::RESOURCE_NOT_FOUND, "Unknown: $uri"),
+        };
+    }
+}
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+// Prompt handler — reusable prompt templates
+final readonly class ReviewPromptHandler implements PromptHandlerInterface
+{
+    public function getPrompts(): array
+    {
+        return [new Prompt(
+            name: 'code_review',
+            description: 'Review code for security and quality issues',
+            arguments: [new PromptArgument(name: 'code', required: true)],
+        )];
+    }
 
-## Testing Requirements
+    public function getPromptMessages(string $name, array $args): array
+    {
+        return [new PromptMessage(
+            role: Role::User,
+            content: "Review this code for OWASP issues:\n```\n{$args['code']}\n```",
+        )];
+    }
+}
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## JSON-RPC & Error Handling
 
-## Security Checklist
+- MCP uses JSON-RPC 2.0 over stdio — one JSON object per line, delimited by `\n`
+- Throw `McpError` with proper `ErrorCode` — SDK serializes to JSON-RPC error response
+- Never catch `McpError` in tool handlers — let it propagate to the transport layer
+- Use `ErrorCode::INTERNAL_ERROR` for unexpected failures, `INVALID_PARAMS` for bad input
+- Wrap external calls in try/catch — convert exceptions to `McpError` with sanitized messages
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Async with ReactPHP
+
+```php
+use React\EventLoop\Loop;
+use React\Promise\Deferred;
+
+// Non-blocking I/O for concurrent tool calls
+$loop = Loop::get();
+$server->onToolCall('batch_search', function (CallToolRequest $req) use ($loop) {
+    $queries = $req->params['queries'];
+    $promises = array_map(fn(string $q) => $this->asyncSearch($q, $loop), $queries);
+    return \React\Promise\all($promises)->then(
+        fn(array $results) => new ToolResult(content: json_encode($results))
+    );
+});
+```
+
+## Testing with PHPUnit
+
+```php
+final class SearchToolHandlerTest extends TestCase
+{
+    public function testCallToolReturnsResults(): void
+    {
+        $handler = new SearchToolHandler(searchService: $this->createMock(SearchService::class));
+        $request = new CallToolRequest(name: 'search_docs', params: ['query' => 'MCP']);
+        $result = $handler->callTool($request);
+        self::assertJson($result->content);
+    }
+
+    public function testRejectsMissingQuery(): void
+    {
+        $handler = new SearchToolHandler(searchService: $this->createStub(SearchService::class));
+        $this->expectException(McpError::class);
+        $handler->callTool(new CallToolRequest(name: 'search_docs', params: []));
+    }
+
+    public function testRejectsOversizedInput(): void
+    {
+        $handler = new SearchToolHandler(searchService: $this->createStub(SearchService::class));
+        $this->expectException(McpError::class);
+        $handler->callTool(new CallToolRequest(
+            name: 'search_docs', params: ['query' => str_repeat('x', 501)]
+        ));
+    }
+}
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `echo`/`print`/`var_dump` to stdout — corrupts JSON-RPC transport
+- ❌ Catching `McpError` inside tool handlers — breaks protocol error propagation
+- ❌ Using `$_GET`/`$_POST`/`$_SERVER` — MCP servers are NOT web apps
+- ❌ Manual JSON-RPC framing — use the SDK transport layer
+- ❌ Global state or `static` mutable properties — use constructor DI
+- ❌ Ignoring `inputSchema` validation — lets malformed input reach business logic
+- ❌ Logging to stdout via `error_log()` default — must redirect to stderr
+- ❌ Blocking I/O in async handlers — use ReactPHP streams or fibers
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | PHP MCP Practice |
+|--------|-----------------|
+| **Security** | Validate all tool inputs via schema + typed DTOs; sanitize `McpError` messages (no stack traces); `readonly` classes prevent mutation; no secrets in tool responses |
+| **Reliability** | `McpError` with typed `ErrorCode` for structured failures; graceful `SIGTERM` via `pcntl_signal`; enum-based state machines prevent invalid transitions |
+| **Cost** | Config-driven `max_tokens`; OPcache for repeated script loads; batch tool calls via ReactPHP `Promise\all` to reduce round-trips |
+| **Ops** | PSR-3 logging to stderr with correlation IDs; Composer scripts for CI (`composer test`, `composer analyse`); PHPStan level 9 in pipeline |
+| **Performance** | Fibers for concurrent I/O; ReactPHP event loop for non-blocking transport; `readonly` properties eliminate defensive copies |
+| **Responsible AI** | Prompt template handlers enforce guardrails; input length caps prevent token abuse; tool descriptions are transparent about capabilities |

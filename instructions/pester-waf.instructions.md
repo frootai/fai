@@ -6,130 +6,196 @@ waf:
   - "operational-excellence"
 ---
 
-# Pester Waf — WAF-Aligned Coding Standards
+# Pester — FAI Standards
 
-> Pester 5 testing standards — Describe/It blocks, TestDrive, and PowerShell module testing patterns.
+## Pester 5.x Block Structure
 
-## Core Rules
+Use `Describe` for the unit under test, `Context` for scenarios, `It` for individual assertions. Never nest `Describe` inside `Describe` — use `Context` for sub-grouping.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```powershell
+Describe 'Get-UserReport' {
+    BeforeAll {
+        . $PSScriptRoot/../src/Get-UserReport.ps1
+    }
 
-## Implementation Patterns
+    Context 'When user exists' {
+        BeforeEach {
+            Mock Get-ADUser { [PSCustomObject]@{ Name = 'Alice'; Enabled = $true } }
+        }
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+        It 'Returns the user object' {
+            $result = Get-UserReport -UserName 'Alice'
+            $result.Name | Should -Be 'Alice'
+        }
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+        It 'Calls Get-ADUser exactly once' {
+            Get-UserReport -UserName 'Alice'
+            Should -Invoke Get-ADUser -Times 1 -Exactly
+        }
+    }
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+    Context 'When user does not exist' {
+        BeforeEach {
+            Mock Get-ADUser { throw [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]::new() }
+        }
+
+        It 'Throws a descriptive error' {
+            { Get-UserReport -UserName 'Ghost' } | Should -Throw '*not found*'
+        }
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Setup and Teardown
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+- `BeforeAll` / `AfterAll` — run once per `Describe` or `Context` block. Use for expensive setup (module import, DB seed).
+- `BeforeEach` / `AfterEach` — run before/after every `It`. Use for per-test isolation (mocks, state reset).
+- Variables set in `BeforeAll` are visible in `It` blocks via `$script:` or block-scoped assignment.
 
-## Code Quality Standards
+## Should Assertions
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+| Assertion | Use When |
+|-----------|----------|
+| `Should -Be $expected` | Case-insensitive string/value equality |
+| `Should -BeExactly $expected` | Case-sensitive string comparison |
+| `Should -BeNullOrEmpty` | Null/empty check |
+| `Should -HaveCount 3` | Collection length |
+| `Should -Contain 'item'` | Collection membership |
+| `Should -BeOfType [hashtable]` | Type validation |
+| `Should -Throw '*message*'` | Exception with wildcard match |
+| `Should -Not -Exist` | File/path does not exist (TestDrive) |
+| `Should -BeGreaterThan 0` | Numeric comparison |
+| `Should -Match '^\d{4}-\d{2}'` | Regex match |
 
-## Testing Requirements
+## Mocking
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+Mock within the scope where the function under test calls the dependency. Use `-ParameterFilter` to differentiate mock behavior per input.
 
-## Security Checklist
+```powershell
+Context 'Selective mocking' {
+    BeforeAll {
+        Mock Invoke-RestMethod { @{ status = 'healthy' } } -ParameterFilter { $Uri -like '*/health' }
+        Mock Invoke-RestMethod { @{ data = @(1,2,3) } }  -ParameterFilter { $Uri -like '*/api/*' }
+    }
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+    It 'Routes to the correct mock' {
+        (Invoke-RestMethod -Uri 'https://svc/health').status | Should -Be 'healthy'
+        (Invoke-RestMethod -Uri 'https://svc/api/items').data | Should -HaveCount 3
+    }
+}
+```
+
+### Assert-MockCalled / Should -Invoke
+
+Pester 5 uses `Should -Invoke`. Add `-Scope Context` when the function under test runs in `BeforeAll`.
+
+```powershell
+Should -Invoke Send-MailMessage -Times 1 -Exactly -Scope Context
+Should -Invoke Write-Warning -Times 0
+```
+
+## TestDrive for File Operations
+
+`TestDrive:` is an auto-cleaned temporary directory per `Describe`. Use it instead of writing to real paths.
+
+```powershell
+Describe 'Export-Report' {
+    It 'Creates a CSV in the output folder' {
+        Export-Report -Path 'TestDrive:/reports'
+        'TestDrive:/reports/summary.csv' | Should -Exist
+        $csv = Import-Csv 'TestDrive:/reports/summary.csv'
+        $csv | Should -HaveCount 5
+    }
+}
+```
+
+## Parameterized Tests with -TestCases / -ForEach
+
+```powershell
+Describe 'ConvertTo-Celsius' {
+    It 'Converts <Fahrenheit>°F to <Expected>°C' -ForEach @(
+        @{ Fahrenheit = 32;  Expected = 0 }
+        @{ Fahrenheit = 212; Expected = 100 }
+        @{ Fahrenheit = -40; Expected = -40 }
+    ) {
+        ConvertTo-Celsius -Fahrenheit $Fahrenheit | Should -Be $Expected
+    }
+}
+```
+
+## Tagging and Selective Execution
+
+Tag tests for filtering in CI. Avoid running slow integration tests on every commit.
+
+```powershell
+Describe 'Database integration' -Tag 'Integration', 'Slow' {
+    It 'Inserts a record' -Tag 'Write' { <# ... #> }
+}
+```
+
+```powershell
+# Run only unit tests
+Invoke-Pester -Path ./tests -Tag 'Unit' -ExcludeTag 'Slow'
+```
+
+## InModuleScope for Private Functions
+
+Test non-exported functions without exposing them publicly.
+
+```powershell
+Describe 'Private helper' {
+    It 'Formats the internal key' {
+        InModuleScope 'MyModule' {
+            Format-InternalKey -Raw 'abc-123' | Should -Be 'ABC_123'
+        }
+    }
+}
+```
+
+## Code Coverage
+
+```powershell
+$config = New-PesterConfiguration
+$config.CodeCoverage.Enabled = $true
+$config.CodeCoverage.Path = @('./src/*.ps1')
+$config.CodeCoverage.CoveragePercentTarget = 80
+Invoke-Pester -Configuration $config
+```
+
+## CI Integration
+
+```powershell
+# GitHub Actions / Azure DevOps — single line
+$config = New-PesterConfiguration
+$config.Run.Path = './tests'
+$config.Run.Exit = $true                          # Non-zero exit on failure
+$config.TestResult.Enabled = $true
+$config.TestResult.OutputFormat = 'NUnitXml'       # Or 'JUnitXml'
+$config.TestResult.OutputPath = './results/tests.xml'
+$config.Output.Verbosity = 'Detailed'
+Invoke-Pester -Configuration $config
+```
+
+The `-CI` switch is shorthand: enables exit-on-failure + NUnit output + Detailed verbosity.
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Nesting `Describe` inside `Describe` — use `Context` for sub-groups
+- ❌ Dot-sourcing scripts with top-level `exit`/`Write-Host` without AST extraction
+- ❌ Omitting `-Scope Context` on `Should -Invoke` when setup runs in `BeforeAll`
+- ❌ Using `Assert-MockCalled` (Pester 4 legacy) — use `Should -Invoke` in Pester 5
+- ❌ Writing to real filesystem paths instead of `TestDrive:`
+- ❌ Single `It` block with dozens of assertions — split into focused test cases
+- ❌ Not using `-Exactly` on `Should -Invoke` — default allows "at least N" which hides bugs
+- ❌ Wrapping `@()` around `Group-Object` result when checking `.Count` of a single group vs group count
+- ❌ Mocking `exit` directly — it's a keyword, not a command; use AST rewrite
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Pester Practice |
+|--------|----------------|
+| **Reliability** | `Should -Throw` for error-path coverage; `-ForEach` for boundary/edge cases; `TestDrive:` for safe file I/O isolation |
+| **Operational Excellence** | `Invoke-Pester -CI` in pipelines; NUnit/JUnit XML for test dashboards; `-Tag` for fast vs full suites |
+| **Security** | Never embed real secrets in test data; mock `Invoke-RestMethod` instead of calling live APIs; `InModuleScope` to verify private validation logic |
+| **Cost Optimization** | `-ExcludeTag 'Slow'` on PR builds; run integration tests only on main; code coverage to find dead code |
+| **Performance Efficiency** | `BeforeAll` for expensive one-time setup; `BeforeEach` only for cheap per-test reset; parallel discovery via `Invoke-Pester -Path ./tests` |
