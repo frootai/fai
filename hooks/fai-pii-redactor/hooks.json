@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-pii-redactor/redact-pii.sh",
+        "windows": "powershell -NoProfile -Command \"Write-Output '{}'\"",
+        "cwd": ".",
+        "env": {
+          "REDACT_MODE": "warn"
+        },
+        "timeout": 30
+      }
+    ]
+  }
+}

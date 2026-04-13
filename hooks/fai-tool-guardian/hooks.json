@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-tool-guardian/guard-tool.sh",
+        "windows": "powershell -NoProfile -Command \"Write-Output '{}'\"",
+        "cwd": ".",
+        "env": {
+          "GUARD_MODE": "warn"
+        },
+        "timeout": 10
+      }
+    ]
+  }
+}

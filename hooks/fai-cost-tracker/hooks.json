@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-cost-tracker/track-cost.sh",
+        "windows": "powershell -NoProfile -File hooks\\fai-cost-tracker\\track-cost.ps1",
+        "cwd": ".",
+        "env": {
+          "COST_MODE": "log"
+        },
+        "timeout": 10
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-license-checker/check-licenses.sh",
+        "windows": "powershell -NoProfile -Command \"Write-Output '{}'\"",
+        "cwd": ".",
+        "env": {
+          "CHECKER_MODE": "warn"
+        },
+        "timeout": 60
+      }
+    ]
+  }
+}

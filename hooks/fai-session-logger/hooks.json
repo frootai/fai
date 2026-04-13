@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-session-logger/log-session.sh",
+        "windows": "powershell -NoProfile -Command \"Write-Output '{}'\"",
+        "cwd": ".",
+        "env": {
+          "SESSION_EVENT": "SessionStart"
+        },
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-session-logger/log-session.sh",
+        "windows": "powershell -NoProfile -Command \"Write-Output '{}'\"",
+        "cwd": ".",
+        "env": {
+          "SESSION_EVENT": "Stop"
+        },
+        "timeout": 5
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-session-logger/log-session.sh",
+        "windows": "powershell -NoProfile -Command \"Write-Output '{}'\"",
+        "cwd": ".",
+        "env": {
+          "SESSION_EVENT": "UserPromptSubmit"
+        },
+        "timeout": 5
+      }
+    ]
+  }
+}

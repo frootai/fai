@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bash hooks/fai-token-budget-enforcer/enforce-budget.sh",
+        "windows": "powershell -NoProfile -Command \"Write-Output '{}'\"",
+        "cwd": ".",
+        "env": {
+          "BUDGET_MODE": "warn",
+          "TOKEN_BUDGET": "50000"
+        },
+        "timeout": 5
+      }
+    ]
+  }
+}
