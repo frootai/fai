@@ -6,130 +6,249 @@ waf:
   - "security"
 ---
 
-# Play 12 Model Serving Aks Patterns — WAF-Aligned Coding Standards
+# Play 12 — Model Serving on AKS Patterns — FAI Standards
 
-> Play 12 patterns — Model serving patterns — vLLM config, GPU scheduling, health probes, autoscaling, quantization selection.
+## vLLM Deployment on AKS
 
-## Core Rules
+### GPU Node Pool with NVIDIA Device Plugin
+```yaml
+# AKS GPU node pool — Standard_NC24ads_A100_v4 for production serving
+apiVersion: v1
+kind: NodePool
+metadata:
+  name: gpu-serving
+spec:
+  vmSize: Standard_NC24ads_A100_v4
+  nodeCount: 2
+  maxCount: 6
+  enableAutoScaling: true
+  nodeLabels:
+    workload: model-serving
+    gpu-type: a100
+  nodeTaints:
+    - key: nvidia.com/gpu
+      effect: NoSchedule
+---
+# NVIDIA device plugin — required for GPU resource discovery
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-device-plugin
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: nvidia-device-plugin
+  template:
+    spec:
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: nvidia-device-plugin
+          image: nvcr.io/nvidia/k8s-device-plugin:v0.15.0
+          securityContext:
+            allowPrivilegeEscalation: false
+```
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+### vLLM Deployment with Model Loading
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-mistral-7b
+spec:
+  replicas: 2
+  template:
+    spec:
+      nodeSelector:
+        gpu-type: a100
+      tolerations:
+        - key: nvidia.com/gpu
+          effect: NoSchedule
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:v0.5.4
+          args:
+            - --model=mistralai/Mistral-7B-Instruct-v0.3
+            - --tensor-parallel-size=1        # 2 for 70B+ models across GPUs
+            - --max-model-len=32768
+            - --gpu-memory-utilization=0.90    # Reserve 10% for KV cache headroom
+            - --enable-chunked-prefill
+            - --max-num-batched-tokens=8192    # Continuous batching window
+            - --swap-space=4                   # GiB CPU swap for KV cache overflow
+            - --dtype=auto
+          env:
+            - name: HUGGING_FACE_HUB_TOKEN
+              valueFrom:
+                secretKeyRef: { name: hf-secret, key: token }
+            # Azure Blob model loading alternative:
+            - name: AZURE_STORAGE_ACCOUNT
+              value: modelstorage
+            - name: AZURE_STORAGE_CONTAINER
+              value: model-artifacts
+          resources:
+            requests:
+              nvidia.com/gpu: "1"       # Must match limits — no overcommit
+              memory: "24Gi"
+              cpu: "8"
+            limits:
+              nvidia.com/gpu: "1"
+              memory: "32Gi"
+              cpu: "12"
+          ports:
+            - containerPort: 8000
+          # Health probes — vLLM native endpoints
+          livenessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 120    # Model loading takes 60-180s
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 90
+            periodSeconds: 10
+          startupProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 30        # Up to 5min for large model load
+```
 
-## Implementation Patterns
+## KEDA Autoscaling
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: vllm-scaler
+spec:
+  scaleTargetRef:
+    name: vllm-mistral-7b
+  minReplicaCount: 2
+  maxReplicaCount: 8
+  cooldownPeriod: 300               # 5min — avoid thrashing on GPU nodes
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus:9090
+        metricName: vllm_num_requests_waiting
+        query: avg(vllm:num_requests_waiting{model="mistral-7b"})
+        threshold: "10"             # Scale when avg queue > 10
+    - type: prometheus
+      metadata:
+        metricName: vllm_gpu_cache_usage
+        query: avg(vllm:gpu_cache_usage_perc{model="mistral-7b"})
+        threshold: "85"             # Scale when KV cache > 85%
+```
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+## Model Loading from Azure Blob
+```python
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient
+import subprocess, os
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+def download_model(account: str, container: str, model_prefix: str, local_path: str):
+    """Download model weights from Azure Blob before vLLM startup."""
+    credential = DefaultAzureCredential()
+    client = BlobServiceClient(f"https://{account}.blob.core.windows.net", credential)
+    container_client = client.get_container_client(container)
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+    os.makedirs(local_path, exist_ok=True)
+    for blob in container_client.list_blobs(name_starts_with=model_prefix):
+        dest = os.path.join(local_path, blob.name.split("/")[-1])
+        with open(dest, "wb") as f:
+            f.write(container_client.download_blob(blob).readall())
+
+    # Launch vLLM with local model path
+    subprocess.run([
+        "python", "-m", "vllm.entrypoints.openai.api_server",
+        "--model", local_path,
+        "--tensor-parallel-size", os.getenv("TP_SIZE", "1"),
+    ])
+```
+
+## Canary Deployment with Model Versioning
+```yaml
+# Istio VirtualService — 90/10 canary split
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: inference-canary
+spec:
+  hosts: [inference.internal]
+  http:
+    - route:
+        - destination:
+            host: vllm-mistral-7b-v2    # New model version
+            port: { number: 8000 }
+          weight: 10
+        - destination:
+            host: vllm-mistral-7b-v1    # Stable version
+            port: { number: 8000 }
+          weight: 90
+      retries:
+        attempts: 2
+        retryOn: 5xx,reset,connect-failure
+```
+
+## GPU Infrastructure (Bicep)
+```bicep
+resource aksCluster 'Microsoft.ContainerService/managedClusters@2024-06-01' existing = {
+  name: aksName
+}
+
+resource gpuPool 'Microsoft.ContainerService/managedClusters/agentPools@2024-06-01' = {
+  parent: aksCluster
+  name: 'gpuserving'
+  properties: {
+    vmSize: 'Standard_NC24ads_A100_v4'
+    count: 2
+    minCount: 1
+    maxCount: 6
+    enableAutoScaling: true
+    scaleSetPriority: environment == 'dev' ? 'Spot' : 'Regular'  // Spot for dev = 60-70% savings
+    spotMaxPrice: environment == 'dev' ? json('0.8') : json('-1')
+    nodeLabels: { workload: 'model-serving' }
+    nodeTaints: [ 'nvidia.com/gpu=true:NoSchedule' ]
+    osSKU: 'Ubuntu'
+    mode: 'User'
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
-
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
-
-## Code Quality Standards
-
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
-
-## Testing Requirements
-
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
-
-## Security Checklist
-
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Monitoring Queries
+```python
+# Prometheus metrics to track — export from vLLM automatically
+CRITICAL_METRICS = {
+    "vllm:gpu_cache_usage_perc":       "KV cache saturation — scale at >85%",
+    "vllm:num_requests_waiting":       "Queue depth — alert at >20 sustained",
+    "vllm:avg_generation_throughput":   "Tokens/sec — baseline per GPU type",
+    "vllm:e2e_request_latency_seconds": "P95 latency — SLO target <2s",
+    "DCGM_FI_DEV_GPU_UTIL":           "GPU utilization — target 70-85%",
+    "DCGM_FI_DEV_GPU_TEMP":           "GPU temperature — alert at >85°C",
+    "DCGM_FI_DEV_FB_USED":            "GPU memory used — correlate with OOM",
+}
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Requesting GPU limits without matching requests — scheduler can't bin-pack
+- ❌ `gpu-memory-utilization=1.0` — leaves no headroom for KV cache spikes, causes OOM
+- ❌ Missing startupProbe — kubelet kills pods during 3min model load
+- ❌ Autoscaling on CPU/memory instead of queue depth — GPU workloads don't correlate
+- ❌ Single replica without PodDisruptionBudget — node drain kills inference
+- ❌ Storing model weights in container image — 30GB+ images, 10min+ pull times
+- ❌ No tensor parallelism for 70B+ models — single GPU OOM, use `--tensor-parallel-size=2`
+- ❌ Spot instances for production inference — preemption causes request failures
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Play 12 Implementation |
+|--------|----------------------|
+| **Reliability** | startupProbe (5min budget), PodDisruptionBudget `minAvailable: 1`, multi-replica serving, canary with automatic rollback on P95 > 3s |
+| **Security** | Managed Identity for Blob/ACR, network policies isolating GPU nodes, no HF token in pod spec (use K8s Secret + CSI driver) |
+| **Cost Optimization** | Spot GPU nodes for dev/test (60-70% savings), KEDA scale-to-min during off-hours, right-size `gpu-memory-utilization` to avoid over-provisioning |
+| **Operational Excellence** | Prometheus + Grafana dashboards (GPU util, queue depth, latency P95), vLLM `/metrics` endpoint, Azure Monitor Container Insights |
+| **Performance Efficiency** | Continuous batching (`max-num-batched-tokens=8192`), chunked prefill, KV cache swap to CPU, tensor parallelism for models >40GB |
+| **Responsible AI** | Content Safety sidecar on inference egress, prompt/response logging for audit (PII-redacted), model versioning with evaluation gates |

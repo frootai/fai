@@ -6,130 +6,184 @@ waf:
   - "security"
 ---
 
-# Play 14 Cost Optimized Ai Gateway Patterns — WAF-Aligned Coding Standards
+# Play 14 — Cost-Optimized AI Gateway Patterns — FAI Standards
 
-> Play 14 patterns — AI gateway patterns — APIM policies, semantic cache, token metering, multi-backend retry, budget enforcement.
+## APIM as AI Gateway
 
-## Core Rules
+Azure API Management fronts all LLM traffic. Enforce rate limiting, quotas, and subscription keys per consumer team. Use APIM policies for header injection, response caching, and backend circuit breaking — never expose OpenAI endpoints directly.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```xml
+<!-- APIM inbound policy: rate limit + quota per subscription -->
+<inbound>
+  <rate-limit-by-key calls="60" renewal-period="60"
+    counter-key="@(context.Subscription.Id)" />
+  <quota-by-key calls="10000" bandwidth="50000" renewal-period="86400"
+    counter-key="@(context.Subscription.Id)" />
+  <set-header name="api-key" exists-action="override">
+    <value>{{aoai-key}}</value>
+  </set-header>
+</inbound>
+```
 
-## Implementation Patterns
+## Model Routing by Complexity
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+Classify prompt complexity before dispatching. Route simple queries (FAQ, classification, extraction) to `gpt-4o-mini` (~$0.15/1M input tokens). Escalate multi-step reasoning, code generation, and long-context to `gpt-4o`. A lightweight classifier avoids spending premium tokens on trivial requests.
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+```python
+from openai import AzureOpenAI
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+COMPLEXITY_THRESHOLD = 0.6
+
+async def route_request(prompt: str, client: AzureOpenAI) -> str:
+    score = await classify_complexity(prompt, client)  # 0.0-1.0
+    deployment = "gpt-4o" if score > COMPLEXITY_THRESHOLD else "gpt-4o-mini"
+    response = await client.chat.completions.create(
+        model=deployment,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=config["max_tokens"],
+        stream=True,
+    )
+    return response
+
+async def classify_complexity(prompt: str, client: AzureOpenAI) -> float:
+    """Classify with gpt-4o-mini — costs <0.01c per classification."""
+    result = await client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "system", "content": "Rate complexity 0.0-1.0. Return only the number."},
+                  {"role": "user", "content": prompt}],
+        max_tokens=5, temperature=0,
+    )
+    return float(result.choices[0].message.content.strip())
+```
+
+## Semantic Caching with Redis
+
+Hash prompt embeddings to find semantically equivalent past queries. Cosine similarity > 0.98 = cache hit. Saves full round-trip LLM cost on repeated or near-duplicate questions. TTL from config — stale cache is worse than no cache.
+
+```python
+import hashlib, numpy as np, redis.asyncio as redis
+
+cache = redis.Redis(host=config["redis_host"], ssl=True)
+
+async def get_or_generate(prompt: str, embedding: list[float]) -> str:
+    cache_key = f"sem:{hashlib.sha256(prompt.encode()).hexdigest()[:16]}"
+    cached = await cache.get(cache_key)
+    if cached:
+        return cached.decode()
+    # Check semantic neighbors via vector similarity index
+    neighbors = await vector_search(embedding, top_k=1, threshold=0.98)
+    if neighbors:
+        return neighbors[0].response
+    response = await call_llm(prompt)
+    await cache.setex(cache_key, config["cache_ttl_seconds"], response)
+    await store_embedding(embedding, response)
+    return response
+```
+
+## Token Metering Middleware
+
+Track prompt/completion tokens per tenant and endpoint. Emit to Application Insights as custom metrics. Without metering you cannot attribute cost, detect abuse, or enforce budgets.
+
+```python
+from opentelemetry import metrics
+
+meter = metrics.get_meter("ai-gateway")
+token_counter = meter.create_counter("ai.tokens.total", description="LLM tokens consumed")
+
+async def metered_completion(tenant_id: str, endpoint: str, **kwargs):
+    response = await client.chat.completions.create(**kwargs)
+    usage = response.usage
+    token_counter.add(usage.prompt_tokens, {"tenant": tenant_id, "endpoint": endpoint, "type": "prompt"})
+    token_counter.add(usage.completion_tokens, {"tenant": tenant_id, "endpoint": endpoint, "type": "completion"})
+    return response
+```
+
+## PTU vs PAYG Routing
+
+Route to Provisioned Throughput Units first — they're pre-paid, so unused capacity is wasted money. Overflow to Pay-As-You-Go when PTU returns 429. APIM backend pool with priority routing handles this transparently.
+
+```bicep
+// APIM backend pool — PTU primary, PAYG fallback
+resource backendPool 'Microsoft.ApiManagement/service/backends@2023-09-01-preview' = {
+  name: 'aoai-pool'
+  properties: {
+    type: 'Pool'
+    pool: {
+      services: [
+        { id: ptuBackend.id, priority: 1, weight: 10 }   // PTU — always try first
+        { id: paygBackend.id, priority: 2, weight: 5 }    // PAYG — overflow only
+      ]
+    }
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Prompt Compression
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Strip redundant whitespace, remove filler instructions already baked into system prompts, and truncate context windows to relevant chunks only. A 30% token reduction at 100K requests/day saves thousands monthly.
 
-## Code Quality Standards
+```python
+import re
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+def compress_prompt(text: str, max_context_tokens: int = 3000) -> str:
+    text = re.sub(r'\n{3,}', '\n\n', text)        # collapse blank lines
+    text = re.sub(r'[ \t]{2,}', ' ', text)          # collapse whitespace
+    text = re.sub(r'(?i)\b(please|kindly)\b ', '', text)  # strip filler
+    tokens = tokenizer.encode(text)
+    if len(tokens) > max_context_tokens:
+        tokens = tokens[:max_context_tokens]
+    return tokenizer.decode(tokens)
+```
 
-## Testing Requirements
+## Response Streaming
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+Stream SSE chunks to the client as they arrive from the LLM. Perceived latency drops from 5-15s (full response) to <500ms (first token). APIM must forward chunked transfer-encoding without buffering.
 
-## Security Checklist
+## Retry with Fallback Endpoints
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+Primary → secondary region → PAYG fallback. Respect `Retry-After` headers from 429s. Jittered exponential backoff: `delay = min(base * 2^attempt + random(0, base), max_delay)`. Three attempts max before returning a graceful degradation response.
+
+## Cost Allocation Dashboards
+
+Emit `tenant_id`, `team`, `endpoint`, `model`, and `token_count` dimensions on every request. Build Azure Monitor workbooks grouping cost by team and endpoint. Alert at 80% budget threshold — auto-throttle at 95%.
+
+```python
+# Budget enforcement — check before every LLM call
+async def enforce_budget(tenant_id: str, estimated_tokens: int) -> bool:
+    usage = await get_monthly_usage(tenant_id)
+    budget = config["budgets"].get(tenant_id, config["default_budget"])
+    if usage + estimated_tokens > budget * 0.95:
+        logger.warning("Budget threshold reached", extra={"tenant": tenant_id, "usage": usage})
+        raise BudgetExceededError(tenant_id, usage, budget)
+    return True
+```
+
+## FinOps Practices
+
+- Tag every Azure resource with `cost-center`, `team`, `environment`
+- Review PTU utilization weekly — downsize if <60% sustained
+- Set Azure Cost Management budgets with action groups (email → throttle → block)
+- Compare PAYG spend vs PTU break-even monthly (PTU wins at >66% utilization)
+- Rotate model versions on schedule — newer models often cheaper per token
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Exposing OpenAI endpoints without APIM — no rate limiting, no metering, no fallback
+- ❌ Sending all traffic to gpt-4o regardless of complexity — 10x cost for FAQ queries
+- ❌ Caching without TTL — stale responses served indefinitely after model updates
+- ❌ No token metering — impossible to attribute cost or detect runaway prompts
+- ❌ Ignoring PTU utilization — paying for provisioned capacity that sits idle
+- ❌ Logging full prompts/responses — storage cost explosion + PII exposure
+- ❌ Hardcoded model names — can't rotate deployments without code changes
+- ❌ No budget enforcement — single tenant can exhaust shared capacity
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Implementation |
+|---|---|
+| **Cost Optimization** | Model routing by complexity, semantic caching, PTU-first with PAYG overflow, prompt compression, per-tenant budgets with auto-throttle |
+| **Reliability** | APIM backend pool with priority failover, retry with jittered backoff, circuit breaker on 429/500, graceful degradation response |
+| **Security** | APIM subscription keys + managed identity to backends, Key Vault for API keys, no direct OpenAI exposure, Content Safety on outputs |
+| **Performance** | SSE streaming for first-token latency, Redis semantic cache, prompt compression reducing token count 20-30% |
+| **Operational Excellence** | Token metering per tenant/endpoint, cost allocation dashboards, budget alerts at 80%/95%, weekly PTU utilization reviews |
+| **Responsible AI** | Content Safety filtering on all outputs, PII redaction before logging, per-tenant audit trail of model usage |

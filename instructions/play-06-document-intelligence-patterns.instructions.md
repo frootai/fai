@@ -6,127 +6,257 @@ waf:
   - "security"
 ---
 
-# Play 06 Document Intelligence Patterns — WAF-Aligned Coding Standards
+# Play 06 — Document Intelligence Patterns — FAI Standards
 
-> Play 06 patterns — Document processing patterns — AI Document Intelligence, table extraction, OCR confidence, structured output.
+## Document Intelligence Client Setup
 
-## Core Rules
+```python
+from azure.ai.documentintelligence import DocumentIntelligenceClient
+from azure.ai.documentintelligence.models import AnalyzeDocumentRequest, DocumentAnalysisFeature
+from azure.identity import DefaultAzureCredential
+from azure.core.exceptions import HttpResponseError
+import json, hashlib, logging
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+logger = logging.getLogger("play06")
 
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+config = json.load(open("config/document-intelligence.json"))
+credential = DefaultAzureCredential()
+client = DocumentIntelligenceClient(
+    endpoint=config["endpoint"], credential=credential
+)
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Prebuilt Model Extraction
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```python
+PREBUILT_MODELS = {
+    "invoice": "prebuilt-invoice",
+    "receipt": "prebuilt-receipt",
+    "id_document": "prebuilt-idDocument",
+    "business_card": "prebuilt-businessCard",
+    "w2": "prebuilt-tax.us.w2",
+    "health_insurance": "prebuilt-healthInsuranceCard.us",
+}
 
-## Code Quality Standards
+async def extract_with_prebuilt(doc_bytes: bytes, doc_type: str, min_confidence: float = 0.7):
+    model_id = PREBUILT_MODELS.get(doc_type, "prebuilt-layout")
+    poller = await client.begin_analyze_document(
+        model_id, AnalyzeDocumentRequest(bytes_source=doc_bytes),
+        features=[DocumentAnalysisFeature.BARCODES, DocumentAnalysisFeature.FORMULAS],
+    )
+    result = await poller.result()
+    fields = {}
+    low_confidence = []
+    for name, field in (result.documents[0].fields or {}).items():
+        if field.confidence and field.confidence < min_confidence:
+            low_confidence.append({"field": name, "confidence": field.confidence, "value": field.content})
+        fields[name] = {"value": field.content, "confidence": field.confidence, "type": field.type}
+    if low_confidence:
+        logger.warning("low_confidence_fields", extra={"fields": low_confidence, "model": model_id})
+    return {"fields": fields, "low_confidence": low_confidence, "model_id": model_id}
+```
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+## Table and Key-Value Extraction
 
-## Testing Requirements
+```python
+def extract_tables(result) -> list[dict]:
+    tables = []
+    for table in (result.tables or []):
+        rows = {}
+        for cell in table.cells:
+            rows.setdefault(cell.row_index, {})[cell.column_index] = {
+                "content": cell.content, "kind": cell.kind,  # "columnHeader", "rowHeader", "content"
+            }
+        headers = [rows.get(0, {}).get(c, {}).get("content", f"col_{c}") for c in range(table.column_count)]
+        data = [
+            {headers[c]: rows[r][c]["content"] for c in range(table.column_count) if c in rows.get(r, {})}
+            for r in range(1, table.row_count)
+        ]
+        tables.append({"headers": headers, "rows": data, "row_count": table.row_count - 1})
+    return tables
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+def extract_kv_pairs(result) -> list[dict]:
+    return [
+        {"key": kv.key.content, "value": (kv.value.content if kv.value else None),
+         "confidence": kv.confidence}
+        for kv in (result.key_value_pairs or [])
+    ]
+```
 
-## Security Checklist
+## Document Classification
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```python
+async def classify_document(doc_bytes: bytes, classifier_id: str) -> dict:
+    poller = await client.begin_classify_document(
+        classifier_id, AnalyzeDocumentRequest(bytes_source=doc_bytes)
+    )
+    result = await poller.result()
+    return {
+        "doc_type": result.documents[0].doc_type,
+        "confidence": result.documents[0].confidence,
+        "page_ranges": [(d.bounding_regions[0].page_number, d.bounding_regions[-1].page_number)
+                        for d in result.documents if d.bounding_regions],
+    }
+```
+
+## Multi-Page Batch Processing
+
+```python
+import asyncio
+from azure.core.exceptions import ServiceRequestError
+
+async def batch_process(files: list[tuple[str, bytes]], model_id: str, max_concurrent: int = 5):
+    semaphore = asyncio.Semaphore(max_concurrent)  # DI throttles at ~15 concurrent
+    results = {}
+
+    async def _process(name: str, data: bytes):
+        async with semaphore:
+            for attempt in range(3):
+                try:
+                    poller = await client.begin_analyze_document(
+                        model_id, AnalyzeDocumentRequest(bytes_source=data), pages="1-"
+                    )
+                    return name, await poller.result()
+                except HttpResponseError as e:
+                    if e.status_code == 429:
+                        await asyncio.sleep(2 ** attempt + 1)
+                        continue
+                    return name, {"error": str(e), "status": e.status_code}
+                except ServiceRequestError:
+                    await asyncio.sleep(2 ** attempt)
+            return name, {"error": "max_retries_exceeded"}
+
+    tasks = [_process(n, d) for n, d in files]
+    for coro in asyncio.as_completed(tasks):
+        name, result = await coro
+        results[name] = result
+        logger.info("batch_doc_processed", extra={"file": name, "success": not isinstance(result, dict)})
+    return results
+```
+
+## Barcode/QR and Handwriting Extraction
+
+```python
+def extract_barcodes(result) -> list[dict]:
+    return [
+        {"kind": bc.kind, "value": bc.value, "confidence": bc.confidence,
+         "page": bc.bounding_regions[0].page_number if bc.bounding_regions else None}
+        for page in (result.pages or []) for bc in (page.barcodes or [])
+    ]
+
+def extract_handwritten_lines(result) -> list[dict]:
+    return [
+        {"content": line.content, "confidence": line.confidence(), "page": page.page_number}
+        for page in (result.pages or []) for line in (page.lines or [])
+        if any(span.confidence < 0.85 for span in (line.spans or []))  # handwritten = lower OCR confidence
+    ]
+```
+
+## Result Caching and Output Normalization
+
+```python
+import redis
+
+cache = redis.Redis.from_url(config.get("redis_url", "redis://localhost:6379"))
+CACHE_TTL = config.get("cache_ttl_seconds", 3600)
+
+def get_or_analyze(doc_bytes: bytes, model_id: str):
+    doc_hash = hashlib.sha256(doc_bytes).hexdigest()
+    cache_key = f"di:{model_id}:{doc_hash}"
+    cached = cache.get(cache_key)
+    if cached:
+        return json.loads(cached)
+    result = client.begin_analyze_document(model_id, AnalyzeDocumentRequest(bytes_source=doc_bytes)).result()
+    normalized = normalize_result(result)
+    cache.setex(cache_key, CACHE_TTL, json.dumps(normalized))
+    return normalized
+
+def normalize_result(result) -> dict:
+    return {
+        "pages": result.pages and len(result.pages),
+        "tables": extract_tables(result),
+        "kv_pairs": extract_kv_pairs(result),
+        "documents": [
+            {"doc_type": d.doc_type, "confidence": d.confidence,
+             "fields": {k: {"value": v.content, "confidence": v.confidence} for k, v in (d.fields or {}).items()}}
+            for d in (result.documents or [])
+        ],
+        "barcodes": extract_barcodes(result),
+        "content_length": len(result.content or ""),
+    }
+```
+
+## Pre/Post-Processing Pipeline
+
+```python
+from PIL import Image
+import io
+
+def preprocess_document(doc_bytes: bytes, filename: str) -> bytes:
+    if filename.lower().endswith((".png", ".jpg", ".jpeg", ".tiff", ".bmp")):
+        img = Image.open(io.BytesIO(doc_bytes))
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        if max(img.size) > 4096:  # DI max dimension
+            img.thumbnail((4096, 4096), Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="PNG", optimize=True)
+        return buf.getvalue()
+    if len(doc_bytes) > 500 * 1024 * 1024:  # 500MB DI limit
+        raise ValueError(f"Document exceeds 500MB limit: {len(doc_bytes)} bytes")
+    return doc_bytes
+
+def postprocess_fields(fields: dict, rules: dict) -> dict:
+    """Apply domain-specific normalization: date formats, currency, phone numbers."""
+    for name, field in fields.items():
+        if rules.get(name, {}).get("type") == "currency" and field.get("value"):
+            field["value"] = field["value"].replace("$", "").replace(",", "").strip()
+        if rules.get(name, {}).get("type") == "date" and field.get("value"):
+            field["value"] = field["value"].replace("/", "-")  # normalize to ISO-ish
+    return fields
+```
+
+## Error Handling — Partial Extraction
+
+```python
+async def safe_extract(doc_bytes: bytes, model_id: str) -> dict:
+    try:
+        poller = await client.begin_analyze_document(model_id, AnalyzeDocumentRequest(bytes_source=doc_bytes))
+        result = await poller.result()
+        return {"status": "complete", "data": normalize_result(result)}
+    except HttpResponseError as e:
+        if e.status_code == 400 and "InvalidContent" in str(e):
+            return {"status": "unsupported_format", "error": str(e)}
+        if e.status_code == 413:
+            return {"status": "too_large", "error": "Document exceeds size limit"}
+        raise
+    except Exception as e:
+        logger.exception("extraction_failed", extra={"model": model_id})
+        return {"status": "partial", "error": str(e), "data": None}
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Using `prebuilt-read` for structured docs — use the specific prebuilt model (invoice, receipt, etc.)
+- ❌ Ignoring confidence scores — always threshold and flag low-confidence fields for human review
+- ❌ Polling without backoff — `begin_analyze_document` returns a poller; don't spin-loop on status
+- ❌ Sending unvalidated file types — DI supports PDF/JPEG/PNG/TIFF/BMP/DOCX/XLSX/PPTX/HTML only
+- ❌ Processing files >500MB or >2000 pages without splitting first
+- ❌ Hardcoding model IDs — use config so custom models can be swapped without code changes
+- ❌ Skipping image preprocessing — rotated/skewed images degrade OCR accuracy significantly
+- ❌ Storing raw DI results without normalization — downstream consumers get inconsistent schemas
+- ❌ Using API keys instead of `DefaultAzureCredential` for the DI client
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
+| Pillar | Play 06 Implementation |
+|--------|----------------------|
+| **Security** | `DefaultAzureCredential` for DI client, private endpoints for DI resource, PII redaction from extracted fields before logging, Key Vault for any custom model training secrets |
+| **Reliability** | Retry with backoff on 429/503 from DI API, partial extraction fallback (return what succeeded), circuit breaker for batch pipelines, dead-letter queue for failed documents |
+| **Cost** | SHA-256 result caching (avoid re-analyzing identical docs), right-size DI SKU (S0 for <500 pages/mo, S1 for higher), batch documents to maximize per-call value, prebuilt models before custom (no training cost) |
+| **Performance** | Semaphore-bounded concurrency (DI limits ~15 concurrent), async polling with `await poller.result()`, image preprocessing to reduce payload size, parallel page-range analysis for large docs |
+| **Ops Excellence** | Structured logging with model_id + doc_hash correlation, confidence-score telemetry for drift detection, automated retraining triggers when custom model accuracy drops below threshold |
+| **Responsible AI** | Flag handwriting extraction as lower-confidence, human-in-the-loop for PII documents (ID, health insurance), audit trail for all extracted data, bias monitoring across document languages |
 
 ### Operational Excellence
 - Structured JSON logging with Application Insights + correlation IDs

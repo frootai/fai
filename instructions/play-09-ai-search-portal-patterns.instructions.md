@@ -6,130 +6,207 @@ waf:
   - "security"
 ---
 
-# Play 09 Ai Search Portal Patterns — WAF-Aligned Coding Standards
+# Play 09 — AI Search Portal Patterns — FAI Standards
 
-> Play 09 patterns — Search portal patterns — faceted search, semantic ranker, result rendering, analytics, personalization.
+## Index Schema Design
 
-## Core Rules
+- Define `SearchableField` with analyzer per language — `en.microsoft` for English, `standard.lucene` as fallback
+- Use `SimpleField(filterable=True, facetable=True)` for category/status fields — never mark filterable fields as searchable unless needed
+- Scoring profiles: boost `title` 5x, `summary` 2x, `content` 1x — add freshness function on `lastModified` with `magnitude` interpolation
+- `ComplexField` for nested metadata (author, tags, permissions) — avoid flattening into top-level fields
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```python
+from azure.search.documents.indexes.models import (
+    SearchIndex, SearchableField, SimpleField, SearchField, SearchFieldDataType,
+    VectorSearch, HnswAlgorithmConfiguration, VectorSearchProfile,
+    SemanticConfiguration, SemanticSearch, SemanticPrioritizedFields, SemanticField,
+    ScoringProfile, TextWeights, FreshnessScoringFunction, FreshnessScoringParameters,
+)
 
-## Implementation Patterns
+fields = [
+    SimpleField(name="id", type=SearchFieldDataType.String, key=True),
+    SearchableField(name="title", type=SearchFieldDataType.String,
+                    analyzer_name="en.microsoft"),
+    SearchableField(name="content", type=SearchFieldDataType.String,
+                    analyzer_name="en.microsoft"),
+    SimpleField(name="category", type=SearchFieldDataType.String,
+                filterable=True, facetable=True),
+    SimpleField(name="lastModified", type=SearchFieldDataType.DateTimeOffset,
+                filterable=True, sortable=True),
+    SimpleField(name="allowedGroups", type="Collection(Edm.String)",
+                filterable=True),  # security trimming ACL
+    SearchField(name="contentVector", type="Collection(Edm.Single)",
+                searchable=True, vector_search_dimensions=1536,
+                vector_search_profile_name="hnsw-profile"),
+]
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+scoring = ScoringProfile(
+    name="default-scoring",
+    text_weights=TextWeights(weights={"title": 5.0, "content": 1.0}),
+    functions=[FreshnessScoringFunction(
+        field_name="lastModified", boost=2.0, interpolation="magnitude",
+        parameters=FreshnessScoringParameters(boosting_duration="P30D"),
+    )],
+)
+```
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+## Vector Search Configuration
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+- HNSW for online queries (`m=4`, `efConstruction=400`, `efSearch=500`, metric `cosine`) — best latency/recall tradeoff
+- Exhaustive KNN only for offline evaluation or small indexes (<50K docs) — prohibitive at scale
+- Store vectors as `Collection(Edm.Single)` with dimensionality matching the embedding model (1536 for `text-embedding-3-small`, 3072 for `text-embedding-3-large`)
+
+```python
+vector_search = VectorSearch(
+    algorithms=[
+        HnswAlgorithmConfiguration(name="hnsw-algo", parameters={
+            "m": 4, "efConstruction": 400, "efSearch": 500, "metric": "cosine",
+        }),
+    ],
+    profiles=[VectorSearchProfile(name="hnsw-profile", algorithm_configuration_name="hnsw-algo")],
+)
+```
+
+## Semantic Ranker + Hybrid Search
+
+- Enable semantic ranker on the index — set `title_field`, `content_fields`, `keyword_fields` in `SemanticConfiguration`
+- Hybrid search: keyword BM25 + vector similarity + semantic reranking = best recall + precision
+- Always pass `query_type="semantic"` and `semantic_configuration_name` in search calls
+
+```python
+semantic_config = SemanticConfiguration(
+    name="default-semantic",
+    prioritized_fields=SemanticPrioritizedFields(
+        title_field=SemanticField(field_name="title"),
+        content_fields=[SemanticField(field_name="content")],
+    ),
+)
+
+# Hybrid search call
+results = search_client.search(
+    search_text=user_query,
+    vector_queries=[VectorizedQuery(
+        vector=query_embedding, k_nearest_neighbors=50,
+        fields="contentVector",
+    )],
+    query_type="semantic",
+    semantic_configuration_name="default-semantic",
+    select=["id", "title", "content", "category"],
+    filter=f"allowedGroups/any(g: g eq '{user_group}')",  # security trimming
+    facets=["category,count:10"],
+    top=20,
+)
+```
+
+## Integrated Vectorization (Skillset Pipeline)
+
+- Use built-in `AzureOpenAIEmbeddingSkill` in the indexer skillset — avoids custom embedding code
+- Chain skills: `SplitSkill` (pages, 2000 chars, 200 overlap) → `AzureOpenAIEmbeddingSkill` → index
+- Set `indexProjections` to map chunked output back to a separate chunk index if using parent-child pattern
+
+## Indexer Scheduling & Change Tracking
+
+- `schedule={"interval": "PT5M"}` for near-real-time; `PT1H` for batch sources
+- Enable `highWaterMarkChangeDetectionPolicy` on SQL/Cosmos with `_ts` or `lastModified` column
+- `softDeleteColumnDeletionDetectionPolicy` — mark deleted rows instead of hard-deleting
+- Incremental enrichment: set `cache` on skillset to avoid re-running skills on unchanged docs
+
+## Custom Skills (Azure Functions)
+
+```python
+# Azure Function custom skill — entity extraction example
+import azure.functions as func
+import json
+
+@app.function_name("CustomEntitySkill")
+@app.route(route="extract", methods=["POST"])
+def extract_entities(req: func.HttpRequest) -> func.HttpResponse:
+    body = req.get_json()
+    results = []
+    for record in body.get("values", []):
+        text = record["data"].get("text", "")
+        entities = run_extraction(text)  # your NER logic
+        results.append({"recordId": record["recordId"],
+                        "data": {"entities": entities}, "errors": [], "warnings": []})
+    return func.HttpResponse(json.dumps({"values": results}),
+                             mimetype="application/json")
+```
+
+- Custom skill contract: accept `{"values": [{"recordId", "data"}]}`, return same shape
+- Timeout budget: 230s max per batch — keep individual record processing under 10s
+- Managed Identity on the Function App — indexer calls the skill via `resourceId` auth, no API keys
+
+## Facets, Filters, Autocomplete
+
+- Facets: `facets=["category,count:10", "author,count:5"]` — only on `facetable` fields
+- Filter syntax: OData — `category eq 'Legal' and lastModified gt 2025-01-01T00:00:00Z`
+- Autocomplete: configure `Suggester(name="sg", source_fields=["title"])` — distinct from search
+- Suggestions return full field values; autocomplete returns partial term completions
+
+## Security Trimming (Document-Level ACL)
+
+- Index an `allowedGroups` field (`Collection(Edm.String)`) with AAD group Object IDs per document
+- At query time: resolve the user's group memberships via Microsoft Graph, inject as OData filter
+- NEVER rely on client-side filtering — always server-side `filter` parameter
+- For row-level security on SQL sources: use the indexer's connection identity with SQL RLS policies
+
+## Search Analytics
+
+- Log every query: `search_text`, `result_count`, `latency_ms`, `filters_applied`, `user_id` (hashed)
+- Track zero-result queries — feed into synonym maps and content gap analysis
+- Monitor: `SearchServiceCounters` (document count, storage), `SearchServiceLimits` (throttling)
+- KQL: `AzureDiagnostics | where OperationName == "Query.Search" | summarize count() by bin(TimeGenerated, 1h)`
+
+## Managed Identity for Data Sources
+
+```bicep
+resource searchService 'Microsoft.Search/searchServices@2024-06-01-preview' = {
+  name: searchName
+  location: location
+  sku: { name: 'standard' }
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    disableLocalAuth: true          // force AAD-only — no API keys
+    authOptions: { aadOrApiKey: { aadAuthFailureMode: 'http401WithBearerChallenge' } }
+  }
+}
+
+// Grant Search Service identity read access to Blob data source
+resource blobRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(searchService.id, storageAccount.id, 'blob-reader')
+  scope: storageAccount
+  properties: {
+    principalId: searchService.identity.principalId
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1')  // Storage Blob Data Reader
+    principalType: 'ServicePrincipal'
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
-
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
-
-## Code Quality Standards
-
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
-
-## Testing Requirements
-
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
-
-## Security Checklist
-
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+- `disableLocalAuth: true` — eliminates API key exposure risk entirely
+- Data source connections: use `resourceId` format instead of connection strings
+- Grant `Search Index Data Contributor` to app identities that push/query documents
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Using `simple` query type when semantic ranker is available — loses reranking quality
+- ❌ Making all fields `searchable` — inflates index size, slows queries, dilutes relevance
+- ❌ Exhaustive KNN on indexes >100K docs — O(n) scan per query kills latency
+- ❌ Skipping `allowedGroups` filter and relying on UI to hide unauthorized results
+- ❌ Hardcoding API keys in indexer data source connections — use Managed Identity `resourceId`
+- ❌ No synonym map — users search "VM" but content says "virtual machine", zero results
+- ❌ Polling indexer on a 5-minute schedule for a source that changes once daily — wasted CU
+- ❌ Ignoring `@search.rerankerScore` — returning results sorted only by BM25 in hybrid mode
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Play 09 Implementation |
+|---|---|
+| **Security** | `disableLocalAuth`, Managed Identity data sources, document-level ACL filtering, private endpoints for search data plane |
+| **Reliability** | Replica count ≥2 for read HA, indexer retry on transient failures, fallback to keyword-only if semantic ranker quota exceeded |
+| **Cost** | Semantic ranker on Standard+ only (not free tier), right-size partitions to doc count, use integrated vectorization to avoid separate embedding endpoint costs |
+| **Ops Excellence** | Indexer run history monitoring, zero-result query alerts, synonym map versioning in CI/CD, IaC for index schema via Bicep |
+| **Performance** | HNSW over exhaustive KNN, `select` to project only needed fields, facet count limits, cache autocomplete suggestions |
+| **Responsible AI** | Content Safety on AI-generated answers layered atop search, PII redaction in analytics logs, transparent relevance scoring via `@search.score` |

@@ -6,130 +6,243 @@ waf:
   - "security"
 ---
 
-# Play 05 It Ticket Resolution Patterns — WAF-Aligned Coding Standards
+# Play 05 — IT Ticket Resolution Patterns — FAI Standards
 
-> Play 05 patterns — IT ticket patterns — intent classification, knowledge base search, automated resolution, escalation rules.
+## Ticket Classification (Multi-Label)
 
-## Core Rules
+Classify incoming tickets with multiple labels and confidence scores. Route based on highest-confidence label exceeding threshold.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```python
+from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
-## Implementation Patterns
+token_provider = get_bearer_token_provider(
+    DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+)
+client = AzureOpenAI(azure_ad_token_provider=token_provider, api_version="2024-10-21")
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+CLASSIFICATION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "labels": {"type": "array", "items": {
+            "type": "object",
+            "properties": {
+                "category": {"enum": ["network", "access", "hardware", "software", "security", "other"]},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+            }, "required": ["category", "confidence"]
+        }},
+        "urgency": {"enum": ["critical", "high", "medium", "low"]},
+        "suggested_team": {"type": "string"}
+    }, "required": ["labels", "urgency", "suggested_team"]
 }
+
+def classify_ticket(subject: str, body: str, config: dict) -> dict:
+    resp = client.chat.completions.create(
+        model=config["classifier_model"],  # gpt-4o-mini — cheap, fast
+        temperature=0,
+        response_format={"type": "json_schema", "json_schema": {"name": "ticket", "schema": CLASSIFICATION_SCHEMA}},
+        messages=[
+            {"role": "system", "content": "Classify IT tickets. Return all applicable labels with confidence 0-1."},
+            {"role": "user", "content": f"Subject: {subject}\nBody: {body}"}
+        ]
+    )
+    return json.loads(resp.choices[0].message.content)
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Knowledge Base Retrieval
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Two-stage retrieval: FAQ vector search + past resolution lookup from Cosmos DB.
 
-## Code Quality Standards
+```python
+from azure.search.documents import SearchClient
+from azure.cosmos import CosmosClient
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+def retrieve_knowledge(query: str, category: str, search_client: SearchClient, cosmos_container) -> dict:
+    # Stage 1: FAQ matching via AI Search hybrid (vector + keyword)
+    faq_results = search_client.search(
+        search_text=query,
+        vector_queries=[VectorizedQuery(vector=embed(query), k_nearest_neighbors=5, fields="embedding")],
+        filter=f"category eq '{category}'",
+        top=3,
+        query_type="semantic",
+        semantic_configuration_name="faq-config"
+    )
+    faqs = [{"content": r["content"], "score": r["@search.reranker_score"], "id": r["id"]} for r in faq_results]
 
-## Testing Requirements
+    # Stage 2: Past resolutions — same category, resolved successfully
+    past = list(cosmos_container.query_items(
+        query="SELECT c.resolution, c.ticket_id, c.resolved_at FROM c "
+              "WHERE c.category=@cat AND c.resolution_success=true ORDER BY c.resolved_at DESC OFFSET 0 LIMIT 5",
+        parameters=[{"name": "@cat", "value": category}],
+        enable_cross_partition_query=True
+    ))
+    return {"faqs": faqs, "past_resolutions": past}
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Automated Resolution Actions
 
-## Security Checklist
+Integrate with ServiceNow/Jira to execute resolutions. Use Managed Identity for API auth via token exchange.
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```python
+import httpx
+from azure.identity import DefaultAzureCredential
+
+credential = DefaultAzureCredential()
+
+async def execute_resolution(action: dict, ticket_id: str, config: dict) -> dict:
+    """Execute automated resolution — password reset, group add, software install."""
+    token = credential.get_token(config["servicenow_scope"]).token
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+    async with httpx.AsyncClient(timeout=30) as http:
+        if action["type"] == "password_reset":
+            resp = await http.post(f"{config['servicenow_url']}/api/now/table/sc_req_item",
+                headers=headers, json={"short_description": f"Auto-reset for {ticket_id}",
+                    "cat_item": config["password_reset_catalog_id"]})
+        elif action["type"] == "group_membership":
+            resp = await http.post(f"{config['servicenow_url']}/api/now/table/sc_req_item",
+                headers=headers, json={"short_description": f"Add to {action['group']}",
+                    "cat_item": config["group_add_catalog_id"], "variables": action["params"]})
+        else:
+            return {"status": "escalated", "reason": f"Unknown action type: {action['type']}"}
+
+        resp.raise_for_status()
+        return {"status": "executed", "servicenow_id": resp.json()["result"]["sys_id"]}
+```
+
+## Escalation Logic
+
+Escalate when confidence is below threshold OR SLA urgency demands human review.
+
+```python
+def should_escalate(classification: dict, knowledge: dict, config: dict) -> tuple[bool, str]:
+    threshold = config["escalation_confidence_threshold"]  # e.g., 0.75
+    top_label = max(classification["labels"], key=lambda x: x["confidence"])
+
+    if top_label["confidence"] < threshold:
+        return True, f"Low confidence ({top_label['confidence']:.2f} < {threshold})"
+
+    if classification["urgency"] == "critical" and not config.get("allow_auto_resolve_critical", False):
+        return True, "Critical urgency requires human approval"
+
+    if not knowledge["faqs"] and not knowledge["past_resolutions"]:
+        return True, "No knowledge base matches — novel issue"
+
+    sla_minutes = config["sla_minutes"].get(classification["urgency"], 480)
+    if sla_minutes <= 30:
+        return True, f"SLA {sla_minutes}m too tight for auto-resolution"
+
+    return False, "Auto-resolution approved"
+```
+
+## Response Generation with Citations
+
+Generate user-facing response grounded in retrieved knowledge. Cite FAQ IDs for traceability.
+
+```python
+def generate_response(ticket: dict, knowledge: dict, config: dict) -> dict:
+    context = "\n".join(
+        f"[FAQ-{f['id']}] {f['content']}" for f in knowledge["faqs"]
+    ) + "\n".join(
+        f"[PAST-{r['ticket_id']}] {r['resolution']}" for r in knowledge["past_resolutions"]
+    )
+    resp = client.chat.completions.create(
+        model=config["response_model"],  # gpt-4o for quality
+        temperature=config.get("response_temperature", 0.3),
+        max_tokens=config.get("response_max_tokens", 500),
+        messages=[
+            {"role": "system", "content": "You are an IT support agent. Answer using ONLY the provided context. "
+             "Cite sources as [FAQ-xxx] or [PAST-xxx]. If unsure, say so — never fabricate steps."},
+            {"role": "user", "content": f"Ticket: {ticket['subject']}\n{ticket['body']}\n\nContext:\n{context}"}
+        ]
+    )
+    return {"response": resp.choices[0].message.content,
+            "citations": [f["id"] for f in knowledge["faqs"]],
+            "tokens_used": resp.usage.total_tokens}
+```
+
+## Ticket Routing (Team/Skill-Based)
+
+Route to teams based on classification labels and agent skill matrix.
+
+```python
+def route_ticket(classification: dict, config: dict) -> dict:
+    routing_map = config["team_routing"]  # {"network": "net-ops", "security": "sec-team", ...}
+    top_label = max(classification["labels"], key=lambda x: x["confidence"])
+    team = routing_map.get(top_label["category"], config["default_team"])
+
+    # Skill-based refinement — match agent expertise
+    if classification["urgency"] in ("critical", "high"):
+        team = config.get("escalation_teams", {}).get(top_label["category"], team)
+
+    return {"team": team, "category": top_label["category"],
+            "priority": {"critical": 1, "high": 2, "medium": 3, "low": 4}[classification["urgency"]]}
+```
+
+## Feedback Loop & SLA Monitoring
+
+Track resolution success and feed back into the system for continuous improvement.
+
+```python
+async def record_resolution_feedback(ticket_id: str, resolved: bool, cosmos_container, config: dict):
+    """Store feedback — feeds into past_resolutions for future retrieval."""
+    cosmos_container.upsert_item({
+        "id": f"feedback-{ticket_id}",
+        "ticket_id": ticket_id,
+        "resolution_success": resolved,
+        "resolved_at": datetime.utcnow().isoformat(),
+        "ttl": config.get("feedback_ttl_days", 365) * 86400
+    })
+
+def check_sla_breach(ticket: dict, config: dict) -> dict:
+    """Check if ticket is approaching or has breached SLA."""
+    sla_minutes = config["sla_minutes"].get(ticket["urgency"], 480)
+    elapsed = (datetime.utcnow() - datetime.fromisoformat(ticket["created_at"])).total_seconds() / 60
+    pct = elapsed / sla_minutes
+    return {"breached": pct >= 1.0, "pct_elapsed": round(pct, 2),
+            "remaining_minutes": max(0, round(sla_minutes - elapsed)),
+            "alert": "breach" if pct >= 1.0 else "warning" if pct >= 0.8 else "ok"}
+```
+
+## Conversation Context for Follow-Ups
+
+Maintain conversation history per ticket for multi-turn resolution.
+
+```python
+def build_followup_messages(ticket_id: str, new_message: str, cosmos_container, config: dict) -> list:
+    """Load conversation history, append new message, enforce token budget."""
+    history = list(cosmos_container.query_items(
+        query="SELECT c.role, c.content, c.timestamp FROM c WHERE c.ticket_id=@tid ORDER BY c.timestamp",
+        parameters=[{"name": "@tid", "value": ticket_id}]
+    ))
+    messages = [{"role": h["role"], "content": h["content"]} for h in history]
+    messages.append({"role": "user", "content": new_message})
+
+    # Trim oldest messages if over token budget (keep system + last N turns)
+    max_turns = config.get("max_conversation_turns", 10)
+    if len(messages) > max_turns * 2:
+        messages = messages[:1] + messages[-(max_turns * 2 - 1):]
+    return messages
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Classifying with `temperature > 0` — deterministic classification requires `temperature=0`
+- ❌ Auto-resolving critical tickets without human approval gate
+- ❌ Generating responses without citations — ungrounded answers erode trust
+- ❌ Hardcoding ServiceNow/Jira URLs or API keys — use config + Managed Identity
+- ❌ Ignoring SLA timers — breached tickets must trigger immediate escalation
+- ❌ No feedback loop — system never learns from resolution outcomes
+- ❌ Unbounded conversation history — exceeds token limits on long tickets
+- ❌ Single-label classification — tickets often span multiple categories
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Play 05 Implementation |
+|---|---|
+| **Security** | Managed Identity for ServiceNow/Jira auth, PII redaction in logs, Content Safety on responses, RBAC per team |
+| **Reliability** | Retry with backoff on ITSM APIs, circuit breaker on ServiceNow, fallback to manual queue on auto-resolve failure |
+| **Cost** | gpt-4o-mini for classification, gpt-4o only for response generation, semantic cache on FAQ lookups, batch classify |
+| **Ops Excellence** | Structured logging with ticket_id correlation, SLA dashboards in Monitor, resolution success rate metrics |
+| **Performance** | Parallel FAQ + past-resolution retrieval, streaming responses, connection pooling on Cosmos/ServiceNow |
+| **Responsible AI** | Citation-grounded responses, confidence thresholds before auto-action, human escalation path always available |
