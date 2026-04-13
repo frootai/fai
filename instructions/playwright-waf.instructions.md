@@ -6,130 +6,217 @@ waf:
   - "operational-excellence"
 ---
 
-# Playwright Waf — WAF-Aligned Coding Standards
+# Playwright — FAI Standards
 
-> Playwright testing standards — role-based locators, auto-wait, visual regression, and accessibility testing.
+## Page Object Model
 
-## Core Rules
+Encapsulate page structure in POM classes. Tests reference methods, not selectors.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
 ```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+// pages/dashboard.page.ts
+import { type Locator, type Page } from "@playwright/test";
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+export class DashboardPage {
+  readonly heading: Locator;
+  readonly createButton: Locator;
+  readonly searchInput: Locator;
+
+  constructor(private page: Page) {
+    this.heading = page.getByRole("heading", { name: "Dashboard" });
+    this.createButton = page.getByRole("button", { name: "Create" });
+    this.searchInput = page.getByRole("searchbox");
   }
+
+  async search(term: string) {
+    await this.searchInput.fill(term);
+    await this.searchInput.press("Enter");
+  }
+  async goto() { await this.page.goto("/dashboard"); }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Custom Fixtures
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Extend `test` with shared setup — avoids `beforeEach` duplication across specs.
 
-## Code Quality Standards
+```typescript
+// fixtures.ts
+import { test as base } from "@playwright/test";
+import { DashboardPage } from "./pages/dashboard.page";
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+type Fixtures = { dashboardPage: DashboardPage };
 
-## Testing Requirements
+export const test = base.extend<Fixtures>({
+  dashboardPage: async ({ page }, use) => {
+    const dashboard = new DashboardPage(page);
+    await dashboard.goto();
+    await use(dashboard);
+  },
+});
+export { expect } from "@playwright/test";
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Locators & Auto-Waiting
 
-## Security Checklist
+Use role-based and text locators. Playwright auto-waits for actionability — never add explicit sleeps.
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+- `page.getByRole("button", { name: "Submit" })` — preferred for interactive elements
+- `page.getByLabel("Email")` — form fields by associated label
+- `page.getByTestId("order-summary")` — stable data-testid for complex selectors
+- `page.getByText("No results")` — visible text matching
+
+## Web-First Assertions
+
+Assertions auto-retry until timeout. Never combine `waitFor` + manual checks.
+
+```typescript
+await expect(page.getByRole("alert")).toBeVisible();
+await expect(page.getByRole("heading")).toHaveText("Welcome");
+await expect(page.getByRole("list")).toHaveCount(5);
+await expect(page).toHaveURL(/\/dashboard/);
+```
+
+## API Testing
+
+Use `request` context for backend-only tests — no browser overhead.
+
+```typescript
+test("POST /api/items returns 201", async ({ request }) => {
+  const res = await request.post("/api/items", { data: { name: "Widget" } });
+  expect(res.status()).toBe(201);
+  expect(await res.json()).toMatchObject({ name: "Widget" });
+});
+```
+
+## Visual Regression
+
+`toHaveScreenshot` diffs against baseline. Update baselines: `npx playwright test --update-snapshots`.
+
+```typescript
+test("landing page visual", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveScreenshot("landing.png", { maxDiffPixelRatio: 0.01 });
+});
+```
+
+## Accessibility — ARIA Snapshots
+
+Snapshot the accessibility tree to catch missing roles, labels, and landmarks.
+
+```typescript
+await expect(page.getByRole("navigation")).toMatchAriaSnapshot(`
+  - navigation:
+    - link "Home"
+    - link "Dashboard"
+    - button "Profile menu"
+`);
+```
+
+## Authentication Reuse
+
+Log in once, save `storageState`, reuse across tests — avoids per-test login overhead.
+
+```typescript
+// auth.setup.ts — runs before all specs via project dependencies
+import { test as setup } from "@playwright/test";
+setup("authenticate", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(process.env.TEST_USER!);
+  await page.getByLabel("Password").fill(process.env.TEST_PASS!);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.context().storageState({ path: ".auth/state.json" });
+});
+// playwright.config.ts → use: { storageState: ".auth/state.json" }
+```
+
+## Network Mocking
+
+Intercept network calls to isolate UI from backend variability.
+
+```typescript
+await page.route("**/api/items", (route) =>
+  route.fulfill({ json: [{ id: 1, name: "Mocked" }] })
+);
+await page.goto("/items");
+await expect(page.getByText("Mocked")).toBeVisible();
+```
+
+## Parallel Execution & Test Tagging
+
+```typescript
+// playwright.config.ts
+export default defineConfig({
+  workers: process.env.CI ? 4 : undefined, // fixed workers in CI, auto locally
+  fullyParallel: true,
+});
+```
+
+Tag tests for selective runs: `npx playwright test --grep @smoke`.
+
+```typescript
+test("checkout flow @smoke @e2e", async ({ page }) => { /* ... */ });
+test("admin export @slow", async ({ page }) => { /* ... */ });
+```
+
+## Trace Viewer for Debugging
+
+Enable traces on first retry to diagnose failures without re-running locally.
+
+```typescript
+// playwright.config.ts
+use: { trace: "on-first-retry" },
+```
+
+View: `npx playwright show-trace trace.zip` — includes DOM snapshots, network log, console, and action timeline.
+
+## Mobile Emulation
+
+```typescript
+import { devices } from "@playwright/test";
+export default defineConfig({
+  projects: [
+    { name: "desktop-chrome", use: { ...devices["Desktop Chrome"] } },
+    { name: "mobile-safari", use: { ...devices["iPhone 14"] } },
+  ],
+});
+```
+
+## CI Configuration — GitHub Actions
+
+```yaml
+# .github/workflows/e2e.yml
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-report, path: playwright-report/ }
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `page.waitForTimeout(3000)` — use auto-waiting locators and web-first assertions
+- ❌ `page.$("div.btn-primary")` — use role/label/testid locators, not CSS selectors
+- ❌ `page.evaluate(() => document.querySelector(...))` — bypasses retry and auto-wait
+- ❌ Shared mutable state between parallel tests — each test gets its own `BrowserContext`
+- ❌ Login flow in every test — use `storageState` via setup project
+- ❌ Screenshots in `afterEach` for passing tests — use `trace: "on-first-retry"` instead
+- ❌ Hardcoded viewport sizes — use `devices` presets for consistent emulation
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Practice |
+|---|---|
+| **Reliability** | Auto-retry assertions, `trace: "on-first-retry"`, flake-free locator strategy, test isolation via `BrowserContext` |
+| **Operational Excellence** | CI with artifact upload on failure, `--grep` tag filtering, parallel workers, reproducible `playwright install --with-deps` |
+| **Performance Efficiency** | `storageState` auth reuse, `fullyParallel: true`, API tests without browser, network mocking eliminates backend latency |
+| **Security** | Secrets via `process.env` (never committed), auth state in `.gitignore`, `--with-deps` pins browser versions |
+| **Cost Optimization** | Run only `@smoke` on PR, full suite on merge; single Chromium install instead of all browsers for fast CI |
+| **Responsible AI** | Accessibility ARIA snapshots enforce inclusive UI, visual regression catches unintended layout regressions |

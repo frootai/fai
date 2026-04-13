@@ -6,130 +6,233 @@ waf:
   - "security"
 ---
 
-# Play 21 Agentic Rag Patterns — WAF-Aligned Coding Standards
+# Play 21 — Agentic RAG Patterns — FAI Standards
 
-> Play 21 patterns — Agentic RAG patterns — retrieval decision loop, multi-source routing, query refinement, self-evaluation.
+## Query Planning Agent
 
-## Core Rules
+Decompose complex questions into sub-queries before retrieval. Each sub-query targets a specific facet, enabling parallel retrieval and focused chunk selection.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```python
+from dataclasses import dataclass
+from openai import AzureOpenAI
 
-## Implementation Patterns
+@dataclass
+class SubQuery:
+    text: str
+    target_index: str  # which index/source to query
+    reasoning: str     # why this sub-query is needed
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+def plan_queries(question: str, client: AzureOpenAI, config: dict) -> list[SubQuery]:
+    """Decompose a complex question into targeted sub-queries."""
+    response = client.chat.completions.create(
+        model=config["planner_model"],
+        temperature=0,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": (
+                "Decompose the user question into 1-5 sub-queries. "
+                "Each sub-query targets one fact. Return JSON: "
+                '{"sub_queries": [{"text": "...", "target_index": "...", "reasoning": "..."}]}'
+            )},
+            {"role": "user", "content": question},
+        ],
+        max_tokens=config.get("planner_max_tokens", 512),
+    )
+    parsed = json.loads(response.choices[0].message.content)
+    return [SubQuery(**sq) for sq in parsed["sub_queries"]]
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Adaptive Retrieval — Index/Source Routing
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Route each sub-query to the best retrieval source based on query type. Structured data goes to SQL, factual lookups to vector search, recent events to web search.
 
-## Code Quality Standards
+```python
+RETRIEVER_REGISTRY: dict[str, Callable] = {
+    "vector": retrieve_from_ai_search,
+    "sql": retrieve_from_sql,
+    "graph": retrieve_from_graph_db,
+    "web": retrieve_from_bing,
+}
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+def adaptive_retrieve(sub_query: SubQuery, registry: dict) -> list[Chunk]:
+    retriever = registry.get(sub_query.target_index, registry["vector"])
+    return retriever(sub_query.text, top_k=5)
+```
 
-## Testing Requirements
+## Multi-Hop Reasoning Loop
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+Iterative retrieve → synthesize → decide-if-done loop. Each hop retrieves new evidence, synthesizes with prior context, then checks whether the answer is complete.
 
-## Security Checklist
+```python
+@dataclass
+class HopState:
+    question: str
+    accumulated_context: list[Chunk]
+    synthesis: str
+    hop_count: int
+    token_budget_remaining: int
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+def multi_hop_rag(question: str, client: AzureOpenAI, config: dict) -> HopState:
+    max_hops = config.get("max_hops", 4)
+    token_budget = config.get("token_budget_per_query", 8000)
+    state = HopState(question, [], "", 0, token_budget)
+
+    while state.hop_count < max_hops and state.token_budget_remaining > 0:
+        # Plan next retrieval based on what's missing
+        follow_up = generate_follow_up(state, client, config)
+        if follow_up is None:
+            break  # Agent decided it has enough evidence
+
+        chunks = adaptive_retrieve(follow_up, RETRIEVER_REGISTRY)
+        chunks = relevance_rerank(chunks, state.question, client, config)
+        state.accumulated_context.extend(chunks[:3])  # top-3 per hop
+
+        # Deduct tokens consumed this hop
+        hop_tokens = sum(c.token_count for c in chunks[:3])
+        state.token_budget_remaining -= hop_tokens
+        state.hop_count += 1
+
+        # Intermediate synthesis — merge new evidence with prior
+        state.synthesis = synthesize_intermediate(state, client, config)
+
+    return state
+```
+
+## Dynamic Chunk Selection — Per-Hop Reranking
+
+After each retrieval hop, rerank chunks against the *evolving* question context — not just the original query. Discard chunks below a relevance threshold.
+
+```python
+def relevance_rerank(
+    chunks: list[Chunk], query: str, client: AzureOpenAI, config: dict
+) -> list[Chunk]:
+    threshold = config.get("rerank_threshold", 0.65)
+    scored = []
+    for chunk in chunks:
+        score = compute_relevance(chunk.text, query, client)
+        if score >= threshold:
+            scored.append((score, chunk))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [c for _, c in scored]
+```
+
+## Tool-Augmented RAG
+
+When retrieval alone is insufficient, the agent invokes tools: calculator for numeric reasoning, code interpreter for data transformations, web search for real-time facts.
+
+```python
+TOOL_DEFINITIONS = [
+    {"type": "function", "function": {"name": "calculator", "description": "Evaluate math expressions", "parameters": {...}}},
+    {"type": "function", "function": {"name": "code_interpreter", "description": "Run Python for data analysis", "parameters": {...}}},
+    {"type": "function", "function": {"name": "web_search", "description": "Search Bing for recent information", "parameters": {...}}},
+]
+
+def agentic_rag_with_tools(state: HopState, client: AzureOpenAI, config: dict) -> str:
+    response = client.chat.completions.create(
+        model=config["reasoning_model"],
+        messages=build_messages(state),
+        tools=TOOL_DEFINITIONS,
+        tool_choice="auto",
+        max_tokens=config.get("synthesis_max_tokens", 1024),
+    )
+    # Execute tool calls, feed results back, re-synthesize
+    return process_tool_calls(response, state, client, config)
+```
+
+## Self-Reflection and Citation Verification
+
+Before answering, the agent critiques its own retrieval: are sources sufficient? Do citations actually support claims? Flag unsupported statements.
+
+```python
+def verify_citations(answer: str, chunks: list[Chunk], client: AzureOpenAI, config: dict) -> dict:
+    response = client.chat.completions.create(
+        model=config["reviewer_model"],
+        temperature=0,
+        messages=[
+            {"role": "system", "content": (
+                "Verify each claim in the answer against the provided sources. "
+                "Return JSON: {\"claims\": [{\"text\": ..., \"supported\": bool, \"source_id\": ...}], "
+                "\"unsupported_count\": int, \"confidence\": float}"
+            )},
+            {"role": "user", "content": f"Answer: {answer}\n\nSources: {format_chunks(chunks)}"},
+        ],
+    )
+    result = json.loads(response.choices[0].message.content)
+    if result["confidence"] < config.get("min_citation_confidence", 0.7):
+        return {"action": "retry_retrieval", "gaps": result}
+    return {"action": "accept", "verified": result}
+```
+
+## Context Window Management Across Hops
+
+Track cumulative token count across hops. Compress older context when approaching limits. Never exceed the model's context window.
+
+```python
+def manage_context_window(state: HopState, max_context_tokens: int) -> list[Chunk]:
+    total = sum(c.token_count for c in state.accumulated_context)
+    if total <= max_context_tokens:
+        return state.accumulated_context
+    # Keep most recent + highest relevance, compress older hops
+    ranked = sorted(state.accumulated_context, key=lambda c: c.relevance_score, reverse=True)
+    selected, running = [], 0
+    for chunk in ranked:
+        if running + chunk.token_count > max_context_tokens:
+            break
+        selected.append(chunk)
+        running += chunk.token_count
+    return selected
+```
+
+## Evaluation Metrics
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Multi-hop recall | ≥ 0.80 | Fraction of required evidence retrieved across all hops |
+| Answer faithfulness | ≥ 0.85 | Claims supported by retrieved sources (via LLM judge) |
+| Citation precision | ≥ 0.90 | Cited sources actually support the claim they're attached to |
+| Hop efficiency | ≤ 3 avg | Average hops needed to reach sufficient evidence |
+| Latency p95 | < 12s | End-to-end including all hops and tool calls |
+
+## Guardrails
+
+- **Max hops**: cap at 4 (config-driven) — exponential latency otherwise
+- **Token budget per hop**: 2000 tokens default, deducted from total budget
+- **Total token budget**: 8000 per query — forces context compression
+- **Retrieval timeout**: 5s per source — circuit-break slow indexes
+- **Tool call limit**: max 3 tool invocations per query
+- **Self-reflection**: mandatory before final answer when confidence < 0.7
+
+## Agentic RAG vs Basic RAG
+
+| Dimension | Basic RAG | Agentic RAG (Play 21) |
+|-----------|-----------|----------------------|
+| Query handling | Single query → single retrieval | Decomposed sub-queries → multi-source |
+| Retrieval | One-shot vector search | Iterative multi-hop with reranking |
+| Source selection | Fixed index | Adaptive routing (vector/SQL/graph/web) |
+| Reasoning | Retrieve then generate | Retrieve → synthesize → reflect → iterate |
+| Tool use | None | Calculator, code interpreter, web search |
+| Citation | Appended chunks | Verified per-claim with confidence scores |
+| Cost | Low (1 LLM call + 1 search) | Higher (N hops × LLM + retrieval + tools) |
+| When to use | Simple factual lookups | Complex, multi-faceted, comparative questions |
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Unlimited hops without token budget — runaway loops drain PTU quota
+- ❌ Reranking against original query only — stale relevance after context evolves
+- ❌ Skipping citation verification — hallucinated references erode trust
+- ❌ Tool calls without output validation — injected content from web search
+- ❌ Flat context window (no compression) — older hops push out recent evidence
+- ❌ Single model for all roles — use gpt-4o-mini for planning, gpt-4o for synthesis
+- ❌ No hop-level telemetry — impossible to debug which hop introduced bad evidence
+- ❌ Hardcoded retrieval sources — new indexes require code changes instead of config
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Agentic RAG Patterns |
+|--------|---------------------|
+| **Reliability** | Circuit breakers per retrieval source, hop-level retries with backoff, graceful degradation to fewer hops on timeout, health checks per index |
+| **Security** | Content Safety on tool outputs, prompt injection defense at each hop boundary, PII redaction before logging intermediate synthesis, Managed Identity for all index connections |
+| **Cost Optimization** | Token budget enforcement per hop, gpt-4o-mini for planning/routing, semantic cache on sub-query results, max-hop cap prevents runaway spend |
+| **Operational Excellence** | Hop-level traces with correlation IDs, per-hop latency/token metrics in App Insights, evaluation pipeline for multi-hop recall and faithfulness |
+| **Performance Efficiency** | Parallel sub-query retrieval, streaming intermediate results, context compression to stay within window, async tool execution |
+| **Responsible AI** | Self-reflection before final answer, citation verification with confidence scoring, unsupported-claim flagging, human escalation when confidence < threshold |
