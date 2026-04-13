@@ -5,130 +5,208 @@ waf:
   - "reliability"
 ---
 
-# No Heredoc Waf — WAF-Aligned Coding Standards
+# No Heredoc — FAI Standards
 
-> No heredoc in terminal — prevent terminal file corruption from heredoc syntax in AI-generated commands.
+## Why Heredocs Are Problematic
 
-## Core Rules
+Heredocs (`<<EOF ... EOF`) and inline multiline strings cause real failures:
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+1. **Indentation corruption** — tabs vs spaces break YAML/Python/Makefile heredocs silently
+2. **Copy-paste errors** — terminal heredocs lose whitespace, merge lines, or truncate on paste
+3. **Shell injection** — unquoted heredoc delimiters (`<<EOF` vs `<<'EOF'`) expand variables unexpectedly
+4. **YAML/JSON embedding** — heredocs inside CI configs produce invalid nesting and escaping nightmares
+5. **AI code generation** — LLMs frequently produce broken heredoc indentation that fails at runtime
 
-## Implementation Patterns
+## Preferred Alternatives by Language
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+### Python — `textwrap.dedent` + Triple Quotes
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+```python
+import textwrap
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+# GOOD: dedent strips leading whitespace consistently
+config = textwrap.dedent("""\
+    [server]
+    host = 0.0.0.0
+    port = 8080
+    workers = 4
+""")
+
+# BAD: inline heredoc-style string with manual spacing
+config = """[server]
+host = 0.0.0.0
+port = 8080
+workers = 4
+"""
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+### TypeScript — Template Literals with `.trim()`
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```typescript
+// GOOD: template literal with trim
+const query = `
+  SELECT u.id, u.name
+  FROM users u
+  WHERE u.active = true
+  ORDER BY u.created_at DESC
+`.trim();
 
-## Code Quality Standards
+// BAD: string concatenation across lines
+const query = "SELECT u.id, u.name " +
+  "FROM users u " +
+  "WHERE u.active = true";
+```
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+### C# — Raw String Literals (C# 11+)
 
-## Testing Requirements
+```csharp
+// GOOD: raw string literal — no escaping needed
+var json = """
+    {
+        "model": "gpt-4o",
+        "temperature": 0.7,
+        "max_tokens": 4096
+    }
+    """;
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+// BAD: verbatim string with escaped quotes
+var json = @"{""model"": ""gpt-4o"", ""temperature"": 0.7}";
+```
 
-## Security Checklist
+### Go — Backtick Raw Strings
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```go
+// GOOD: backtick string preserves formatting
+prompt := `You are a helpful assistant.
+Respond in JSON format with fields:
+- "answer": string
+- "confidence": float`
+
+// BAD: concatenated strings
+prompt := "You are a helpful assistant.\n" +
+    "Respond in JSON format."
+```
+
+### Bash — `printf` and Variables Instead of Heredocs
+
+```bash
+# GOOD: printf for structured output
+printf '[database]\nhost=%s\nport=%d\n' "$DB_HOST" "$DB_PORT" > config.ini
+
+# GOOD: write from a template file
+envsubst < config.template > config.ini
+
+# BAD: heredoc in script (indentation-sensitive, injection-prone)
+cat <<EOF > config.ini
+[database]
+host=$DB_HOST
+port=$DB_PORT
+EOF
+```
+
+## Template Files Over Inline Strings
+
+For configs longer than 5 lines, use external template files:
+
+```
+templates/
+├── nginx.conf.j2          # Jinja2 for Python tooling
+├── deployment.yaml.hbs    # Handlebars for Node.js
+├── appsettings.json.tmpl  # Go text/template
+└── .env.template          # envsubst for shell
+```
+
+**Jinja2 example** (Python):
+```python
+from jinja2 import Environment, FileSystemLoader
+
+env = Environment(loader=FileSystemLoader("templates"))
+result = env.get_template("nginx.conf.j2").render(
+    server_name="api.example.com",
+    upstream_port=8080,
+)
+```
+
+**Handlebars example** (Node.js):
+```typescript
+import Handlebars from "handlebars";
+import { readFileSync } from "fs";
+
+const template = Handlebars.compile(
+  readFileSync("templates/deployment.yaml.hbs", "utf-8")
+);
+const output = template({ image: "myapp:v2", replicas: 3 });
+```
+
+## YAML Multiline Best Practices
+
+Use YAML's built-in multiline scalars — never embed heredocs in YAML:
+
+```yaml
+# GOOD: literal block (|) preserves newlines exactly
+description: |
+  This service handles authentication.
+  It validates JWT tokens and issues refresh tokens.
+  Deployed to Azure Container Apps.
+
+# GOOD: folded block (>) joins lines with spaces (for prose)
+summary: >
+  A cost-optimized AI gateway that routes requests
+  across multiple model endpoints based on token
+  budget and latency requirements.
+
+# BAD: escaped newlines in quoted strings
+description: "This service handles authentication.\nIt validates JWT tokens."
+```
+
+## Dockerfile — COPY Files, Never Inline Heredocs
+
+```dockerfile
+# GOOD: copy a config file from build context
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# BAD: Docker heredoc syntax (BuildKit-only, breaks older builders)
+RUN <<EOF
+apt-get update
+apt-get install -y curl jq
+EOF
+```
+
+## sed/awk for In-Place Edits (Not Heredocs)
+
+```bash
+# GOOD: targeted edits with sed
+sed -i 's/workers: 2/workers: 4/' config.yaml
+sed -i "s|IMAGE_TAG|${TAG}|g" deployment.yaml
+
+# GOOD: awk for multi-line transforms
+awk '/\[server\]/{found=1} found && /port/{sub(/=.*/, "= 9090"); found=0} 1' config.ini
+
+# BAD: heredoc to rewrite entire file
+cat <<EOF > config.yaml
+workers: 4
+...200 lines of config repeated inline...
+EOF
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+| Anti-Pattern | Risk | Fix |
+|---|---|---|
+| `cat <<EOF > file` in CI/CD | Indentation breaks, variable expansion | Template file + `envsubst` |
+| Heredoc inside YAML `run:` block | YAML parsing errors, invisible tab damage | Separate script file, `run: bash scripts/setup.sh` |
+| Python multiline without `dedent` | Extra indentation in output strings | `textwrap.dedent()` |
+| Docker `RUN <<EOF` | BuildKit-only, fails on older Docker | Multiple `RUN` commands or script `COPY` |
+| Inline SQL heredocs | SQL injection, unescaped quotes | Parameterized queries + `.sql` files |
+| `echo -e "line1\nline2"` | Inconsistent across shells (bash vs dash) | `printf 'line1\nline2\n'` |
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Relevance |
+|---|---|
+| **Reliability** | Template files are testable and version-controlled; heredocs silently corrupt |
+| **Security** | Unquoted heredocs expand `$variables` — shell injection vector |
+| **Operational Excellence** | External templates integrate with linters, formatters, and CI validation |
+| **Performance Efficiency** | Template engines cache compiled templates; heredocs reparse every execution |

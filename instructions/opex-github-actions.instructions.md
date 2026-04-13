@@ -5,130 +5,144 @@ waf:
   - "operational-excellence"
 ---
 
-# Opex Github Actions — WAF-Aligned Coding Standards
+# Operational Excellence — CI/CD — FAI Standards
 
-> GitHub Actions operational excellence — reusable workflows, matrix testing, artifact management.
+> Deployment pipeline design, environment protection, deployment gates, rollback automation, DORA metrics, and release management for GitHub Actions workflows.
 
-## Core Rules
+## Pipeline Stages
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci --ignore-scripts && npm run build
+      - uses: actions/upload-artifact@v4
+        with: { name: build-${{ github.sha }}, path: dist/, retention-days: 7 }
+  test:
+    needs: build
+    strategy: { matrix: { node: [20, 22] } }
+    steps: [{ run: "npm test -- --coverage --ci" }]
+  scan:
+    needs: build
+    steps:
+      - uses: github/codeql-action/analyze@v3
+      - run: npm audit --audit-level=high
+  deploy-staging:
+    needs: [test, scan]
+    environment: { name: staging }
+    steps: [{ run: "az webapp deploy --name $APP_NAME-staging --src-path dist.zip" }]
+  deploy-prod:
+    needs: deploy-staging
+    environment: { name: production }
+    steps: [{ run: "az webapp deployment slot swap --name $APP_NAME --slot staging" }]
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Environment Protection
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+- **staging**: auto-approve, branch policy `main, release/*`
+- **production**: 2 reviewers, 15-min wait timer, `main` only, deployment gate for Lighthouse + smoke
 
-## Code Quality Standards
+## Deployment Gates
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```yaml
+  gate-checks:
+    needs: deploy-staging
+    steps:
+      - run: |
+          for ep in /health /api/status; do
+            curl -sf "$STAGING_URL$ep" || { echo "FAIL: $ep"; exit 1; }
+          done
+      - uses: treosh/lighthouse-ci-action@v12
+        with: { urls: "${{ env.STAGING_URL }}", budgetPath: .github/lighthouse-budget.json }
+      - run: npx artillery run tests/load.yml --target $STAGING_URL --ensure "p99<500"
+```
 
-## Testing Requirements
+## Rollback & Post-Deploy Verification
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```yaml
+  post-deploy-verify:
+    needs: deploy-prod
+    steps:
+      - id: verify
+        run: |
+          for i in $(seq 1 10); do
+            curl -sf "$PROD_URL/health" && echo "healthy=true" >> $GITHUB_OUTPUT && exit 0; sleep 15
+          done
+          echo "healthy=false" >> $GITHUB_OUTPUT
+      - if: steps.verify.outputs.healthy != 'true'
+        run: |
+          az webapp deployment slot swap --name $APP_NAME --slot staging --action reset
+          gh issue create --title "Auto-rollback: ${{ github.sha }}" --body "Health check failed."
+```
 
-## Security Checklist
+## Infra Validation
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```yaml
+  infra-validate:
+    steps:
+      - run: az bicep build --file infra/main.bicep --stdout > /dev/null
+      - id: whatif
+        run: |
+          az deployment group what-if --resource-group $RG_NAME \
+            --template-file infra/main.bicep --parameters infra/params/$ENV.bicepparam > whatif.txt
+          grep -q "Delete" whatif.txt && echo "has_deletes=true" >> $GITHUB_OUTPUT || true
+      - if: steps.whatif.outputs.has_deletes == 'true'
+        run: echo "::error::Resource deletions detected. Manual approval required." && exit 1
+```
+
+## Dependency Updates & Release Channels
+
+Use Dependabot or Renovate for automated dependency PRs. Pin major versions — auto-merge patch/minor, manual review for major. Tag-driven releases: `-beta`/`-rc` tags → preview channel, clean semver → stable. Generate changelogs with `git-cliff` or `release-please` from conventional commits.
+
+```yaml
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - id: channel
+        run: |
+          [[ "${GITHUB_REF#refs/tags/}" == *-beta* || "${GITHUB_REF#refs/tags/}" == *-rc* ]] \
+            && echo "prerelease=true" >> $GITHUB_OUTPUT || echo "prerelease=false" >> $GITHUB_OUTPUT
+      - uses: orhun/git-cliff-action@v4
+        with: { config: cliff.toml, args: --latest --strip header }
+      - uses: softprops/action-gh-release@v2
+        with: { body_path: CHANGELOG.md, prerelease: "${{ steps.channel.outputs.prerelease }}" }
+```
+
+## DORA Metrics & Incident Response
+
+Track deployment frequency, lead time, MTTR, and change failure rate. Post deployment events to a metrics API. On failure: Slack `#incidents` + PagerDuty critical alert.
+
+```yaml
+  dora-metrics:
+    if: always()
+    needs: [deploy-prod, post-deploy-verify]
+    steps:
+      - run: |
+          curl -X POST "$METRICS_ENDPOINT/deployments" -H "Content-Type: application/json" \
+            -d '{"sha":"${{ github.sha }}","result":"${{ needs.post-deploy-verify.result }}"}'
+      - if: needs.post-deploy-verify.result == 'failure'
+        run: curl -X POST "$SLACK_WEBHOOK" -d '{"text":"Deploy failed. Auto-rollback executed."}'
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Single-stage pipeline — no isolation, no rollback point
+- ❌ `if: always()` on deploy steps — deploys broken builds
+- ❌ No environment protection — any contributor can push to prod
+- ❌ Manual rollback — MTTR hours vs seconds
+- ❌ Skipping what-if — accidental resource deletion
+- ❌ `npm install` vs `npm ci` — non-reproducible builds
+- ❌ No artifact pinning — staging tests build A, prod deploys build B
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | CI/CD Practice |
+|--------|---------------|
+| **Reliability** | Automated rollback, slot swap zero-downtime, retry on transient errors |
+| **Security** | CodeQL + Trivy scan stage, `npm audit`, OIDC auth (no stored creds) |
+| **Cost Optimization** | Artifact retention 7 days, parallel matrix shards, self-hosted GPU runners |
+| **Operational Excellence** | DORA metrics, deployment frequency dashboards, conventional commits |
+| **Performance Efficiency** | Lighthouse budget gates, Artillery p99 thresholds, dependency caching |
+| **Responsible AI** | Eval pipeline gate before AI deploy, content safety regression tests |

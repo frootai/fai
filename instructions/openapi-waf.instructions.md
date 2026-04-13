@@ -6,130 +6,145 @@ waf:
   - "reliability"
 ---
 
-# Openapi Waf — WAF-Aligned Coding Standards
+# OpenAPI — FAI Standards
 
-> OpenAPI standards — spec-first design, versioning, security schemes, examples.
+- Author OpenAPI 3.1 (JSON Schema 2020-12 compatible) — avoid 3.0 `nullable`, use `type: ["string", "null"]`
+- Single source of truth: `openapi.yaml` generates server stubs, client SDKs, docs, and tests
+- Every endpoint: `operationId`, `summary`, `description`, `tags`, and at least one `responses` entry
+- Semantic `description` fields — AI tool-calling agents parse these to select and invoke endpoints
 
-## Core Rules
+## Document Structure & operationId
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+```yaml
+openapi: "3.1.0"
+info: { title: Contoso AI API, version: "2025-04-01", description: Enterprise RAG service. }
+servers: [{ url: "https://api.contoso.com/v1", description: Production }]
+paths:
+  /completions:
+    post:
+      operationId: createCompletion       # camelCase verb-noun, unique across spec
+      tags: [Completions]
+      summary: Generate a grounded completion.
+      description: Sends prompt with context to LLM, returns grounded answer with citations.
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+- **operationId** — camelCase verb-noun: `listDocuments`, `getDocumentById`, `createCompletion`, `deleteIndex`
+- Verbs: `list`, `get`, `create`, `update`, `replace`, `delete`, `search`, `upload`
+- **Path**: required identifiers (`/{documentId}`, `format: uuid`). **Query**: filters/pagination. **Header**: `X-Request-ID`, `If-None-Match`
+- Never put secrets in query params — use `Authorization` header
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Schema Design
 
-## Code Quality Standards
+```yaml
+components:
+  schemas:
+    CompletionRequest:
+      type: object
+      required: [messages]
+      properties:
+        messages: { type: array, items: { $ref: "#/components/schemas/ChatMessage" }, minItems: 1 }
+        temperature: { type: number, minimum: 0, maximum: 2, default: 0.7 }
+        max_tokens: { type: integer, minimum: 1, maximum: 128000 }
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role: { type: string, enum: [system, user, assistant, tool] }
+        content: { type: string, maxLength: 100000 }
+    ToolCall:  # Discriminator for polymorphism
+      oneOf: [{ $ref: "#/components/schemas/FunctionToolCall" }, { $ref: "#/components/schemas/RetrievalToolCall" }]
+      discriminator: { propertyName: type, mapping: { function: "#/…/FunctionToolCall", retrieval: "#/…/RetrievalToolCall" } }
+```
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+- `$ref` for every reusable type — never inline objects deeper than 2 levels
+- `allOf` for inheritance, `oneOf` + `discriminator` for polymorphism, `anyOf` for loose unions
+- Set `required`, `minimum`, `maximum`, `maxLength`, `pattern`, `enum` — client-side validation
+- `additionalProperties: false` on request bodies to reject unknown fields
 
-## Testing Requirements
+## Error Responses — RFC 7807
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```yaml
+    ProblemDetails:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }     # e.g. https://api.contoso.com/errors/rate-limited
+        title: { type: string }                  # e.g. "Rate limit exceeded"
+        status: { type: integer }                # HTTP status code
+        detail: { type: string }                 # Human-readable explanation
+        instance: { type: string, format: uri }  # Request URI that caused the error
+        retryAfter: { type: integer }            # Seconds to wait (429/503)
+```
 
-## Security Checklist
+- Return `ProblemDetails` for all 4xx/5xx (`application/problem+json`): 400, 401, 403, 404, 409, 422, 429, 503
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Security Schemes
+
+```yaml
+  securitySchemes:
+    BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token
+          scopes: { "api://contoso-ai/.default": "Full API access" }
+security: [{ BearerAuth: [] }]  # Global default — override per-operation for public endpoints
+```
+
+- Prefer OAuth2/JWT over API keys — keys for dev/testing only
+
+## Pagination & Examples
+
+```yaml
+    PaginatedResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items: { type: array, items: {} }
+        total: { type: integer, minimum: 0 }
+        limit: { type: integer, minimum: 1, maximum: 100 }
+        offset: { type: integer, minimum: 0 }
+        nextLink: { type: string, format: uri }
+```
+
+- Cursor-based for large datasets, offset-based for small. Every body needs `examples` (plural, named map)
+
+## Versioning & Linting
+
+- **Path-based** (`/v1/`) for breaking changes. **Date-based** (`api-version: 2025-04-01`) for Azure-style
+- `info.version` = API version, not spec file revision
+- Spectral in CI: `spectral lint openapi.yaml` — block merge on errors
+- Required rules: `operation-operationId: error`, `oas3-schema: error`, `operation-tag-defined: error`
+
+## Code Generation & AI Tool-Calling
+
+- **TS**: `openapi-generator-cli generate -i openapi.yaml -g typescript-axios -o sdk/`
+- **Python**: `openapi-generator-cli generate -g python-flask -o server/`
+- **C#**: `autorest --input-file=openapi.yaml --csharp --output-folder=sdk/dotnet`
+- Pin generator version in CI — commit SDKs or publish to private registry
+- AI agents use `summary` for tool selection, `description` for call construction (side effects, idempotency, limits)
+- `operationId` becomes function name. Add `x-ai-hints` for disambiguation
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Missing `operationId` — breaks codegen and AI tool discovery
+- ❌ Generic descriptions — useless for AI agents
+- ❌ Inline schemas instead of `$ref` — unmaintainable
+- ❌ `200` for all responses — masks errors
+- ❌ Secrets in query params — logged by proxies/caches
+- ❌ No `examples` — API explorers render empty
+- ❌ `additionalProperties: true` on requests — allows field injection
+- ❌ Array responses without pagination — unbounded payload
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | OpenAPI Practice |
+|---|---|
+| **Security** | OAuth2/JWT, no secrets in query params, `additionalProperties: false`, schema constraints |
+| **Reliability** | RFC 7807 `retryAfter`, `Idempotency-Key` header, `429`/`503` documented |
+| **Cost** | Pagination bounds payload, `max_tokens` constraints, `304 Not Modified` + `ETag` |
+| **Ops Excellence** | Spectral in CI, pinned SDK generation, `X-Request-ID` correlation, tag grouping |
+| **Performance** | `HEAD` for existence checks, `ETag`/`If-None-Match` caching, SSE streaming |
+| **Responsible AI** | Semantic descriptions for AI tools, `x-pii: true` markers, content safety in docs |

@@ -6,130 +6,136 @@ waf:
   - "security"
 ---
 
-# Nestjs Waf — WAF-Aligned Coding Standards
+# NestJS — FAI Standards
 
-> NestJS standards — DI, decorators, modular architecture, Pipes validation, and TypeORM patterns.
+## Module Organization
 
-## Core Rules
+- One feature module per domain (`UsersModule`, `OrdersModule`) — never dump everything in `AppModule`
+- `SharedModule` with `@Global()` for cross-cutting providers (Logger, ConfigService, CacheService)
+- Barrel exports — only expose what consumers need via `exports: []`, keep repos private
+- Lazy-load heavy modules with `LazyModuleLoader` to reduce cold-start time
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+## Dependency Injection
 
-## Implementation Patterns
+- Constructor injection only — never use `ModuleRef.get()` outside factories
+- `@Inject(TOKEN)` with `InjectionToken` for interfaces — NestJS can't resolve interfaces directly
+- `useClass` for swappable impls, `useFactory` for async setup, `useValue` for constants
+- `Scope.REQUEST` only when truly needed — it propagates to all dependents, kills singleton perf
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
 ```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+const AI_CLIENT = Symbol('AI_CLIENT');
+const aiProvider: Provider = {
+  provide: AI_CLIENT,
+  useFactory: async (config: ConfigService) => {
+    return new OpenAIClient(config.getOrThrow('AZURE_OPENAI_ENDPOINT'), new DefaultAzureCredential());
+  },
+  inject: [ConfigService],
+};
+```
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+## Request Pipeline (Guards → Interceptors → Pipes → Handler → Filters)
+
+- **Guards** for authZ — return `boolean`, throw `ForbiddenException`. Bind globally via `APP_GUARD`
+- **Interceptors** for cross-cutting: logging, response mapping, timeout. Use `tap()`/`map()` on Observable
+- **Pipes** — always apply `ValidationPipe` globally with `whitelist: true`, `forbidNonWhitelisted: true`
+- **Exception filters** map domain errors to HTTP — never leak stack traces
+
+```typescript
+app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+```
+
+## DTOs with class-validator / class-transformer
+
+- One DTO per operation: `CreateOrderDto`, `UpdateOrderDto`, `OrderResponseDto`
+- `PartialType()`, `PickType()`, `OmitType()` from `@nestjs/mapped-types` — never duplicate fields
+- `@Exclude()` sensitive fields on response DTOs, apply `ClassSerializerInterceptor` globally
+- Nested: `@ValidateNested()` + `@Type(() => ChildDto)` — both required
+
+```typescript
+export class CreateOrderDto {
+  @IsString() @IsNotEmpty() customerId: string;
+  @IsArray() @ValidateNested({ each: true }) @Type(() => OrderItemDto) items: OrderItemDto[];
+  @IsOptional() @IsEnum(Priority) priority?: Priority = Priority.NORMAL;
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Database Integration
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+- **TypeORM**: `@InjectRepository(Entity)` — never inject `DataSource` in services. Migrations over `synchronize: true` (dev-only). `QueryRunner` for transactions, `release()` in `finally`. No eager relations — explicit `find({ relations })`
+- **Prisma**: `PrismaService` extending `OnModuleInit`/`OnModuleDestroy`. `$on('query')` dev-only. `$transaction([])` for batch, interactive for complex flows
 
-## Code Quality Standards
+## ConfigModule with Validation
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+- `ConfigModule.forRoot({ isGlobal: true, validationSchema })` — validate at boot, fail fast
+- `ConfigService.getOrThrow<T>()` — never use raw `process.env`
 
-## Testing Requirements
+```typescript
+ConfigModule.forRoot({
+  isGlobal: true,
+  validationSchema: Joi.object({
+    DATABASE_URL: Joi.string().uri().required(),
+    AZURE_OPENAI_ENDPOINT: Joi.string().uri().required(),
+    PORT: Joi.number().default(3000),
+  }),
+})
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Health Checks (Terminus)
 
-## Security Checklist
+- `TerminusModule` — check DB, Redis, external APIs
+- Separate `/health/live` (process alive) from `/health/ready` (can serve traffic)
+- Custom health indicators for domain checks (queue depth, model availability)
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Swagger / OpenAPI
+
+- `@ApiTags()` per controller, `@ApiOperation()` per endpoint, `@ApiResponse()` per status
+- `@ApiBearerAuth()` on protected controllers — generate client SDKs from spec
+
+## CQRS, Microservices, WebSockets
+
+- **CQRS**: `@nestjs/cqrs` — `CommandHandler` (writes) vs `QueryHandler` (reads). Events for side-effects. Sagas for long-running workflows
+- **Microservices**: `ClientProxy` abstracts transport (TCP/Redis/NATS/gRPC/Kafka). `@MessagePattern()` for request-response, `@EventPattern()` for fire-and-forget. Always use `@Payload()`/`@Ctx()` explicitly
+- **WebSockets**: `@WebSocketGateway()` + `@SubscribeMessage()`. Use `WsException` not `HttpException`. Auth in `handleConnection()`, not per-message
+
+## Caching
+
+- `CacheModule.register()` with Redis store for multi-instance deployments
+- `@CacheKey()`+`@CacheTTL()` on GET handlers or `CacheInterceptor` per controller
+- Manual `cacheManager.del()` on mutations — stale cache is worse than no cache
+
+## Testing
+
+- `Test.createTestingModule()` — override providers with `.overrideProvider().useValue(mock)`
+- Never import real DB module in unit tests — mock the repository
+- `supertest` with `app.getHttpAdapter()` for e2e — tests full pipeline (guards, pipes, filters)
+- `moduleRef.close()` in `afterAll` — prevents Jest open handle warnings
+
+```typescript
+const module = await Test.createTestingModule({
+  providers: [OrdersService, { provide: getRepositoryToken(Order), useValue: mockRepo }],
+}).compile();
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Business logic in controllers — controllers only parse input, call service, return response
+- ❌ `synchronize: true` in production TypeORM config — data loss risk
+- ❌ Catching exceptions in controllers — use exception filters
+- ❌ `Scope.REQUEST` on shared services — destroys singleton performance, cascades to every consumer
+- ❌ `@Res()` passthrough in controllers — breaks interceptors and serialization
+- ❌ Circular dependencies — refactor with `forwardRef()` only as a last resort, prefer events
+- ❌ Raw SQL in services — use QueryBuilder or repositories
+- ❌ Missing `whitelist: true` on ValidationPipe — allows mass-assignment attacks
+- ❌ God modules with 20+ providers — split by domain
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | NestJS Practice |
+|--------|----------------|
+| **Security** | Global `ValidationPipe` with whitelist, `@UseGuards(AuthGuard)`, helmet middleware, CORS allowlist, rate limiting via `ThrottlerModule` |
+| **Reliability** | Terminus health checks, graceful `enableShutdownHooks()`, circuit breakers in `HttpService` interceptors, retry on transient DB errors |
+| **Cost** | `CacheInterceptor` on read-heavy endpoints, connection pooling (TypeORM `extra.max`), lazy module loading, right-sized Fastify over Express |
+| **Ops Excellence** | Structured logging with `PinoLogger` or `WinstonModule`, OpenTelemetry via `@opentelemetry/nestjs`, correlation IDs in `ClsModule`, Swagger auto-gen |
+| **Performance** | Fastify adapter, streaming with `StreamableFile`, `@nestjs/bull` for background jobs, `compression()` middleware, `@CacheTTL()` on hot paths |
+| **Responsible AI** | Content safety middleware on AI endpoints, input sanitization pipes, audit logging interceptors, output filtering before response |

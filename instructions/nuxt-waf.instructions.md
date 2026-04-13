@@ -6,130 +6,139 @@ waf:
   - "reliability"
 ---
 
-# Nuxt Waf — WAF-Aligned Coding Standards
+# Nuxt 3 — FAI Standards
 
-> Nuxt 3 standards — Vue 3, SSR, auto-imports, and composable patterns.
+## Auto-Imports
 
-## Core Rules
+Nuxt auto-imports composables (`composables/`), components (`components/`), and utilities (`utils/`). Never write manual imports for Vue APIs or Nuxt composables.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+```vue
+<script setup lang="ts">
+// ✅ All auto-imported — useRoute, useFetch, useState, ref, computed
+const route = useRoute()
+const { data } = await useFetch('/api/products')
+const count = useState('counter', () => 0)
+</script>
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+Custom composables: prefix with `use`, export from `composables/`. Utils: pure functions only — no Vue reactivity.
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## File-Based Routing
 
-## Code Quality Standards
+Pages in `pages/`. Dynamic: `[id].vue`. Catch-all: `[...slug].vue`. Always use `definePageMeta`:
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```vue
+<!-- pages/products/[id].vue -->
+<script setup lang="ts">
+definePageMeta({
+  layout: 'shop',
+  middleware: ['auth'],
+  validate: (route) => /^\d+$/.test(route.params.id as string),
+})
+const { data: product } = await useFetch(`/api/products/${useRoute().params.id}`)
+</script>
+```
 
-## Testing Requirements
+Use `navigateTo()` for programmatic navigation — never `router.push` in server context.
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Server Routes (Nitro)
 
-## Security Checklist
+HTTP-method suffixed files in `server/api/`. Use `defineEventHandler`, `readBody`, `getQuery`, `getRouterParam`:
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```ts
+// server/api/products/[id].get.ts
+export default defineEventHandler(async (event) => {
+  const id = getRouterParam(event, 'id')
+  if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing ID' })
+  return await db.findProduct(id) ?? throw createError({ statusCode: 404 })
+})
+```
+
+POST/PUT: `readBody<T>(event)` with validation. `server/middleware/` for auth. `server/utils/` for shared helpers (auto-imported).
+
+## Data Fetching
+
+- `useFetch` — component-level, SSR-safe, deduped, reactive via `watch`
+- `useAsyncData` — custom fetch logic, transforms, multi-source aggregation
+- `$fetch` — event handlers and client-only code ONLY
+
+```vue
+<script setup lang="ts">
+const { data, pending, refresh } = await useFetch('/api/items', {
+  query: { page: currentPage }, watch: [currentPage],
+})
+</script>
+```
+
+`useAsyncData` for multi-source: `Promise.all([$fetch(...), $fetch(...)])`. **Never** call `$fetch` directly in `<script setup>` — causes double fetch on SSR.
+
+## State & Runtime Config
+
+`useState` for SSR-safe reactive state. Pinia (`@pinia/nuxt`) for complex stores with `defineStore` + composition API.
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    apiSecret: '',          // Server-only — NUXT_API_SECRET env var
+    public: { apiBase: '' } // Client-safe — NUXT_PUBLIC_API_BASE env var
+  }
+})
+```
+
+Access via `useRuntimeConfig()` in components, `event.context.runtimeConfig` in server routes. Never use `process.env` in client code.
+
+## SEO, Middleware, Plugins
+
+```vue
+<script setup lang="ts">
+useSeoMeta({ title: () => product.value?.name, description: 'Browse our catalog' })
+</script>
+```
+
+```ts
+// middleware/auth.ts
+export default defineNuxtRouteMiddleware((to) => {
+  const { isLoggedIn } = useAuth()
+  if (!isLoggedIn.value && to.meta.requiresAuth) return navigateTo('/login')
+})
+```
+
+Plugins in `plugins/` — use `.client.ts`/`.server.ts` suffixes. Layouts in `layouts/` — bind via `definePageMeta({ layout: 'admin' })`.
+
+## Error Handling
+
+Wrap volatile components in `<NuxtErrorBoundary>` with `#error="{ error, clearError }"` slot. Server routes: always `createError({ statusCode, statusMessage })` — never throw raw strings. Create `error.vue` at project root for global error pages.
+
+## TypeScript, Modules & Testing
+
+```ts
+export default defineNuxtConfig({
+  typescript: { strict: true, typeCheck: true },
+  modules: ['@pinia/nuxt', '@nuxt/image', '@nuxtjs/i18n'],
+})
+```
+
+Run `nuxi typecheck` in CI. Use `.nuxt/tsconfig.json` — don't override auto-generated paths.
+
+Test with `@nuxt/test-utils` + Vitest: `mountSuspended()` for component tests, `$fetch` for server route tests. Run `nuxi prepare` before test suite.
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- **Don't** use `axios`/raw `fetch` — use `$fetch`, `useFetch`, `useAsyncData`
+- **Don't** import Vue APIs manually (`import { ref }`) — auto-imported
+- **Don't** use `process.env` in client code — use `useRuntimeConfig().public`
+- **Don't** call `$fetch` in `<script setup>` top-level — double fetch on SSR
+- **Don't** use `router.push()` — use `<NuxtLink>` or `navigateTo()`
+- **Don't** skip `definePageMeta.validate` for dynamic route params
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Practice |
+|---|---|
+| Performance | `<Lazy*>` components, `useFetch` with `pick`, Nitro `routeRules` caching, code-split via `pages/` |
+| Reliability | `NuxtErrorBoundary` per widget, `createError` with status codes, `useFetch` retry, `server/api/health.get.ts` |
+| Security | Secrets in `runtimeConfig` (not `public`), validate `readBody`, CSRF module, CSP in `nitro.routeRules` |
+| Cost | ISR via `routeRules`, edge deploy with Nitro presets, `nitro.minify`, lazy hydration |
+| Operations | `nuxi analyze` bundles, structured server logging, `nuxi typecheck` in CI, pin module versions |
+| Responsible AI | Sanitize input before LLM calls, content safety in server routes, AI attribution in UI |
