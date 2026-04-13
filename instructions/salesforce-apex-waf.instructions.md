@@ -6,130 +6,244 @@ waf:
   - "security"
 ---
 
-# Salesforce Apex Waf — WAF-Aligned Coding Standards
+# Salesforce Apex — FAI Standards
 
-> Salesforce Apex standards — bulkification, governor limits, trigger patterns, and testing.
+## Governor Limits — Know the Walls
 
-## Core Rules
+| Limit | Synchronous | Async (Batch/Future) |
+|-------|------------|----------------------|
+| SOQL queries | 100 | 200 |
+| DML statements | 150 | 150 |
+| CPU time | 10,000 ms | 60,000 ms |
+| Heap size | 6 MB | 12 MB |
+| Callouts | 100 | 100 |
+| Query rows | 50,000 | 50,000 |
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+- Check `Limits.getQueries()` / `Limits.getDmlStatements()` in long transactions
+- Never assume headroom — design for worst-case bulk (200 records per trigger batch)
 
-## Implementation Patterns
+## Bulk Patterns
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+### Trigger Handler Pattern
+One trigger per object. All logic in a handler class:
+```apex
+// AccountTrigger.trigger
+trigger AccountTrigger on Account (before insert, before update, after insert, after update) {
+    AccountTriggerHandler.execute(Trigger.operationType, Trigger.new, Trigger.oldMap);
+}
+```
+```apex
+// AccountTriggerHandler.cls
+public with sharing class AccountTriggerHandler {
+    public static void execute(
+        System.TriggerOperation op, List<Account> newList, Map<Id, Account> oldMap
+    ) {
+        switch on op {
+            when BEFORE_INSERT { validateAccounts(newList); }
+            when AFTER_UPDATE  { syncToExternal(newList, oldMap); }
+        }
+    }
+    private static void validateAccounts(List<Account> accounts) {
+        for (Account acc : accounts) {
+            if (String.isBlank(acc.Industry)) acc.addError('Industry is required');
+        }
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+### Bulkification — Collect, Query, Update
+```apex
+// ❌ SOQL in loop — hits 100-query limit at 100 records
+for (Opportunity opp : Trigger.new) {
+    Account a = [SELECT Name FROM Account WHERE Id = :opp.AccountId];
+}
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+// ✅ Bulkified — 1 query regardless of batch size
+Set<Id> accountIds = new Set<Id>();
+for (Opportunity opp : Trigger.new) { accountIds.add(opp.AccountId); }
+Map<Id, Account> accountMap = new Map<Id, Account>(
+    [SELECT Id, Name FROM Account WHERE Id IN :accountIds]
+);
+```
 
-## Code Quality Standards
+## SOQL Best Practices
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+- Always filter on indexed fields (`Id`, `Name`, `CreatedDate`, `RecordTypeId`, custom indexes)
+- Use relationship queries to reduce query count:
+  ```apex
+  List<Account> accs = [
+      SELECT Name, (SELECT LastName, Email FROM Contacts WHERE IsActive__c = true)
+      FROM Account WHERE Industry = 'Technology' LIMIT 200
+  ];
+  ```
+- Never `SELECT *` — list explicit fields. Use `fields(standard)` only in dynamic SOQL when needed
+- No SOQL/DML inside loops — collect IDs, query once, process in-memory
+- Use `LIMIT` on all exploratory or UI-bound queries
+- Use `Database.query()` for dynamic SOQL — sanitize inputs via `String.escapeSingleQuotes()`
 
-## Testing Requirements
+## Security
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+### Enforce Sharing and Field-Level Security
+```apex
+// Always declare sharing — default is 'without sharing' (dangerous)
+public with sharing class OpportunityService {
+    public static List<Opportunity> getByStage(String stage) {
+        SObjectAccessDecision decision = Security.stripInaccessible(
+            AccessType.READABLE,
+            [SELECT Name, Amount, StageName FROM Opportunity WHERE StageName = :stage]
+        );
+        return (List<Opportunity>) decision.getRecords();
+    }
 
-## Security Checklist
+    public static void updateAmounts(List<Opportunity> opps) {
+        SObjectAccessDecision decision = Security.stripInaccessible(
+            AccessType.UPDATABLE, opps
+        );
+        update decision.getRecords();
+    }
+}
+```
+- Use `with sharing` unless you have a documented reason for `without sharing` (system jobs, platform events)
+- Use `Security.stripInaccessible()` over manual `Schema.SObjectType` checks — cleaner and handles polymorphic fields
+- Never trust client-side input — validate, sanitize, escape
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Test Classes
+
+```apex
+@IsTest
+private class OpportunityServiceTest {
+    @TestSetup
+    static void setup() {
+        Account acc = new Account(Name = 'Test Corp', Industry = 'Technology');
+        insert acc;
+        List<Opportunity> opps = new List<Opportunity>();
+        for (Integer i = 0; i < 200; i++) {
+            opps.add(new Opportunity(
+                Name = 'Opp ' + i, AccountId = acc.Id,
+                StageName = 'Prospecting', CloseDate = Date.today().addDays(30)
+            ));
+        }
+        insert opps;
+    }
+
+    @IsTest
+    static void testGetByStage_returnsFiltered() {
+        Test.startTest();
+        List<Opportunity> results = OpportunityService.getByStage('Prospecting');
+        Test.stopTest();
+        System.assertEquals(200, results.size(), 'Should return all test opportunities');
+        System.assertNotEquals(null, results[0].Name, 'Name should be accessible');
+    }
+}
+```
+- 75% coverage minimum (aim for 90%+). Every `if` branch covered
+- `Test.startTest()` / `Test.stopTest()` resets governor limits — test bulk in fresh context
+- Use `@TestSetup` to share data across test methods (runs once per class)
+- Use `System.assert`, `System.assertEquals`, `System.assertNotEquals` with messages
+- Test bulk (200+ records), negative cases, and permission scenarios
+- Never use `SeeAllData=true` — create all test data explicitly
+
+## Async Patterns
+
+| Pattern | Use Case | Limits |
+|---------|----------|--------|
+| `@future` | Simple callouts, fire-and-forget | No chaining, no `getJobId()`, 50 calls/txn |
+| `Queueable` | Chained async, complex logic | `System.enqueueJob()`, 1 chain depth in test |
+| `Batch` | 10K+ records, long-running | `Database.Batchable`, 5 concurrent batches |
+| `Schedulable` | Recurring jobs (hourly/daily) | `System.schedule()`, cron expression |
+
+```apex
+public class AccountSyncQueueable implements Queueable, Database.AllowsCallouts {
+    private List<Id> accountIds;
+    public AccountSyncQueueable(List<Id> ids) { this.accountIds = ids; }
+    public void execute(QueueableContext ctx) {
+        List<Account> accounts = [SELECT Name, BillingCity FROM Account WHERE Id IN :accountIds];
+        HttpResponse res = ExternalService.sync(JSON.serialize(accounts));
+        if (res.getStatusCode() != 200) {
+            System.enqueueJob(new AccountSyncQueueable(accountIds)); // chain retry
+        }
+    }
+}
+```
+
+## Custom Metadata & Platform Events
+
+- Use **Custom Metadata Types** (`__mdt`) for config — deployable, queryable, no DML limits
+  ```apex
+  Integration_Setting__mdt setting = Integration_Setting__mdt.getInstance('ERP_Sync');
+  String endpoint = setting.Endpoint__c;
+  Integer timeout = (Integer) setting.Timeout_Ms__c;
+  ```
+- Use **Platform Events** for decoupled async communication and audit trails
+- Subscribe via triggers or Apex `EventBus.publish()` — guaranteed delivery with replay
+
+## Exception Handling
+
+```apex
+public with sharing class IntegrationService {
+    public static void syncRecords(List<SObject> records) {
+        Savepoint sp = Database.setSavepoint();
+        try {
+            List<Database.SaveResult> results = Database.update(records, false);
+            for (Database.SaveResult sr : results) {
+                if (!sr.isSuccess()) {
+                    for (Database.Error err : sr.getErrors())
+                        Logger.error('Update failed: ' + err.getMessage() + ' on ' + sr.getId());
+                }
+            }
+        } catch (DmlException e) {
+            Database.rollback(sp);
+            Logger.error('DML rollback: ' + e.getMessage());
+            throw new IntegrationException('Sync failed — rolled back', e);
+        }
+    }
+    public class IntegrationException extends Exception {}
+}
+```
+- Use `Database.insert(records, false)` for partial success in batch operations
+- Always log error details before rethrowing — include record IDs and field names
+- Custom exception classes per domain — `IntegrationException`, `ValidationException`
+
+## Naming Conventions
+
+| Element | Convention | Example |
+|---------|-----------|---------|
+| Class | PascalCase + suffix | `AccountTriggerHandler`, `OrderService` |
+| Trigger | `{Object}Trigger` | `OpportunityTrigger` |
+| Test class | `{Class}Test` | `AccountTriggerHandlerTest` |
+| Method | camelCase, verb-first | `getActiveContacts()`, `validateInput()` |
+| Constant | UPPER_SNAKE | `MAX_RETRY_COUNT` |
+| Custom field | PascalCase + `__c` | `External_Id__c` |
+
+## Code Review Checklist
+
+- [ ] No SOQL/DML inside loops
+- [ ] All classes declare `with sharing` or `without sharing` explicitly
+- [ ] `Security.stripInaccessible()` on all user-facing queries and DML
+- [ ] Tests cover bulk (200+ records), negatives, and permission edge cases
+- [ ] Governor limit headroom validated (`Limits.*` checks or load test)
+- [ ] No hardcoded IDs — use Custom Metadata or Custom Labels
+- [ ] Trigger has one per object, all logic in handler class
+- [ ] Async pattern matches use case (Queueable > @future for new code)
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ SOQL or DML inside `for` loops — governor limit bomb
+- ❌ Hardcoded IDs (`'001xxx...'`) — break across orgs/sandboxes
+- ❌ Trigger logic without handler class — untestable spaghetti
+- ❌ `without sharing` by default — data exposure risk
+- ❌ `SeeAllData=true` in tests — flaky, org-dependent
+- ❌ Catching generic `Exception` and swallowing it silently
+- ❌ Recursive triggers without static flag guard
+- ❌ Schema describes in loops (`Schema.getGlobalDescribe()` is expensive)
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Salesforce Apex Practice |
+|--------|--------------------------|
+| **Reliability** | Bulkified triggers, `Database.Savepoint` rollback, partial DML with `allOrNone=false`, governor limit monitoring |
+| **Security** | `with sharing` default, `Security.stripInaccessible()` for CRUD/FLS, `String.escapeSingleQuotes()` for dynamic SOQL |
+| **Cost Optimization** | Selective SOQL (indexed filters), Custom Metadata over custom settings (no DML), batch sizing tuned to data volume |
+| **Operational Excellence** | One trigger per object, handler class pattern, structured logging, `@TestSetup` for consistent test data |
+| **Performance Efficiency** | Collect-Query-Update pattern, relationship subqueries, async offload for callouts, `LIMIT` on all queries |
+| **Responsible AI** | Sanitize LLM inputs via `String.escapeSingleQuotes()`, validate AI-generated field values before DML, audit Platform Events for AI actions |

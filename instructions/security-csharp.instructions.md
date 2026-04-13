@@ -5,130 +5,205 @@ waf:
   - "security"
 ---
 
-# Security Csharp — WAF-Aligned Coding Standards
+# C# Security Patterns — FAI Standards
 
-> C# security standards — parameterized queries, output encoding, anti-forgery tokens, secure headers.
+## Authentication
 
-## Core Rules
+```csharp
+// Azure service auth — always DefaultAzureCredential, never connection strings
+var credential = new DefaultAzureCredential();
+var client = new SecretClient(new Uri(vaultUri), credential);
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+// JWT Bearer in ASP.NET Core
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Authorization
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```csharp
+// Policy-based — define once, enforce everywhere
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", p => p.RequireRole("Admin"))
+    .AddPolicy("PremiumTier", p => p.RequireClaim("subscription", "premium"))
+    .AddPolicy("DocumentOwner", p =>
+        p.Requirements.Add(new ResourceOwnerRequirement()));
 
-## Code Quality Standards
+// Resource-based handler
+public class ResourceOwnerHandler : AuthorizationHandler<ResourceOwnerRequirement, Document>
+{
+    protected override Task HandleRequirementAsync(
+        AuthorizationHandlerContext context, ResourceOwnerRequirement req, Document doc)
+    {
+        if (doc.OwnerId == context.User.FindFirstValue(ClaimTypes.NameIdentifier))
+            context.Succeed(req);
+        return Task.CompletedTask;
+    }
+}
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+// Controller usage — never authorize in business logic
+[Authorize(Policy = "AdminOnly")]
+[HttpDelete("{id}")]
+public async Task<IActionResult> Delete(int id) => Ok(await _service.DeleteAsync(id));
+```
 
-## Testing Requirements
+## Input Validation
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```csharp
+// FluentValidation — complex rules
+public class CreateOrderValidator : AbstractValidator<CreateOrderRequest>
+{
+    public CreateOrderValidator()
+    {
+        RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
+        RuleFor(x => x.Quantity).InclusiveBetween(1, 1000);
+        RuleFor(x => x.ProductId).Must(id => Guid.TryParse(id, out _));
+    }
+}
+builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderValidator>();
 
-## Security Checklist
+// DataAnnotations — simple DTOs
+public record SearchRequest(
+    [Required, StringLength(200, MinimumLength = 1)] string Query,
+    [Range(1, 100)] int PageSize = 20);
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## SQL Injection Prevention
+
+```csharp
+// EF Core — parameterized by default, safe
+var results = await db.Users.Where(u => u.Email == email).ToListAsync();
+
+// Raw SQL — ALWAYS parameterize, never interpolate user input
+var users = await db.Users
+    .FromSqlInterpolated($"SELECT * FROM Users WHERE TenantId = {tenantId}")
+    .ToListAsync();
+
+// Dapper — named parameters
+var order = await conn.QuerySingleAsync<Order>(
+    "SELECT * FROM Orders WHERE Id = @Id AND UserId = @UserId",
+    new { Id = orderId, UserId = userId });
+```
+
+## XSS Prevention & Security Headers
+
+```csharp
+// Razor auto-encodes by default — never use Html.Raw with user input
+// CSP + security headers middleware
+app.Use(async (ctx, next) =>
+{
+    ctx.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    ctx.Response.Headers.Append("X-Frame-Options", "DENY");
+    ctx.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    ctx.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=()");
+    ctx.Response.Headers.Append("Content-Security-Policy",
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'");
+    await next();
+});
+```
+
+## CORS
+
+```csharp
+// Explicit origin allowlist — never use AllowAnyOrigin in production
+builder.Services.AddCors(o => o.AddPolicy("Strict", p =>
+    p.WithOrigins("https://app.contoso.com", "https://admin.contoso.com")
+     .WithMethods("GET", "POST", "PUT", "DELETE")
+     .WithHeaders("Authorization", "Content-Type")
+     .SetPreflightMaxAge(TimeSpan.FromMinutes(10))));
+app.UseCors("Strict");
+```
+
+## Secrets Management
+
+```csharp
+// IConfiguration + Key Vault — secrets never in appsettings or source
+builder.Configuration.AddAzureKeyVault(
+    new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/"),
+    new DefaultAzureCredential());
+
+// Access via DI — never IConfiguration directly in controllers
+builder.Services.Configure<OpenAIOptions>(builder.Configuration.GetSection("OpenAI"));
+```
+
+## HTTPS & CSRF
+
+```csharp
+// Force HTTPS + HSTS
+builder.Services.AddHttpsRedirection(o => o.HttpsPort = 443);
+builder.Services.AddHsts(o => { o.MaxAge = TimeSpan.FromDays(365); o.IncludeSubDomains = true; });
+app.UseHsts();
+app.UseHttpsRedirection();
+
+// Anti-forgery — auto-validates on POST/PUT/DELETE in Razor Pages
+builder.Services.AddAntiforgery(o => o.HeaderName = "X-XSRF-TOKEN");
+app.UseAntiforgery();
+```
+
+## Rate Limiting
+
+```csharp
+// System.Threading.RateLimiting — built-in .NET 8+
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.AddFixedWindowLimiter("api", opt =>
+    {
+        opt.PermitLimit = 60;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
+    o.AddTokenBucketLimiter("ai", opt =>
+    {
+        opt.TokenLimit = 20;
+        opt.ReplenishmentPeriod = TimeSpan.FromSeconds(10);
+        opt.TokensPerPeriod = 5;
+    });
+});
+app.UseRateLimiter();
+```
+
+## Cryptography
+
+```csharp
+// Data Protection API — key rotation handled automatically
+builder.Services.AddDataProtection()
+    .PersistKeysToAzureBlobStorage(blobUri)
+    .ProtectKeysWithAzureKeyVault(keyId, new DefaultAzureCredential());
+
+// Password hashing — BCrypt, never SHA/MD5
+var hash = BCrypt.Net.BCrypt.EnhancedHashPassword(password, 12);
+bool valid = BCrypt.Net.BCrypt.EnhancedVerify(input, hash);
+```
+
+## Dependency Scanning
+
+```bash
+# CI pipeline — fail build on known vulnerabilities
+dotnet list package --vulnerable --include-transitive
+dotnet list package --deprecated
+# .NET 8+ audit command
+dotnet audit
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `string.Format` or `$""` for SQL — always parameterize
+- ❌ `Html.Raw(userInput)` — use Razor auto-encoding
+- ❌ `AllowAnyOrigin()` in CORS — explicit allowlist only
+- ❌ Secrets in `appsettings.json` or env vars checked into source
+- ❌ `[AllowAnonymous]` on endpoints without documented justification
+- ❌ `SHA256.HashData` for passwords — use BCrypt/Argon2
+- ❌ Disabling HTTPS redirection or model validation filters
+- ❌ `app.UseDeveloperExceptionPage()` in production — leaks stack traces
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | C# Security Practices |
+|--------|----------------------|
+| **Security** | DefaultAzureCredential, Key Vault secrets, anti-forgery, CSP headers, parameterized queries |
+| **Reliability** | Rate limiting prevents overload, input validation rejects bad data early |
+| **Cost** | Token bucket limiter controls AI API spend, cached auth tokens reduce Key Vault calls |
+| **Operations** | `dotnet audit` in CI, structured security logging, HSTS preload |
+| **Performance** | Response caching with security-safe headers, connection pooling via DI |
+| **Responsible AI** | Content Safety API on LLM outputs, PII redaction before logging |

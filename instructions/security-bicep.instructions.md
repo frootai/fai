@@ -5,130 +5,146 @@ waf:
   - "security"
 ---
 
-# Security Bicep — WAF-Aligned Coding Standards
+# Bicep Security Patterns — FAI Standards
 
-> Bicep security standards — @secure() parameters, private endpoints, Managed Identity, diagnostic settings.
-
-## Core Rules
-
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+## Managed Identity
+Prefer user-assigned for shared identity; system-assigned for single-resource lifecycle.
+```bicep
+resource uami 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: 'id-${workloadName}-${env}', location: location
+}
+resource app 'Microsoft.Web/sites@2023-12-01' = {
+  name: appName, location: location
+  identity: { type: 'UserAssigned', userAssignedIdentities: { '${uami.id}': {} } }
+  properties: { siteConfig: { minTlsVersion: '1.2', ftpsState: 'Disabled', httpsOnly: true } }
+}
+```
+## RBAC — Least Privilege
+Never assign Owner/Contributor for data-plane. Use named variables for role GUIDs.
+```bicep
+var cogServicesOpenAIUser = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+resource openaiRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(openai.id, uami.id, cogServicesOpenAIUser)
+  scope: openai
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cogServicesOpenAIUser)
+    principalId: uami.properties.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 ```
-
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
-
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
-
-## Code Quality Standards
-
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
-
-## Testing Requirements
-
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
-
-## Security Checklist
-
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
-
+## Key Vault — RBAC Mode + Purge Protection
+```bicep
+resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: 'kv-${workloadName}-${env}', location: location
+  properties: {
+    sku: { family: 'A', name: 'standard' }
+    tenantId: tenant().tenantId
+    enableRbacAuthorization: true       // Always RBAC — never access policies
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 90
+    enablePurgeProtection: true         // Required for CMK
+    networkAcls: { defaultAction: 'Deny', bypass: 'AzureServices' }
+  }
+}
+// Reference secrets without exposing values in App Service
+resource appCfg 'Microsoft.Web/sites/config@2023-12-01' = {
+  parent: app, name: 'appsettings'
+  properties: { API_KEY: '@Microsoft.KeyVault(SecretUri=${kv.properties.vaultUri}secrets/api-key)' }
+}
+```
+## Secure Parameters & Conditional Auth
+```bicep
+@secure()
+param sqlAdminPassword string
+@secure()
+param apiKey string = ''              // Empty default — never commit real values
+var useIdentityAuth = empty(apiKey)   // Prefer Managed Identity when no key provided
+```
+## Private Endpoints & Conditional Deployment
+```bicep
+param deployPe bool = env == 'prod'   // Private endpoints only in production
+resource pe 'Microsoft.Network/privateEndpoints@2023-11-01' = if (deployPe) {
+  name: 'pe-${openai.name}', location: location
+  properties: {
+    subnet: { id: peSubnet.id }
+    privateLinkServiceConnections: [{
+      name: 'plsc-${openai.name}'
+      properties: { privateLinkServiceId: openai.id, groupIds: ['account'] }
+    }]
+  }
+}
+resource dnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.openai.azure.com', location: 'global'
+}
+```
+## Network Security
+Default-deny NSG with explicit HTTPS allow. Use service tags over raw CIDRs.
+```bicep
+resource nsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
+  name: 'nsg-${subnetName}', location: location
+  properties: { securityRules: [
+    { name: 'AllowHttpsIn', properties: { priority: 100, direction: 'Inbound', access: 'Allow', protocol: 'Tcp', sourceAddressPrefix: 'Internet', destinationAddressPrefix: 'VirtualNetwork', sourcePortRange: '*', destinationPortRange: '443' } }
+    { name: 'DenyAllIn', properties: { priority: 4096, direction: 'Inbound', access: 'Deny', protocol: '*', sourceAddressPrefix: '*', destinationAddressPrefix: '*', sourcePortRange: '*', destinationPortRange: '*' } }
+  ]}
+}
+```
+## Diagnostic Settings
+```bicep
+resource diag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-${openai.name}', scope: openai
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [{ categoryGroup: 'allLogs', enabled: true, retentionPolicy: { enabled: true, days: 90 } }]
+    metrics: [{ category: 'AllMetrics', enabled: true, retentionPolicy: { enabled: true, days: 90 } }]
+  }
+}
+```
+## Customer-Managed Keys
+```bicep
+resource cmkStorage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: storageAccountName, location: location
+  identity: { type: 'UserAssigned', userAssignedIdentities: { '${uami.id}': {} } }
+  properties: { encryption: {
+    keySource: 'Microsoft.Keyvault'
+    identity: { userAssignedIdentity: uami.id }
+    keyvaultproperties: { keyname: 'storage-cmk', keyvaulturi: kv.properties.vaultUri }
+  }}
+}
+```
+## Azure Policy, Defender & Resource Locks
+```bicep
+resource policyAssign 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
+  name: 'deny-cogsvcs-public'
+  properties: {
+    policyDefinitionId: '/providers/Microsoft.Authorization/policyDefinitions/0725b4dd-7e76-479c-a735-68e7ee23d5be'
+    displayName: 'Deny public network access — Cognitive Services'
+    enforcementMode: 'Default'
+  }
+}
+resource defenderKv 'Microsoft.Security/pricings@2024-01-01' = {
+  name: 'KeyVaults', properties: { pricingTier: 'Standard' }
+}
+resource kvLock 'Microsoft.Authorization/locks@2020-05-01' = if (env == 'prod') {
+  name: 'lock-${kv.name}', scope: kv
+  properties: { level: 'CanNotDelete', notes: 'Remove lock before deletion' }
+}
+```
 ## Anti-Patterns
-
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Access policies on Key Vault — use `enableRbacAuthorization: true`
+- ❌ `@secure()` params with hardcoded secrets as defaults
+- ❌ Contributor/Owner for data-plane — use scoped data roles (Blob Data Reader, Cognitive Services User)
+- ❌ `publicNetworkAccess: 'Enabled'` in prod — use private endpoints + firewall
+- ❌ Missing `enablePurgeProtection` on Key Vaults used for CMK
+- ❌ Diagnostic settings without retention — logs grow unbounded
+- ❌ Hardcoded role GUIDs without variable names — unreadable, error-prone
+- ❌ `'*'` in NSG source/destination — scope to service tags or CIDR
 
 ## WAF Alignment
-
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Bicep Security Practice |
+|--------|------------------------|
+| Security | Managed Identity, private endpoints, RBAC least privilege, Key Vault RBAC, TLS 1.2+, NSG deny-all default |
+| Reliability | Soft delete + purge protection, diagnostic settings for alerting, resource locks on critical infra |
+| Cost | Conditional deployment (`if` guards), right-sized SKUs via params, Standard vs Premium KV by env |
+| Operations | Diagnostics to Log Analytics, Azure Policy enforcement, Defender for Cloud, naming conventions |
+| Responsible AI | Content Safety policy assignments, audit logs for AI model access, RBAC separation deployers vs consumers |

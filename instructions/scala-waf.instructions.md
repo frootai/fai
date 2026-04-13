@@ -6,130 +6,145 @@ waf:
   - "performance-efficiency"
 ---
 
-# Scala Waf — WAF-Aligned Coding Standards
+# Scala — FAI Standards
 
-> Scala coding standards — immutability, val over var, pattern matching, and functional programming patterns.
+## Scala 3 Syntax
 
-## Core Rules
+Prefer Scala 3 style. Use `given`/`using` over implicit defs, `enum` over sealed trait hierarchies, extension methods over implicit classes.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```scala
+// given/using replaces implicit val/def
+trait JsonCodec[A]:
+  def encode(a: A): String
+  def decode(s: String): Either[String, A]
 
-## Implementation Patterns
+given JsonCodec[UserId] with
+  def encode(id: UserId): String = id.value.toString
+  def decode(s: String): Either[String, UserId] =
+    s.toLongOption.map(UserId(_)).toRight(s"Invalid UserId: $s")
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+def serialize[A](a: A)(using codec: JsonCodec[A]): String = codec.encode(a)
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+// Opaque types — zero-cost wrappers
+opaque type UserId = Long
+object UserId:
+  def apply(v: Long): UserId = v
+  extension (id: UserId) def value: Long = id
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+type ApiError = NotFound | RateLimited | Unauthorized  // Union types
+
+extension (s: String)  // Extension methods
+  def toSlug: String = s.toLowerCase.replaceAll("[^a-z0-9]+", "-").stripSuffix("-")
+
+enum Priority:  // Enum with methods
+  case Low, Medium, High, Critical
+  def weight: Int = this match
+    case Low => 1; case Medium => 5; case High => 10; case Critical => 100
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Domain Modeling & Pattern Matching
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Case classes for all domain objects. ADTs over stringly-typed fields. Validate at construction boundaries. Exhaustive matches — no `_` catch-all on sealed types unless intentional.
 
-## Code Quality Standards
+```scala
+final case class Ticket(id: TicketId, title: String, priority: Priority, tags: Set[String])
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+object Ticket:
+  def create(title: String, priority: Priority): Either[String, Ticket] =
+    if title.isBlank then Left("Title must not be blank")
+    else Right(Ticket(TicketId(java.util.UUID.randomUUID), title.trim, priority, Set.empty))
 
-## Testing Requirements
+def handleResult(result: Either[ApiError, Ticket]): String = result match
+  case Right(t) if t.priority == Priority.Critical => s"URGENT: ${t.title}"
+  case Right(t)                                    => t.title
+  case Left(_: NotFound)                           => "Resource not found"
+  case Left(_: RateLimited)                        => "Too many requests"
+  case Left(_: Unauthorized)                       => "Access denied"
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Error Handling — Option / Either / Try
 
-## Security Checklist
+Never use `null`. Never throw exceptions for control flow. `Option` for absence, `Either` for expected failures, `Try` only at JVM boundaries — convert immediately.
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```scala
+def parseConfig(raw: String): Either[ConfigError, AppConfig] =
+  for
+    json   <- io.circe.parser.parse(raw).left.map(e => ConfigError.ParseFailed(e.message))
+    config <- json.as[AppConfig].left.map(e => ConfigError.Missing(e.message))
+  yield config
+
+val port: Either[String, Int] = Try(sys.env("PORT").toInt).toEither.left.map(_.getMessage)
+```
+
+## Effect Systems — Cats Effect / ZIO
+
+Cats Effect `IO` as default. `Resource` for lifecycle management. ZIO acceptable when already adopted.
+
+```scala
+import cats.effect.{IO, Resource}
+import org.http4s.ember.server.EmberServerBuilder
+
+val server: Resource[IO, Server] =
+  EmberServerBuilder.default[IO]
+    .withHost(host"0.0.0.0").withPort(port"8080")
+    .withHttpApp(routes.orNotFound).build
+
+object Main extends cats.effect.IOApp.Simple:
+  def run: IO[Unit] = server.useForever  // Resource drains connections on shutdown
+```
+
+## Actors — Pekko
+
+Use Apache Pekko (Apache-licensed Akka fork) for new projects. Typed actors only.
+
+```scala
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.{ActorRef, Behavior}
+
+object TicketProcessor:
+  sealed trait Command
+  case class Process(ticket: Ticket, replyTo: ActorRef[Result]) extends Command
+  def apply(): Behavior[Command] = Behaviors.receive { (ctx, msg) => msg match
+    case Process(ticket, replyTo) => replyTo ! Result.Success(ticket.id); Behaviors.same
+  }
+```
+
+## Collections, JSON & Type Classes
+
+Immutable by default. `Vector` for indexed, `List` for prepend, `LazyList` for streaming. Avoid `mutable._` unless profiling demands it. circe with `derives` for JSON. Type classes via `given`.
+
+```scala
+val active = tickets.filter(_.priority.weight >= 5).sortBy(_.title)
+val batched = LazyList.from(items).grouped(100).map(processBatch)
+final case class ApiResponse(status: String, data: List[Ticket]) derives Codec.AsObject
+
+trait Show[A]:
+  extension (a: A) def show: String
+given Show[Ticket] with
+  extension (t: Ticket) def show: String = s"[${t.priority}] ${t.title}"
+```
+
+## Build, Testing & Tooling
+
+- **sbt**: Lock `scalaVersion := "3.5.2"`, enable `-Wunused:all -Werror` in CI, sbt-native-packager for Docker
+- **Testing**: ScalaTest for BDD, MUnit for lightweight, ScalaCheck for property-based, `munit-cats-effect` for IO tests, 80%+ coverage via sbt-scoverage
+- **Metals**: LSP with scalafmt format-on-save + scalafix linting, `.scalafmt.conf` in repo root
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `var` — use `val` and immutable structures
+- ❌ `null` — use `Option`; throwing exceptions for control flow — use `Either`/`IO.raiseError`
+- ❌ Scala 2 `implicit` in new Scala 3 code — use `given`/`using`; implicit conversions — use extensions
+- ❌ Blocking inside `IO`/`Future` without `IO.blocking`; `Any`/`AnyRef` as param/return types
+- ❌ Non-exhaustive matches on sealed types
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Scala Practice |
+|---|---|
+| **Reliability** | `Resource` lifecycle, typed errors via `Either`/`IO`, `cats-retry` circuit breakers, exhaustive matching, actor supervision |
+| **Security** | Opaque types prevent ID misuse, smart constructors validate at boundary, no `null`/exception leaks, secrets via env/vault |
+| **Performance** | `LazyList` streaming, non-blocking IO fibers, Pekko actors, `Vector` indexed access, `-Wunused` dead code elimination |
+| **Cost** | Lightweight fibers over OS threads, grouped batch streams, `Resource` connection pooling, right-sized dispatchers |
+| **Ops Excellence** | scalafmt + scalafix in CI, log4cats structured logging, sbt-native-packager containers, Metals LSP |
+| **Responsible AI** | Typed domain models prevent misclassification, validated inputs at boundary, auditable ADT decision pipelines |

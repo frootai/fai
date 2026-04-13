@@ -6,130 +6,147 @@ waf:
   - "reliability"
 ---
 
-# Salesforce Lwc Waf — WAF-Aligned Coding Standards
+# Salesforce LWC — FAI Standards
 
-> Salesforce Lightning Web Components standards — reactive properties, wire adapters, and accessibility.
+## Component Structure
 
-## Core Rules
+Four co-located files per component (`.html`, `.js`, `.css`, `.js-meta.xml`). Keep JS under 300 lines.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```html
+<template>
+  <lightning-card title={cardTitle} icon-name="standard:account">
+    <template if:true={account.data}>
+      <p class="slds-p-horizontal_small">{accountName}</p>
+    </template>
+    <template if:true={account.error}>
+      <c-error-panel errors={account.error}></c-error-panel>
+    </template>
+  </lightning-card>
+</template>
+```
 
-## Implementation Patterns
+```xml
+<!-- .js-meta.xml — expose to App Builder with design attributes -->
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+  <apiVersion>62.0</apiVersion><isExposed>true</isExposed>
+  <targets><target>lightning__RecordPage</target><target>lightning__AppPage</target></targets>
+  <targetConfigs><targetConfig targets="lightning__RecordPage">
+    <property name="showDetails" type="Boolean" default="true" label="Show Details"/>
+  </targetConfig></targetConfigs>
+</LightningComponentBundle>
+```
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+## Reactive Properties and Wire Service
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+```javascript
+import { LightningElement, api, wire } from 'lwc';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import getContacts from '@salesforce/apex/ContactController.getContacts';
+import updateContact from '@salesforce/apex/ContactController.updateContact';
+import { refreshApex } from '@salesforce/apex';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import NAME_FIELD from '@salesforce/schema/Account.Name';
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+export default class AccountCard extends LightningElement {
+  @api recordId;            // Public — set by parent or record page, never mutate internally
+  @api showDetails = true;  // Public with default — matches meta XML property
+  searchTerm = '';           // Reactive (tracked by default since API 59)
+
+  @wire(getRecord, { recordId: '$recordId', fields: [NAME_FIELD] })
+  account;                  // Wire for reads — auto-refreshes, caches results
+
+  @wire(getContacts, { accountId: '$recordId' })
+  contacts;
+
+  get accountName() { return getFieldValue(this.account.data, NAME_FIELD) ?? 'Account'; }
+
+  // Imperative Apex for DML — wire is read-only
+  async handleSave(event) {
+    try {
+      await updateContact({ contactId: event.detail.id, fields: event.detail.fields });
+      await refreshApex(this.contacts); // Re-fetch wired cache after mutation
+      this.dispatchEvent(new ShowToastEvent({ title: 'Success', variant: 'success' }));
+    } catch (error) {
+      this.dispatchEvent(new ShowToastEvent({
+        title: 'Error', message: error.body?.message ?? 'Unknown error', variant: 'error'
+      }));
+    }
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+Use `@wire` for read operations. Imperative calls for DML or conditional fetches. Always `refreshApex` after mutations. Import specific fields, not entire objects.
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Event Handling and Communication
 
-## Code Quality Standards
+```javascript
+// Child dispatches — bubbles:false, composed:false by default (direct parent only)
+this.dispatchEvent(new CustomEvent('select', { detail: { contactId: this.contact.Id } }));
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+// Parent listens: <c-contact-tile onselect={handleContactSelect}></c-contact-tile>
 
-## Testing Requirements
+// Cross-DOM via Lightning Message Service (sibling/unrelated components)
+import { publish, MessageContext } from 'lightning/messageService';
+import RECORD_SELECTED from '@salesforce/messageChannel/RecordSelected__c';
+@wire(MessageContext) messageContext;
+handleSelect(event) {
+  publish(this.messageContext, RECORD_SELECTED, { recordId: event.detail.contactId });
+}
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+Props down (`@api`), events up (`CustomEvent`). Sibling/unrelated: use LMS. Never `document.querySelector` across shadow boundaries — use `this.template.querySelector`.
 
-## Security Checklist
+## CSS and Accessibility
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```css
+:host { display: block; --tile-bg: var(--lwc-colorBackground, #fff); }
+.tile { background: var(--tile-bg); border: 1px solid var(--lwc-colorBorder, #e5e5e5); padding: var(--lwc-spacingMedium, 1rem); }
+```
+
+Use SLDS tokens (`var(--lwc-*)`) for theming. Never `!important` — shadow DOM handles encapsulation. Use `slds-*` classes for layout, custom CSS for behavior. Accessibility: `aria-label` on interactive elements, `aria-live="polite"` for dynamic regions, focus management after async ops, keyboard Enter/Space on all clickable elements.
+
+## Testing with Jest
+
+```javascript
+import { createElement } from 'lwc';
+import AccountCard from 'c/accountCard';
+import { getRecord } from 'lightning/uiRecordApi';
+
+describe('c-account-card', () => {
+  afterEach(() => { while (document.body.firstChild) document.body.removeChild(document.body.firstChild); });
+
+  it('renders name from wired record', async () => {
+    const el = createElement('c-account-card', { is: AccountCard });
+    el.recordId = '001FAKEID';
+    document.body.appendChild(el);
+    getRecord.emit({ fields: { Name: { value: 'Acme Corp' } } });
+    await Promise.resolve();
+    expect(el.shadowRoot.querySelector('lightning-card').title).toBe('Acme Corp');
+  });
+});
+```
+
+Use `@salesforce/sfdx-lwc-jest` adapters (`emit`/`emitError`). Always DOM cleanup in `afterEach`. Flush microtasks with `await Promise.resolve()` after state changes. CI: `sfdx-lwc-jest --coverage` at 80%+.
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Mutating `@api` properties internally — breaks one-way data flow
+- ❌ `document.querySelector` — cannot cross shadow DOM, use `this.template.querySelector`
+- ❌ `@wire` for DML — imperative only for create/update/delete
+- ❌ Missing `refreshApex` after mutations — stale data
+- ❌ `bubbles: true, composed: true` on all events — leaks across boundaries
+- ❌ Inline styles over SLDS tokens — breaks theming
+- ❌ Apex without try/catch — unhandled errors crash UI
+- ❌ `@salesforce/schema/Account` instead of fields — excess metadata
+- ❌ Skipping `afterEach` DOM cleanup in Jest — cross-spec test pollution
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | LWC Practice |
+|--------|-------------|
+| **Performance** | Lazy-load with `lwc:if` / dynamic imports. Combine fields in single `getRecord`. `@wire` caching over repeated imperative fetches. Debounce search inputs (300ms). |
+| **Reliability** | Try/catch every imperative Apex call. `c-error-panel` on wire errors. Null-safe access via `getFieldValue`. Graceful fallback when FLS blocks `@wire`. |
+| **Security** | `lightning/navigation` for URLs — never `window.location`. `lightning-formatted-rich-text` for dynamic HTML. `WITH SECURITY_ENFORCED` in Apex SOQL. Server-side record ID validation. |
+| **Op. Excellence** | Error logging via platform events. camelCase JS, kebab-case HTML. Meta XML pinned to org API version. CI with `sfdx-lwc-jest --coverage` at 80%+. |
+| **Responsible AI** | Content Safety before rendering AI text. Bias-aware prompts when surfacing AI recommendations. |
+| **Cost** | Client-side filtering on wired data to reduce Apex calls. Cache static picklists. `refreshApex` only after confirmed DML. |
