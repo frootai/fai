@@ -6,130 +6,206 @@ waf:
   - "reliability"
 ---
 
-# Grpc Waf — WAF-Aligned Coding Standards
+# gRPC — FAI Standards
 
-> gRPC standards — protobuf design, streaming, error codes, health checking.
+## Proto3 Design
 
-## Core Rules
+- Start field numbers at 1. Reserve 1-15 for frequently-set fields (1-byte varint).
+- Never reuse deleted field numbers. Mark them `reserved`:
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```protobuf
+message Order {
+  reserved 4, 8 to 10;
+  reserved "legacy_status";
+  string id = 1;
+  string customer_id = 2;
+  repeated LineItem items = 3;
+  google.protobuf.Timestamp created_at = 5;
+}
+```
 
-## Implementation Patterns
+- Use `oneof` for mutually exclusive fields. Never set more than one programmatically:
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+```protobuf
+message PaymentMethod {
+  oneof method {
+    CreditCard card = 1;
+    BankTransfer bank = 2;
+    Wallet wallet = 3;
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+- Wrap scalars in messages for optional semantics: `google.protobuf.StringValue`.
+- Enums must have `_UNSPECIFIED = 0` as first value. Never use 0 for real business meaning.
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Service Design Patterns
 
-## Code Quality Standards
+Match RPC type to data flow. Do not force unary when streaming fits:
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```protobuf
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);             // unary
+  rpc WatchOrderStatus(WatchRequest) returns (stream OrderStatusEvent);          // server-streaming
+  rpc UploadLineItems(stream LineItem) returns (UploadSummary);                  // client-streaming
+  rpc NegotiatePrice(stream PriceProposal) returns (stream PriceCounter);        // bidirectional
+}
+```
 
-## Testing Requirements
+- Keep request/response messages named `{Method}Request` / `{Method}Response`.
+- Never return bare scalars. Always wrap in a message for future extensibility.
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Error Handling
 
-## Security Checklist
+Return `google.rpc.Status` with rich error details. Never embed errors in response messages:
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```python
+from grpc_status import rpc_status
+from google.rpc import status_pb2, error_details_pb2
+from google.protobuf import any_pb2
+
+detail = any_pb2.Any()
+detail.Pack(error_details_pb2.BadRequest(
+    field_violations=[error_details_pb2.BadRequest.FieldViolation(
+        field="customer_id", description="must be non-empty UUID"
+    )]
+))
+status = status_pb2.Status(
+    code=code_pb2.INVALID_ARGUMENT,
+    message="validation failed",
+    details=[detail],
+)
+context.abort_with_status(rpc_status.to_status(status))
+```
+
+Map domain errors to canonical codes: `NOT_FOUND`, `ALREADY_EXISTS`, `PERMISSION_DENIED`, `RESOURCE_EXHAUSTED`, `FAILED_PRECONDITION`. Never use `UNKNOWN` or `INTERNAL` for expected errors.
+
+## Interceptors / Middleware
+
+Chain interceptors for cross-cutting concerns. Do not scatter auth/logging across handlers:
+
+```python
+# Python server interceptor
+class AuthInterceptor(grpc.ServerInterceptor):
+    def intercept_service(self, continuation, handler_call_details):
+        metadata = dict(handler_call_details.invocation_metadata)
+        token = metadata.get("authorization", "")
+        if not self._validate(token):
+            return grpc.unary_unary_rpc_method_handler(
+                lambda req, ctx: ctx.abort(grpc.StatusCode.UNAUTHENTICATED, "invalid token")
+            )
+        return continuation(handler_call_details)
+
+server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                     interceptors=[AuthInterceptor(), LoggingInterceptor()])
+```
+
+```go
+// Go unary interceptor
+func UnaryLogger(ctx context.Context, req any, info *grpc.UnaryServerInfo,
+    handler grpc.UnaryHandler) (any, error) {
+    start := time.Now()
+    resp, err := handler(ctx, req)
+    slog.Info("rpc", "method", info.FullMethod, "dur", time.Since(start), "code", status.Code(err))
+    return resp, err
+}
+```
+
+## Deadline Propagation
+
+Always set deadlines on client calls. Servers must check and propagate:
+
+```go
+ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+defer cancel()
+resp, err := client.CreateOrder(ctx, req)
+if status.Code(err) == codes.DeadlineExceeded {
+    // handle timeout
+}
+```
+
+Never set infinite deadlines. Default to 30s for unary, 5m for streaming. Check `ctx.Err()` in long loops.
+
+## Health Checking
+
+Implement `grpc.health.v1.Health` on every service. This is required for Kubernetes gRPC probes and load balancer health:
+
+```python
+from grpc_health.v1 import health, health_pb2_grpc
+health_servicer = health.HealthServicer()
+health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
+health_servicer.set("OrderService", health_pb2.HealthCheckResponse.SERVING)
+```
+
+Enable server reflection in non-production for debugging:
+
+```python
+from grpc_reflection.v1alpha import reflection
+SERVICE_NAMES = (order_pb2.DESCRIPTOR.services_by_name["OrderService"].full_name,
+                 reflection.SERVICE_NAME, health.SERVICE_NAME)
+reflection.enable_server_reflection(SERVICE_NAMES, server)
+```
+
+## Load Balancing
+
+- Use client-side `round_robin` for simple deployments:
+  `grpc.insecure_channel("dns:///orders.svc:50051", options=[("grpc.lb_policy_name", "round_robin")])`
+- Use xDS for traffic splitting, canary, and fault injection in service mesh.
+- Never point clients at a single pod IP. Use DNS or service discovery.
+
+## TLS / mTLS
+
+- Always terminate TLS. Use mTLS for service-to-service:
+
+```go
+creds, _ := credentials.NewServerTLSFromFile("server.crt", "server.key")
+srv := grpc.NewServer(grpc.Creds(creds))
+```
+
+- Store certs in Key Vault or cert-manager. Never embed PEM in source.
+- Rotate certificates on schedule (90-day max lifetime).
+
+## Proto Evolution & Compatibility
+
+- Never change field numbers or types of existing fields.
+- Add new fields with new numbers. Old clients ignore unknown fields (forward-compatible).
+- Use `reserved` for removed fields to prevent accidental reuse.
+- Run `buf breaking --against .git#branch=main` on every PR to catch breaking changes.
+- Run `buf lint` to enforce style: `PACKAGE_VERSION_SUFFIX`, `ENUM_ZERO_VALUE_SUFFIX`, `SERVICE_SUFFIX`.
+
+## Testing with grpcurl
+
+```bash
+# list services via reflection
+grpcurl -plaintext localhost:50051 list
+
+# describe a service
+grpcurl -plaintext localhost:50051 describe order.v1.OrderService
+
+# call unary RPC
+grpcurl -plaintext -d '{"customer_id":"abc-123"}' localhost:50051 order.v1.OrderService/CreateOrder
+```
+
+Write integration tests that spin up an in-process server, call via channel, and assert on responses + status codes. Mock downstream dependencies at the gRPC layer, not HTTP.
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+| Anti-Pattern | Fix |
+|---|---|
+| Bare scalar returns (`returns (string)`) | Wrap in `{Method}Response` message |
+| Reusing deleted field numbers | `reserved` the number and name |
+| No deadline on client calls | `WithTimeout` / `deadline` on every call |
+| `UNKNOWN` for business errors | Map to canonical code (`NOT_FOUND`, etc.) |
+| Reflection enabled in production | Gate behind env flag or disable |
+| HTTP JSON gateway without `google.api.http` annotations | Add `option (google.api.http)` for REST transcoding |
+| Polling instead of server-streaming | Use server-stream for push-based updates |
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Practice |
+|---|---|
+| Performance Efficiency | Client-side LB, connection pooling, streaming for bulk data, proto binary encoding |
+| Reliability | Deadlines, retries with backoff, health checks, circuit breaking via xDS |
+| Security | mTLS, token validation in interceptor, no reflection in prod |
+| Cost Optimization | Reuse channels, compress large payloads (`grpc.default_compression_algorithm`) |
+| Operational Excellence | Structured logging in interceptors, `buf lint` in CI, proto registry |

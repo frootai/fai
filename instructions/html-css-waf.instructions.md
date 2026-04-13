@@ -6,130 +6,145 @@ waf:
   - "performance-efficiency"
 ---
 
-# Html Css Waf — WAF-Aligned Coding Standards
+# HTML & CSS — FAI Standards
 
-> HTML/CSS standards — semantic HTML, accessibility, 60-30-10 color rule, and responsive design.
+## Semantic HTML5
 
-## Core Rules
+- Use `<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>`, `<footer>` — never `<div>` soup
+- One `<main>` per page. `<figure>` + `<figcaption>` for images/charts/code
+- `<details>`+`<summary>` for collapsible UI. `<dialog>` for modals (`.showModal()`)
+- `<time datetime="2026-04-13">` for dates. Strict `h1`→`h6` hierarchy, never skip levels
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```html
+<article>
+  <header><h2>Play 01 — Enterprise RAG</h2></header>
+  <section aria-labelledby="arch">
+    <h3 id="arch">Architecture</h3>
+    <figure>
+      <img src="arch.webp" alt="RAG pipeline: ingest → chunk → embed → retrieve" width="800" height="450">
+      <figcaption>End-to-end RAG architecture</figcaption>
+    </figure>
+  </section>
+</article>
+```
 
-## Implementation Patterns
+## CSS Custom Properties & Theming
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+```css
+:root {
+  color-scheme: light dark;
+  --color-surface: light-dark(#fff, #1a1a2e);
+  --color-text: light-dark(#111, #e0e0e0);
+  --color-primary: #10b981;
+  --radius-md: 0.5rem;
+  --space-unit: 0.25rem;
+}
+body { background: var(--color-surface); color: var(--color-text); }
+```
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+## Modern Layout
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+- **Grid** for 2D layouts, **Flexbox** for 1D alignment. `gap` on both — no margin hacks
+
+```css
+.play-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: calc(var(--space-unit) * 6);
+}
+.card { display: flex; flex-direction: column; gap: 1rem; aspect-ratio: 4 / 3; }
+```
+
+## Container Queries
+
+```css
+.card-wrapper { container-type: inline-size; }
+@container (min-inline-size: 400px) { .card { flex-direction: row; } }
+```
+
+## CSS Nesting & Cascade Layers
+
+```css
+@layer reset, base, components, utilities;
+
+@layer components {
+  .btn {
+    padding-block: 0.5rem; padding-inline: 1rem;
+    &:hover { filter: brightness(1.1); }
+    &:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Logical Properties
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+- `margin-inline`, `padding-block`, `border-inline-start`, `inset-block` — automatic RTL support
 
-## Code Quality Standards
+## Responsive Typography & `:has()`
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```css
+h1 { font-size: clamp(1.75rem, 1rem + 3vw, 3rem); }
+h2 { font-size: clamp(1.25rem, 0.8rem + 2vw, 2rem); }
+p  { font-size: clamp(1rem, 0.9rem + 0.5vw, 1.125rem); line-height: 1.6; }
 
-## Testing Requirements
+.form-group:has(:invalid) { border-color: var(--color-error); }
+.card:has(> img) { grid-template-rows: 200px 1fr; }
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Scroll Snap & BEM
 
-## Security Checklist
+```css
+.carousel {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+  & > * { scroll-snap-align: start; flex: 0 0 min(300px, 80vw); }
+}
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+- BEM: `.play-card` → `.play-card__title` → `.play-card--featured`. Max depth: `block__element--modifier`
+
+## Accessibility
+
+- `:focus-visible` for keyboard-only focus rings — never `outline: none` without replacement
+- `prefers-reduced-motion: reduce` — disable transitions, parallax, auto-play
+- `prefers-contrast: more` — increase borders, use solid backgrounds
+- Touch targets: `44px × 44px` min (`min-block-size`/`min-inline-size`)
+- Contrast: 4.5:1 text, 3:1 large text / UI (WCAG AA). Use `aria-*` on unlabelled interactives
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+```
+
+## Performance
+
+- `content-visibility: auto` on below-fold sections — skips rendering until scrolled
+- `will-change` only before animation, remove after — never in static styles
+- `contain: layout style paint` on isolated components (cards, modals)
+- Images: `loading="lazy"` + explicit `width`/`height` to prevent CLS
+- `<picture>` with `<source type="image/avif">` → `webp` → `jpg` fallback
+- Inline critical CSS in `<head>`, defer rest via `<link rel="preload" as="style">`
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `<div>`/`<span>` for clickable elements — use `<button>`, `<a>`, `<input>`
+- ❌ `outline: none` without `:focus-visible` replacement
+- ❌ `!important` outside utility layers or a11y overrides
+- ❌ Fixed `px` font sizes — use `rem`/`clamp()`
+- ❌ `@import` in CSS — use `@layer` or bundler imports
+- ❌ Magic numbers — extract to custom properties
+- ❌ `will-change` on static elements — compositor layer bloat
+- ❌ `height: 100vh` on mobile — use `100dvh`
+- ❌ Styling with IDs — specificity too high, use classes
+- ❌ `display: none` without `aria-hidden` consideration
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | HTML/CSS Practice |
+|--------|-------------------|
+| **Responsible AI** | Semantic HTML for screen readers, WCAG AA contrast, `prefers-reduced-motion`, `aria-*`, `lang` on `<html>` |
+| **Performance** | `content-visibility`, `contain`, lazy loading, critical CSS inlining, AVIF/WebP, CSS-only animations |
+| **Reliability** | Progressive enhancement — content readable without CSS/JS, `<noscript>`, `@supports` feature detection |
+| **Security** | CSP-compatible styles (no inline `style=`), `referrerpolicy`, `sandbox` on `<iframe>`, SRI on CDN sheets |
+| **Cost Optimization** | Cascade layers for minimal CSS, tree-shakeable utilities, system font stacks, modern image formats |
+| **Operational Excellence** | Design tokens as custom properties, BEM/utility naming, `@layer` for predictable cascade |

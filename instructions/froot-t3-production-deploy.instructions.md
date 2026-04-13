@@ -6,130 +6,262 @@ waf:
   - "operational-excellence"
 ---
 
-# Froot T3 Production Deploy — WAF-Aligned Coding Standards
+# Production Deployment — FAI Standards
 
-> Production deployment standards — blue-green, canary rollout, health probes, rollback criteria.
+## Blue-Green Deployment (Azure App Service)
 
-## Core Rules
+Use deployment slots to eliminate downtime. Staging receives traffic only after health checks pass.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```bicep
+resource appService 'Microsoft.Web/sites@2023-12-01' = {
+  name: svcName
+  properties: {
+    siteConfig: {
+      healthCheckPath: '/health'
+      autoHealEnabled: true
+    }
+  }
+}
 
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
+resource stagingSlot 'Microsoft.Web/sites/slots@2023-12-01' = {
+  parent: appService
+  name: 'staging'
+  properties: {
+    siteConfig: {
+      healthCheckPath: '/health'
+      appSettings: [
+        { name: 'DEPLOYMENT_SLOT', value: 'staging' }
+        { name: 'MODEL_VERSION', value: modelVersion }
+      ]
+    }
   }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+Swap only after smoke tests pass on the staging slot:
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```bash
+az webapp deployment slot swap \
+  --resource-group $RG --name $APP --slot staging \
+  --target-slot production --action preview
+curl -sf "https://${APP}-staging.azurewebsites.net/health" || exit 1
+curl -sf "https://${APP}-staging.azurewebsites.net/ready" || exit 1
+az webapp deployment slot swap \
+  --resource-group $RG --name $APP --slot staging \
+  --target-slot production --action swap
+```
 
-## Code Quality Standards
+## Canary Releases with Traffic Splitting
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+Route a percentage to the new version. Increase only when error rate and latency hold steady.
 
-## Testing Requirements
+```bicep
+resource trafficRouting 'Microsoft.Web/sites/config@2023-12-01' = {
+  parent: appService
+  name: 'web'
+  properties: {
+    experiments: {
+      rampUpRules: [
+        {
+          actionHostName: '${svcName}-staging.azurewebsites.net'
+          reroutePercentage: 10   // Start 10%, ramp to 50%, then 100%
+          name: 'canary'
+          changeIntervalInMinutes: 15
+          changeStep: 10
+          maxReroutePercentage: 50
+          minReroutePercentage: 10
+        }
+      ]
+    }
+  }
+}
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Health Check Endpoints
 
-## Security Checklist
+Every AI service MUST expose three endpoints:
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+| Endpoint | Purpose | Failure Action |
+|----------|---------|---------------|
+| `/health` | Load balancer liveness — 200 if process alive | Remove from rotation |
+| `/ready` | Readiness — model loaded, DB connected, caches warm | Stop sending traffic |
+| `/live` | Deep liveness — GPU available, inference < threshold | Alert + investigate |
+
+```python
+@app.get("/ready")
+async def readiness():
+    model_ok = model_registry.is_loaded()
+    db_ok = await db.ping()
+    if not (model_ok and db_ok):
+        raise HTTPException(503, detail="not ready")
+    return {"status": "ready", "model": model_registry.version()}
+```
+
+## Graceful Shutdown (SIGTERM Handling)
+
+AI workloads must drain in-flight inference requests before exiting. Never kill mid-generation.
+
+```python
+import signal, asyncio
+shutdown_event = asyncio.Event()
+
+def handle_sigterm(sig, frame):
+    logger.info("SIGTERM received — draining connections")
+    shutdown_event.set()
+
+signal.signal(signal.SIGTERM, handle_sigterm)
+
+async def shutdown():
+    shutdown_event.set()
+    await asyncio.sleep(0.5)          # Let in-flight requests finish
+    await inference_engine.flush()     # Flush GPU batch queue
+    await telemetry.flush()            # Flush App Insights buffer
+    await db_pool.close()
+```
+
+Set `terminationGracePeriodSeconds: 60` in Kubernetes — GPU inference can take 30s+ per request.
+
+## AKS Deployment Strategies for GPU Workloads
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-inference
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # 1 extra GPU pod during rollout
+      maxUnavailable: 0    # Zero downtime
+  template:
+    spec:
+      terminationGracePeriodSeconds: 60
+      tolerations:
+        - key: "sku"
+          operator: "Equal"
+          value: "gpu"
+          effect: "NoSchedule"
+      containers:
+        - name: inference
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          readinessProbe:
+            httpGet: { path: /ready, port: 8080 }
+            initialDelaySeconds: 30  # Model loading time
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /live, port: 8080 }
+            initialDelaySeconds: 45
+            failureThreshold: 3
+```
+
+## Feature Flags for AI Model Rollout
+
+Route traffic between model versions without redeploying:
+
+```json
+{
+  "model_routing": {
+    "default": "gpt-4o-2024-08-06",
+    "canary": { "model": "gpt-4o-2024-11-20", "percentage": 15 },
+    "rollback_model": "gpt-4o-2024-05-13"
+  },
+  "rollback_triggers": {
+    "error_rate_threshold": 0.05,
+    "latency_p99_ms": 8000,
+    "groundedness_score_min": 0.85
+  }
+}
+```
+
+## Rollback Procedures
+
+Automated rollback triggers — codify in CI/CD, never rely on manual judgment:
+
+```bash
+ERROR_RATE=$(az monitor metrics list --resource $RESOURCE_ID \
+  --metric "Http5xx" --interval PT10M \
+  --query "value[0].timeseries[0].data[-1].total" -o tsv)
+TOTAL=$(az monitor metrics list --resource $RESOURCE_ID \
+  --metric "Requests" --interval PT10M \
+  --query "value[0].timeseries[0].data[-1].total" -o tsv)
+RATE=$(echo "scale=4; $ERROR_RATE / $TOTAL" | bc)
+if (( $(echo "$RATE > 0.05" | bc -l) )); then
+  echo "Error rate ${RATE} > 5% — rolling back"
+  az webapp deployment slot swap --resource-group $RG --name $APP \
+    --slot staging --target-slot production --action swap
+fi
+```
+
+## Environment Promotion Pipeline
+
+```yaml
+# .github/workflows/deploy.yml
+jobs:
+  deploy-staging:
+    environment: staging
+    steps:
+      - run: az deployment group create -g $RG_STAGING -f infra/main.bicep -p env=staging
+      - run: ./scripts/smoke-test.sh https://$APP-staging.azurewebsites.net
+      - run: ./scripts/eval-pipeline.sh --env staging --threshold 0.85
+  deploy-prod:
+    needs: deploy-staging
+    environment: production
+    steps:
+      - run: az deployment group create -g $RG_PROD -f infra/main.bicep -p env=prod
+      - run: ./scripts/smoke-test.sh https://$APP.azurewebsites.net
+      - run: |
+          python evaluation/post_deploy_check.py \
+            --latency-p99 8000 --error-rate 0.02 --token-budget-daily 5000000
+```
+
+## Post-Deploy Smoke Tests
+
+Smoke tests MUST validate AI-specific behavior, not just HTTP 200:
+
+```bash
+curl -sf "$ENDPOINT/health" | jq -e '.status == "healthy"'
+curl -sf "$ENDPOINT/ready" | jq -e '.status == "ready"'
+RESPONSE=$(curl -s -X POST "$ENDPOINT/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"What is 2+2?"}]}')
+echo "$RESPONSE" | jq -e '.choices[0].message.content' || exit 1
+LATENCY=$(echo "$RESPONSE" | jq '.usage.latency_ms')
+[ "$LATENCY" -lt 8000 ] || { echo "Latency ${LATENCY}ms > 8s"; exit 1; }
+```
+
+## Monitoring & Alerting Thresholds
+
+| Metric | Warning | Critical | Action |
+|--------|---------|----------|--------|
+| Latency p99 | > 5s | > 10s | Scale out / check GPU saturation |
+| Error rate (5xx) | > 2% | > 5% | Auto-rollback triggered |
+| Token usage / hour | > 80% budget | > 95% budget | Throttle non-critical |
+| Groundedness score | < 0.90 | < 0.80 | Block deploy / retrain |
+| GPU utilization | > 85% | > 95% | Add node to pool |
+| Memory (RSS) | > 80% | > 90% | Restart pod / investigate leak |
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Deploying directly to production without staging slot validation
+- ❌ `kubectl rollout restart` instead of canary with traffic split
+- ❌ Health endpoint returning 200 without checking model readiness or GPU state
+- ❌ No `terminationGracePeriodSeconds` — GPU inference killed mid-generation
+- ❌ Feature flags in code instead of external config (forces redeploy to toggle)
+- ❌ Manual rollback — MUST be automated with metric-based triggers
+- ❌ Skipping smoke tests — inference can diverge between slots
+- ❌ GPU workloads without node taints — pods land on CPU nodes and OOM
+- ❌ No token budget alerts — prompt injection loops can burn $10K in hours
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Deployment Practice |
+|--------|-------------------|
+| **Reliability** | Blue-green slots, zero-downtime rolling updates, auto-rollback at 5% error rate, health probes `/health` `/ready` `/live`, `terminationGracePeriodSeconds: 60` |
+| **Operational Excellence** | Bicep IaC with env-specific params, GitHub Actions promotion (dev→staging→prod), post-deploy smoke + eval, structured deployment logs |
+| **Security** | Slot-sticky secrets, Managed Identity per slot, private endpoints in prod, no secrets in CI logs |
+| **Cost Optimization** | Canary at 10% initial traffic (limits blast radius + cost), GPU auto-scaling with KEDA, daily token budget alerts, model routing via feature flags |
+| **Performance Efficiency** | GPU taints prevent CPU scheduling, readiness probes block traffic until model loaded, traffic split validates latency before full rollout |
+| **Responsible AI** | Groundedness gate (≥ 0.85) before promotion, Content Safety per slot, evaluation pipeline as deployment gate |

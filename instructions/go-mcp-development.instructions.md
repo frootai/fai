@@ -6,130 +6,237 @@ waf:
   - "reliability"
 ---
 
-# Go Mcp Development — WAF-Aligned Coding Standards
+# Go MCP Server Development — FAI Standards
 
-> Go MCP server development — go-sdk/mcp, struct-based I/O, context handling.
+> Building MCP servers in Go using `mark3labs/mcp-go` — tool registration, resource handlers, stdio transport, structured logging, and production patterns.
 
-## Core Rules
+## Go Module Structure
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```
+my-mcp-server/
+├── go.mod                    # module github.com/org/my-mcp-server
+├── main.go                   # entry point — server bootstrap + signal handling
+├── tools/                    # one file per tool domain
+│   ├── search.go
+│   └── documents.go
+├── resources/                # resource + template handlers
+│   └── configs.go
+├── prompts/                  # prompt template definitions
+│   └── templates.go
+├── internal/                 # unexported helpers — validation, clients
+│   ├── validate.go
+│   └── client.go
+└── tools_test.go             # test file co-located or in _test package
+```
 
-## Implementation Patterns
+- One `tools.AddTool()` call per tool — never register tools in `init()`
+- Group related tools in domain files, keep `main.go` as pure wiring
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+## Server Bootstrap (stdio Transport)
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+```go
+package main
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+import (
+"context"
+"log/slog"
+"os"
+"os/signal"
+"syscall"
+
+"github.com/mark3labs/mcp-go/mcp"
+"github.com/mark3labs/mcp-go/server"
+)
+
+func main() {
+logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
+slog.SetDefault(logger)
+
+s := server.NewMCPServer("my-server", "1.0.0",
+server.WithLogging(),
+)
+registerTools(s)
+registerResources(s)
+registerPrompts(s)
+
+ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+defer stop()
+
+if err := server.ServeStdio(s, server.WithContext(ctx)); err != nil {
+slog.Error("server exited", "error", err)
+os.Exit(1)
+}
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+- Always log to `os.Stderr` — stdout is the MCP JSON-RPC transport
+- Use `signal.NotifyContext` for graceful shutdown — never `os.Exit` in handlers
+- Pass `context.Context` through every handler for cancellation propagation
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Tool Registration with JSON Schema Validation
 
-## Code Quality Standards
+```go
+func registerTools(s *server.MCPServer) {
+searchTool := mcp.NewTool("search_docs",
+mcp.WithDescription("Search documents by query and optional filters"),
+mcp.WithString("query",
+mcp.Required(),
+mcp.Description("Search query string"),
+mcp.MaxLength(500),
+),
+mcp.WithNumber("limit",
+mcp.Description("Max results to return"),
+mcp.DefaultNumber(10),
+mcp.Min(1),
+mcp.Max(100),
+),
+)
+s.AddTool(searchTool, handleSearchDocs)
+}
+```
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+- Define input schemas declaratively — mcp-go generates JSON Schema from `mcp.With*` helpers
+- Always set `mcp.Required()` on mandatory params, `mcp.Description()` on all params
+- Use `mcp.Min/Max/MaxLength/Enum` constraints — reject bad input at the schema level
 
-## Testing Requirements
+## Tool Handler Pattern
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```go
+func handleSearchDocs(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+query, _ := req.Params.Arguments["query"].(string)
+if query == "" {
+return mcp.NewToolResultError("query is required"), nil
+}
+limit := 10
+if v, ok := req.Params.Arguments["limit"].(float64); ok {
+limit = int(v)
+}
 
-## Security Checklist
+results, err := doSearch(ctx, query, limit)
+if err != nil {
+slog.ErrorContext(ctx, "search failed", "query", query, "error", err)
+return mcp.NewToolResultError("internal search error"), nil
+}
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+out, _ := json.Marshal(results)
+return mcp.NewToolResultText(string(out)), nil
+}
+```
+
+- Return `(*mcp.CallToolResult, error)` — return `mcp.NewToolResultError()` for user-facing errors, Go `error` only for transport failures
+- Extract arguments via type assertion from `req.Params.Arguments` map — JSON numbers decode as `float64`
+- Always pass `ctx` to downstream calls for timeout/cancellation propagation
+- Log with `slog.ErrorContext` — never `fmt.Println` or `log.Fatal` inside handlers
+
+## Resource Handlers
+
+```go
+func registerResources(s *server.MCPServer) {
+s.AddResource(mcp.NewResource(
+"config://app/settings",
+"Application settings",
+mcp.WithMIMEType("application/json"),
+), handleGetSettings)
+
+s.AddResourceTemplate(mcp.NewResourceTemplate(
+"docs://articles/{id}",
+"Article by ID",
+), handleGetArticle)
+}
+
+func handleGetSettings(ctx context.Context, req mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+data, err := os.ReadFile("config/settings.json")
+if err != nil {
+return nil, fmt.Errorf("read settings: %w", err)
+}
+return []mcp.ResourceContents{mcp.NewTextResourceContents(req.Params.URI, "application/json", string(data))}, nil
+}
+```
+
+## Prompt Templates
+
+```go
+func registerPrompts(s *server.MCPServer) {
+s.AddPrompt(mcp.NewPrompt("summarize",
+mcp.WithPromptDescription("Summarize a document"),
+mcp.WithArgument("content", mcp.ArgumentDescription("Text to summarize"), mcp.RequiredArgument()),
+mcp.WithArgument("style", mcp.ArgumentDescription("Summary style: brief|detailed")),
+), handleSummarizePrompt)
+}
+
+func handleSummarizePrompt(ctx context.Context, req mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+content := req.Params.Arguments["content"]
+style := req.Params.Arguments["style"]
+if style == "" {
+style = "brief"
+}
+return mcp.NewGetPromptResult(
+"Summarize the following document",
+mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(
+fmt.Sprintf("Summarize this text in a %s style:\n\n%s", style, content),
+)),
+), nil
+}
+```
+
+## Structured Logging (slog)
+
+- Use `log/slog` with `slog.NewJSONHandler(os.Stderr, ...)` — JSON to stderr, never stdout
+- Add request context: `slog.With("tool", toolName, "request_id", rid)`
+- Log levels: `Info` for tool invocations, `Error` for failures, `Debug` for argument details
+- Never log full user prompts or PII — redact before logging
+
+## Error Handling
+
+- Schema validation errors → mcp-go rejects automatically before handler runs
+- Business logic errors → return `mcp.NewToolResultError("descriptive message"), nil`
+- Infrastructure errors → return `nil, fmt.Errorf("context: %w", err)` (transport-level failure)
+- Never panic in handlers — recover at server level if needed
+- Wrap errors with `%w` for unwrapping; include operation context in message
+
+## Testing MCP Tools
+
+```go
+func TestHandleSearchDocs(t *testing.T) {
+ctx := context.Background()
+req := mcp.CallToolRequest{}
+req.Params.Arguments = map[string]any{
+"query": "kubernetes",
+"limit": float64(5), // JSON number = float64
+}
+result, err := handleSearchDocs(ctx, req)
+if err != nil {
+t.Fatalf("unexpected error: %v", err)
+}
+if result.IsError {
+t.Fatalf("tool returned error: %v", result.Content)
+}
+}
+```
+
+- Test handlers directly — they are plain functions with `(context.Context, mcp.CallToolRequest) → (*mcp.CallToolResult, error)`
+- Use table-driven tests for input validation edge cases (missing required, invalid types, boundary values)
+- For integration tests, use `server.NewTestClient(s)` to exercise the full JSON-RPC flow
+- Mock external dependencies via interfaces — inject via struct fields, not globals
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Logging to stdout — corrupts the MCP JSON-RPC transport
+- ❌ Using `log.Fatal`/`os.Exit` inside tool handlers — kills server on single request failure
+- ❌ Global mutable state shared across tool handlers without synchronization
+- ❌ Ignoring `context.Context` — breaks cancellation, timeout, and tracing propagation
+- ❌ Returning Go `error` for business validation — use `mcp.NewToolResultError` instead
+- ❌ Registering tools in `init()` — makes testing and conditional registration impossible
+- ❌ Raw string argument extraction without type assertion guards — panics on missing keys
+- ❌ Blocking the handler goroutine with unbounded operations — always use `ctx.Done()` checks
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Go MCP Server Practice |
+|--------|----------------------|
+| **Reliability** | `signal.NotifyContext` graceful shutdown; `context.Context` propagation; error wrapping with `%w`; no panics in handlers |
+| **Security** | Schema-level input validation via `mcp.Required/Max/Enum`; never log PII; secrets from env vars or Key Vault; sanitize all user input before downstream calls |
+| **Performance** | Stdio transport is zero-overhead; reuse HTTP clients via `sync.Pool` or struct fields; stream large results; keep handlers non-blocking |
+| **Cost Optimization** | Limit result sizes via schema `Max` constraints; cache expensive lookups; batch downstream API calls where possible |
+| **Operational Excellence** | Structured JSON logging to stderr with `slog`; correlation IDs in log attributes; `go vet`/`staticcheck` in CI; version in `server.NewMCPServer` for client discovery |
+| **Responsible AI** | Validate and sanitize LLM inputs in tool handlers; Content Safety checks before returning AI-generated content; document tool descriptions accurately for model grounding |

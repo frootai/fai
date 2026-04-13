@@ -6,130 +6,218 @@ waf:
   - "operational-excellence"
 ---
 
-# Froot T1 Fine Tuning Data — WAF-Aligned Coding Standards
+# Fine-Tuning Data Preparation — FAI Standards
 
-> Fine-tuning data standards — JSONL format, quality validation, class balance, edge case inclusion.
+## JSONL Format — Chat Completion Structure
 
-## Core Rules
+Every training example must follow the OpenAI chat completion format. One JSON object per line, no trailing commas, UTF-8 encoded.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```python
+import json
 
-## Implementation Patterns
+def create_training_example(system: str, user: str, assistant: str) -> dict:
+    """Build a single JSONL training example."""
+    return {
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+            {"role": "assistant", "content": assistant},
+        ]
+    }
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+# Write JSONL — one JSON object per line, newline-terminated
+with open("train.jsonl", "w", encoding="utf-8") as f:
+    for ex in examples:
+        f.write(json.dumps(ex, ensure_ascii=False) + "\n")
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+Validate every line parses and contains the required `messages` array with at least one `user` and one `assistant` turn. Reject examples missing any role.
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Data Quality Pipeline
 
-## Code Quality Standards
+```python
+import hashlib, tiktoken
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+enc = tiktoken.encoding_for_model("gpt-4o")
 
-## Testing Requirements
+def token_count(messages: list[dict]) -> int:
+    """Count tokens for a chat completion training example (approx)."""
+    return sum(len(enc.encode(m["content"])) + 4 for m in messages) + 2
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+def deduplicate(examples: list[dict]) -> list[dict]:
+    """Remove exact-duplicate examples by content hash."""
+    seen = set()
+    unique = []
+    for ex in examples:
+        h = hashlib.sha256(json.dumps(ex, sort_keys=True).encode()).hexdigest()
+        if h not in seen:
+            seen.add(h)
+            unique.append(ex)
+    return unique
 
-## Security Checklist
+def filter_by_length(examples: list[dict], min_tokens: int = 10, max_tokens: int = 4096) -> list[dict]:
+    """Drop examples outside token bounds — too short = noise, too long = truncation."""
+    return [ex for ex in examples if min_tokens <= token_count(ex["messages"]) <= max_tokens]
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+def validate_format(examples: list[dict]) -> list[str]:
+    """Return list of errors. Empty = valid."""
+    errors = []
+    for i, ex in enumerate(examples):
+        msgs = ex.get("messages", [])
+        roles = [m.get("role") for m in msgs]
+        if "user" not in roles:
+            errors.append(f"Example {i}: missing user message")
+        if "assistant" not in roles:
+            errors.append(f"Example {i}: missing assistant message")
+        if any(not m.get("content", "").strip() for m in msgs):
+            errors.append(f"Example {i}: empty content field")
+    return errors
+```
+
+## PII Scrubbing Before Training
+
+Strip PII before any data leaves your control. Use Presidio or Azure AI Language PII detection — never roll your own regex-only solution.
+
+```python
+from presidio_analyzer import AnalyzerEngine
+from presidio_anonymizer import AnonymizerEngine
+
+analyzer = AnalyzerEngine()
+anonymizer = AnonymizerEngine()
+
+def scrub_pii(text: str, language: str = "en") -> str:
+    """Detect and redact PII (emails, phones, SSNs, names, addresses)."""
+    results = analyzer.analyze(text=text, language=language,
+                               entities=["EMAIL_ADDRESS", "PHONE_NUMBER", "PERSON",
+                                         "CREDIT_CARD", "US_SSN", "LOCATION"])
+    return anonymizer.anonymize(text=text, analyzer_results=results).text
+
+# Apply to every message content BEFORE writing JSONL
+for ex in examples:
+    for msg in ex["messages"]:
+        msg["content"] = scrub_pii(msg["content"])
+```
+
+## Dataset Splits
+
+```python
+import random
+
+def split_dataset(examples: list[dict], val_ratio: float = 0.2, seed: int = 42) -> tuple:
+    """80/20 train/validation split. Stratify manually if class-imbalanced."""
+    random.seed(seed)
+    shuffled = examples.copy()
+    random.shuffle(shuffled)
+    split_idx = int(len(shuffled) * (1 - val_ratio))
+    return shuffled[:split_idx], shuffled[split_idx:]
+
+train, val = split_dataset(clean_examples)
+# Write both files
+for name, data in [("train.jsonl", train), ("val.jsonl", val)]:
+    with open(name, "w", encoding="utf-8") as f:
+        for ex in data:
+            f.write(json.dumps(ex, ensure_ascii=False) + "\n")
+```
+
+Minimum dataset sizes: 50 examples for basic tasks, 500+ for complex domain adaptation. Validation set minimum: 20 examples.
+
+## Token Budget Analysis
+
+```python
+def dataset_token_report(examples: list[dict]) -> dict:
+    """Per-example and aggregate token stats for cost estimation."""
+    counts = [token_count(ex["messages"]) for ex in examples]
+    return {
+        "total_examples": len(counts),
+        "total_tokens": sum(counts),
+        "mean_tokens": sum(counts) / max(len(counts), 1),
+        "max_tokens": max(counts, default=0),
+        "min_tokens": min(counts, default=0),
+        "estimated_epochs_cost_1k": round(sum(counts) / 1000 * 0.008, 2),  # gpt-4o-mini rate
+    }
+```
+
+## Azure OpenAI Fine-Tuning API
+
+```python
+from openai import AzureOpenAI
+
+client = AzureOpenAI()  # Uses AZURE_OPENAI_ENDPOINT + DefaultAzureCredential
+
+# 1. Upload training file
+train_file = client.files.create(file=open("train.jsonl", "rb"), purpose="fine-tune")
+val_file = client.files.create(file=open("val.jsonl", "rb"), purpose="fine-tune")
+
+# 2. Create fine-tuning job with hyperparameters
+job = client.fine_tuning.jobs.create(
+    training_file=train_file.id,
+    validation_file=val_file.id,
+    model="gpt-4o-mini-2024-07-18",
+    hyperparameters={
+        "n_epochs": 3,                # 2-4 for most tasks; more = overfitting risk
+        "batch_size": "auto",          # Let API choose; override only with data
+        "learning_rate_multiplier": 1.8,  # 0.5-2.0 range; lower for small datasets
+    },
+    suffix="my-domain-v1",
+)
+
+# 3. Poll until complete
+import time
+while (status := client.fine_tuning.jobs.retrieve(job.id)).status not in ("succeeded", "failed"):
+    time.sleep(60)
+```
+
+## Hyperparameter Selection Guide
+
+| Parameter | Default | Guidance |
+|-----------|---------|----------|
+| `n_epochs` | auto (~3) | 2 for >10k examples, 3-4 for <1k, watch val loss for plateau |
+| `batch_size` | auto | Larger = stable gradients but slower convergence |
+| `learning_rate_multiplier` | auto (~1.8) | Reduce to 0.5–1.0 for small datasets to avoid overfitting |
+
+## LoRA / QLoRA Configuration Basics
+
+For open-source models (Llama, Mistral) fine-tuned via Azure AI Foundry or custom infra:
+
+- **LoRA rank (`r`)**: 8–64. Start at 16. Higher = more parameters = more expressive but slower.
+- **LoRA alpha**: Typically `2 * r`. Controls scaling of adapter weights.
+- **Target modules**: `q_proj, v_proj` minimum. Add `k_proj, o_proj, gate_proj` for deeper adaptation.
+- **QLoRA**: 4-bit NF4 quantization + LoRA. Use `bitsandbytes` with `bnb_4bit_compute_dtype=bfloat16`. Reduces VRAM by ~60% with <1% quality loss.
+- **Dropout**: 0.05–0.1 on LoRA layers to prevent overfitting small datasets.
+
+## Evaluation After Fine-Tuning
+
+- Compare validation loss curves — decreasing = learning, rising = overfitting → reduce epochs
+- Run the same eval benchmark on base model AND fine-tuned model — quantify improvement
+- Measure task-specific metrics: accuracy, F1, BLEU/ROUGE, or custom rubric scores
+- Track `completion_tokens` cost — fine-tuned models should produce tighter, cheaper outputs
+- A/B test in staging before production rollout — use feature flags, not hard cutover
+
+## Data Augmentation Techniques
+
+- **Paraphrase**: Use a larger model to rephrase user queries while keeping assistant answers fixed
+- **Role-play**: Vary system prompts across formal/casual/technical tones
+- **Edge cases**: Deliberately include adversarial, ambiguous, and boundary inputs (~10% of dataset)
+- **Negative examples**: Include examples where the correct response is refusal or "I don't know"
+- Never augment by duplicating — it inflates loss without adding signal
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Training on data containing PII, credentials, or internal URLs
+- ❌ Skipping validation split — no way to detect overfitting without held-out data
+- ❌ Using fewer than 50 examples — model won't converge meaningfully
+- ❌ Inconsistent system prompts across examples — confuses the model's persona
+- ❌ Including very long examples (>4096 tokens) without checking truncation behavior
+- ❌ Fine-tuning when few-shot prompting achieves the same quality — wasted cost
+- ❌ Not versioning datasets — no reproducibility, no rollback capability
+- ❌ Training on synthetic data only without human-reviewed ground truth
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Fine-Tuning Practices |
+|--------|----------------------|
+| **Security** | PII scrubbing before upload. `DefaultAzureCredential` for API auth. Training data stored in access-controlled Azure Blob with encryption at rest. Never log training examples. |
+| **Reliability** | Validate JSONL format before upload. Checksum files for integrity. Retry file upload on transient failures. Keep dataset versions in immutable storage. |
+| **Cost Optimization** | Token count analysis before job creation — estimate cost upfront. Start with gpt-4o-mini (cheapest). Use LoRA/QLoRA for open models to reduce GPU hours. Limit epochs to 2-3. |
+| **Operational Excellence** | Version datasets with timestamps (`train-v3-20260413.jsonl`). Track experiments in MLflow or AI Foundry. Automate data pipeline: scrub → validate → split → upload → train → evaluate. |
+| **Responsible AI** | Audit training data for bias, toxicity, and harmful content before training. Include refusal examples. Evaluate fine-tuned model against Content Safety benchmarks. Document data provenance. |

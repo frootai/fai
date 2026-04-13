@@ -6,130 +6,145 @@ waf:
   - "operational-excellence"
 ---
 
-# Github Actions Waf — WAF-Aligned Coding Standards
+# GitHub Actions — FAI Standards
 
-> GitHub Actions CI/CD standards — SHA-pinned actions, minimal permissions, secrets handling, and reusable workflows.
+## Reusable Workflows & Composite Actions
 
-## Core Rules
+Extract shared CI into `workflow_call` workflows. Package multi-step logic into composite actions with typed inputs.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+```yaml
+# .github/workflows/reusable-deploy.yml
+on:
+  workflow_call:
+    inputs:
+      environment: { required: true, type: string }
+      resource-group: { required: true, type: string }
+    secrets:
+      AZURE_CLIENT_ID: { required: true }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions: { id-token: write, contents: read }
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2.2.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - run: az deployment group create -g ${{ inputs.resource-group }} -f infra/main.bicep
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## OIDC for Azure — No Secrets
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Never store `AZURE_CLIENT_SECRET`. Use workload identity federation — requires `id-token: write`. Register federated credential in Entra ID with subject `repo:<owner>/<repo>:environment:<env-name>`.
 
-## Code Quality Standards
+```yaml
+permissions: { id-token: write, contents: read }
+steps:
+  - uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2.2.0
+    with:
+      client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      tenant-id: ${{ vars.AZURE_TENANT_ID }}
+      subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+```
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+## Security — Pinned Actions & Permissions
 
-## Testing Requirements
+Pin every action to full SHA — tags are mutable. Set `permissions: read-all` at workflow level, override per-job with least privilege. Set `CODEOWNERS` on `.github/workflows/`.
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```yaml
+permissions: read-all
+jobs:
+  build:
+    permissions: { contents: read, packages: write }
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: npm }
+```
 
-## Security Checklist
+## Concurrency, Matrix & Job Dependencies
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```yaml
+# Cancel stale PR builds, never cancel deploys
+concurrency: { group: "ci-${{ github.ref }}", cancel-in-progress: true }
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix: { os: [ubuntu-latest, windows-latest], node: [20, 22] }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: "${{ matrix.node }}", cache: npm }
+
+  build:
+    needs: test
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - id: meta
+        run: echo "tags=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+  deploy-prod:
+    needs: [build, integration-tests]
+    environment: { name: production, url: "https://app.example.com" }
+    if: github.ref == 'refs/heads/main'
+```
+
+Set `timeout-minutes` on every job. Use `needs` for ordering, `GITHUB_OUTPUT` for passing data.
+## Caching & Artifacts
+
+Prefer built-in caching on setup actions. Use `actions/cache` for custom paths. Short artifact retention to control costs.
+```yaml
+- uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+  with:
+    path: ~/.cache/pip
+    key: pip-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+    restore-keys: pip-${{ runner.os }}-
+
+- uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+  with: { name: build-output, path: "dist/", retention-days: 5, if-no-files-found: error }
+```
+
+## Environment Protection & workflow_dispatch
+
+Gate deploys with required reviewers, wait timers, and branch restrictions (Settings → Environments). Typed `workflow_dispatch` inputs for manual triggers.
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      environment: { type: choice, options: [dev, staging, production], default: dev }
+      dry-run: { type: boolean, default: true }
+```
+
+## Self-Hosted Runner Hardening
+
+- Ephemeral runners (`--ephemeral`) — fresh VM per job, no state leakage, no long-lived credentials
+- Network-isolate in dedicated VNET/subnet, use runner groups with org-level restrictions
+- Pin `runs-on` to labeled groups (`runs-on: [self-hosted, linux, gpu]`), never bare `self-hosted`
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `secrets.AZURE_CLIENT_SECRET` — use OIDC federated credentials
+- ❌ `actions/checkout@v4` — mutable tag, pin to full SHA
+- ❌ `permissions: write-all` — least privilege per job
+- ❌ `continue-on-error: true` on security steps — masks failures
+- ❌ Workflow-level `env:` for secrets — scope to the job that needs them
+- ❌ Missing `concurrency` on deploy workflows — race conditions
+- ❌ Caching `node_modules/` directly — cache lockfile hash instead
+- ❌ `runs-on: self-hosted` without group labels — any runner picks up
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | GitHub Actions Practice |
+|--------|------------------------|
+| **Security** | SHA-pinned actions, OIDC, `permissions: read-all`, Dependabot for actions, `CODEOWNERS` on workflows |
+| **Reliability** | `fail-fast: false`, `timeout-minutes` on every job, `if: failure()` notifications, environment protection gates |
+| **Cost** | Built-in cache on setup actions, short artifact retention, concurrency cancellation, ephemeral self-hosted runners |
+| **Ops Excellence** | `workflow_call` reusable workflows, composite actions, `GITHUB_OUTPUT` chaining, status checks as branch protection |
+| **Performance** | Parallel matrix jobs, dependency caching, artifact passing vs rebuilding, `paths` filter to skip irrelevant workflows |
