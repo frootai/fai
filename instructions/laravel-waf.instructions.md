@@ -6,130 +6,281 @@ waf:
   - "security"
 ---
 
-# Laravel Waf — WAF-Aligned Coding Standards
+# Laravel — FAI Standards
 
-> Laravel standards — Eloquent, Blade, Artisan, queue workers, and security.
+## Eloquent Best Practices
 
-## Core Rules
+- Define `$fillable` on every model — never use `$guarded = []` in production
+- Use query scopes for reusable filters; name them after the domain concept
+- Accessors/mutators use the `Attribute` cast syntax (Laravel 9+)
+- Always eager-load relationships to prevent N+1 — enforce with `Model::preventLazyLoading()`
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```php
+class Order extends Model
+{
+    protected $fillable = ['user_id', 'status', 'total_cents', 'shipped_at'];
 
-## Implementation Patterns
+    protected function totalCents(): Attribute
+    {
+        return Attribute::make(
+            get: fn (int $value) => $value / 100,
+            set: fn (float $value) => (int) ($value * 100),
+        );
+    }
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+    public function scopeCompleted(Builder $query): Builder
+    {
+        return $query->where('status', 'completed');
+    }
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
+    }
+}
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+// Usage: Order::completed()->forUser($id)->with('items')->paginate(25);
+```
+
+- Use `firstOrCreate` / `updateOrCreate` for idempotent upserts
+- Prefer chunking (`chunkById`) over `get()` for large datasets
+- Cast columns: `protected $casts = ['metadata' => 'array', 'shipped_at' => 'datetime'];`
+
+## Routing & Controllers
+
+- Route model binding for all resource endpoints — never manually `findOrFail`
+- Thin controllers: validate → delegate to service/action → return resource
+- Group routes with middleware: `Route::middleware(['auth:sanctum'])->group(...)`
+
+```php
+// routes/api.php
+Route::apiResource('orders', OrderController::class);
+
+// Controller — thin, delegates to action class
+class OrderController extends Controller
+{
+    public function store(StoreOrderRequest $request, CreateOrderAction $action): OrderResource
+    {
+        return new OrderResource($action->execute($request->validated()));
+    }
+
+    public function show(Order $order): OrderResource // route model binding
+    {
+        return new OrderResource($order->load('items'));
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Form Requests & Validation
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+- One FormRequest per endpoint — never validate inline in controllers
+- Authorization logic lives in `authorize()` method, not middleware
 
-## Code Quality Standards
+```php
+class StoreOrderRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', Order::class);
+    }
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+    public function rules(): array
+    {
+        return [
+            'items'            => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'exists:products,id'],
+            'items.*.quantity'   => ['required', 'integer', 'min:1', 'max:100'],
+            'coupon_code'      => ['nullable', 'string', 'exists:coupons,code'],
+        ];
+    }
+}
+```
 
-## Testing Requirements
+## Service / Action Classes
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+- Single-responsibility action classes for business operations — one public `execute()` method
+- Services wrap external integrations (payment gateways, APIs) — inject via constructor
 
-## Security Checklist
+```php
+class CreateOrderAction
+{
+    public function __construct(
+        private readonly PricingService $pricing,
+        private readonly InventoryService $inventory,
+    ) {}
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+    public function execute(array $data): Order
+    {
+        return DB::transaction(function () use ($data) {
+            $this->inventory->reserve($data['items']);
+            $order = Order::create([
+                'user_id'     => auth()->id(),
+                'status'      => 'pending',
+                'total_cents' => $this->pricing->calculate($data['items']),
+            ]);
+            $order->items()->createMany($data['items']);
+            OrderCreated::dispatch($order);
+            return $order;
+        });
+    }
+}
+```
+
+## Queues & Jobs
+
+- All long-running work dispatched to queues — never block HTTP requests
+- Implement `ShouldQueue`, set `$tries`, `$backoff`, and `$maxExceptions`
+- Use `release()` with backoff for transient failures; `fail()` for permanent errors
+
+```php
+class ProcessPayment implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 3;
+    public array $backoff = [10, 60, 300]; // seconds between retries
+    public int $maxExceptions = 2;
+
+    public function __construct(public readonly Order $order) {}
+
+    public function handle(PaymentGateway $gateway): void
+    {
+        $gateway->charge($this->order->total_cents, $this->order->user->payment_method);
+        $this->order->update(['status' => 'paid']);
+    }
+
+    public function failed(\Throwable $e): void
+    {
+        $this->order->update(['status' => 'payment_failed']);
+        Log::error('Payment failed', ['order' => $this->order->id, 'error' => $e->getMessage()]);
+    }
+}
+```
+
+## Events & Listeners
+
+- Dispatch domain events from actions — decouple side effects via listeners
+- Listeners that do I/O must implement `ShouldQueue`
+
+```php
+// Event
+class OrderCreated { public function __construct(public readonly Order $order) {} }
+
+// Listener — queued
+class SendOrderConfirmation implements ShouldQueue
+{
+    public function handle(OrderCreated $event): void
+    {
+        Mail::to($event->order->user)->send(new OrderConfirmationMail($event->order));
+    }
+}
+```
+
+## API Resources
+
+- API Resources for all JSON responses — never return raw models or arrays
+- Use `whenLoaded()` to conditionally include relationships
+
+```php
+class OrderResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id'         => $this->id,
+            'status'     => $this->status,
+            'total'      => $this->total_cents, // accessor formats it
+            'items'      => OrderItemResource::collection($this->whenLoaded('items')),
+            'created_at' => $this->created_at->toIso8601String(),
+        ];
+    }
+}
+```
+
+## Authentication
+
+- API auth: Laravel Sanctum for SPA + token-based; Passport only when OAuth2 flows required
+- Protect routes with `auth:sanctum` middleware — never leave API routes unguarded
+- Scope tokens: `$user->createToken('api', ['orders:read'])`
+- Rate limit auth endpoints: `RateLimiter::for('login', fn () => Limit::perMinute(5))`
+
+## Migrations & Seeding
+
+- Every `up()` must have a reversible `down()` — never leave `down()` empty
+- Add indexes on foreign keys and frequently-queried columns
+- Use `after()` for column ordering; `nullOnDelete()` for optional foreign keys
+- Seeders: `DatabaseSeeder` calls domain seeders; factories for test data only
+
+```php
+Schema::create('orders', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+    $table->string('status', 20)->default('pending')->index();
+    $table->unsignedInteger('total_cents');
+    $table->timestamp('shipped_at')->nullable();
+    $table->timestamps();
+});
+```
+
+## Testing
+
+- Use Pest with `RefreshDatabase` trait — Tests\Feature for HTTP, Tests\Unit for isolated logic
+- Factory states for domain scenarios; assert database state, not implementation
+- Mock external services with `Http::fake()` and `Queue::fake()`
+
+```php
+it('creates an order', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['price_cents' => 1999]);
+
+    $response = actingAs($user)->postJson('/api/orders', [
+        'items' => [['product_id' => $product->id, 'quantity' => 2]],
+    ]);
+
+    $response->assertCreated()->assertJsonPath('data.status', 'pending');
+    expect(Order::count())->toBe(1);
+    Queue::assertPushed(ProcessPayment::class);
+});
+```
+
+## Configuration & Caching
+
+- All secrets via `.env` — access only through `config()` helper, never `env()` outside config files
+- Cache config/routes/views in production: `php artisan config:cache && route:cache && view:cache`
+- Use `cache()->remember()` with TTL for expensive queries; tag-based invalidation with Redis
+
+## Blade & Frontend
+
+- Blade Components (`<x-alert type="error">`) over `@include` — typed props, encapsulated logic
+- Escape output by default (`{{ }}`) — use `{!! !!}` only for trusted, sanitized HTML
+- Anonymous components for presentational markup; class components when logic needed
+
+## Middleware
+
+- Custom middleware for cross-cutting: locale detection, team tenancy, request logging
+- Register in `bootstrap/app.php` (Laravel 11+) — avoid stuffing logic into global middleware
+- Terminate middleware for post-response work (telemetry flush, audit logging)
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ `$guarded = []` — allows mass-assignment of any column
+- ❌ `env()` calls outside `config/` files — returns `null` when config is cached
+- ❌ Business logic in controllers — extract to action/service classes
+- ❌ Raw SQL without parameter binding — SQL injection risk
+- ❌ `Model::all()` without pagination or chunking — OOM on large tables
+- ❌ Synchronous mail/notification sending in HTTP requests — use queues
+- ❌ Missing `down()` in migrations — blocks safe rollbacks
+- ❌ `dd()` or `dump()` committed to source — use structured logging
+- ❌ Fat models with 50+ methods — split with traits, scopes, and action classes
+- ❌ Storing uploaded files locally in production — use `Storage::disk('s3')`
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Laravel Practice |
+|--------|-----------------|
+| **Security** | Sanctum/Passport auth, CSRF via `@csrf`, `$fillable` mass-assignment, parameterized queries, rate limiting, `Hash::make()`, encrypted `.env` |
+| **Reliability** | Queue retries with `$backoff`, DB transactions, health checks via `php artisan schedule:test`, failed job monitoring, circuit breaker middleware |
+| **Cost Optimization** | Query caching (`cache()->remember`), eager loading (kill N+1), config/route/view caching, queue batching, right-sized Horizon workers |
+| **Operational Excellence** | `php artisan` commands, scheduled tasks, structured logging (Monolog + JSON), Telescope in dev, Horizon dashboard, CI with `php artisan test` |
+| **Performance** | Redis for cache/session/queue, database indexes, lazy collections for streaming, pagination, octane for long-lived workers |
+| **Responsible AI** | Validate + sanitize all user input via FormRequests, log without PII, audit trail via model observers, content filtering on AI outputs |

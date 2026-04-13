@@ -7,130 +7,334 @@ waf:
   - "performance-efficiency"
 ---
 
-# Kubernetes Waf — WAF-Aligned Coding Standards
+# Kubernetes — FAI Standards
 
-> Kubernetes standards — pod security, resource limits, health probes, and production deployment patterns.
+## Pod Security Standards
 
-## Core Rules
+Enforce the `restricted` Pod Security Standard at the namespace level. Never run containers as root.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-workloads
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+All pods must set a non-root security context:
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```yaml
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  runAsGroup: 65534
+  fsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
+containers:
+  - name: app
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: ["ALL"]
+```
 
-## Code Quality Standards
+## Resource Requests and Limits
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+Every container must declare CPU and memory requests AND limits. GPU workloads use `nvidia.com/gpu`.
 
-## Testing Requirements
+```yaml
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "2"
+    memory: "2Gi"
+# GPU inference pod:
+resources:
+  requests:
+    cpu: "4"
+    memory: "16Gi"
+    nvidia.com/gpu: "1"
+  limits:
+    cpu: "8"
+    memory: "32Gi"
+    nvidia.com/gpu: "1"
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+- Never omit requests — scheduler can't bin-pack without them
+- Set limits ≥ requests — limits < requests is invalid
+- Memory limits prevent OOMKill cascades across nodes
+- Use LimitRange per namespace to enforce defaults
 
-## Security Checklist
+## Health Probes
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+All long-running pods must define liveness, readiness, and startup probes:
+
+```yaml
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  failureThreshold: 30
+  periodSeconds: 5
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  failureThreshold: 3
+```
+
+- Startup probe gates liveness — prevents restart loops for slow-starting AI models
+- Readiness controls Service traffic — remove pod from endpoints when overloaded
+- Liveness detects deadlocks — restart only when truly stuck, not during load spikes
+
+## Autoscaling
+
+### HPA (CPU/memory-based)
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: inference-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: inference
+  minReplicas: 2
+  maxReplicas: 20
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+```
+
+### KEDA (event-driven)
+
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: queue-processor
+spec:
+  scaleTargetRef:
+    name: queue-worker
+  minReplicaCount: 0
+  maxReplicaCount: 50
+  cooldownPeriod: 120
+  triggers:
+    - type: azure-servicebus
+      metadata:
+        queueName: inference-requests
+        messageCount: "5"
+```
+
+- KEDA for queue-driven scale-to-zero (Service Bus, Event Hubs, Kafka)
+- HPA `scaleDown.stabilizationWindowSeconds: 300` prevents flapping
+- Never set `maxReplicas` without cluster resource headroom validation
+
+## Network Policies
+
+Default-deny ingress per namespace, then allow explicitly:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: ai-workloads
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-inference
+  namespace: ai-workloads
+spec:
+  podSelector:
+    matchLabels:
+      app: inference
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+      ports:
+        - port: 8080
+          protocol: TCP
+```
+
+## RBAC and ServiceAccounts
+
+One ServiceAccount per workload. Never use `default`. Bind least-privilege roles.
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: inference-sa
+  namespace: ai-workloads
+  annotations:
+    azure.workload.identity/client-id: "<managed-identity-client-id>"
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: inference-role
+  namespace: ai-workloads
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "watch"]
+    resourceNames: ["inference-config"]
+```
+
+- `automountServiceAccountToken: false` unless the pod needs API server access
+- Use Azure Workload Identity — never mount static credentials
+- Bind to `Role` (namespaced), not `ClusterRole`, unless cross-namespace access is required
+
+## Secrets Management
+
+Use `external-secrets-operator` syncing from Azure Key Vault. Never store sensitive data in native k8s Secrets for production.
+
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: openai-credentials
+  namespace: ai-workloads
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: azure-keyvault
+    kind: ClusterSecretStore
+  target:
+    name: openai-credentials
+  data:
+    - secretKey: AZURE_OPENAI_KEY
+      remoteRef:
+        key: openai-api-key
+```
+
+## Disruption Budgets
+
+Every production Deployment needs a PDB:
+
+```yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: inference-pdb
+spec:
+  minAvailable: "50%"
+  selector:
+    matchLabels:
+      app: inference
+```
+
+## Topology and GPU Scheduling
+
+```yaml
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app: inference
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: accelerator
+              operator: In
+              values: ["nvidia-a100", "nvidia-t4"]
+tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Exists"
+    effect: "NoSchedule"
+```
+
+- Zone-spread critical workloads with `maxSkew: 1` + `DoNotSchedule`
+- Taint GPU nodes with `nvidia.com/gpu:NoSchedule` — only GPU pods tolerate
+- Use `nodeAffinity` to pin inference to specific GPU SKUs
+
+## Namespace and Labeling Conventions
+
+```yaml
+metadata:
+  namespace: ai-workloads
+  labels:
+    app.kubernetes.io/name: inference
+    app.kubernetes.io/component: model-serving
+    app.kubernetes.io/part-of: rag-pipeline
+    app.kubernetes.io/version: "1.4.2"
+    app.kubernetes.io/managed-by: helm
+  annotations:
+    fai.dev/play: "01-enterprise-rag"
+    fai.dev/waf: "reliability,security"
+```
+
+- Use `app.kubernetes.io/*` standard labels on every resource
+- Namespace per environment: `ai-dev`, `ai-staging`, `ai-prod`
+- Annotations for non-identifying metadata (play ID, WAF pillars, cost center)
+
+## Helm and Kustomize
+
+- Helm: pin chart versions in `Chart.lock`, use `.helmignore`, template all environment-specific values
+- Kustomize: base + overlays per environment, use `configMapGenerator` with `behavior: merge`
+- Never use `helm install` without `--atomic` — failed releases auto-rollback
+- Store Helm values in Git, not `--set` flags — reproducibility over convenience
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Running containers as root or with `privileged: true`
+- ❌ Omitting resource requests/limits — causes noisy-neighbor evictions
+- ❌ Using `latest` image tag — breaks reproducibility, defeats rollback
+- ❌ Storing API keys in ConfigMaps or native Secrets without external-secrets-operator
+- ❌ Single replica with no PDB — node drain kills your service
+- ❌ Liveness probe hitting a dependency (DB, external API) — cascading restarts
+- ❌ `ClusterRoleBinding` to `cluster-admin` for application ServiceAccounts
+- ❌ No network policies — any pod can reach any pod (flat network)
+- ❌ GPU nodes without taints — non-GPU pods scheduled on expensive GPU VMs
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Kubernetes Practice |
+|--------|-------------------|
+| **Security** | Restricted PSS, non-root, drop ALL caps, RBAC least-privilege, Workload Identity, external-secrets-operator, NetworkPolicy default-deny |
+| **Reliability** | PDBs, topology spread across zones, startup/readiness/liveness probes, graceful shutdown (preStop + terminationGracePeriodSeconds) |
+| **Performance** | GPU node affinity, KEDA scale-to-zero, HPA with stabilization window, resource requests for scheduler bin-packing |
+| **Cost** | Scale-to-zero with KEDA, right-sized requests (not over-provisioned), spot/preemptible nodes for batch, GPU taints prevent waste |
+| **Operations** | Helm atomic deploys, kustomize overlays, standard labels, namespace isolation, GitOps with Flux/ArgoCD |
+| **Responsible AI** | Content Safety as sidecar or init container, audit logging via Falco, workload isolation for PII-processing pods |

@@ -6,130 +6,217 @@ waf:
   - "reliability"
 ---
 
-# Kotlin Mcp Development — WAF-Aligned Coding Standards
+# Kotlin MCP Server Development — FAI Standards
 
-> Kotlin MCP server development — coroutines, data classes, Ktor, and Gradle patterns.
+> Build MCP servers with `modelcontextprotocol/kotlin-sdk`, coroutines, kotlinx.serialization, and Ktor.
 
-## Core Rules
+## Server Bootstrap
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+Use `Server` with `ServerOptions` — register tools, resources, and prompts via DSL builders:
 
-## Implementation Patterns
+```kotlin
+import io.modelcontextprotocol.kotlin.sdk.Server
+import io.modelcontextprotocol.kotlin.sdk.ServerOptions
+import io.modelcontextprotocol.kotlin.sdk.Implementation
+import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+fun main() = runBlocking {
+    val server = Server(
+        ServerOptions(
+            capabilities = ServerCapabilities(tools = ToolCapabilities(), resources = ResourceCapabilities()),
+        ),
+        Implementation(name = "my-mcp-server", version = "1.0.0"),
+    )
+    // Register tools, resources, prompts here
+    val transport = StdioServerTransport()
+    server.connect(transport)
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Tool Registration
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Define tools with `Tool` data class — use `inputSchema` for typed parameters, return `CallToolResult`:
 
-## Code Quality Standards
+```kotlin
+import io.modelcontextprotocol.kotlin.sdk.Tool
+import io.modelcontextprotocol.kotlin.sdk.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.TextContent
+import kotlinx.serialization.json.*
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+server.addTool(
+    Tool(
+        name = "search_documents",
+        description = "Search indexed documents by query",
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                putJsonObject("query") { put("type", "string"); put("description", "Search query") }
+                putJsonObject("limit") { put("type", "integer"); put("default", 10) }
+            },
+            required = listOf("query"),
+        ),
+    ),
+) { request ->
+    val query = request.arguments["query"]?.jsonPrimitive?.content
+        ?: return@addTool CallToolResult(content = listOf(TextContent("Missing query")), isError = true)
+    val limit = request.arguments["limit"]?.jsonPrimitive?.intOrNull ?: 10
+    val results = searchService.search(query, limit.coerceIn(1, 100))
+    CallToolResult(content = listOf(TextContent(Json.encodeToString(results))))
+}
+```
 
-## Testing Requirements
+## Resource Handlers
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+Expose resources via URI templates — return `ReadResourceResult` with MIME-typed content:
 
-## Security Checklist
+```kotlin
+server.addResource(
+    Resource(uri = "docs://{docId}", name = "Document", mimeType = "application/json"),
+) { request ->
+    val docId = request.uri.substringAfterLast("/")
+    val doc = repository.findById(docId) ?: throw McpError(ErrorCode.InvalidRequest, "Not found: $docId")
+    ReadResourceResult(contents = listOf(TextResourceContents(Json.encodeToString(doc), request.uri, "application/json")))
+}
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Prompt Templates
+
+Register reusable prompt templates — accept arguments, return `GetPromptResult` with message list:
+
+```kotlin
+server.addPrompt(
+    Prompt(name = "summarize", description = "Summarize a document", arguments = listOf(
+        PromptArgument(name = "content", description = "Text to summarize", required = true),
+        PromptArgument(name = "style", description = "Brief or detailed", required = false),
+    )),
+) { request ->
+    val content = request.arguments?.get("content") ?: error("content required")
+    val style = request.arguments?.get("style") ?: "brief"
+    GetPromptResult(messages = listOf(
+        PromptMessage(Role.User, TextContent("Summarize ($style):\n\n$content")),
+    ))
+}
+```
+
+## Coroutines for Async Tool Execution
+
+- All tool handlers are `suspend` functions — use structured concurrency with `coroutineScope`
+- Fan out independent operations with `async` + `awaitAll`, never `GlobalScope.launch`
+- Set timeouts via `withTimeout` — prevent runaway tool calls from blocking the server
+- Use `Dispatchers.IO` for blocking I/O (database, HTTP), `Dispatchers.Default` for CPU
+
+```kotlin
+server.addTool(Tool(name = "parallel_search", description = "Search multiple indices", inputSchema = ...)) { request ->
+    val results = coroutineScope {
+        val indices = listOf("docs", "tickets", "wiki")
+        indices.map { idx -> async(Dispatchers.IO) { searchIndex(idx, query) } }.awaitAll()
+    }
+    CallToolResult(content = listOf(TextContent(Json.encodeToString(results.flatten()))))
+}
+```
+
+## kotlinx.serialization
+
+- Annotate all data transfer objects with `@Serializable` — never use reflection-based parsers
+- Configure `Json { ignoreUnknownKeys = true; encodeDefaults = false }` for forward compatibility
+- Use `@SerialName` for wire-format names that differ from Kotlin property names
+- Sealed classes + `@SerialName` discriminator for polymorphic tool results
+
+```kotlin
+@Serializable
+data class SearchResult(
+    @SerialName("doc_id") val docId: String,
+    val score: Double,
+    val snippet: String,
+)
+```
+
+## Ktor Integration
+
+For HTTP/SSE transport instead of stdio — embed MCP in a Ktor server:
+
+```kotlin
+fun Application.mcpModule() {
+    val server = Server(ServerOptions(...), Implementation("ktor-mcp", "1.0.0"))
+    // register tools...
+    routing {
+        sse("/mcp") {
+            val transport = SseServerTransport("/mcp/message", this)
+            server.connect(transport)
+        }
+    }
+}
+```
+
+- Use Ktor's `ContentNegotiation` with `kotlinx.serialization` — avoid Jackson duplication
+- Structured logging via `io.ktor.server.plugins.calllogging.CallLogging` with correlation IDs
+- Health endpoint: `get("/health") { call.respond(mapOf("status" to "ok")) }`
+
+## Input Validation
+
+- Validate ALL `request.arguments` before use — check nullability, type, and range
+- Use `coerceIn` for numeric bounds, `Regex` for string patterns
+- Return `CallToolResult(isError = true)` with descriptive message — never throw untyped exceptions
+- Sanitize string inputs destined for database queries or shell commands
+
+## Error Handling
+
+- Wrap tool bodies in `runCatching` — map failures to `CallToolResult(isError = true)`
+- Use `McpError(ErrorCode.InvalidRequest, message)` for protocol-level errors
+- Log exceptions with structured fields: `logger.error(e) { "tool=$toolName query=$query" }`
+- Never expose stack traces or internal paths in error responses
+
+## Structured Logging
+
+- Use `io.github.oshai.kotlinlogging.KotlinLogging` (kotlin-logging) — SLF4J facade
+- JSON format via Logback `LogstashEncoder` — machine-parseable in production
+- Include `correlationId`, `toolName`, `durationMs` in every log entry
+- Log at INFO for tool invocations, WARN for validation failures, ERROR for exceptions
+
+## Testing
+
+- **Unit tests**: Kotest or JUnit5 — test tool handler logic with mock services via `mockk`
+- **Integration tests**: Spin up `Server` + `InMemoryTransport`, send `CallToolRequest`, assert `CallToolResult`
+- **Contract tests**: Validate `inputSchema` against sample payloads with `kotlinx.serialization`
+- **Coverage**: Kover (JetBrains) ≥ 80% line coverage on tool handlers
+
+```kotlin
+@Test
+fun `search_documents returns results`() = runTest {
+    val server = buildTestServer()   // registers tools with mock SearchService
+    val transport = InMemoryTransport()
+    server.connect(transport)
+    val result = transport.callTool("search_documents", buildJsonObject { put("query", "kotlin") })
+    assertFalse(result.isError ?: false)
+    val text = (result.content.first() as TextContent).text
+    assertTrue(text.contains("kotlin"))
+}
+```
+
+## GraalVM Native Considerations
+
+- Register all `@Serializable` classes in `reflect-config.json` or use `@RegisterForReflection`
+- Avoid `Class.forName` / `ServiceLoader` — use compile-time DI (Koin, manual wiring)
+- Test native image in CI: `./gradlew nativeCompile && ./build/native/nativeCompile/server --help`
+- Coroutine-based servers work in native but require `--initialize-at-run-time=kotlinx.coroutines`
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Using `GlobalScope.launch` — leaks coroutines, breaks structured concurrency
+- ❌ Blocking the event loop with `Thread.sleep` or synchronous I/O in `Dispatchers.Default`
+- ❌ Returning raw exception `.message` in `CallToolResult` — leaks internals
+- ❌ Skipping `inputSchema` validation — trusting client-supplied JSON blindly
+- ❌ Using Gson/Jackson when kotlinx.serialization is available — reflection overhead + native issues
+- ❌ Registering tools with duplicate names — server silently overwrites, causes routing bugs
+- ❌ Hardcoding secrets in `application.conf` — use environment variables or vault integration
+- ❌ Missing `Content-Type` on SSE responses — breaks MCP client transport negotiation
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Kotlin MCP Implementation |
+|--------|--------------------------|
+| **Security** | Validate all tool inputs at boundary; sanitize before DB/shell; no secrets in code; TLS for SSE transport |
+| **Reliability** | Structured concurrency with `supervisorScope`; `withTimeout` on tool calls; circuit breaker via Resilience4j |
+| **Cost Optimization** | Coroutine pools share threads (no thread-per-request); cache tool results with Caffeine TTL; batch DB reads |
+| **Operational Excellence** | JSON structured logging with correlation IDs; `/health` endpoint; Gradle build scans in CI |
+| **Performance Efficiency** | `Dispatchers.IO` for blocking calls; `Flow` for streaming results; connection pooling via HikariCP |
+| **Responsible AI** | Content safety checks before returning LLM-generated tool results; PII redaction in logs |

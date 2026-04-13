@@ -6,130 +6,295 @@ waf:
   - "performance-efficiency"
 ---
 
-# Maui Waf — WAF-Aligned Coding Standards
+# .NET MAUI — FAI Standards
 
-> MAUI standards — cross-platform, MVVM, dependency injection, platform-specific.
+## MVVM with CommunityToolkit.Mvvm
 
-## Core Rules
+Use source generators — never implement `INotifyPropertyChanged` manually:
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```csharp
+public partial class OrderViewModel : ObservableObject
+{
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalDisplay))]
+    private decimal _total;
 
-## Implementation Patterns
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private bool _isValid;
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+    public string TotalDisplay => Total.ToString("C");
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+    [RelayCommand(CanExecute = nameof(IsValid))]
+    private async Task SubmitAsync(CancellationToken token)
+    {
+        IsBusy = true;
+        await _orderService.PlaceAsync(Order, token);
+        await Shell.Current.GoToAsync("..");
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+- Prefix backing fields with `_` — generator creates PascalCase property
+- Use `[NotifyCanExecuteChangedFor]` to re-evaluate command availability
+- Pass `CancellationToken` to all async relay commands
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Shell Navigation
 
-## Code Quality Standards
+Register routes in `AppShell.xaml.cs`, use typed query parameters:
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```csharp
+// Registration
+Routing.RegisterRoute(nameof(OrderDetailPage), typeof(OrderDetailPage));
 
-## Testing Requirements
+// Navigate with parameters
+await Shell.Current.GoToAsync($"{nameof(OrderDetailPage)}?id={order.Id}");
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+// Receive parameters
+[QueryProperty(nameof(OrderId), "id")]
+public partial class OrderDetailViewModel : ObservableObject
+{
+    [ObservableProperty] private string _orderId;
 
-## Security Checklist
+    partial void OnOrderIdChanged(string value) => LoadOrder(value);
+}
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+- Never navigate from Views — always from ViewModels via `Shell.Current`
+- Use `".."` for back navigation, `"//route"` for absolute routes
+- Complex objects: pass via `IDictionary<string, object>` or a shared service
+
+## Dependency Injection — MauiProgram.cs
+
+```csharp
+public static MauiApp CreateMauiApp()
+{
+    var builder = MauiApp.CreateBuilder();
+    builder.UseMauiApp<App>()
+           .ConfigureFonts(fonts => fonts.AddFont("Inter-Regular.ttf", "Inter"));
+
+    // Services
+    builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
+    builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
+    builder.Services.AddSingleton<IOrderService, OrderService>();
+
+    // HttpClient with resilience
+    builder.Services.AddHttpClient<IApiClient, ApiClient>(c =>
+        c.BaseAddress = new Uri(Config.ApiBaseUrl))
+        .AddStandardResilienceHandler();
+
+    // ViewModels & Pages (transient)
+    builder.Services.AddTransient<OrderViewModel>();
+    builder.Services.AddTransient<OrderPage>();
+
+    return builder.Build();
+}
+```
+
+- Register platform abstractions as singletons (`Connectivity.Current`, `SecureStorage.Default`)
+- Pages and ViewModels as transient — avoids stale state after navigation
+- Use `AddHttpClient` + `AddStandardResilienceHandler()` from `Microsoft.Extensions.Http.Resilience`
+
+## Platform-Specific Code
+
+```csharp
+// Conditional compilation
+#if ANDROID
+    var activity = Platform.CurrentActivity;
+    Window.SetStatusBarColor(Android.Graphics.Color.ParseColor("#1a1a2e"));
+#elif IOS
+    UIApplication.SharedApplication.StatusBarStyle = UIStatusBarStyle.LightContent;
+#endif
+
+// Partial classes (preferred for larger blocks)
+// Platforms/Android/Services/BiometricService.cs
+public partial class BiometricService
+{
+    public partial Task<bool> AuthenticateAsync()
+    {
+        var executor = ContextCompat.GetMainExecutor(Platform.AppContext);
+        // Android BiometricPrompt implementation
+    }
+}
+```
+
+- Prefer partial classes in `Platforms/{OS}/` over `#if` for anything >5 lines
+- Use `DeviceInfo.Platform` for runtime checks, `#if` for compile-time
+
+## Handlers vs Renderers
+
+Always use Handlers (not legacy Renderers). Customize via mapper:
+
+```csharp
+Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("BorderlessEntry", (handler, view) =>
+{
+#if ANDROID
+    handler.PlatformView.SetBackgroundColor(Android.Graphics.Color.Transparent);
+#elif IOS
+    handler.PlatformView.BorderStyle = UIKit.UITextBorderStyle.None;
+#endif
+});
+```
+
+## CollectionView Performance
+
+```xml
+<CollectionView ItemsSource="{Binding Orders}"
+                ItemSizingStrategy="MeasureFirstItem"
+                SelectionMode="Single"
+                SelectionChangedCommand="{Binding SelectOrderCommand}">
+    <CollectionView.ItemTemplate>
+        <DataTemplate x:DataType="models:Order">
+            <Grid Padding="12" ColumnDefinitions="*,Auto">
+                <Label Text="{Binding Name}" FontSize="16" />
+                <Label Grid.Column="1" Text="{Binding Total, StringFormat='{0:C}'}" />
+            </Grid>
+        </DataTemplate>
+    </CollectionView.ItemTemplate>
+</CollectionView>
+```
+
+- Set `ItemSizingStrategy="MeasureFirstItem"` for uniform rows — avoids per-item measure pass
+- Always set `x:DataType` on `DataTemplate` for compiled bindings
+- Use `DataTemplateSelector` when mixing row layouts — never `IsVisible` toggle inside a single template
+- For 1000+ items: use `RemainingItemsThreshold` + `RemainingItemsThresholdReachedCommand` for incremental loading
+- Avoid nested `CollectionView` — flatten data or use grouped `CollectionView` with `IsGrouped="True"`
+
+## Resource Dictionaries & Styles
+
+```xml
+<!-- App.xaml — global styles -->
+<Style TargetType="Label" x:Key="Heading1">
+    <Setter Property="FontSize" Value="24" />
+    <Setter Property="FontAttributes" Value="Bold" />
+    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+</Style>
+
+<!-- Implicit style (no x:Key) applies to ALL Labels -->
+<Style TargetType="Entry">
+    <Setter Property="BackgroundColor" Value="Transparent" />
+</Style>
+```
+
+- Use `AppThemeBinding` for Light/Dark mode — never hardcode colors
+- Keep `Colors.xaml` and `Styles.xaml` separate in `Resources/Styles/`
+- Use `StaticResource` for values that never change, `DynamicResource` for theme-switched values
+
+## Lifecycle Events
+
+```csharp
+protected override void OnAppearing()
+{
+    base.OnAppearing();
+    _viewModel.LoadDataCommand.Execute(null);
+    Connectivity.ConnectivityChanged += OnConnectivityChanged;
+}
+
+protected override void OnDisappearing()
+{
+    base.OnDisappearing();
+    Connectivity.ConnectivityChanged -= OnConnectivityChanged;
+    _cts?.Cancel(); // Cancel in-flight operations
+}
+```
+
+- Always unsubscribe events in `OnDisappearing` — prevents memory leaks
+- Cancel `CancellationTokenSource` on disappearing for pending HTTP calls
+- Use `OnNavigatedTo` (Shell) for data that should reload on every visit
+
+## Secure Storage & Connectivity
+
+```csharp
+// Store tokens securely (encrypted per-platform)
+await SecureStorage.Default.SetAsync("auth_token", token);
+var saved = await SecureStorage.Default.GetAsync("auth_token");
+
+// Check connectivity before network calls
+if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+{
+    await Shell.Current.DisplayAlert("Offline", "No internet connection.", "OK");
+    return;
+}
+```
+
+- Never store secrets in `Preferences` — use `SecureStorage` (Keychain on iOS, EncryptedSharedPreferences on Android)
+- Inject `IConnectivity` in ViewModels — testable and mockable
+
+## Responsive Layouts
+
+```xml
+<Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*"
+      Padding="{OnIdiom Phone='16', Tablet='32'}">
+    <Label Text="{Binding Title}"
+           FontSize="{OnIdiom Phone=20, Tablet=28}"
+           Grid.ColumnSpan="{OnIdiom Phone=2, Tablet=1}" />
+
+    <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="SpaceEvenly"
+                Grid.Row="1" Grid.ColumnSpan="2">
+        <Frame FlexLayout.Basis="{OnIdiom Phone='100%', Tablet='48%'}" />
+    </FlexLayout>
+</Grid>
+
+<!-- Platform-specific -->
+<Label Margin="{OnPlatform iOS='0,20,0,0', Android='0,0,0,0'}" />
+```
+
+- Use `OnIdiom` for Phone/Tablet/Desktop breakpoints
+- Use `OnPlatform` for OS-specific padding (iOS safe area)
+- `FlexLayout` with `Wrap="Wrap"` for adaptive card grids
+
+## Testing
+
+### Unit Testing ViewModels
+```csharp
+[Fact]
+public async Task SubmitCommand_InvalidOrder_DoesNotCallService()
+{
+    var mockService = Substitute.For<IOrderService>();
+    var vm = new OrderViewModel(mockService) { IsValid = false };
+
+    Assert.False(vm.SubmitCommand.CanExecute(null));
+    await Assert.ThrowsAsync<InvalidOperationException>(
+        () => vm.SubmitCommand.ExecuteAsync(null));
+    await mockService.DidNotReceive().PlaceAsync(Arg.Any<Order>(), Arg.Any<CancellationToken>());
+}
+```
+
+### UI Testing with Appium
+```csharp
+[Fact]
+public void OrderPage_TapSubmit_NavigatesToConfirmation()
+{
+    var submitBtn = _driver.FindElement(MobileBy.AccessibilityId("SubmitButton"));
+    submitBtn.Click();
+    Assert.NotNull(_driver.FindElement(MobileBy.AccessibilityId("ConfirmationLabel")));
+}
+```
+
+- Set `AutomationId` on every interactive element for Appium/accessibility
+- Use NSubstitute or Moq — mock `IConnectivity`, `ISecureStorage`, services
+- Test command `CanExecute` logic, property change notifications, navigation calls
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Code-behind with business logic — keep pages thin, use ViewModels
+- ❌ `async void` anywhere except event handlers — causes unobserved exceptions
+- ❌ Manual `PropertyChanged` instead of `[ObservableProperty]` source generator
+- ❌ Legacy custom Renderers — migrate to Handlers
+- ❌ `Device.BeginInvokeOnMainThread` — use `MainThread.InvokeOnMainThreadAsync`
+- ❌ Hardcoded colors/sizes — use resource dictionaries + `AppThemeBinding`
+- ❌ Storing tokens in `Preferences` — use `SecureStorage`
+- ❌ Nested `ScrollView` inside `CollectionView` — causes layout chaos
+- ❌ Not setting `x:DataType` on DataTemplates — loses compiled binding perf
+- ❌ Subscribing to events in `OnAppearing` without unsubscribing in `OnDisappearing`
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | MAUI Application |
+|---|---|
+| **Reliability** | HttpClient resilience handler, `CancellationToken` propagation, connectivity checks before network calls, graceful offline fallback |
+| **Security** | `SecureStorage` for tokens, HTTPS certificate pinning, `OnPlatform` biometric auth, obfuscated release builds, no secrets in XAML |
+| **Performance** | Compiled bindings (`x:DataType`), `MeasureFirstItem` sizing, image caching, lazy-loaded tabs, `DataTemplateSelector` over visibility toggles |
+| **Cost Optimization** | Share 95%+ code cross-platform, single codebase CI/CD, conditional `#if` only for true platform gaps |
+| **Operational Excellence** | Centralized DI in `MauiProgram.cs`, structured logging via `ILogger`, crash reporting (App Center / Sentry), automated UI tests in CI |
+| **Responsible AI** | Accessible labels on all controls (`SemanticProperties`), `AutomationId` for screen readers, RTL layout support, high-contrast theme compliance |

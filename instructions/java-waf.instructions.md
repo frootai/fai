@@ -7,127 +7,254 @@ waf:
   - "operational-excellence"
 ---
 
-# Java Waf — WAF-Aligned Coding Standards
+# Java — FAI Standards
 
-> Java coding standards — constructor injection, immutable objects, streams API, JUnit 5, and Spring Boot patterns.
+## Records & Sealed Types
 
-## Core Rules
+Use `record` for DTOs, API responses, and value objects — no Lombok needed:
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```java
+public record CreateOrderRequest(
+    @NotBlank String customerId,
+    @NotEmpty List<LineItem> items,
+    @Positive BigDecimal total
+) {}
 
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+public sealed interface PaymentResult
+    permits PaymentResult.Success, PaymentResult.Declined, PaymentResult.Error {
+    record Success(String transactionId, Instant timestamp) implements PaymentResult {}
+    record Declined(String reason) implements PaymentResult {}
+    record Error(String code, String message) implements PaymentResult {}
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Pattern Matching
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Prefer pattern matching over `instanceof` chains and visitor patterns:
 
-## Code Quality Standards
+```java
+// switch expressions with sealed types — exhaustive, no default needed
+return switch (result) {
+    case PaymentResult.Success s -> ResponseEntity.ok(s);
+    case PaymentResult.Declined d -> ResponseEntity.unprocessableEntity().body(d);
+    case PaymentResult.Error e -> ResponseEntity.internalServerError().body(e);
+};
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+// guarded patterns
+if (obj instanceof String s && s.length() > 10) {
+    process(s.substring(0, 10));
+}
+```
 
-## Testing Requirements
+## Optional Usage
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+Return `Optional` from methods that may not produce a value. Never use as field types or parameters:
 
-## Security Checklist
+```java
+// ✅ Return type
+public Optional<Customer> findByEmail(String email) {
+    return repository.findByEmail(email);
+}
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+// ✅ Chain with map/flatMap — avoid .get()
+var name = findByEmail(email)
+    .map(Customer::displayName)
+    .orElse("Unknown");
+
+// ❌ NEVER as field or parameter
+// private Optional<String> nickname;           — use @Nullable
+// public void process(Optional<Filter> filter) — use @Nullable or overload
+```
+
+## Stream API
+
+```java
+// Prefer toList() (Java 16+) over Collectors.toList()
+var activeNames = users.stream()
+    .filter(User::isActive)
+    .map(User::name)
+    .sorted()
+    .toList();  // unmodifiable list
+
+// Use flatMap for nested collections
+var allTags = documents.stream()
+    .flatMap(doc -> doc.tags().stream())
+    .distinct()
+    .toList();
+
+// Collectors for grouping/partitioning
+var byDepartment = employees.stream()
+    .collect(Collectors.groupingBy(Employee::department, Collectors.counting()));
+```
+
+Avoid: side-effects in `peek()`, streams over 3 operations without intermediate variables, parallel streams unless benchmarked.
+
+## Virtual Threads (Project Loom)
+
+Use virtual threads for I/O-bound concurrency. Never pool them:
+
+```java
+// Spring Boot 3.2+ — enable in application.yml
+// spring.threads.virtual.enabled: true
+
+// Manual usage for fan-out
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    var futures = urls.stream()
+        .map(url -> executor.submit(() -> httpClient.send(buildRequest(url), ofString())))
+        .toList();
+    var results = futures.stream().map(Future::resultNow).toList();
+}
+```
+
+Never use `synchronized` blocks inside virtual thread tasks — use `ReentrantLock`. Never pool virtual threads in a fixed-size pool.
+
+## Text Blocks & var
+
+```java
+// Text blocks for SQL, JSON, prompts
+var query = """
+    SELECT c.id, c.name, c.email
+    FROM customers c
+    WHERE c.status = :status
+      AND c.created_at > :since
+    ORDER BY c.created_at DESC
+    """;
+
+// var for local variables when RHS type is obvious
+var client = HttpClient.newHttpClient();
+var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+var mapper = new ObjectMapper();
+```
+
+## Resource Management & Error Handling
+
+```java
+// try-with-resources — always for AutoCloseable
+try (var conn = dataSource.getConnection();
+     var stmt = conn.prepareStatement(query)) {
+    stmt.setString(1, customerId);
+    return mapResults(stmt.executeQuery());
+}
+
+// CompletableFuture for async orchestration
+CompletableFuture.supplyAsync(() -> fetchProfile(userId))
+    .thenCombine(
+        CompletableFuture.supplyAsync(() -> fetchOrders(userId)),
+        (profile, orders) -> new CustomerView(profile, orders)
+    )
+    .exceptionally(ex -> {
+        log.error("Failed to build customer view", ex);
+        return CustomerView.empty();
+    });
+```
+
+## Spring Boot 3 Conventions
+
+```java
+// Constructor injection — no @Autowired, no field injection
+@Service
+public class OrderService {
+    private final OrderRepository repository;
+    private final PaymentGateway gateway;
+    private final OrderProperties props;
+
+    OrderService(OrderRepository repository, PaymentGateway gateway, OrderProperties props) {
+        this.repository = repository;
+        this.gateway = gateway;
+        this.props = props;
+    }
+}
+
+// @ConfigurationProperties over @Value — type-safe, validated
+@ConfigurationProperties(prefix = "app.ai")
+@Validated
+public record AiProperties(
+    @NotBlank String endpoint,
+    @NotBlank String deploymentName,
+    @DecimalMin("0.0") @DecimalMax("2.0") double temperature,
+    @Positive int maxTokens
+) {}
+```
+
+## Jackson & Serialization
+
+```java
+// Records work with Jackson out of the box
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record ApiResponse<T>(
+    T data,
+    @JsonInclude(JsonInclude.Include.NON_NULL) String error,
+    Instant timestamp
+) {}
+
+// Enum with @JsonValue
+public enum Status {
+    ACTIVE("active"), INACTIVE("inactive");
+    private final String value;
+    Status(String value) { this.value = value; }
+    @JsonValue public String getValue() { return value; }
+}
+```
+
+## Testing — JUnit 5 + AssertJ
+
+```java
+@Test
+void shouldDeclineExpiredCard() {
+    var request = new PaymentRequest("4111111111111111", YearMonth.of(2020, 1), new BigDecimal("50.00"));
+    var result = paymentService.process(request);
+
+    assertThat(result)
+        .isInstanceOf(PaymentResult.Declined.class)
+        .extracting("reason")
+        .isEqualTo("Card expired");
+}
+
+@ParameterizedTest
+@CsvSource({"0, false", "17, false", "18, true", "65, true"})
+void shouldValidateAge(int age, boolean expected) {
+    assertThat(Policy.isEligible(age)).isEqualTo(expected);
+}
+
+// @SpringBootTest only for integration tests — unit tests need no Spring context
+```
+
+## Structured Logging — SLF4J
+
+```java
+// Structured key-value pairs — never string concatenation
+log.info("Order processed", kv("orderId", order.id()), kv("amount", order.total()), kv("durationMs", elapsed));
+log.error("Payment failed", kv("customerId", customerId), kv("errorCode", e.code()), e);
+
+// MDC for correlation
+MDC.put("correlationId", correlationId);
+MDC.put("userId", userId);
+try { process(request); }
+finally { MDC.clear(); }
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Lombok `@Data` on JPA entities — use records for DTOs, write JPA entities explicitly
+- ❌ Field injection (`@Autowired private Foo foo`) — invisible dependencies, untestable
+- ❌ `Optional.get()` without `isPresent()` — use `orElseThrow()`, `map()`, `orElse()`
+- ❌ Raw types (`List` instead of `List<String>`) — always parameterize generics
+- ❌ Catching `Exception` or `Throwable` — catch specific types, rethrow unknown
+- ❌ `new Thread()` for concurrency — use virtual threads or `ExecutorService`
+- ❌ Mutable DTOs with setters — use records or builder pattern (immutable)
+- ❌ `System.out.println` in production — use SLF4J with structured logging
+- ❌ `@SpringBootTest` for unit tests — only for integration, use plain JUnit + mocks
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
+| Pillar | Java Practice |
+|--------|--------------|
+| **Reliability** | Virtual threads for non-blocking I/O, `CompletableFuture` error recovery, try-with-resources for leak prevention, health actuator at `/actuator/health` |
+| **Security** | `@ConfigurationProperties` for secrets (never hardcoded), `@Validated` on all input DTOs, parameterized queries only, `DefaultAzureCredential` via Azure SDK |
+| **Cost** | Stream `toList()` avoids extra copies, virtual threads eliminate thread pool sizing, `@Cacheable` with TTL for repeated queries |
+| **Ops Excellence** | SLF4J + MDC correlation, `@ParameterizedTest` for edge cases, Actuator metrics + Micrometer, constructor injection for clear dependency graphs |
+| **Performance** | Virtual threads scale to 1M+ concurrent tasks, `HttpClient` with HTTP/2, Stream lazy evaluation, text blocks eliminate runtime concatenation |
+| **Responsible AI** | Input validation via Bean Validation, structured logging with PII redaction, Content Safety integration before user-facing output |
 
 ### Operational Excellence
 - Structured JSON logging with Application Insights + correlation IDs

@@ -5,130 +5,159 @@ waf:
   - "operational-excellence"
 ---
 
-# Memory Bank Waf — WAF-Aligned Coding Standards
+# Memory Bank & Context Management — FAI Standards
 
-> Persistent project documentation standards — maintain context across AI sessions with structured memory files.
+> Standards for coding agent memory systems — persistent context, session tracking, and cross-conversation continuity.
 
-## Core Rules
+## Memory Scopes
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+Three tiers, each with distinct lifecycle and visibility:
 
-## Implementation Patterns
+| Scope | Path | Persists | Visibility | Use For |
+|-------|------|----------|------------|---------|
+| **User** | `/memories/` | Forever | All workspaces | Preferences, patterns, lessons learned |
+| **Session** | `/memories/session/` | Current conversation | Single chat session | Task plans, progress tracking, WIP notes |
+| **Repo** | `/memories/repo/` | Until deleted | Current workspace | Build commands, conventions, project state |
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+- User memory auto-loads first 200 lines into context — keep it lean
+- Session memory files are listed but NOT auto-loaded — read explicitly when needed
+- Repo memory is workspace-scoped — store codebase facts, not personal preferences
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+## File Structure Standards
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+Organize by topic, one concern per file. Use descriptive kebab-case names:
+
+```
+/memories/
+├── preferences.md          # Editor, language, machine constraints
+├── debugging.md             # Lessons from past debugging sessions
+├── patterns.md              # Coding patterns that worked well
+└── session/
+    ├── migration-plan.md    # Current task plan + progress
+    ├── api-redesign.md      # Multi-turn task state
+    └── bug-analysis.md      # Investigation notes
+```
+
+## When to Read vs Write
+
+### Read Memory
+- **Start of conversation** — check `/memories/` and `/memories/session/` for prior context
+- **Before creating files** — check if a memory on the topic already exists (deduplication)
+- **When stuck** — prior sessions may have solved the same problem
+
+### Write Memory
+- **Discovered a non-obvious gotcha** — e.g., a framework quirk, version-specific behavior
+- **User states a preference** — e.g., "always use pnpm", "never use classes"
+- **Completing a multi-step task** — update progress so next session can resume
+- **After a hard-won fix** — record the root cause and solution
+
+### Delete Memory
+- **Information is outdated** — project migrated, tool changed, pattern abandoned
+- **Session complete** — clean up session files for finished tasks
+- **Duplicate exists** — merge into existing file, remove the duplicate
+
+## Conciseness Rules
+
+User memory is expensive — every line loads into every conversation. Enforce brevity:
+
+```markdown
+# Good — terse bullet points
+- Windows ARM64, limited RAM
+- NEVER use `next dev` — eats 2-3GB, use `npx serve out` instead
+- Node v22.18.0
+
+# Bad — prose paragraphs
+The user is running Windows on ARM64 architecture. Their machine has
+limited RAM available, so we should be careful about memory-intensive
+operations. They prefer using Node.js version 22.18.0 and have
+mentioned that running next dev causes issues...
+```
+
+## Deduplication Protocol
+
+Before creating any memory file:
+1. **View the directory** — `view /memories/` to see what exists
+2. **Check for overlap** — if `preferences.md` exists, don't create `user-prefs.md`
+3. **Update existing** — use `str_replace` or `insert` to add to existing files
+4. **Merge if needed** — consolidate scattered notes into one topical file
+
+## Multi-Turn Task Tracking
+
+For tasks spanning multiple exchanges, use session memory with structured progress:
+
+```markdown
+# API Migration — Progress
+
+## Plan
+1. ✅ Audit current endpoints (found 23 routes)
+2. ✅ Design new schema (saved to docs/api-v2.md)
+3. 🔄 Migrate auth routes (3/7 done)
+4. ⬜ Migrate data routes
+5. ⬜ Update tests
+
+## Decisions
+- Keep backward compat for /v1/users (3 consumers)
+- New routes use kebab-case, old stay camelCase
+
+## Blockers
+- Token refresh endpoint needs Redis — blocked on infra ticket #142
+```
+
+## Cross-Session Continuity
+
+Repo memory bridges sessions for long-running projects:
+
+```json
+// /memories/repo/ example structure (as .md files)
+{
+  "build_command": "npm run build",
+  "test_command": "npm test -- --coverage",
+  "deploy_command": "az containerapp up",
+  "conventions": {
+    "naming": "kebab-case files, camelCase variables",
+    "testing": "vitest, 80% coverage target",
+    "branching": "feature/* → main, no develop branch"
+  },
+  "known_issues": [
+    "PostCSS workers leak on crash — kill orphans before build",
+    "Config validation runs at startup — never skip"
+  ]
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Coding Preference Patterns
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Record preferences as actionable rules, not vague opinions:
 
-## Code Quality Standards
-
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
-
-## Testing Requirements
-
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
-
-## Security Checklist
-
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+```markdown
+# preferences.md — good entries
+- Prefer `const` over `let` — only use `let` for actual reassignment
+- Error messages: include operation name + entity ID, never just "failed"
+- Imports: group stdlib → external → internal, blank line between groups
+- Tests: arrange-act-assert, one assertion per test where practical
+- Never auto-add docstrings to code I didn't write
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+| Anti-Pattern | Why It Fails | Fix |
+|---|---|---|
+| Dumping full file contents into memory | Bloats context, wastes tokens every conversation | Store only key facts, reference file paths |
+| Creating a new file per conversation | Memory directory explodes, duplicates everywhere | Append to existing topical files |
+| Writing prose paragraphs | User memory auto-loads — prose wastes token budget | Bullet points, 1-2 lines max per entry |
+| Never cleaning up session memory | Stale plans confuse future sessions | Delete session files when task completes |
+| Storing secrets or credentials | Memory files may be shared or synced | Never store API keys, tokens, passwords |
+| Recording obvious information | "Python uses indentation" adds no value | Only record non-obvious insights and gotchas |
+| Not checking before creating | Creates duplicate `debugging.md` and `debug-notes.md` | Always `view` directory first |
+| Storing transient state as permanent | "Currently on step 3" in user memory is stale next week | Use session memory for WIP, user memory for lessons |
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Memory Practice |
+|--------|----------------|
+| **Operational Excellence** | Track build commands, deploy steps, and project conventions in repo memory — eliminates repeated discovery |
+| **Reliability** | Record known failure modes and workarounds — prevents re-encountering solved problems |
+| **Security** | Never store secrets, credentials, or PII in memory files — treat memory as potentially shared |
+| **Cost Optimization** | Keep user memory under 200 lines — every line loads into every conversation's token budget |
+| **Performance Efficiency** | Read session memory on-demand, not eagerly — only load what the current task needs |
+| **Responsible AI** | Don't store user-identifying information or conversation content — only store technical facts |

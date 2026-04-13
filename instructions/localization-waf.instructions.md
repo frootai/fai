@@ -6,130 +6,223 @@ waf:
   - "operational-excellence"
 ---
 
-# Localization Waf — WAF-Aligned Coding Standards
+# Localization & i18n — FAI Standards
 
-> Localization standards — i18n key management, RTL support, pluralization, date/number formatting.
+## String Externalization
 
-## Core Rules
+Zero hardcoded user-facing text. Every visible string lives in a translation file.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
 ```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+// ❌ NEVER
+const label = "No results found";
+const msg = "Hello " + user.name + ", you have " + count + " items";
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+// ✅ ALWAYS — use message keys with ICU placeholders
+import { useTranslation } from "react-i18next";
+const { t } = useTranslation("search");
+const label = t("search:noResults");
+const msg = t("greeting", { name: user.name, count });
+```
+
+```python
+# ✅ Python — gettext or message catalogs
+from babel.support import Translations
+trans = Translations.load("locales", [locale])
+_ = trans.gettext
+label = _("No results found")
+```
+
+## ICU Message Format
+
+Use ICU MessageFormat for plurals, gender select, and number/date formatting. Never build plural logic in code.
+
+```typescript
+// locales/en/messages.json
+{
+  "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}",
+  "greeting": "{gender, select, male {He} female {She} other {They}} liked your post",
+  "price": "Total: {amount, number, ::currency/USD compact-short}",
+  "deadline": "Due {date, date, medium}"
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+```typescript
+// i18next with ICU plugin
+import i18next from "i18next";
+import ICU from "i18next-icu";
+i18next.use(ICU).init({
+  fallbackLng: "en",
+  ns: ["common", "search", "errors"],
+  defaultNS: "common",
+});
+// react-intl alternative
+import { FormattedMessage } from "react-intl";
+<FormattedMessage id="itemCount" values={{ count: items.length }} />
+```
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Translation File Structure
 
-## Code Quality Standards
+Namespace by feature domain. Flat keys with dot notation — no deep nesting beyond 2 levels.
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```
+locales/
+├── en/
+│   ├── common.json      # shared: buttons, labels, nav
+│   ├── errors.json      # error messages, validation
+│   ├── search.json      # search feature strings
+│   └── dashboard.json   # dashboard-specific
+├── ar/                   # RTL language
+├── ja/
+└── pseudo/               # pseudo-locale for testing
+    └── common.json
+```
 
-## Testing Requirements
+```json
+// locales/en/errors.json — flat keys, translator context via _description
+{
+  "validation.emailInvalid": "Enter a valid email address",
+  "validation.emailInvalid_description": "Shown below email field on signup form",
+  "api.rateLimited": "Too many requests. Try again in {seconds, number} {seconds, plural, one {second} other {seconds}}.",
+  "api.rateLimited_description": "Toast notification when user hits rate limit"
+}
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Locale Detection & Fallback Chains
 
-## Security Checklist
+```typescript
+// Fallback: user preference → browser → Accept-Language → default
+const fallbackChain: string[] = [
+  userProfile?.locale,                        // stored preference
+  navigator.language,                         // browser locale
+  navigator.languages?.[0],                   // secondary
+].filter(Boolean) as string[];
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+i18next.init({
+  fallbackLng: { "zh-Hant": ["zh-TW", "zh", "en"], default: ["en"] },
+  load: "currentOnly",  // load "fr-CA" not "fr-CA" + "fr" + "en"
+  detection: { order: ["querystring", "cookie", "navigator", "htmlTag"] },
+});
+```
+
+```python
+# Python — locale negotiation
+from babel import negotiate_locale
+available = ["en", "fr", "de", "ja", "ar"]
+user_prefs = ["fr-CA", "fr", "en"]
+locale = negotiate_locale(user_prefs, available, sep="-") or "en"
+```
+
+## Date, Time & Number Formatting
+
+Never format dates/numbers manually. Use `Intl` APIs (JS) or `babel`/`zoneinfo` (Python).
+
+```typescript
+// Dates — always pass locale, never hardcode format strings
+const fmt = new Intl.DateTimeFormat(locale, {
+  dateStyle: "medium", timeStyle: "short", timeZone: user.tz,
+});
+const display = fmt.format(new Date(timestamp));
+
+// Numbers & currency
+new Intl.NumberFormat(locale, { style: "currency", currency: "JPY" }).format(price);
+new Intl.NumberFormat(locale, { notation: "compact" }).format(1_500_000); // "1.5M" or "150万"
+
+// Relative time — "3 days ago", "in 2 hours"
+new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(-3, "day");
+```
+
+```python
+# Python — babel for locale-aware formatting, zoneinfo for timezones
+from babel.dates import format_datetime
+from babel.numbers import format_currency
+from zoneinfo import ZoneInfo  # stdlib ≥3.9, NOT pytz
+
+dt = datetime.now(ZoneInfo(user_tz))
+format_datetime(dt, format="medium", locale=locale)  # "Apr 13, 2026, 3:45 PM"
+format_currency(29.99, "EUR", locale="de_DE")         # "29,99 €"
+```
+
+## RTL Support
+
+Support bidirectional text for Arabic, Hebrew, Urdu, Farsi. Use CSS logical properties — never `left`/`right` for layout.
+
+```html
+<!-- Auto-detect direction from content -->
+<html lang={locale} dir={isRTL(locale) ? "rtl" : "ltr"}>
+<p dir="auto">{userGeneratedContent}</p>
+```
+
+```css
+/* ❌ NEVER — breaks in RTL */
+.sidebar { margin-left: 16px; padding-right: 8px; text-align: left; }
+
+/* ✅ ALWAYS — CSS logical properties */
+.sidebar { margin-inline-start: 16px; padding-inline-end: 8px; text-align: start; }
+.icon { inset-inline-start: 0; }  /* not "left: 0" */
+```
+
+```typescript
+// RTL detection utility
+const RTL_LOCALES = new Set(["ar", "he", "fa", "ur", "ps", "sd", "yi"]);
+const isRTL = (locale: string): boolean => RTL_LOCALES.has(locale.split("-")[0]);
+```
+
+## Pseudo-Localization for Testing
+
+Generate pseudo-locale to catch truncation, hardcoded strings, and layout issues before real translation.
+
+```typescript
+// pseudo-locale transforms: accents + expansion + brackets
+// "Save" → "[Šàààvé~~~~~~]" — exposes: untranslated strings, truncation, concatenation
+function pseudoLocalize(str: string): string {
+  const accents: Record<string, string> = { a: "à", e: "é", i: "ì", o: "ó", u: "ù", s: "š" };
+  const accented = str.replace(/[aeious]/gi, (c) => accents[c.toLowerCase()] || c);
+  const padLen = Math.ceil(str.length * 0.3); // 30% expansion for German/Finnish
+  return `[${accented}${"~".repeat(padLen)}]`;
+}
+```
+
+Add `pseudo` as a locale in development builds and visually audit every screen.
+
+## Translator Context & String Quality
+
+- Add `_description` suffix keys or use `i18next` context feature for translator notes
+- Never split sentences across multiple keys — translators need full sentence context
+- Avoid string concatenation — word order differs across languages
+- Use named placeholders (`{userName}`) not positional (`{0}`) — reorderable by translators
+- Keep one concept per key — don't reuse "Save" for both "Save file" and "Save money"
+- Maximum string length hints: `"saveButton_maxLength": 12` for UI-constrained elements
+
+## Accessibility for Translations
+
+```typescript
+// Screen readers need locale-tagged content for correct pronunciation
+<span lang="ja">東京</span>  // even inside English page
+<time dateTime={iso}>{localizedDate}</time>  // machine-readable + localized display
+// aria-label must also be translated
+<button aria-label={t("common:closeDialog")}><CloseIcon /></button>
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ String concatenation for sentences: `"Hello " + name` — word order breaks in Japanese, Arabic
+- ❌ Hardcoded date formats: `MM/DD/YYYY` — most of the world uses DD/MM/YYYY or YYYY-MM-DD
+- ❌ `new Date().toLocaleDateString()` without explicit locale — inconsistent across Node versions
+- ❌ Pluralizing with ternary: `count === 1 ? "item" : "items"` — fails for Arabic (6 plural forms), Polish (3)
+- ❌ Embedding HTML in translation strings: `"Click <b>here</b>"` — use Trans component or ICU markup
+- ❌ Using `pytz` — deprecated, use `zoneinfo` (stdlib) or `dateutil.tz`
+- ❌ Sorting with `Array.sort()` — use `Intl.Collator` for locale-aware alphabetical ordering
+- ❌ Assuming LTR layout — CSS `left`/`right` instead of `inline-start`/`inline-end`
+- ❌ Flag icons for language selectors — flags represent countries, not languages (Swiss speak 4 languages)
+- ❌ Storing translated text in database — store keys, translate at render time
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Localization Practice |
+|--------|----------------------|
+| **Responsible AI** | Inclusive language review per locale, cultural sensitivity checks, bias-free translations, accessible `lang` attributes |
+| **Operational Excellence** | CI lint for missing keys (`i18next-parser`), pseudo-locale in staging, translation coverage metrics in dashboards |
+| **Reliability** | Fallback chains prevent blank UI on missing translations, graceful degradation to base language |
+| **Performance** | Lazy-load namespaces per route, split locale bundles (only ship active locale), CDN for translation files |
+| **Security** | Sanitize interpolated values in translations (XSS via `{userName}`), CSP-safe rendering, no `dangerouslySetInnerHTML` for translated strings |
+| **Cost** | Translation memory (TM) reuse across versions, machine translation + human review workflow, shared glossaries reduce per-word cost |
