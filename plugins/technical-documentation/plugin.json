@@ -1,6 +1,6 @@
 {
   "name": "technical-documentation",
-  "description": "Technical Documentation — API references, architecture guides, README generation, changelog automation, tutorials, and ADRs. AI-assisted writing with Mermaid diagrams, PlantUML, and DrawIO integration.",
+  "description": "Technical Documentation — API references, architecture guides, README generation, changelog automation, tutorials.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

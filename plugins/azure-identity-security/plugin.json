@@ -1,6 +1,6 @@
 {
   "name": "azure-identity-security",
-  "description": "Azure Identity & Security — Managed Identity, Key Vault, RBAC, Conditional Access, and zero-trust architecture. Secure AI workloads with certificate-based auth, secret rotation, and compliance auditing.",
+  "description": "Azure Identity & Security — Managed Identity, Key Vault, RBAC, Conditional Access.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

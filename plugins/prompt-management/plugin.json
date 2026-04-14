@@ -1,6 +1,6 @@
 {
   "name": "prompt-management",
-  "description": "Prompt Management — version-controlled prompt templates, A/B testing, evaluation pipelines, and dynamic prompt assembly. Manage hundreds of prompts across models with Semantic Kernel prompt functions.",
+  "description": "Prompt Management — version-controlled prompt templates, A/B testing, evaluation pipelines.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

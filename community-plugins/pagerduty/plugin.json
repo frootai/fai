@@ -7,6 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
+  "keywords": ["pagerduty", "integration", "mcp", "community"],
   "agent": "fai-pagerduty-expert",
   "tools": [
     {

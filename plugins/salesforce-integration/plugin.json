@@ -1,6 +1,6 @@
 {
   "name": "salesforce-integration",
-  "description": "Salesforce Integration — Apex development, Lightning Web Components, SOQL optimization, Salesforce MCP connectors, and AI-powered CRM workflows. Bridge Salesforce data with Azure AI services.",
+  "description": "Salesforce Integration — Apex development, Lightning Web Components, SOQL optimization, Salesforce MCP connectors.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

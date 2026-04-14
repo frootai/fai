@@ -1,6 +1,6 @@
 {
   "name": "go-development",
-  "description": "Go Development — high-performance services, gRPC APIs, concurrent patterns, and cloud-native tooling. Idiomatic Go with table-driven tests, error handling, and minimal dependency builds.",
+  "description": "Go Development — high-performance services, gRPC APIs, concurrent patterns, and cloud-native tooling. Idiomatic Go with table-driven tests.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

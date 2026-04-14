@@ -1,6 +1,6 @@
 {
   "name": "code-quality",
-  "description": "Code Quality — automated code review, refactoring suggestions, dead code removal, complexity analysis, and technical debt tracking. AI-powered quality gates with custom rulesets and team coding standards.",
+  "description": "Code Quality — automated code review, refactoring suggestions, dead code removal, complexity analysis.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

@@ -7,6 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
+  "keywords": ["datadog", "integration", "mcp", "community"],
   "agent": "fai-datadog-expert",
   "tools": [
     {

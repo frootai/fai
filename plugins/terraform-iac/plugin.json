@@ -1,6 +1,6 @@
 {
   "name": "terraform-iac",
-  "description": "Terraform IaC — module authoring, state management, workspace strategies, provider configuration, and drift detection. Multi-cloud infrastructure as code with Azure-optimized patterns and cost estimation.",
+  "description": "Terraform IaC — module authoring, state management, workspace strategies, provider configuration.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

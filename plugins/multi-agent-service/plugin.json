@@ -1,6 +1,6 @@
 {
   "name": "multi-agent-service",
-  "description": "Multi-Agent Service — orchestrated agent teams with supervisor patterns, tool delegation, shared memory, and conflict resolution. Build production agent services on Azure Container Apps with Semantic Kernel or AutoGen.",
+  "description": "Multi-Agent Service — orchestrated agent teams with supervisor patterns, tool delegation, shared memory.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

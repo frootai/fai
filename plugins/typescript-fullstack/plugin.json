@@ -1,6 +1,6 @@
 {
   "name": "typescript-fullstack",
-  "description": "TypeScript Full-Stack — Next.js, React, NestJS, Prisma, Zod, Vitest, and end-to-end type safety. Modern web development with server components, tRPC, and Tailwind CSS.",
+  "description": "TypeScript Full-Stack — Next.js, React, NestJS, Prisma, Zod, Vitest, and end-to-end type safety. Modern web development with server components.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

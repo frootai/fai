@@ -1,6 +1,6 @@
 {
   "name": "copilot-teams-extension",
-  "description": "Copilot for Teams Extension — declarative agents, API plugins, message extensions, and adaptive cards for Microsoft 365 Copilot. Build custom AI experiences that surface inside Teams, Outlook, and M365 apps.",
+  "description": "Copilot for Teams Extension — declarative agents, API plugins, message extensions.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

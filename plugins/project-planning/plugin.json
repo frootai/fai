@@ -1,6 +1,6 @@
 {
   "name": "project-planning",
-  "description": "Project Planning — PRDs, epic breakdown, implementation plans, technical spikes, and rollout strategies. AI-assisted project management with architecture decision records and feature decomposition.",
+  "description": "Project Planning — PRDs, epic breakdown, implementation plans, technical spikes.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

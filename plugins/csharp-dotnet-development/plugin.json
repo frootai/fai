@@ -1,6 +1,6 @@
 {
   "name": "csharp-dotnet-development",
-  "description": "C# .NET Development — ASP.NET Core, Minimal API, Blazor, MAUI, EF Core, xUnit/NUnit testing, and architecture patterns. Full-stack .NET with WAF-aligned coding standards and code review agents.",
+  "description": "C# .NET Development — ASP.NET Core, Minimal API, Blazor, MAUI, EF Core, xUnit/NUnit testing.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

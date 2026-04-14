@@ -1,6 +1,6 @@
 {
   "name": "java-development",
-  "description": "Java Development — Spring Boot, Quarkus, JUnit 5, Gradle/Maven builds, and microservice patterns. Enterprise Java with reactive streams, GraalVM native images, and cloud-native deployment.",
+  "description": "Java Development — Spring Boot, Quarkus, JUnit 5, Gradle/Maven builds, and microservice patterns. Enterprise Java with reactive streams.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

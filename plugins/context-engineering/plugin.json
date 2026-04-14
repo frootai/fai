@@ -1,6 +1,6 @@
 {
   "name": "context-engineering",
-  "description": "Context Engineering — maximize AI effectiveness with structured context, memory banks, knowledge wiring, and smart prompt assembly. Build context-aware agents that retrieve the right information at the right time.",
+  "description": "Context Engineering — maximize AI effectiveness with structured context, memory banks, knowledge wiring.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

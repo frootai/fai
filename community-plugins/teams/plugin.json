@@ -7,6 +7,7 @@
     "url": "https://frootai.dev"
   },
   "license": "MIT",
+  "keywords": ["teams", "integration", "mcp", "community"],
   "agent": "fai-teams-expert",
   "tools": [
     {

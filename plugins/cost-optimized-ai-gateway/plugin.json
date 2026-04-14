@@ -1,6 +1,6 @@
 {
   "name": "cost-optimized-ai-gateway",
-  "description": "Cost-Optimized AI Gateway — intelligent model routing, token budget enforcement, request caching, rate limiting, and usage analytics. Route between GPT-4o, GPT-4o-mini, and Phi models based on complexity and cost.",
+  "description": "Cost-Optimized AI Gateway — intelligent model routing, token budget enforcement, request caching, rate limiting.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

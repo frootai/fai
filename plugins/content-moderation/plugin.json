@@ -1,6 +1,6 @@
 {
   "name": "content-moderation",
-  "description": "Content Moderation — real-time text, image, and multi-modal content safety with Azure AI Content Safety. Includes severity scoring, blocklist management, custom categories, and human-in-the-loop review workflows.",
+  "description": "Content Moderation — real-time text, image, and multi-modal content safety with Azure AI Content Safety. Includes severity scoring.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

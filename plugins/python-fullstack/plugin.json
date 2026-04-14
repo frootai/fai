@@ -1,6 +1,6 @@
 {
   "name": "python-fullstack",
-  "description": "Python Full-Stack — FastAPI, Django, Flask, Pydantic, SQLAlchemy, pytest, and async patterns. Data science to web APIs with type safety, dependency injection, and production deployment.",
+  "description": "Python Full-Stack — FastAPI, Django, Flask, Pydantic, SQLAlchemy, pytest, and async patterns. Data science to web APIs with type safety.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

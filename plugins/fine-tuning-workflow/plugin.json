@@ -1,6 +1,6 @@
 {
   "name": "fine-tuning-workflow",
-  "description": "Fine-Tuning Workflow — dataset preparation, training job orchestration, evaluation pipelines, model registry, and deployment automation. Fine-tune GPT, Phi, and open-source models on Azure AI Foundry.",
+  "description": "Fine-Tuning Workflow — dataset preparation, training job orchestration, evaluation pipelines, model registry.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

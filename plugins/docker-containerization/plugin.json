@@ -1,6 +1,6 @@
 {
   "name": "docker-containerization",
-  "description": "Docker Containerization — multi-stage builds, distroless images, BuildKit caching, health checks, and security scanning. Containerize any workload with optimized images for AI inference and web services.",
+  "description": "Docker Containerization — multi-stage builds, distroless images, BuildKit caching, health checks.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

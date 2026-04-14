@@ -1,6 +1,6 @@
 {
   "name": "prompt-engineering",
-  "description": "Prompt Engineering — chain-of-thought, few-shot, tree-of-thought, and meta-prompting patterns. Template management, dynamic prompt assembly, safety guardrails, and evaluation-driven prompt optimization.",
+  "description": "Prompt Engineering — chain-of-thought, few-shot, tree-of-thought, and meta-prompting patterns. Template management, dynamic prompt assembly.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

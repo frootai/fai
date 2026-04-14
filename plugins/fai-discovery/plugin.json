@@ -1,6 +1,6 @@
 {
   "name": "fai-discovery",
-  "description": "FAI Discovery — meta-plugin for exploring and recommending agents, instructions, skills, hooks, and plugins. Suggests the right primitives for your task based on project context and WAF alignment.",
+  "description": "FAI Discovery — meta-plugin for exploring and recommending agents, instructions, skills, hooks.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

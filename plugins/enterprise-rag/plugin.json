@@ -1,6 +1,6 @@
 {
   "name": "enterprise-rag",
-  "description": "Production-grade Retrieval-Augmented Generation pipeline with Azure AI Search, OpenAI embeddings, Container Apps deployment, and WAF-aligned evaluation. Includes the RAG Architect agent, Python + Bicep instructions, play initializer skill, and all 3 security hooks.",
+  "description": "Production-grade Retrieval-Augmented Generation pipeline with Azure AI Search, OpenAI embeddings, Container Apps deployment, and WAF-aligned evalua...",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

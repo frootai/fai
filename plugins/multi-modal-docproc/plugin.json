@@ -1,6 +1,6 @@
 {
   "name": "multi-modal-docproc",
-  "description": "Multi-Modal Document Processing — combine OCR, vision, speech, and text analysis for complex document workflows. Extract structured data from PDFs, images, audio, and video using Azure AI multi-modal capabilities.",
+  "description": "Multi-Modal Document Processing — combine OCR, vision, speech, and text analysis for complex document workflows. Extract structured data from PDFs.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

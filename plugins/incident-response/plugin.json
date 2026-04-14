@@ -1,6 +1,6 @@
 {
   "name": "incident-response",
-  "description": "Incident Response — on-call triage, KQL query generation, Azure resource diagnostics, runbook automation, and post-incident reviews. AI-assisted SRE with intelligent alerting and root cause analysis.",
+  "description": "Incident Response — on-call triage, KQL query generation, Azure resource diagnostics, runbook automation.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

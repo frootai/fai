@@ -1,6 +1,6 @@
 {
   "name": "security-hardening",
-  "description": "Security Hardening — OWASP Top 10, secrets scanning, dependency auditing, supply chain security, threat modeling, and penetration testing patterns. Harden AI applications with defense-in-depth and zero-trust.",
+  "description": "Security Hardening — OWASP Top 10, secrets scanning, dependency auditing, supply chain security, threat modeling.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

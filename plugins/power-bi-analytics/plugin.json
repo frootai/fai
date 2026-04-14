@@ -1,6 +1,6 @@
 {
   "name": "power-bi-analytics",
-  "description": "Power BI Analytics — DAX formulas, data modeling, report design, dashboard layout, and performance optimization. Build self-service AI analytics with DirectQuery, incremental refresh, and composite models.",
+  "description": "Power BI Analytics — DAX formulas, data modeling, report design, dashboard layout.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

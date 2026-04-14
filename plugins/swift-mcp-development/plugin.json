@@ -1,6 +1,6 @@
 {
   "name": "swift-mcp-development",
-  "description": "Swift MCP Development — build MCP servers in Swift with Vapor framework, SwiftUI tool previews, iOS/macOS native integration, and Apple silicon optimization.",
+  "description": "Swift MCP Development — build MCP servers in Swift with Vapor framework, SwiftUI tool previews, iOS/macOS native integration.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

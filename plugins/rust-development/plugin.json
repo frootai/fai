@@ -1,6 +1,6 @@
 {
   "name": "rust-development",
-  "description": "Rust Development — systems programming, zero-cost abstractions, async with Tokio, WASM targets, and memory-safe concurrency. Build high-performance tools, CLIs, and servers without garbage collection.",
+  "description": "Rust Development — systems programming, zero-cost abstractions, async with Tokio, WASM targets.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

@@ -1,6 +1,6 @@
 {
   "name": "oracle-migration",
-  "description": "Oracle Migration — Oracle-to-PostgreSQL and Oracle-to-Azure SQL migration patterns. Schema conversion, PL/SQL translation, data pipeline design, and validation testing for database modernization.",
+  "description": "Oracle Migration — Oracle-to-PostgreSQL and Oracle-to-Azure SQL migration patterns. Schema conversion, PL/SQL translation, data pipeline design.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

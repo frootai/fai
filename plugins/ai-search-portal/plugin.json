@@ -1,6 +1,6 @@
 {
   "name": "ai-search-portal",
-  "description": "AI Search Portal — full-text and vector hybrid search with semantic ranking, faceted navigation, autocomplete, and personalized results. Build a production search experience on Azure AI Search with RAG integration.",
+  "description": "AI Search Portal — full-text and vector hybrid search with semantic ranking, faceted navigation, autocomplete.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

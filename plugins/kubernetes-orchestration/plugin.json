@@ -1,6 +1,6 @@
 {
   "name": "kubernetes-orchestration",
-  "description": "Kubernetes Orchestration — cluster setup, Helm charts, KEDA autoscaling, Dapr sidecars, Istio service mesh, and GPU scheduling. Production K8s patterns for AI model serving and microservices.",
+  "description": "Kubernetes Orchestration — cluster setup, Helm charts, KEDA autoscaling, Dapr sidecars, Istio service mesh.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

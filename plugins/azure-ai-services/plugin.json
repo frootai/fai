@@ -1,6 +1,6 @@
 {
   "name": "azure-ai-services",
-  "description": "Azure AI Services — OpenAI, AI Search, Document Intelligence, Language, Speech, Vision, and Content Safety integration patterns. Production-ready wrappers with retry, circuit breaker, and cost tracking.",
+  "description": "Azure AI Services — OpenAI, AI Search, Document Intelligence, Language, Speech, Vision.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

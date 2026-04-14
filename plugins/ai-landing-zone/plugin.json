@@ -1,6 +1,6 @@
 {
   "name": "ai-landing-zone",
-  "description": "Azure AI Landing Zone — subscription vending, network topology, RBAC, policy enforcement, and hub-spoke architecture for enterprise AI workloads. Includes Bicep IaC modules validated against all 6 WAF pillars.",
+  "description": "Azure AI Landing Zone — subscription vending, network topology, RBAC, policy enforcement.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

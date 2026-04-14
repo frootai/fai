@@ -1,6 +1,6 @@
 {
   "name": "cicd-automation",
-  "description": "CI/CD Automation — GitHub Actions, Azure DevOps pipelines, build matrices, deployment gates, and release management. Automate test → build → deploy → evaluate pipelines for AI workloads.",
+  "description": "CI/CD Automation — GitHub Actions, Azure DevOps pipelines, build matrices, deployment gates.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

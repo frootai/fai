@@ -1,6 +1,6 @@
 {
   "name": "model-serving-aks",
-  "description": "Model Serving on AKS — GPU-accelerated inference, autoscaling with KEDA, model versioning, A/B deployment, and canary rollouts. Deploy open-source LLMs (Phi-4, Llama, Mistral) on Azure Kubernetes Service.",
+  "description": "Model Serving on AKS — GPU-accelerated inference, autoscaling with KEDA, model versioning, A/B deployment.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

@@ -1,6 +1,6 @@
 {
   "name": "frontend-web-development",
-  "description": "Frontend Web Development — React, Angular, Vue, Svelte, Astro, and Tailwind CSS patterns. Component architecture, state management, accessibility, and performance optimization for modern web apps.",
+  "description": "Frontend Web Development — React, Angular, Vue, Svelte, Astro, and Tailwind CSS patterns. Component architecture, state management, accessibility.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

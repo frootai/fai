@@ -1,6 +1,6 @@
 {
   "name": "ai-landing-zone-advanced",
-  "description": "Advanced AI Landing Zone — multi-region deployment, private endpoints, Azure Firewall, DDoS protection, sovereign cloud patterns, and compliance-ready infrastructure for regulated industries.",
+  "description": "Advanced AI Landing Zone — multi-region deployment, private endpoints, Azure Firewall, DDoS protection, sovereign cloud patterns.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

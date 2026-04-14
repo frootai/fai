@@ -1,6 +1,6 @@
 {
   "name": "ai-evaluation-suite",
-  "description": "AI Evaluation Suite — groundedness, coherence, relevance, fluency, and safety scoring. Build evaluation pipelines with Azure AI Evaluation SDK, custom metrics, regression tracking, and CI/CD integration.",
+  "description": "AI Evaluation Suite — groundedness, coherence, relevance, fluency, and safety scoring. Build evaluation pipelines with Azure AI Evaluation SDK.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

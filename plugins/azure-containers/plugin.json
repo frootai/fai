@@ -1,6 +1,6 @@
 {
   "name": "azure-containers",
-  "description": "Azure Containers — AKS, Container Apps, Container Registry, and Dockerized deployment patterns. GPU workloads, KEDA autoscaling, Dapr sidecar integration, and multi-arch builds for AI model serving.",
+  "description": "Azure Containers — AKS, Container Apps, Container Registry, and Dockerized deployment patterns. GPU workloads, KEDA autoscaling.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

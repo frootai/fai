@@ -1,6 +1,6 @@
 {
   "name": "ai-observability",
-  "description": "AI Observability — distributed tracing for LLM calls, token usage dashboards, latency monitoring, evaluation score tracking, and alerting. Build full observability for AI workloads with Azure Monitor and OpenTelemetry.",
+  "description": "AI Observability — distributed tracing for LLM calls, token usage dashboards, latency monitoring, evaluation score tracking.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

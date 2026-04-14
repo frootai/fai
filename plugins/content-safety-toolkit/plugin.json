@@ -1,6 +1,6 @@
 {
   "name": "content-safety-toolkit",
-  "description": "Content Safety Toolkit — Azure AI Content Safety integration, custom blocklists, severity thresholds, image moderation, prompt injection detection, and jailbreak defense patterns for production AI.",
+  "description": "Content Safety Toolkit — Azure AI Content Safety integration, custom blocklists, severity thresholds, image moderation, prompt injection detection.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

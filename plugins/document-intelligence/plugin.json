@@ -1,6 +1,6 @@
 {
   "name": "document-intelligence",
-  "description": "Document Intelligence — OCR, form extraction, table recognition, and intelligent document processing. Uses Azure AI Document Intelligence with custom models for invoices, receipts, contracts, and domain-specific forms.",
+  "description": "Document Intelligence — OCR, form extraction, table recognition.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

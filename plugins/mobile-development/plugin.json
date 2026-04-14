@@ -1,6 +1,6 @@
 {
   "name": "mobile-development",
-  "description": "Mobile Development — Swift/SwiftUI for iOS, Kotlin for Android, .NET MAUI for cross-platform, and Flutter/Dart for hybrid apps. Native AI integration with on-device inference and platform-specific UX patterns.",
+  "description": "Mobile Development — Swift/SwiftUI for iOS, Kotlin for Android, .NET MAUI for cross-platform.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

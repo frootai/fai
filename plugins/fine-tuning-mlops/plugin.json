@@ -1,6 +1,6 @@
 {
   "name": "fine-tuning-mlops",
-  "description": "Fine-Tuning & MLOps — dataset curation, model training, hyperparameter optimization, model registry, and deployment pipelines. End-to-end ML lifecycle with Azure AI Foundry, MLflow, and evaluation gates.",
+  "description": "Fine-Tuning & MLOps — dataset curation, model training, hyperparameter optimization, model registry.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

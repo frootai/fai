@@ -1,18 +1,15 @@
 {
   "name": "servicenow-ai-agent",
   "version": "1.0.0",
-  "description": "ServiceNow IT Service Management integration — AI-powered ticket routing, auto-resolution, knowledge base search",
-  "author": "FAI Community",
-  "play": "05-it-ticket-resolution",
-  "layers": {
-    "instructions": [".github/instructions/servicenow-integration.instructions.md"],
-    "agents": [".github/agents/servicenow-agent.agent.md"],
-    "config": ["config/servicenow.json"],
-    "hooks": [".github/workflows/servicenow-sync.yml"]
-  },
-  "dependencies": ["frootai-mcp"],
-  "install": "copy",
-  "tags": ["servicenow", "itsm", "ticketing", "enterprise"],
-  "azure_services": ["Azure OpenAI", "Logic Apps", "Container Apps"],
-  "waf_aligned": true
+  "description": "ServiceNow ITSM integration — AI-powered ticket routing, auto-resolution, knowledge base search.",
+  "author": { "name": "FAI Community", "url": "https://frootai.dev" },
+  "repository": "https://github.com/frootai/frootai",
+  "license": "MIT",
+  "homepage": "https://frootai.dev",
+  "keywords": ["servicenow", "itsm", "ticketing", "enterprise", "integration"],
+  "plays": ["05-it-ticket-resolution"],
+  "agents": [".github/agents/servicenow-agent.agent.md"],
+  "instructions": [".github/instructions/servicenow-integration.instructions.md"],
+  "hooks": [".github/workflows/servicenow-sync.yml"],
+  "dependencies": ["frootai-mcp"]
 }

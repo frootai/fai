@@ -1,6 +1,6 @@
 {
   "name": "it-ticket-resolution",
-  "description": "IT Ticket Resolution — automated incident classification, knowledge base search, resolution suggestion, and escalation routing. Uses RAG over IT documentation with Azure AI Search and Semantic Kernel orchestration.",
+  "description": "IT Ticket Resolution — automated incident classification, knowledge base search, resolution suggestion.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

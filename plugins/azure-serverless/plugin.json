@@ -1,6 +1,6 @@
 {
   "name": "azure-serverless",
-  "description": "Azure Serverless — Functions, Logic Apps, Event Grid, and Durable Functions patterns. Event-driven architectures with consumption-based scaling, cold start mitigation, and cost optimization.",
+  "description": "Azure Serverless — Functions, Logic Apps, Event Grid, and Durable Functions patterns. Event-driven architectures with consumption-based scaling.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

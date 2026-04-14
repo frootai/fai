@@ -1,6 +1,6 @@
 {
   "name": "copilot-studio-bot",
-  "description": "Copilot Studio Bot — custom copilot experiences with Microsoft Copilot Studio, Power Virtual Agents, and Teams integration. Build conversational AI with enterprise SSO, Dataverse, and multi-channel deployment.",
+  "description": "Copilot Studio Bot — custom copilot experiences with Microsoft Copilot Studio, Power Virtual Agents.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

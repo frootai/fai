@@ -1,6 +1,6 @@
 {
   "name": "call-center-voice-ai",
-  "description": "Call Center Voice AI — real-time speech-to-text, intent classification, sentiment analysis, and AI-assisted agent coaching. Integrates Azure AI Speech, Azure Communication Services, and GPT-4o for voice-driven customer service.",
+  "description": "Call Center Voice AI — real-time speech-to-text, intent classification, sentiment analysis.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

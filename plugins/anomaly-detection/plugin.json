@@ -1,6 +1,6 @@
 {
   "name": "anomaly-detection",
-  "description": "Anomaly Detection — real-time and batch anomaly detection for time-series, metrics, and log data. Uses Azure AI Anomaly Detector, custom ML models, and event-driven alerting with Azure Event Hubs.",
+  "description": "Anomaly Detection — real-time and batch anomaly detection for time-series, metrics, and log data. Uses Azure AI Anomaly Detector, custom ML models.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

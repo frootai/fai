@@ -1,6 +1,6 @@
 {
   "name": "deterministic-agent",
-  "description": "Deterministic AI Agent — finite state machines, rule-based routing, guardrailed tool use, and reproducible conversation flows. Build agents that produce consistent outputs regardless of LLM temperature.",
+  "description": "Deterministic AI Agent — finite state machines, rule-based routing, guardrailed tool use.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

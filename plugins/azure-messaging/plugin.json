@@ -1,6 +1,6 @@
 {
   "name": "azure-messaging",
-  "description": "Azure Messaging — Service Bus, Event Hubs, and Event Grid patterns for async communication, event sourcing, and CQRS. Build reliable message-driven architectures with dead-letter handling and partitioning.",
+  "description": "Azure Messaging — Service Bus, Event Hubs, and Event Grid patterns for async communication, event sourcing.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

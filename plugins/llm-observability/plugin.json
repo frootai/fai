@@ -1,6 +1,6 @@
 {
   "name": "llm-observability",
-  "description": "LLM Observability — trace every LLM call with input/output logging, token counts, latency percentiles, cost attribution, and evaluation score trends. OpenTelemetry-based tracing for Azure OpenAI and open-source models.",
+  "description": "LLM Observability — trace every LLM call with input/output logging, token counts, latency percentiles, cost attribution.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

@@ -1,6 +1,6 @@
 {
   "name": "edge-ai-phi4",
-  "description": "Edge AI with Phi-4 — deploy small language models on edge devices, IoT hubs, and local inference servers. Quantization, ONNX optimization, and offline-capable AI with Microsoft Phi-4 models.",
+  "description": "Edge AI with Phi-4 — deploy small language models on edge devices, IoT hubs, and local inference servers. Quantization, ONNX optimization.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

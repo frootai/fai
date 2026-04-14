@@ -1,6 +1,6 @@
 {
   "name": "responsible-ai",
-  "description": "Responsible AI — content safety, bias testing, fairness metrics, transparency cards, and human-in-the-loop review. Build ethical AI systems aligned with Microsoft Responsible AI Standard and EU AI Act requirements.",
+  "description": "Responsible AI — content safety, bias testing, fairness metrics, transparency cards.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",

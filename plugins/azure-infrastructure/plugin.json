@@ -1,6 +1,6 @@
 {
   "name": "azure-infrastructure",
-  "description": "Azure Infrastructure — landing zones, hub-spoke networking, private endpoints, Azure Policy, RBAC, and subscription vending. Enterprise-grade Bicep IaC for AI workloads validated against all 6 WAF pillars.",
+  "description": "Azure Infrastructure — landing zones, hub-spoke networking, private endpoints, Azure Policy, RBAC.",
   "version": "1.0.0",
   "author": {
     "name": "FAI Contributors",
