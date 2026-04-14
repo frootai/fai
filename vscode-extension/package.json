@@ -201,6 +201,22 @@
         "title": "FrootAI: Search Everything",
         "icon": "$(search)",
         "shortTitle": "Search"
+      },
+      {
+        "command": "frootai.openPlayDetail",
+        "title": "FrootAI: Open Play Detail Panel"
+      },
+      {
+        "command": "frootai.openEvaluationDashboard",
+        "title": "FrootAI: Open Evaluation Dashboard"
+      },
+      {
+        "command": "frootai.openScaffoldWizard",
+        "title": "FrootAI: Open Scaffold Wizard"
+      },
+      {
+        "command": "frootai.openMcpExplorer",
+        "title": "FrootAI: Explore MCP Tools"
       }
     ],
     "menus": {
