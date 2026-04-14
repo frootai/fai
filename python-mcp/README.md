@@ -61,10 +61,19 @@ frootai-mcp-py
 ### Use in Python
 
 ```python
-from frootai_mcp import FrootAIMCP
+from frootai_mcp.server import mcp
 
-server = FrootAIMCP()
-result = server._search_knowledge({"query": "RAG architecture"})
+# Run as MCP server (stdio transport)
+mcp.run(transport="stdio")
+```
+
+Or call tools directly:
+
+```python
+import asyncio
+from frootai_mcp.server import search_knowledge, wire_play
+
+result = asyncio.run(search_knowledge(query="RAG architecture"))
 print(result)
 ```
 
@@ -102,51 +111,127 @@ print(result)
 
 ---
 
-### MCP Tools
+### MCP Capabilities
 
-**Static** — bundled knowledge, works offline
+| Capability | Count | Description |
+|-----------|-------|-------------|
+| **Tools** | 45 | Full MCP tools with annotations |
+| **Resources** | 4 | URI templates for modules, plays, glossary, overview |
+| **Prompts** | 6 | Guided workflows for architecture, review, scaffold |
+| **Search** | BM25 | 358 docs × 8,627 terms, Robertson IDF |
+| **Plays** | 100 | Solution architectures from starter to enterprise |
+| **Primitives** | 830+ | Agents, instructions, skills, hooks, plugins |
+
+### MCP Tools (45)
+
+**Knowledge (6)** — bundled knowledge, works offline
 - `list_modules` — browse FROOT knowledge modules by layer
 - `get_module` — read any module in full
-- `lookup_term` — AI/ML glossary lookup
-- `search_knowledge` — full-text search across all modules
+- `lookup_term` — AI/ML glossary lookup (200+ terms)
+- `search_knowledge` — BM25 full-text search across all modules
 - `get_architecture_pattern` — architecture decision guides
 - `get_froot_overview` — complete framework summary
 
-**Live** — network-enabled, graceful offline fallback
-- `fetch_azure_docs` — search Microsoft Learn for Azure docs
-- `fetch_external_mcp` — discover MCP servers from public registries
-- `list_community_plays` — browse solution plays from GitHub
-- `get_github_agentic_os` — .github Agentic OS implementation guide
+**Solution Plays (5)** — 100 pre-architected solutions
+- `list_solution_plays` — list all 100 plays with filters
+- `get_play_detail` — full play info with infra, tuning, complexity
+- `semantic_search_plays` — BM25-powered play matching
+- `compare_plays` — side-by-side play comparison
+- `generate_architecture_diagram` — Mermaid.js diagrams
 
-**Agent Chain** — build → review → tune
-- `agent_build` — architecture guidance + code patterns
+**Agent Chain (3)** — build → review → tune
+- `agent_build` — architecture guidance + recommended play
 - `agent_review` — security, quality, compliance audit
-- `agent_tune` — production readiness validation
+- `agent_tune` — production readiness + tuning recommendations
 
-**Ecosystem** — Azure AI intelligence
-- `get_model_catalog` — Azure AI model catalog with pricing
-- `get_azure_pricing` — monthly cost estimates for Azure services
+**Azure / Live (4)** — Azure AI intelligence
+- `get_model_catalog` — model catalog with pricing tiers
+- `get_azure_pricing` — service pricing by tier
 - `compare_models` — side-by-side model comparison
-- `compare_plays` — compare solution plays
+- `estimate_cost` — itemized monthly cost per play
 
-**Compute** — real calculations, not just lookups
-- `estimate_cost` — itemized Azure cost estimate per play + scale
-- `validate_config` — validate configs against best practices
-- `generate_architecture_diagram` — Mermaid architecture diagrams
-- `embedding_playground` — cosine similarity between texts
-- `semantic_search_plays` — semantic search across solution plays
-- `run_evaluation` — quality scoring with configurable thresholds
+**Ecosystem (5)** — platform awareness
+- `get_github_agentic_os` — .github Agentic OS guide
+- `list_community_plays` — community plugin marketplace
+- `fetch_azure_docs` — Azure documentation links
+- `fetch_external_mcp` — discover MCP servers
+- `get_play_spec` — SpecKit with WAF alignment
+
+**FAI Engine (5)** — protocol wiring
+- `wire_play` — generate fai-manifest.json for a play
+- `inspect_wiring` — check what primitives are connected
+- `validate_manifest` — validate fai-manifest.json schema
+- `validate_config` — validate AI config parameters
+- `evaluate_quality` — run quality evaluation (groundedness, relevance, etc.)
+
+**Marketplace (4)** — primitive discovery
+- `list_marketplace` — browse 830+ primitives by type
+- `get_primitive_detail` — get detail for a specific primitive
+- `search_marketplace` — keyword search across all primitives
+- `embedding_playground` — text similarity comparison (educational)
+
+**Scaffold (5)** — project bootstrapping
+- `scaffold_play` — scaffold a new play with DevKit structure
+- `smart_scaffold` — describe what you want, get the best play
+- `list_templates` — available scaffold templates by complexity
+- `preview_scaffold` — dry-run preview of scaffold output
+- `scaffold_status` — check scaffold completeness
+
+**Extra (8)** — specialized utilities
+- `run_evaluation` — run evaluation with custom thresholds
+- `get_bicep_best_practices` — Bicep IaC best practices
+- `list_primitives` — list primitives by type
+- `get_waf_guidance` — WAF pillar guidance
+- `check_play_compatibility` — check if plays can compose
+- `get_learning_path` — curated learning paths by topic
+- `export_play_config` — export play config as JSON
+- `get_version_info` — server version and capabilities
+
+### MCP Resources (4)
+
+| URI | Description |
+|-----|-------------|
+| `fai://modules/{module_id}` | Read FROOT module without tool call |
+| `fai://plays/{play_id}` | Read solution play without tool call |
+| `fai://glossary/{term}` | Look up glossary term without tool call |
+| `fai://overview` | Platform overview without tool call |
+
+### MCP Prompts (6)
+
+| Prompt | Description |
+|--------|-------------|
+| `design_architecture` | Guided AI architecture design |
+| `review_config` | Structured config review for production |
+| `pick_solution_play` | Conversational play selection |
+| `estimate_costs` | Azure cost estimation workflow |
+| `scaffold_project` | Project bootstrapping workflow |
+| `learn_fai_protocol` | FAI Protocol educational walkthrough |
 
 ---
 
 ### What Ships Inside
 
-- **FROOT Knowledge Modules** — Foundations, Reasoning, Orchestration, Operations, Transformation
-- **AI Glossary** — comprehensive AI/ML term definitions
-- **Solution Plays** — pre-tuned deployable AI solutions
-- **Architecture Decision Guides** — RAG, agents, hosting, cost optimization
+| Component | Details |
+|-----------|---------|
+| **FROOT Knowledge** | 16 modules across 5 layers (682KB) |
+| **BM25 Search Index** | 358 documents × 8,627 terms, pre-computed IDF |
+| **Solution Plays** | 100 pre-architected Azure AI solutions |
+| **AI Glossary** | 200+ terms extracted from modules |
+| **FAI Protocol** | Manifest schema for play wiring |
+| **Architecture Guides** | RAG, agents, hosting, cost, security |
 
-> Same tools as the Node.js MCP server. The FrootAI ecosystem grows with every release.
+> **Feature parity** with the Node.js MCP server — same 45 tools, same knowledge, same FAI Engine.
+
+---
+
+### Testing
+
+```bash
+pip install pytest
+cd python-mcp
+python -m pytest tests/ -v
+# 43 tests across 9 test classes
+```
 
 ---
 

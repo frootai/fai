@@ -6,12 +6,16 @@ FAI Protocol engine · Scaffold · Marketplace · full MCP protocol
 Compatible with Claude Desktop, VS Code Copilot, Cursor, Windsurf, any MCP client.
 """
 import json
+import logging
 import math
 import re
 from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+
+_logger = logging.getLogger("frootai-mcp")
+_logger.setLevel(logging.INFO)
 
 PLAYS = [
     {"id":"01","name":"Enterprise RAG Q&A","desc":"Production RAG — AI Search + OpenAI + Container Apps","cx":"Medium","infra":"AI Search · Azure OpenAI · Container Apps · Blob","tune":"temperature · top-k · chunk size · reranking"},
@@ -271,6 +275,7 @@ async def search_knowledge(query: str, max_results: int = 10) -> str:
     if not query.strip():
         return json.dumps({"error": "Query required"})
     results = _bm25_search(query, top_k=max_results)
+    _logger.info("search_knowledge query=%s results=%d", query, len(results))
     return json.dumps({"query": query, "results": results, "total": len(results), "engine": "BM25"}, indent=2)
 
 
@@ -625,6 +630,7 @@ async def wire_play(play_id: str, output_dir: str = ".") -> str:
         },
     }
 
+    _logger.info("wire_play play=%s status=wired", play_id)
     return json.dumps({"play": play["name"], "manifest": manifest, "output": f"{output_dir}/fai-manifest.json", "status": "wired"}, indent=2)
 
 
@@ -854,6 +860,8 @@ async def scaffold_play(play_id: str, project_name: str = "", dry_run: bool = Fa
     has_infra = any(s in play["infra"].lower() for s in ["azure", "container", "cosmos", "key vault", "vnet"])
     if has_infra:
         files.extend([f"{name}/infra/main.bicep", f"{name}/infra/parameters.bicepparam"])
+
+    _logger.info("scaffold_play play=%s files=%d dry_run=%s", play_id, len(files), dry_run)
 
     if dry_run:
         return json.dumps({"play": play["name"], "project": name, "files": files, "dry_run": True, "file_count": len(files)}, indent=2)
