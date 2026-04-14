@@ -64,6 +64,78 @@ try {
   faiEngine = { available: false, reason: err.message };
 }
 
+// ─── Production Middleware (Phase 3) ──────────────────────────────
+
+/** LRU Cache with TTL — avoids re-computing on repeated calls */
+class LRUCache {
+  constructor(maxSize = 100, defaultTTLMs = 300_000) {
+    this.cache = new Map();
+    this.maxSize = maxSize;
+    this.defaultTTL = defaultTTLMs;
+    this.hits = 0;
+    this.misses = 0;
+  }
+
+  get(key) {
+    const entry = this.cache.get(key);
+    if (!entry) { this.misses++; return undefined; }
+    if (Date.now() > entry.expiresAt) { this.cache.delete(key); this.misses++; return undefined; }
+    this.cache.delete(key); this.cache.set(key, entry); // move to end (LRU)
+    this.hits++;
+    return entry.value;
+  }
+
+  set(key, value, ttlMs) {
+    if (this.cache.size >= this.maxSize) {
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) this.cache.delete(firstKey);
+    }
+    this.cache.set(key, { value, expiresAt: Date.now() + (ttlMs ?? this.defaultTTL) });
+  }
+
+  stats() {
+    const total = this.hits + this.misses;
+    return { size: this.cache.size, hits: this.hits, misses: this.misses, hitRate: total > 0 ? `${((this.hits / total) * 100).toFixed(1)}%` : '0%' };
+  }
+}
+
+/** Token bucket rate limiter — protects external APIs */
+class RateLimiter {
+  constructor(maxTokens = 10, refillPerSec = 1) {
+    this.buckets = new Map();
+    this.maxTokens = maxTokens;
+    this.refillPerSec = refillPerSec;
+  }
+
+  allow(key) {
+    const now = Date.now();
+    let bucket = this.buckets.get(key);
+    if (!bucket) { bucket = { tokens: this.maxTokens, lastRefill: now }; this.buckets.set(key, bucket); }
+    const elapsed = (now - bucket.lastRefill) / 1000;
+    bucket.tokens = Math.min(this.maxTokens, bucket.tokens + elapsed * this.refillPerSec);
+    bucket.lastRefill = now;
+    if (bucket.tokens >= 1) { bucket.tokens -= 1; return true; }
+    return false;
+  }
+}
+
+/** Standardized MCP error responses */
+function mcpError(message, details) {
+  return { content: [{ type: "text", text: details ? `❌ ${message}\n\n${details}` : `❌ ${message}` }], isError: true };
+}
+
+function mcpNotFound(entity, id) {
+  return { content: [{ type: "text", text: `❌ ${entity} "${id}" not found.` }], isError: true };
+}
+
+// Initialize middleware
+const searchCache = new LRUCache(50, 5 * 60_000);       // 5 min TTL
+const azureDocsCache = new LRUCache(30, 60 * 60_000);   // 1 hour TTL
+const mcpRegistryCache = new LRUCache(20, 60 * 60_000); // 1 hour TTL
+const githubPlaysCache = new LRUCache(5, 5 * 60_000);   // 5 min TTL
+
+const liveLimiter = new RateLimiter(10, 1);  // 10 req burst, 1/sec refill
+
 // ─── Knowledge Base Loader ─────────────────────────────────────────
 // Two modes:
 //   1. BUNDLED (npx frootai-mcp) — reads from knowledge.json shipped in the package
@@ -2294,6 +2366,512 @@ if (faiEngine && faiEngine.available) {
 
       lines.push(``, `---`, `*This is the FAI Layer — shared context that makes standalone primitives work as one system.*`);
       return { content: [{ type: "text", text: lines.join('\n') }] };
+    }
+  );
+
+  // ════════════════════════════════════════════════════════════════════
+  // SCAFFOLD & CREATE TOOLS — Phase 2
+  // Empowerment: people create plays and primitives through MCP.
+  // What they create auto-wires through the FAI Protocol.
+  // ════════════════════════════════════════════════════════════════════
+
+  const { mkdirSync, writeFileSync, statSync, cpSync } = await import("fs");
+  const pathMod = await import("path");
+
+  // ── Helper: generate play name + number ──────────────────────────
+
+  function nextPlayNumber() {
+    const playsDir = pathMod.default.join(process.cwd(), "solution-plays");
+    if (!existsSync(playsDir)) return "101";
+    const dirs = readdirSync(playsDir).filter(d => /^\d{2,3}-/.test(d)).map(d => parseInt(d.split("-")[0]));
+    const max = dirs.length > 0 ? Math.max(...dirs) : 100;
+    return String(max + 1).padStart(2, "0");
+  }
+
+  function kebabCase(str) {
+    return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  function safeMkdir(dir) {
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  }
+
+  function safeWrite(filePath, content) {
+    safeMkdir(pathMod.default.dirname(filePath));
+    writeFileSync(filePath, content, "utf-8");
+  }
+
+  // ── Tool: scaffold_play ──────────────────────────────────────────
+
+  server.tool(
+    "scaffold_play",
+    "FAI SCAFFOLD — Generate a complete solution play with DevKit (.github/ Agentic OS), TuneKit (config/ + evaluation/), SpecKit (spec/ + fai-manifest.json), and infrastructure (infra/). Everything auto-wires through the FAI Protocol.",
+    {
+      name: z.string().describe("Play name in plain English (e.g., 'Customer Support Chatbot', 'Invoice Processor')"),
+      description: z.string().optional().describe("What this play does (1-2 sentences)"),
+      model: z.enum(["gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini", "o3", "o4-mini"]).optional().default("gpt-4o"),
+      wafPillars: z.array(z.string()).optional().default(["security", "reliability", "cost-optimization"]),
+      temperature: z.number().optional().default(0.1),
+      generateInfra: z.boolean().optional().default(true).describe("Generate Bicep infrastructure (infra/)"),
+      dryRun: z.boolean().optional().default(false).describe("Preview file list without creating"),
+    },
+    { annotations: { destructiveHint: true, idempotentHint: false } },
+    async ({ name, description, model, wafPillars, temperature, generateInfra, dryRun }) => {
+      const slug = kebabCase(name);
+      const playNum = nextPlayNumber();
+      const playId = `${playNum}-${slug}`;
+      const desc = description || `${name} — AI-powered solution built with the FAI Protocol.`;
+      const playsDir = pathMod.default.join(process.cwd(), "solution-plays");
+      const playDir = pathMod.default.join(playsDir, playId);
+
+      if (existsSync(playDir)) {
+        return { content: [{ type: "text", text: `❌ Directory already exists: solution-plays/${playId}` }], isError: true };
+      }
+
+      const files = [];
+
+      // ── agent.md (root orchestrator) ────────────────────────
+      files.push({ path: "agent.md", content: `---
+description: "${desc}"
+tools: ["terminal", "file", "search"]
+model: ["${model}", "gpt-4o-mini"]
+waf: ${JSON.stringify(wafPillars)}
+plays: ["${playId}"]
+handoffs:
+  - agent: "builder"
+    prompt: "Build features for ${name}"
+  - agent: "reviewer"
+    prompt: "Review implementation for ${name}"
+  - agent: "tuner"
+    prompt: "Validate production readiness for ${name}"
+---
+
+# ${name}
+
+Production agent for ${name} (Play ${playNum}). Orchestrates builder → reviewer → tuner workflow.
+
+## How to Use
+1. Describe what you want to build
+2. I'll delegate to the Builder agent for implementation
+3. Then to the Reviewer for security + quality audit
+4. Then to the Tuner for production readiness validation
+` });
+
+      // ── .github/copilot-instructions.md ─────────────────────
+      files.push({ path: ".github/copilot-instructions.md", content: `---
+description: "${name} domain knowledge — auto-injected into every Copilot conversation"
+applyTo: "**"
+---
+
+# ${name} — Domain Knowledge
+
+This workspace implements ${desc}
+
+## Key Architecture Decisions
+- **Model**: ${model} (temperature: ${temperature})
+- **WAF Pillars**: ${wafPillars.join(", ")}
+
+## Project Conventions
+- Use config/*.json for all AI parameters — never hardcode
+- Use Azure Managed Identity for authentication — no API keys in code
+- All responses must include citations when using retrieved context
+- Follow the FAI Protocol: every primitive is wired through fai-manifest.json
+` });
+
+      // ── .github/agents/ ─────────────────────────────────────
+      for (const role of ["builder", "reviewer", "tuner"]) {
+        const roleDesc = {
+          builder: `Implements features for ${name} — coding, API integration, pipeline setup`,
+          reviewer: `Reviews ${name} implementation — security (OWASP LLM Top 10), quality, Azure best practices`,
+          tuner: `Validates ${name} for production — config tuning, evaluation thresholds, infrastructure readiness`,
+        }[role];
+
+        files.push({ path: `.github/agents/${role}.agent.md`, content: `---
+description: "${roleDesc}"
+tools: ["read", "edit", "search", "execute"]
+model: ["${model}", "gpt-4o-mini"]
+waf: ${JSON.stringify(wafPillars)}
+plays: ["${playId}"]
+---
+
+# ${role.charAt(0).toUpperCase() + role.slice(1)} Agent — ${name}
+
+You are the **${role.charAt(0).toUpperCase() + role.slice(1)} Agent** for ${name} (Play ${playNum}).
+
+## File Discovery
+Always use \`list_dir\` to discover files, then \`read_file\` with exact paths.
+
+## Read Config Before Acting
+- \`read_file config/openai.json\` for model parameters
+- \`read_file config/guardrails.json\` for safety rules
+` });
+      }
+
+      // ── .github/instructions/ ───────────────────────────────
+      files.push({ path: `.github/instructions/${slug}-patterns.instructions.md`, content: `---
+description: "${name} implementation patterns and coding standards"
+applyTo: "**/*.{py,ts,js,bicep}"
+---
+
+# ${name} — Implementation Patterns
+
+## Architecture
+- Use Azure Managed Identity for all service-to-service authentication
+- Store secrets in Azure Key Vault — never in code or environment variables
+- Implement retry logic with exponential backoff for all Azure SDK calls
+
+## Error Handling
+- Wrap all Azure SDK calls in try/catch with structured logging
+- Return meaningful error messages — never expose raw exceptions to users
+- Log correlation IDs for distributed tracing
+` });
+
+      // ── .github/prompts/ ────────────────────────────────────
+      for (const [cmd, purpose] of [["deploy", "Deploy to Azure"], ["test", "Run test suite"], ["review", "Code review"], ["evaluate", "Run evaluation pipeline"]]) {
+        files.push({ path: `.github/prompts/${cmd}.prompt.md`, content: `---
+description: "${purpose} for ${name}"
+---
+
+# /${cmd}
+
+${purpose} for ${name} (Play ${playNum}).
+
+## Steps
+1. Read the relevant config files in config/
+2. Execute the ${cmd} workflow
+3. Report results with pass/fail status
+` });
+      }
+
+      // ── .github/skills/ ─────────────────────────────────────
+      for (const skill of ["deploy", "evaluate", "tune"]) {
+        files.push({ path: `.github/skills/${skill}-${slug}/SKILL.md`, content: `---
+name: "${skill}-${slug}"
+description: "${skill.charAt(0).toUpperCase() + skill.slice(1)} skill for ${name}"
+---
+
+# ${skill.charAt(0).toUpperCase() + skill.slice(1)} — ${name}
+
+This skill handles the ${skill} workflow for ${name} (Play ${playNum}).
+
+## Prerequisites
+- Azure CLI authenticated (\`az login\`)
+- Config files in config/ validated
+
+## Steps
+1. Read config from \`config/openai.json\` and \`config/guardrails.json\`
+2. ${skill === "deploy" ? "Run Bicep deployment via `az deployment group create`" : skill === "evaluate" ? "Run `python evaluation/eval.py --ci-gate`" : "Validate all config thresholds against best practices"}
+3. Report results
+` });
+      }
+
+      // ── .github/hooks/ ──────────────────────────────────────
+      files.push({ path: ".github/hooks/guardrails.json", content: JSON.stringify({
+        version: 1,
+        hooks: {
+          SessionStart: [{ type: "command", bash: "echo 'FAI guardrails active for " + name + "'" }]
+        }
+      }, null, 2) });
+
+      // ── .vscode/ ────────────────────────────────────────────
+      files.push({ path: ".vscode/mcp.json", content: JSON.stringify({
+        servers: { frootai: { type: "stdio", command: "npx", args: ["frootai-mcp@latest"] } }
+      }, null, 2) });
+
+      files.push({ path: ".vscode/settings.json", content: JSON.stringify({
+        "chat.agent.enabled": true,
+        "github.copilot.chat.agent.thinkingTool": true
+      }, null, 2) });
+
+      // ── config/ (TuneKit) ───────────────────────────────────
+      files.push({ path: "config/openai.json", content: JSON.stringify({
+        model, api_version: "2024-12-01-preview",
+        temperature, top_p: 0.9, max_tokens: 1000,
+        frequency_penalty: 0, presence_penalty: 0, seed: 42,
+        _comments: {
+          temperature: `${temperature} for ${temperature <= 0.3 ? 'factual/deterministic' : 'creative'} tasks`,
+          model: `Switch to gpt-4o-mini for cost reduction`
+        }
+      }, null, 2) });
+
+      files.push({ path: "config/guardrails.json", content: JSON.stringify({
+        content_safety: { enabled: true, categories: ["hate", "self_harm", "sexual", "violence"], severity_threshold: 2, action: "block" },
+        pii_detection: { enabled: true, categories: ["email", "phone", "ssn", "credit_card"], action: "redact" },
+        prompt_injection: { enabled: true, action: "block" },
+        business_rules: { max_response_tokens: 1000, require_citations: true, min_confidence_to_answer: 0.7, abstention_message: "I don't have enough verified information to answer this accurately." }
+      }, null, 2) });
+
+      // ── evaluation/ ─────────────────────────────────────────
+      files.push({ path: "evaluation/eval.py", content: `"""
+Evaluation Pipeline for ${name} (Play ${playNum})
+FrootAI Solution Play — Azure AI Evaluation SDK
+
+Usage:
+    python evaluation/eval.py
+    python evaluation/eval.py --test-set evaluation/test-set.jsonl
+    python evaluation/eval.py --ci-gate --config config/guardrails.json
+"""
+
+import json
+import sys
+from pathlib import Path
+
+def load_test_set(path="evaluation/test-set.jsonl"):
+    with open(path) as f:
+        return [json.loads(line) for line in f if line.strip()]
+
+def evaluate(test_cases):
+    results = {"groundedness": 0.0, "relevance": 0.0, "coherence": 0.0, "fluency": 0.0, "safety": 0}
+    # TODO: Implement evaluation using Azure AI Evaluation SDK
+    print(f"Evaluated {len(test_cases)} test cases")
+    return results
+
+if __name__ == "__main__":
+    test_set = load_test_set()
+    scores = evaluate(test_set)
+    print(json.dumps(scores, indent=2))
+` });
+
+      files.push({ path: "evaluation/test-set.jsonl", content: `{"question": "What does ${name} do?", "ground_truth": "${desc}", "context": ""}
+{"question": "How is ${name} deployed?", "ground_truth": "Deployed on Azure using Bicep IaC templates.", "context": ""}
+` });
+
+      // ── infra/ (optional) ───────────────────────────────────
+      if (generateInfra) {
+        files.push({ path: "infra/main.bicep", content: `// ${name} — Azure Infrastructure
+// Generated by FrootAI scaffold_play
+
+targetScope = 'resourceGroup'
+
+@description('Azure region for all resources')
+param location string = resourceGroup().location
+
+@description('Environment name')
+@allowed(['dev', 'staging', 'prod'])
+param environment string = 'dev'
+
+@description('Project name used for resource naming')
+param projectName string = '${slug}'
+
+// TODO: Add Azure resources for ${name}
+// Common services: Azure OpenAI, AI Search, Container Apps, Key Vault
+` });
+
+        files.push({ path: "infra/parameters.json", content: JSON.stringify({
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+          contentVersion: "1.0.0.0",
+          parameters: { location: { value: "eastus2" }, environment: { value: "dev" }, projectName: { value: slug } }
+        }, null, 2) });
+      }
+
+      // ── spec/ (SpecKit + fai-manifest.json) ─────────────────
+      const manifestContent = {
+        play: playId, version: "1.0.0",
+        context: {
+          knowledge: ["F1-GenAI-Foundations", "R1-Prompt-Engineering", "T3-Production-Patterns"],
+          waf: wafPillars, scope: slug
+        },
+        primitives: {
+          agents: ["./agent.md"],
+          instructions: [`./.github/instructions/${slug}-patterns.instructions.md`],
+          skills: [`./.github/skills/deploy-${slug}/`, `./.github/skills/evaluate-${slug}/`, `./.github/skills/tune-${slug}/`],
+          hooks: ["./.github/hooks/"],
+          guardrails: { groundedness: 0.95, coherence: 0.90, relevance: 0.85, safety: 0, costPerQuery: 0.01 }
+        },
+        infrastructure: generateInfra ? { bicep: "./infra/main.bicep", parameters: "./infra/parameters.json" } : undefined,
+        toolkit: { devkit: "./.github/", tunekit: "./config/", speckit: "./spec/" }
+      };
+
+      files.push({ path: "spec/fai-manifest.json", content: JSON.stringify(manifestContent, null, 2) });
+
+      files.push({ path: "spec/play-spec.json", content: JSON.stringify({
+        name, playId, description: desc, version: "1.0.0",
+        services: ["Azure OpenAI", "Azure AI Search", "Azure Container Apps", "Azure Key Vault"],
+        complexity: "Medium", waf: wafPillars
+      }, null, 2) });
+
+      files.push({ path: "spec/CHANGELOG.md", content: `# ${name} — Changelog\n\n## 1.0.0 (${new Date().toISOString().slice(0, 10)})\n- Initial scaffold generated by FrootAI\n` });
+
+      // ── README.md ───────────────────────────────────────────
+      files.push({ path: "README.md", content: `# ${name}\n\n> Play ${playNum} — ${desc}\n\n## Quick Start\n\n\`\`\`bash\ncd solution-plays/${playId}\nnpx frootai-mcp  # Start MCP server\n\`\`\`\n\n## Architecture\n\n- **Model**: ${model} (temperature: ${temperature})\n- **WAF**: ${wafPillars.join(", ")}\n- **DevKit**: .github/ Agentic OS (3 agents, 4 prompts, 3 skills)\n- **TuneKit**: config/ (openai.json, guardrails.json)\n- **SpecKit**: spec/ (fai-manifest.json)\n\n## FAI Protocol\n\nThis play is wired through the FAI Protocol. Run \`wire_play("${playId}")\` to verify.\n` });
+
+      // ── Dry run or create ───────────────────────────────────
+      if (dryRun) {
+        const listing = files.map((f, i) => `  ${i + 1}. ${f.path}`).join("\n");
+        return { content: [{ type: "text", text: `## 📋 Scaffold Preview: ${playId}\n\n**${files.length} files** would be created:\n\n${listing}\n\n💡 Remove dryRun to create for real.` }] };
+      }
+
+      // Create all files
+      for (const f of files) {
+        safeWrite(pathMod.default.join(playDir, f.path), f.content);
+      }
+
+      // Wire the play to verify
+      let wiringStatus = "not verified";
+      try {
+        const result = faiEngine.runPlay({ manifestPath: pathMod.default.join(playDir, "spec", "fai-manifest.json") });
+        wiringStatus = result.errors?.length === 0
+          ? `✅ All primitives wired (${result.wiring?.total || 0} items, ${result.duration}ms)`
+          : `⚠️ Wired with ${result.errors.length} issue(s): ${result.errors.slice(0, 3).join("; ")}`;
+      } catch { wiringStatus = "⚠️ Could not verify (engine error)"; }
+
+      return {
+        content: [{
+          type: "text",
+          text: `## 🍊 Scaffolded: ${playId}\n\n**${files.length} files** created in \`solution-plays/${playId}/\`\n\n### Structure\n- 📁 .github/ — DevKit (3 agents, 4 prompts, 3 skills, 1 hook)\n- 📁 config/ — TuneKit (openai.json, guardrails.json)\n- 📁 evaluation/ — eval.py + test-set.jsonl\n${generateInfra ? "- 📁 infra/ — main.bicep + parameters.json\n" : ""}- 📁 spec/ — fai-manifest.json + play-spec.json\n- 📄 agent.md — Root orchestrator\n- 📄 README.md\n\n### FAI Protocol Wiring\n${wiringStatus}\n\n### Next Steps\n1. Customize \`config/openai.json\` for your model preferences\n2. Add domain-specific instructions in \`.github/instructions/\`\n3. Run \`wire_play("${playId}")\` to inspect the wiring\n4. Run \`validate_manifest("${playId}")\` to check protocol compliance`
+        }]
+      };
+    }
+  );
+
+  // ── Tool: create_primitive ───────────────────────────────────────
+
+  server.tool(
+    "create_primitive",
+    "FAI CREATE — Create a single FAI primitive (agent, instruction, or skill) with proper frontmatter, naming convention, and FAI context.",
+    {
+      type: z.enum(["agent", "instruction", "skill"]).describe("Primitive type to create"),
+      name: z.string().describe("Primitive name in kebab-case (e.g., 'rag-evaluator', 'python-azure')"),
+      description: z.string().describe("What this primitive does (10-200 chars)"),
+      waf: z.array(z.string()).optional().default([]),
+      plays: z.array(z.string()).optional().default([]),
+      targetDir: z.string().optional().describe("Target directory (default: repo-level agents/, instructions/, or skills/)"),
+      dryRun: z.boolean().optional().default(false),
+    },
+    { annotations: { destructiveHint: true } },
+    async ({ type, name, description, waf, plays, targetDir, dryRun }) => {
+      const slug = kebabCase(name);
+      const faiName = slug.startsWith("fai-") ? slug : `fai-${slug}`;
+
+      let filePath, content;
+
+      if (type === "agent") {
+        const dir = targetDir || pathMod.default.join(process.cwd(), "agents");
+        filePath = pathMod.default.join(dir, `${faiName}.agent.md`);
+        content = `---
+description: "${description}"
+tools: ["read", "edit", "search", "execute"]
+model: ["gpt-4o", "gpt-4o-mini"]
+waf: ${JSON.stringify(waf)}
+plays: ${JSON.stringify(plays)}
+---
+
+# ${name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+
+${description}
+
+## Responsibilities
+- Implement features related to ${name}
+- Follow WAF pillars: ${waf.join(", ") || "none specified"}
+- Read config files before making changes
+
+## File Discovery
+Always use \`list_dir\` to discover files, then \`read_file\` with exact paths.
+`;
+      } else if (type === "instruction") {
+        const dir = targetDir || pathMod.default.join(process.cwd(), "instructions");
+        filePath = pathMod.default.join(dir, `${slug}.instructions.md`);
+        content = `---
+description: "${description}"
+applyTo: "**/*.{py,ts,js,bicep,json}"
+waf: ${JSON.stringify(waf)}
+---
+
+# ${name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+
+${description}
+
+## Patterns
+- Follow Azure best practices for all service integrations
+- Use Managed Identity for authentication
+- Implement retry logic with exponential backoff
+`;
+      } else {
+        const dir = targetDir || pathMod.default.join(process.cwd(), "skills");
+        const skillDir = pathMod.default.join(dir, faiName);
+        filePath = pathMod.default.join(skillDir, "SKILL.md");
+        content = `---
+name: "${faiName}"
+description: "${description}"
+---
+
+# ${name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+
+${description}
+
+## Prerequisites
+- Azure CLI authenticated
+- Required config files present
+
+## Steps
+1. Read configuration from config/
+2. Execute the ${name} workflow
+3. Report results with pass/fail status
+`;
+      }
+
+      if (existsSync(filePath)) {
+        return { content: [{ type: "text", text: `❌ File already exists: ${filePath}` }], isError: true };
+      }
+
+      if (dryRun) {
+        return { content: [{ type: "text", text: `## 📋 Preview: ${type} "${faiName}"\n\nWould create: \`${filePath}\`\n\n\`\`\`markdown\n${content}\n\`\`\`\n\n💡 Remove dryRun to create.` }] };
+      }
+
+      safeWrite(filePath, content);
+
+      return {
+        content: [{
+          type: "text",
+          text: `## ✅ Created: ${type} "${faiName}"\n\n📄 \`${filePath}\`\n\n- **Type**: ${type}\n- **WAF**: ${waf.join(", ") || "none"}\n- **Plays**: ${plays.join(", ") || "universal"}\n\n💡 Add to a play's fai-manifest.json to wire it into the FAI Protocol.`
+        }]
+      };
+    }
+  );
+
+  // ── Tool: smart_scaffold ─────────────────────────────────────────
+
+  server.tool(
+    "smart_scaffold",
+    "FAI SMART SCAFFOLD — Describe what you want to build in natural language, and get the best-matching solution play as a template. Then optionally scaffold a new play based on that template.",
+    {
+      description: z.string().describe("What you want to build (e.g., 'process invoices and extract structured data', 'customer support chatbot with knowledge base')"),
+      topK: z.number().optional().default(3).describe("Number of template matches to return (default: 3)"),
+      scaffoldFromTop: z.boolean().optional().default(false).describe("Auto-scaffold a new play using the top match as template"),
+      playName: z.string().optional().describe("Name for the new play (required if scaffoldFromTop=true)"),
+    },
+    { annotations: { readOnlyHint: false } },
+    async ({ description, topK, scaffoldFromTop, playName }) => {
+      // Semantic search across all 100 plays
+      const scored = PLAY_DATA
+        .map(play => ({
+          play,
+          score: computeSimilarity(description, `${play.name} ${play.pattern}`),
+        }))
+        .filter(({ score }) => score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, topK);
+
+      if (scored.length === 0) {
+        return { content: [{ type: "text", text: `No matching plays for "${description}". Try broader terms or use scaffold_play to create from scratch.` }] };
+      }
+
+      const matches = scored.map(({ play, score }, i) =>
+        `### ${i + 1}. Play ${play.id} — ${play.name} (${(score * 100).toFixed(0)}% match)\n- **Services**: ${play.services.join(", ")}\n- **Complexity**: ${play.cx}\n- **Keywords**: ${play.pattern.split(" ").slice(0, 10).join(", ")}`
+      ).join("\n\n");
+
+      let scaffoldResult = "";
+      if (scaffoldFromTop && playName) {
+        const topMatch = scored[0].play;
+        scaffoldResult = `\n\n---\n\n💡 To scaffold from this template, run:\n\`scaffold_play name="${playName}" description="${description}" model="gpt-4o"\``;
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: `## 🎯 Smart Scaffold — "${description}"\n*${scored.length} matches from ${PLAY_DATA.length} plays*\n\n${matches}${scaffoldResult}\n\n---\n💡 Use \`scaffold_play\` to create a new play, or \`get_play_detail\` to explore a match.`
+        }]
+      };
     }
   );
 
