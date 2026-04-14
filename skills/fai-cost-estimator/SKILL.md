@@ -1,6 +1,6 @@
 ---
 name: fai-cost-estimator
-description: 'name: fai-cost-estimator'
+description: "Estimate token costs, model pricing, and budget forecasts for Azure OpenAI deployments and AI workloads."
 ---
 
 # Fai Cost Estimator

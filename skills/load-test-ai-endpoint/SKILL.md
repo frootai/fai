@@ -1,5 +1,5 @@
 ---
-name: "load-test-ai-endpoint"
+name: load-test-ai-endpoint
 description: "Load test an AI endpoint with k6/Locust for p95 latency and error rates"
 ---
 

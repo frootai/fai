@@ -1,5 +1,5 @@
 ---
-name: "content-safety-configure"
+name: content-safety-configure
 description: "Configure Azure Content Safety API with custom categories and thresholds"
 ---
 

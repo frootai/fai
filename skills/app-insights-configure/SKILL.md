@@ -1,5 +1,5 @@
 ---
-name: "app-insights-configure"
+name: app-insights-configure
 description: "Configure Application Insights with custom metrics, alerts, and dashboards"
 ---
 

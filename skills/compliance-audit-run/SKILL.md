@@ -1,5 +1,5 @@
 ---
-name: "compliance-audit-run"
+name: compliance-audit-run
 description: "Run a compliance audit against HIPAA/FedRAMP/SOC2 requirements for AI systems"
 ---
 

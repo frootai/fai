@@ -1,5 +1,5 @@
 ---
-name: "token-budget-enforce"
+name: token-budget-enforce
 description: "Enforce token budgets per user/team with tracking and alerting"
 ---
 

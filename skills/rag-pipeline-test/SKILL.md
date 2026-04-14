@@ -1,5 +1,5 @@
 ---
-name: "rag-pipeline-test"
+name: rag-pipeline-test
 description: "Test a RAG pipeline end-to-end with relevance and groundedness metrics"
 ---
 

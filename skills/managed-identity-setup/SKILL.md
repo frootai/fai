@@ -1,5 +1,5 @@
 ---
-name: "managed-identity-setup"
+name: managed-identity-setup
 description: "Set up Managed Identity with RBAC role assignments for Azure services"
 ---
 

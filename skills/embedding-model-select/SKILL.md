@@ -1,5 +1,5 @@
 ---
-name: "embedding-model-select"
+name: embedding-model-select
 description: "Select and configure the optimal embedding model for vector search"
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: "vector-index-create"
+name: vector-index-create
 description: "Create and populate a vector search index in Azure AI Search or Cosmos DB"
 ---
 

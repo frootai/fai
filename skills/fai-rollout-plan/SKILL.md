@@ -1,6 +1,6 @@
 ---
 name: fai-rollout-plan
-description: 'name: fai-rollout-plan'
+description: "Plan phased rollouts for AI features — canary percentages, promotion gates, rollback triggers, and timeline."
 ---
 
 # Fai Rollout Plan

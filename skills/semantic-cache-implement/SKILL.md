@@ -1,5 +1,5 @@
 ---
-name: "semantic-cache-implement"
+name: semantic-cache-implement
 description: "Implement semantic caching for AI responses with Redis and embedding similarity"
 ---
 

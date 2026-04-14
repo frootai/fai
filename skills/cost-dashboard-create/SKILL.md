@@ -1,5 +1,5 @@
 ---
-name: "cost-dashboard-create"
+name: cost-dashboard-create
 description: "Create a cost attribution dashboard for AI workloads with Azure Cost Management"
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: "bicep-module-create"
+name: bicep-module-create
 description: "Create a reusable Bicep module with parameters, outputs, and conditions"
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: "feature-flag-ai"
+name: feature-flag-ai
 description: "Implement feature flags for AI capabilities with gradual rollout"
 ---
 

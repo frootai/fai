@@ -1,5 +1,5 @@
 ---
-name: "database-migrate-ai"
+name: database-migrate-ai
 description: "Migrate data and embeddings between vector databases with zero downtime"
 ---
 

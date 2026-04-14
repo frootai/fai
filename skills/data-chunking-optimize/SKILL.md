@@ -1,5 +1,5 @@
 ---
-name: "data-chunking-optimize"
+name: data-chunking-optimize
 description: "Optimize document chunking strategy for RAG with semantic boundaries"
 ---
 

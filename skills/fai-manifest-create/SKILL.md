@@ -1,5 +1,5 @@
 ---
-name: "fai-manifest-create"
+name: fai-manifest-create
 description: "Create an fai-manifest.json with context, primitives, infrastructure, and guardrails"
 ---
 
@@ -24,7 +24,7 @@ Every manifest has 6 top-level fields. `play`, `version`, `context`, and `primit
     "agents": ["./agent.md"],
     "instructions": ["./instructions.md", "../../instructions/python-waf.instructions.md"],
     "skills": ["./.github/skills/deploy-enterprise-rag/"],
-    "hooks": ["../../hooks/frootai-secrets-scanner/"],
+    "hooks": ["../../hooks/fai-secrets-scanner/"],
     "workflows": [],
     "guardrails": {
       "groundedness": 0.95,
@@ -98,7 +98,7 @@ Paths are relative to the play's root folder. Use `../../` to reference shared r
       "../../instructions/python-waf.instructions.md"
     ],
     "skills": ["./.github/skills/deploy-my-play/"],
-    "hooks": ["../../hooks/frootai-secrets-scanner/"]
+    "hooks": ["../../hooks/fai-secrets-scanner/"]
   }
 }
 ```

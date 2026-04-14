@@ -1,5 +1,5 @@
 ---
-name: "pii-detection-setup"
+name: pii-detection-setup
 description: "Set up PII detection and masking with Azure AI Language service"
 ---
 

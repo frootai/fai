@@ -1,5 +1,5 @@
 ---
-name: "model-comparison-benchmark"
+name: model-comparison-benchmark
 description: "Benchmark multiple AI models on cost, latency, quality for a specific task"
 ---
 

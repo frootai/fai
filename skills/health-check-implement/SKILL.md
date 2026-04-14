@@ -1,5 +1,5 @@
 ---
-name: "health-check-implement"
+name: health-check-implement
 description: "Implement comprehensive health check endpoints for all AI service dependencies"
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: "key-vault-integrate"
+name: key-vault-integrate
 description: "Integrate Azure Key Vault for secret management with Managed Identity"
 ---
 

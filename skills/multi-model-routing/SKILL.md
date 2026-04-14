@@ -1,5 +1,5 @@
 ---
-name: "multi-model-routing"
+name: multi-model-routing
 description: "Implement model routing logic: cheap model for simple, capable for complex tasks"
 ---
 

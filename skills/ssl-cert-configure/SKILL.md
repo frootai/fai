@@ -1,5 +1,5 @@
 ---
-name: "ssl-cert-configure"
+name: ssl-cert-configure
 description: "Configure SSL certificates for custom domains on Azure App Service/AKS"
 ---
 

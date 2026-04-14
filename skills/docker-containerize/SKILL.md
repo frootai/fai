@@ -1,5 +1,5 @@
 ---
-name: "docker-containerize"
+name: docker-containerize
 description: "Containerize an AI application with multi-stage Docker build and health checks"
 ---
 

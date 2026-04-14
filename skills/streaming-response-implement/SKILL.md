@@ -1,5 +1,5 @@
 ---
-name: "streaming-response-implement"
+name: streaming-response-implement
 description: "Implement streaming AI responses with Server-Sent Events (SSE)"
 ---
 

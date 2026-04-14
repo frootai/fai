@@ -1,5 +1,5 @@
 ---
-name: "azure-openai-setup"
+name: azure-openai-setup
 description: "Set up Azure OpenAI Service with model deployments, RBAC, and monitoring"
 ---
 

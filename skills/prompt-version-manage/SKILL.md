@@ -1,5 +1,5 @@
 ---
-name: "prompt-version-manage"
+name: prompt-version-manage
 description: "Version control prompts with A/B testing, rollback, and performance tracking"
 ---
 

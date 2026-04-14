@@ -1,5 +1,5 @@
 ---
-name: "webhook-ai-event"
+name: webhook-ai-event
 description: "Set up webhooks for AI system events: evaluation results, safety alerts, cost alerts"
 ---
 

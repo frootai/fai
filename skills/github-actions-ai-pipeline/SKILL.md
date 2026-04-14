@@ -1,5 +1,5 @@
 ---
-name: "github-actions-ai-pipeline"
+name: github-actions-ai-pipeline
 description: "Create a GitHub Actions CI/CD pipeline with evaluation gates for AI apps"
 ---
 

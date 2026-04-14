@@ -1,5 +1,5 @@
 ---
-name: "evaluation-pipeline-create"
+name: evaluation-pipeline-create
 description: "Create an evaluation pipeline with Azure AI Evaluation SDK and CI gate logic"
 ---
 

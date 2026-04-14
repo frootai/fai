@@ -1,5 +1,5 @@
 ---
-name: "rbac-setup-play"
+name: rbac-setup-play
 description: "Set up RBAC role assignments for a solution play's Azure resources"
 ---
 

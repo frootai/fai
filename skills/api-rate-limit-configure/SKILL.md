@@ -1,5 +1,5 @@
 ---
-name: "api-rate-limit-configure"
+name: api-rate-limit-configure
 description: "Configure API rate limiting with Azure APIM policies and retry headers"
 ---
 

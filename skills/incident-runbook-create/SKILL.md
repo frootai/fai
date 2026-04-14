@@ -1,5 +1,5 @@
 ---
-name: "incident-runbook-create"
+name: incident-runbook-create
 description: "Create an incident response runbook for AI system failures"
 ---
 

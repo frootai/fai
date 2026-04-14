@@ -1,5 +1,5 @@
 ---
-name: "structured-output-enforce"
+name: structured-output-enforce
 description: "Enforce structured JSON output from LLMs with schema validation"
 ---
 

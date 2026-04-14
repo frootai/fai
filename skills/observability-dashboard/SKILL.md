@@ -1,5 +1,5 @@
 ---
-name: "observability-dashboard"
+name: observability-dashboard
 description: "Create an observability dashboard with KQL queries for AI system health"
 ---
 

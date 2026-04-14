@@ -1,5 +1,5 @@
 ---
-name: "circuit-breaker-add"
+name: circuit-breaker-add
 description: "Add circuit breaker pattern for Azure OpenAI calls with fallback behavior"
 ---
 

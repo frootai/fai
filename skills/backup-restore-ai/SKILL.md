@@ -1,5 +1,5 @@
 ---
-name: "backup-restore-ai"
+name: backup-restore-ai
 description: "Set up backup and restore procedures for AI application data and configurations"
 ---
 

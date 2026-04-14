@@ -1,6 +1,6 @@
 ---
 name: fai-eval-runner
-description: 'name: fai-eval-runner'
+description: "Run evaluation pipelines, compare model outputs, and generate quality reports for AI solution plays."
 ---
 
 # Fai Eval Runner

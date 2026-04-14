@@ -1,5 +1,5 @@
 ---
-name: "agent-chain-configure"
+name: agent-chain-configure
 description: "Configure builder→reviewer→tuner agent chain with handoff rules"
 ---
 

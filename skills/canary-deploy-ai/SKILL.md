@@ -1,5 +1,5 @@
 ---
-name: "canary-deploy-ai"
+name: canary-deploy-ai
 description: "Implement canary deployment for AI model updates with rollback on quality drop"
 ---
 

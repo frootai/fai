@@ -1,5 +1,5 @@
 ---
-name: "sla-monitor-setup"
+name: sla-monitor-setup
 description: "Set up SLA monitoring with availability, latency, and quality metrics"
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: "audit-log-implement"
+name: audit-log-implement
 description: "Implement immutable audit logging with Azure Blob Storage and Sentinel"
 ---
 
