@@ -406,7 +406,7 @@ Health probes (Kubernetes / Container Apps):
 <summary><b>🔎 BM25 Search Engine</b></summary>
 <br>
 
-All search tools use a pre-built BM25 index (Robertson IDF, k1=1.5, b=0.75) over 358 documents. Far more accurate than keyword matching — finds "voice AI call center" → Play 04 with high relevance. The index covers all 100 solution plays, 16 knowledge modules, and the glossary.
+All search tools use a pre-built BM25 index (Robertson IDF, k1=1.5, b=0.75) over 358 documents. Far more accurate than keyword matching — finds "voice AI call center" → Play 04 with high relevance. The index covers all 101 solution plays, 16 knowledge modules, and the glossary.
 </details>
 
 <details>
