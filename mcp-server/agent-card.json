@@ -92,42 +92,38 @@
     "_comment": "FrootAI MCP is open source — no authentication required for read-only knowledge queries. Azure-deployed instances can add Managed Identity auth."
   },
   "tools": {
-    "mcp_tools": 25,
+    "mcp_tools": 45,
     "categories": {
-      "static": [
-        "list_modules",
-        "get_module",
-        "lookup_term",
-        "search_knowledge",
-        "get_architecture_pattern",
-        "get_froot_overview"
+      "knowledge": [
+        "list_modules", "get_module", "lookup_term", "search_knowledge",
+        "get_architecture_pattern", "get_froot_overview"
       ],
       "live": [
-        "fetch_azure_docs",
-        "fetch_external_mcp",
-        "list_community_plays",
-        "get_github_agentic_os"
+        "fetch_azure_docs", "fetch_external_mcp",
+        "list_community_plays", "get_github_agentic_os"
       ],
       "agent_chain": [
-        "agent_build",
-        "agent_review",
-        "agent_tune"
+        "agent_build", "agent_review", "agent_tune"
       ],
-      "ai_ecosystem": [
-        "get_model_catalog",
-        "get_azure_pricing",
-        "compare_models",
-        "compare_plays",
-        "semantic_search_plays",
-        "validate_config",
-        "run_evaluation",
-        "list_primitives",
-        "get_play_detail"
-      ],
-      "compute": [
-        "estimate_cost",
-        "embedding_playground",
+      "ecosystem": [
+        "get_model_catalog", "get_azure_pricing", "estimate_cost",
+        "compare_models", "compare_plays", "semantic_search_plays",
+        "embedding_playground", "run_evaluation", "validate_config",
         "generate_architecture_diagram"
+      ],
+      "engine": [
+        "wire_play", "inspect_wiring", "validate_manifest",
+        "get_play_detail", "list_primitives", "evaluate_quality"
+      ],
+      "scaffold": [
+        "scaffold_play", "create_primitive", "smart_scaffold"
+      ],
+      "marketplace": [
+        "marketplace_search", "marketplace_browse", "install_plugin",
+        "uninstall_plugin", "list_installed", "check_compatibility",
+        "validate_plugin", "compose_plugins", "publish_plugin",
+        "check_plugin_updates", "resolve_dependencies",
+        "list_external_plugins", "marketplace_stats"
       ]
     }
   }

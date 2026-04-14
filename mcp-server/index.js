@@ -331,6 +331,22 @@ const glossary = loadGlossary(modules);
 
 const PKG_VERSION = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf-8")).version;
 
+// ── Toolset grouping (slim mode support) ───────────────────────────
+// Set FAI_TOOLSET=slim to expose only the 6 core tools (token-constrained contexts).
+// Set FAI_TOOLSET=knowledge,ecosystem to load specific groups only.
+// Default: all 7 groups enabled.
+const ALL_TOOLSETS = ["knowledge", "live", "agents", "ecosystem", "engine", "scaffold", "marketplace"];
+const SLIM_TOOLSET = ["knowledge", "ecosystem", "agents"];
+const requestedToolsets = process.env.FAI_TOOLSET
+  ? (process.env.FAI_TOOLSET === "slim" ? SLIM_TOOLSET : process.env.FAI_TOOLSET.split(",").map(s => s.trim()))
+  : ALL_TOOLSETS;
+const enabledToolsets = new Set(requestedToolsets);
+
+/** Returns true if the given toolset group is enabled */
+function toolsetEnabled(group) {
+  return enabledToolsets.has(group);
+}
+
 /** Create and register all tools/resources/prompts on a McpServer instance */
 function createConfiguredServer() {
   const server = new McpServer({
@@ -2090,7 +2106,7 @@ The open glue that binds infrastructure, platform, and application.
 🏗️ O — Operations: Azure AI Platform, Infrastructure, Copilot
 🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
-18 modules | 200+ AI terms | 29 tools | 100 solution plays | FAI Engine
+18 modules | 200+ AI terms | 45 tools | 100 solution plays | FAI Engine
 Engine: ${faiEngine?.available ? 'connected' : 'not available (npm mode)'}
 https://frootai.dev`,
     }],
@@ -2192,6 +2208,57 @@ if (faiEngine?.available) {
     })
   );
 }
+
+server.prompt(
+  "design",
+  "Design an AI architecture — guided flow: requirements → play selection → services → cost estimate → next steps.",
+  [
+    { name: "description", description: "What you want to build (e.g., 'customer service chatbot', 'document extraction pipeline')", required: true },
+    { name: "scale", description: "Expected scale: 'dev', 'small', 'medium', 'large', 'enterprise'", required: false },
+  ],
+  async ({ description, scale }) => ({
+    messages: [{
+      role: "user",
+      content: {
+        type: "text",
+        text: `Design an AI architecture for: ${description}${scale ? ` at ${scale} scale` : ''}.
+
+Step 1: Use semantic_search_plays to find the top 3 matching solution plays.
+Step 2: Use get_play_detail on the best match to see the full architecture.
+Step 3: Use compare_models to recommend the right AI model for this use case.
+Step 4: Use estimate_cost to project monthly costs${scale ? ` for ${scale} scale` : ''}.
+Step 5: Use get_architecture_pattern to surface relevant patterns (rag_pipeline, agent_hosting, cost_optimization, etc.).
+
+Provide a complete architecture recommendation with services, estimated cost, and a "start here" action plan.`,
+      },
+    }],
+  })
+);
+
+server.prompt(
+  "cost",
+  "Estimate costs for an AI solution — guided cost breakdown by scenario and scale.",
+  [
+    { name: "scenario", description: "Solution type: 'rag', 'agent', 'batch', 'realtime', 'custom'", required: true },
+    { name: "scale", description: "Scale: 'dev', 'staging', 'production'", required: false },
+    { name: "play", description: "Specific solution play number (e.g., '01', '07') for play-specific cost breakdown", required: false },
+  ],
+  async ({ scenario, scale, play }) => ({
+    messages: [{
+      role: "user",
+      content: {
+        type: "text",
+        text: `Estimate Azure costs for a ${scenario} solution${scale ? ` at ${scale} scale` : ''}.
+
+${play ? `Step 1: Use estimate_cost with play="${play}" and scale="${scale || 'production'}" for a play-specific itemized breakdown.` : `Step 1: Use get_azure_pricing with scenario="${scenario}" and scale="${scale || 'production'}" for a full cost breakdown.`}
+Step 2: Use compare_models with priority="cost" to find the most cost-efficient AI model.
+Step 3: Use get_architecture_pattern with scenario="cost_optimization" for FinOps best practices.
+
+Present an itemized monthly cost table with: compute, AI services, storage, networking, and a total. Include 3 cost-saving recommendations.`,
+      },
+    }],
+  })
+);
 
 // ════════════════════════════════════════════════════════════════════
 // FAI ENGINE TOOLS — The Differentiator (Phase 1)
