@@ -6,130 +6,183 @@ waf:
   - "reliability"
 ---
 
-# Zod Waf — WAF-Aligned Coding Standards
+# Zod — FAI Standards
 
-> Zod validation standards — schema design, type inference, transform, error messages, API input validation.
+## Schema Definition
 
-## Core Rules
+```ts
+const UserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  role: z.enum(["admin", "editor", "viewer"]),
+  tags: z.array(z.string().min(1)).max(20),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
-
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
-}
+// Discriminated unions — exhaustive matching on a literal field
+const EventSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("click"), x: z.number(), y: z.number() }),
+  z.object({ type: z.literal("scroll"), offset: z.number() }),
+  z.object({ type: z.literal("keypress"), key: z.string() }),
+]);
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Type Inference
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+```ts
+type User = z.infer<typeof UserSchema>;          // extract TS type from schema
+type Event = z.infer<typeof EventSchema>;         // union type auto-derived
+type CreateUser = z.input<typeof UserSchema>;     // input type (before transforms)
+```
 
-## Code Quality Standards
+## Refinements
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```ts
+const PasswordSchema = z.string().min(8).refine(
+  (v) => /[A-Z]/.test(v) && /\d/.test(v),
+  { message: "Must contain uppercase letter and digit" }
+);
 
-## Testing Requirements
+// Cross-field validation with superRefine
+const SignupSchema = z.object({
+  password: z.string().min(8),
+  confirm: z.string(),
+}).superRefine((data, ctx) => {
+  if (data.password !== data.confirm) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Passwords must match", path: ["confirm"] });
+  }
+});
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Transforms & Pipes
 
-## Security Checklist
+```ts
+const TrimmedEmail = z.string().trim().toLowerCase().email();
+const MoneySchema = z.string()
+  .transform((v) => parseFloat(v.replace(/[^0-9.]/g, "")))
+  .pipe(z.number().positive().finite());
+```
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## Defaults & Optionals
+
+```ts
+const ConfigSchema = z.object({
+  retries: z.number().int().min(0).default(3),
+  timeout: z.number().positive().default(30_000),
+  verbose: z.boolean().optional(),
+});
+```
+
+## Error Handling
+
+```ts
+const result = UserSchema.safeParse(req.body);      // prefer safeParse at system boundaries
+if (!result.success) {
+  const flat = result.error.flatten();               // { formErrors, fieldErrors }
+  return res.status(400).json({ errors: flat.fieldErrors });
+}
+const user: User = result.data;
+// parse only in trusted contexts (startup config, tests)
+const config = ConfigSchema.parse(loadedConfig);     // throws ZodError on failure
+```
+
+## Coercion
+
+```ts
+const PaginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  active: z.coerce.boolean().default(true),
+});
+```
+
+## Schema Composition
+
+```ts
+const BaseEntity = z.object({ id: z.string().uuid(), createdAt: z.coerce.date() });
+const WithTimestamps = BaseEntity.extend({ updatedAt: z.coerce.date() });
+const CreateUserInput = UserSchema.omit({ id: true });
+const UserSummary = UserSchema.pick({ id: true, email: true });
+const Merged = BaseEntity.merge(UserSchema);
+```
+
+## Branded Types
+
+```ts
+const UserId = z.string().uuid().brand<"UserId">();
+const OrderId = z.string().uuid().brand<"OrderId">();  // prevents accidental ID swap
+```
+
+## API Input Preprocessing
+
+```ts
+const ApiInputSchema = z.preprocess(
+  (raw) => (typeof raw === "string" ? JSON.parse(raw) : raw),
+  UserSchema
+);
+```
+
+## React Hook Form Integration
+
+```ts
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const form = useForm<z.infer<typeof SignupSchema>>({
+  resolver: zodResolver(SignupSchema),
+});
+```
+
+## tRPC Integration
+
+```ts
+export const userRouter = router({
+  create: publicProcedure
+    .input(CreateUserInput)             // Zod schema as input validator
+    .mutation(({ input }) => db.user.create({ data: input })),
+  list: publicProcedure
+    .input(PaginationSchema)
+    .query(({ input }) => db.user.findMany({ skip: (input.page - 1) * input.limit, take: input.limit })),
+});
+```
+
+## Environment Variable Validation
+
+```ts
+const EnvSchema = z.object({
+  DATABASE_URL: z.string().url(),
+  AZURE_OPENAI_KEY: z.string().min(1),
+  PORT: z.coerce.number().int().default(3000),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+});
+export const env = EnvSchema.parse(process.env);     // fail-fast at startup
+```
+
+## OpenAPI Generation
+
+```ts
+import { extendZodWithOpenApi } from "zod-to-openapi";
+extendZodWithOpenApi(z);
+const UserSchemaOA = UserSchema.openapi("User", { description: "Application user" });
+```
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+| Anti-Pattern | Fix |
+|---|---|
+| `schema.parse()` in request handlers | Use `safeParse` — never throw in hot paths |
+| `.any()` / `.unknown()` without narrowing | Add `.refine()` or `.pipe()` to validate shape |
+| Duplicating TS types alongside Zod schemas | Derive types via `z.infer<typeof Schema>` |
+| Skipping `.trim()` on string inputs | Chain `.trim()` before `.email()` / `.url()` |
+| Hardcoded error messages without i18n key | Use `errorMap` or structured `message` objects |
+| Coercing without upper bounds | Always chain `.max()` / `.finite()` after coerce |
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | Practice |
+|---|---|
+| **Security** | Validate all external input at system boundaries; reject unknown keys with `.strict()`; branded types prevent ID mixups |
+| **Reliability** | `safeParse` returns structured errors instead of throwing; `EnvSchema.parse(process.env)` fails fast at startup |
+| **Cost Optimization** | Derive types from schemas to eliminate drift; schema composition reduces duplication |
+| **Performance** | Coercion avoids manual parsing; `.pipe()` chains avoid intermediate allocations |
+| **Operational Excellence** | Centralize schemas in a shared package; `zod-to-openapi` keeps spec in sync with code |

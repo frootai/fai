@@ -5,62 +5,252 @@ waf:
   - "reliability"
 ---
 
-# Xunit Waf — WAF-Aligned Coding Standards
+# xUnit.net — FAI Standards
 
-> xUnit testing standards — Fact/Theory, FluentAssertions, and integration testing with WebApplicationFactory.
+## Test Organization
 
-## Core Rules
+Use `[Fact]` for single-case tests, `[Theory]` with data attributes for parameterized tests:
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```csharp
+public class OrderService_PlaceOrder
+{
+    [Fact]
+    public async Task PlaceOrder_ValidCart_ReturnsConfirmation()
+    {
+        var sut = new OrderService(_mockRepo.Object);
+        var result = await sut.PlaceOrderAsync(TestData.ValidCart);
+        result.Status.Should().Be(OrderStatus.Confirmed);
+    }
 
-## Implementation Patterns
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(-1, false)]
+    [InlineData(100, true)]
+    public void ValidateQuantity_ReturnsExpected(int qty, bool expected)
+        => OrderValidator.IsValidQuantity(qty).Should().Be(expected);
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+    [Theory]
+    [MemberData(nameof(DiscountCases))]
+    public void ApplyDiscount_CalculatesCorrectly(decimal price, decimal discount, decimal expected)
+        => PricingEngine.ApplyDiscount(price, discount).Should().Be(expected);
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
+    public static IEnumerable<object[]> DiscountCases()
+    {
+        yield return new object[] { 100m, 0.1m, 90m };
+        yield return new object[] { 50m, 0.25m, 37.5m };
+    }
 
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+    [Theory]
+    [ClassData(typeof(BulkOrderTestCases))]
+    public void BulkOrder_AppliesTierPricing(Order order, decimal expectedTotal)
+        => _sut.CalculateTotal(order).Should().Be(expectedTotal);
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## Assertion Patterns
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+Prefer FluentAssertions over raw `Assert.*` for readability. Use `Assert.Throws` for exception paths:
+
+```csharp
+// FluentAssertions — chain assertions, get clear failure messages
+result.Should().NotBeNull();
+result.Items.Should().HaveCount(3).And.OnlyContain(i => i.IsActive);
+result.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+
+// Exception assertions
+var act = () => sut.Process(null!);
+act.Should().Throw<ArgumentNullException>().WithParameterName("request");
+
+// xUnit built-in (acceptable for simple cases)
+Assert.Equal(expected, actual);
+var ex = Assert.Throws<InvalidOperationException>(() => sut.Execute());
+Assert.Contains("expired", ex.Message);
+```
+
+## Test Lifecycle
+
+Constructor runs before each test, `Dispose` after. Use `IAsyncLifetime` for async setup/teardown:
+
+```csharp
+public class DatabaseTests : IAsyncLifetime
+{
+    private readonly AppDbContext _db;
+
+    public DatabaseTests() => _db = TestDbFactory.Create();
+
+    public async Task InitializeAsync()
+        => await _db.Database.MigrateAsync();
+
+    public async Task DisposeAsync()
+        => await _db.Database.EnsureDeletedAsync();
+
+    [Fact]
+    public async Task Insert_PersistsEntity() { /* ... */ }
+}
+```
+
+## Shared Context
+
+`IClassFixture<T>` shares a single instance across all tests in one class. `ICollectionFixture<T>` shares across multiple classes:
+
+```csharp
+// Shared within one test class
+public class ProductTests : IClassFixture<DatabaseFixture>
+{
+    private readonly DatabaseFixture _fixture;
+    public ProductTests(DatabaseFixture fixture) => _fixture = fixture;
+}
+
+// Shared across multiple test classes
+[CollectionDefinition("Integration")]
+public class IntegrationCollection : ICollectionFixture<ApiFixture> { }
+
+[Collection("Integration")]
+public class OrderApiTests { /* injected ApiFixture */ }
+
+[Collection("Integration")]
+public class PaymentApiTests { /* same ApiFixture instance */ }
+```
+
+## Integration Tests with WebApplicationFactory
+
+```csharp
+public class ApiTests : IClassFixture<WebApplicationFactory<Program>>
+{
+    private readonly HttpClient _client;
+
+    public ApiTests(WebApplicationFactory<Program> factory)
+    {
+        _client = factory.WithWebHostBuilder(b =>
+        {
+            b.ConfigureServices(s =>
+            {
+                s.RemoveAll<DbContext>();
+                s.AddDbContext<AppDbContext>(o => o.UseInMemoryDatabase("test"));
+                s.AddSingleton<IEmailService, FakeEmailService>();
+            });
+        }).CreateClient();
+    }
+
+    [Fact]
+    public async Task GetProducts_Returns200()
+    {
+        var response = await _client.GetAsync("/api/products");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+}
+```
+
+## Dependency Injection in Tests
+
+```csharp
+public class ServiceTests
+{
+    private readonly ServiceProvider _provider;
+
+    public ServiceTests()
+    {
+        _provider = new ServiceCollection()
+            .AddSingleton<ICache, FakeCache>()
+            .AddTransient<OrderService>()
+            .BuildServiceProvider();
+    }
+
+    [Fact]
+    public void Resolve_OrderService_UsesInjectedCache()
+        => _provider.GetRequiredService<OrderService>().Should().NotBeNull();
+}
+```
+
+## Mocking
+
+NSubstitute (concise) or Moq (explicit setup):
+
+```csharp
+// NSubstitute
+var repo = Substitute.For<IOrderRepository>();
+repo.GetByIdAsync(42).Returns(TestData.SampleOrder);
+var sut = new OrderService(repo);
+await repo.Received(1).SaveAsync(Arg.Any<Order>());
+
+// Moq
+var mock = new Mock<IPaymentGateway>();
+mock.Setup(g => g.ChargeAsync(It.IsAny<decimal>())).ReturnsAsync(PaymentResult.Success);
+mock.Verify(g => g.ChargeAsync(99.99m), Times.Once);
+```
+
+## Output & Diagnostics
+
+`ITestOutputHelper` captures output per-test (visible in test explorer):
+
+```csharp
+public class DiagnosticTests(ITestOutputHelper output)
+{
+    [Fact]
+    public void SlowQuery_LogsWarning()
+    {
+        output.WriteLine($"Test started: {DateTime.UtcNow:O}");
+        var (result, elapsed) = MeasureExecution(() => _sut.RunQuery());
+        output.WriteLine($"Elapsed: {elapsed.TotalMilliseconds}ms");
+        elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+    }
+}
+```
+
+## Parallelism Control
+
+xUnit runs test classes in parallel by default. Disable per-collection when tests share state:
+
+```csharp
+[Collection("Sequential-DB")]  // Tests in this collection run serially
+public class MigrationTests { }
+```
+
+To disable globally, add `xunit.runner.json`: `{ "parallelizeTestCollections": false }`
+
+## Test Ordering
+
+Avoid ordering — tests should be independent. When sequence genuinely matters (e.g., migration smoke tests), use `[TestCaseOrderer]` with a custom orderer.
+
+## Code Coverage
+
+Use Coverlet with `dotnet test`:
+
+```bash
+dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+reportgenerator -reports:coverage.cobertura.xml -targetdir:coverage-report
+```
+
+## Naming Convention
+
+`Method_Scenario_ExpectedResult` — class name = SUT class + method under test:
+
+```
+OrderService_PlaceOrder/PlaceOrder_EmptyCart_ThrowsValidationException
+PricingEngine_ApplyDiscount/ApplyDiscount_NegativeRate_ClampsToZero
+```
+
+## Anti-Patterns
+
+| Avoid | Do Instead |
+|---|---|
+| `Thread.Sleep` in tests | Use `async/await` with `Task.Delay` or polling |
+| Shared mutable static state | `IClassFixture` / `ICollectionFixture` |
+| Testing private methods | Test through public API surface |
+| `[Fact]` with hardcoded loops | `[Theory]` + `[InlineData]`/`[MemberData]` |
+| Catching exceptions manually | `Assert.Throws` / `.Should().Throw<T>()` |
+| Giant arrange blocks | Extract test builders / `TestData` factories |
+
+## WAF Alignment
+
+| Pillar | Practice |
+|---|---|
+| **Reliability** | Integration tests with `WebApplicationFactory`, retry-aware assertions, lifecycle cleanup via `IAsyncLifetime` |
+| **Security** | No secrets in test code, use `ConfigureServices` to swap real auth for test stubs |
+| **Cost Optimization** | In-memory databases over cloud instances, parallel execution, Coverlet to find dead code |
+| **Operational Excellence** | CI-integrated `dotnet test`, coverage gates, deterministic test data |
+| **Performance Efficiency** | Shared fixtures reduce setup cost, parallelism by default, avoid `Thread.Sleep` |
+
 
 ## Code Quality Standards
 

@@ -6,130 +6,176 @@ waf:
   - "performance-efficiency"
 ---
 
-# Winui3 Waf — WAF-Aligned Coding Standards
+# WinUI 3 — FAI Standards
 
-> WinUI 3 standards — XAML, MVVM, Windows App SDK patterns.
+## MVVM with CommunityToolkit.Mvvm
 
-## Core Rules
+- All ViewModels inherit `ObservableObject`; use `[ObservableProperty]` and `[RelayCommand]` source generators
+- Never put business logic in code-behind — code-behind only for view-specific concerns (focus, animations)
+- Use `ObservableValidator` for form ViewModels with `DataAnnotations` validation
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```csharp
+public partial class CustomerViewModel : ObservableValidator
+{
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [Required, MinLength(2)]
+    private string _name = string.Empty;
 
-## Implementation Patterns
-
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
-
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+    [RelayCommand]
+    private async Task SaveAsync()
+    {
+        ValidateAllProperties();
+        if (HasErrors) return;
+        await _repository.SaveAsync(new Customer(Name));
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+## WinUI 3 Controls
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+- `NavigationView` with `PaneDisplayMode="Left"` for primary navigation; bind `SelectedItem` to ViewModel
+- `TabView` for document-style UX; handle `TabCloseRequested` to confirm unsaved changes
+- `InfoBar` for non-blocking status messages — never use `ContentDialog` for transient notifications
+- `TeachingTip` for contextual onboarding; set `IsLightDismissEnabled="True"`
 
-## Code Quality Standards
+## Windowing & Title Bar
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+- Use `AppWindow` API (not legacy `ApplicationView`) for multi-window and custom title bars
+- Set `ExtendsContentIntoTitleBar = true` on Window, define `SetTitleBar()` with a XAML element
+- Handle `AppWindow.Changed` for position/size persistence across sessions
 
-## Testing Requirements
+```csharp
+// App startup — custom title bar
+var appWindow = this.AppWindow;
+appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
+appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+SetTitleBar(AppTitleBar); // XAML Grid element
+```
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+## Resource Dictionaries & Theming
 
-## Security Checklist
+- Define app-wide styles in `Themes/Generic.xaml`; merge into `App.xaml` `<Application.Resources>`
+- Use `ThemeResource` (not `StaticResource`) for colors that respond to Light/Dark switching
+- Override system brushes via `ResourceDictionary.ThemeDictionaries` keyed `"Light"` / `"Dark"` / `"HighContrast"`
+- Expose `ActualTheme` from root `FrameworkElement` — never cache theme at startup
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+## ContentDialog Patterns
+
+- Always set `XamlRoot = Content.XamlRoot` before calling `ShowAsync()` — crashes without it
+- Only one `ContentDialog` can be open at a time; queue or cancel the previous one
+- Use `ContentDialog` for destructive confirmations, not routine feedback
+
+## Data Binding
+
+- Prefer `x:Bind` (compiled, type-safe) over `{Binding}` for performance and compile-time errors
+- Always set `x:DataType` on the page/template to enable compiled bindings
+- Use `x:Bind Mode=OneWay` explicitly — `x:Bind` defaults to `OneTime`, unlike `{Binding}`
+
+```xml
+<Page x:DataType="viewmodels:CustomerViewModel">
+    <TextBox Text="{x:Bind Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+    <Button Command="{x:Bind SaveCommand}" Content="Save" />
+    <ListView ItemsSource="{x:Bind Items, Mode=OneWay}"
+              x:DefaultBindMode="OneWay">
+        <ListView.ItemTemplate>
+            <DataTemplate x:DataType="models:Item">
+                <TextBlock Text="{x:Bind Title}" />
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
+</Page>
+```
+
+## Dependency Injection
+
+- Register services in `App.xaml.cs` using `Microsoft.Extensions.DependencyInjection`
+- Expose `IServiceProvider` as a static property on `App` for resolution in views
+- ViewModels receive dependencies via constructor injection — never use service locator in VMs
+
+```csharp
+// App.xaml.cs
+public partial class App : Application
+{
+    public static IServiceProvider Services { get; private set; } = null!;
+
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<ICustomerRepository, SqlCustomerRepository>();
+        services.AddTransient<CustomerViewModel>();
+        Services = services.BuildServiceProvider();
+        m_window = new MainWindow();
+        m_window.Activate();
+    }
+}
+```
+
+## Navigation
+
+- Use frame-based navigation; `NavigationView.SelectionChanged` triggers `Frame.Navigate(typeof(Page))`
+- Pass parameters via `Navigate(typeof(DetailPage), itemId)` — retrieve in `OnNavigatedTo`
+- Implement `INavigationService` abstraction so ViewModels navigate without referencing `Frame`
+
+## File & Folder Pickers
+
+- Use `StorageFile` / `StoragePicker` APIs with `WinRT.Interop` to set owner HWND
+- Always call `InitializeWithWindow` — pickers crash without an owner window handle
+- Request `FileTypeFilter` explicitly; empty filter throws `COMException`
+
+```csharp
+var picker = new FileOpenPicker();
+WinRT.Interop.InitializeWithWindow.Initialize(picker,
+    WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow));
+picker.FileTypeFilter.Add(".json");
+var file = await picker.PickSingleFileAsync();
+```
+
+## App Lifecycle
+
+- Handle `Activated` event on `AppInstance` for protocol/file activation and single-instancing
+- Save state in `Window.Closed` or `EnteredBackground` — no guaranteed `OnSuspending` for unpackaged
+- Use `AppInstance.GetCurrent().GetActivatedEventArgs()` for activation kind detection
+
+## Packaging
+
+- **MSIX**: full Store/sideload support, auto-update, clean install/uninstall, identity for push notifications
+- **Unpackaged**: set `<WindowsPackageType>None</WindowsPackageType>` in `.csproj`; no identity features
+- Use `PublishSingleFile` + `SelfContained` for unpackaged distribution without .NET prerequisite
+
+## Testing
+
+- Unit test ViewModels with xUnit/NUnit — no UI thread needed since `ObservableObject` is POCO
+- Use WinAppDriver or Appium for UI automation tests on real controls
+- Mock `IServiceProvider` dependencies; never instantiate real DB/HTTP in VM unit tests
+- Test `[RelayCommand] CanExecute` logic separately — verify button enable/disable states
+
+## Performance
+
+- `x:Load="False"` on panels/sections not immediately visible — defer creation until needed
+- `ItemsRepeater` with `VirtualizingLayout` for large lists instead of `ListView` for custom layouts
+- Avoid `x:Bind` with `FallbackValue` in hot paths — fallback evaluation adds overhead
+- Set `CacheSize` on `Frame` to keep recently visited pages alive (default 10)
+- Profile with `VisualDiagnostics` and Windows Performance Analyzer for XAML thread stalls
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Putting async logic in constructors — use `[RelayCommand]` or factory methods with `async Task`
+- ❌ Using `{Binding}` without `x:DataType` — loses compile-time safety and is 5-10x slower
+- ❌ Showing `ContentDialog` without setting `XamlRoot` — runtime crash on WinUI 3
+- ❌ Calling pickers without `InitializeWithWindow` — COM exception, no dialog appears
+- ❌ Storing window state in static fields — breaks multi-window; use per-`AppWindow` state
+- ❌ Using `DispatcherTimer` for background work — use `Task.Run` + `DispatcherQueue.TryEnqueue`
+- ❌ Direct `Frame.Navigate` from ViewModel — breaks testability; use `INavigationService`
+- ❌ Ignoring `HighContrast` theme dictionary — accessibility compliance failure
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | WinUI 3 Practice |
+|--------|-----------------|
+| **Reliability** | Persist state in `Window.Closed`; handle `AppInstance` restart; validate all picker results for `null` |
+| **Security** | Use MSIX identity for Windows Hello / push notifications; never store tokens in `ApplicationData` unencrypted; validate file picker MIME types |
+| **Performance** | `x:Bind` compiled bindings; `x:Load` deferred loading; `ItemsRepeater` virtualization; `CacheSize` on Frame; background threads via `Task.Run` |
+| **Cost Optimization** | `PublishTrimmed` + `PublishSingleFile` to reduce distributable size; lazy-load heavy controls; share `HttpClient` instances |
+| **Operational Excellence** | Structured logging via `ILogger` + Serilog sink; crash telemetry with `UnhandledException`; CI build with `dotnet publish` + MSIX signing |
+| **Responsible AI** | Accessible contrast ratios via `HighContrast` theme; screen reader support with `AutomationProperties`; localized strings via `.resw` resource files |

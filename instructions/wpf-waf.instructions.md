@@ -5,130 +5,186 @@ waf:
   - "reliability"
 ---
 
-# Wpf Waf — WAF-Aligned Coding Standards
+# WPF — FAI Standards
 
-> WPF standards — MVVM, data binding, commands, styles, templates.
+## MVVM with CommunityToolkit.Mvvm
 
-## Core Rules
+Use `ObservableObject` as ViewModel base. Source-generated properties via `[ObservableProperty]` eliminate boilerplate. Partial classes required for generators.
 
-- Follow the principle of least privilege for all operations and access controls
-- Use configuration files (`config/*.json`) for all tunable parameters — never hardcode values
-- Implement structured JSON logging with correlation IDs via Application Insights
-- Error handling with retry and exponential backoff (base=1s, max=30s, 3 retries) for external calls
-- Health check endpoints at `/health` for load balancer integration and instance rotation
-- Input validation and sanitization at all system boundaries — reject invalid before processing
-- PII detection and redaction before logging, analytics storage, or telemetry
-- `DefaultAzureCredential` for all Azure service authentication — no API keys in production
-- Content Safety API integration for all user-facing AI outputs
+```csharp
+public partial class OrderViewModel : ObservableObject
+{
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalDisplay))]
+    private decimal _total;
 
-## Implementation Patterns
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private bool _isValid;
 
-### Config-Driven Development
-- Read ALL parameters from `config/*.json` — temperature, thresholds, endpoints, model names
-- Environment-specific configuration via parameter files or environment variables
-- Validate configuration at startup — fail fast on missing required values
-- Feature flags for gradual rollout and A/B testing
+    public string TotalDisplay => Total.ToString("C");
 
-### Azure SDK Integration
-```typescript
-// Pattern: Managed Identity + config-driven + error handling
-import { DefaultAzureCredential } from "@azure/identity";
-const credential = new DefaultAzureCredential();
-const config = JSON.parse(fs.readFileSync("config/openai.json", "utf8"));
-
-async function callService(operation: string) {
-  const correlationId = crypto.randomUUID();
-  try {
-    const result = await client.operation({ ...config, correlationId });
-    telemetry.trackEvent({ name: operation, properties: { correlationId, duration: elapsed } });
-    return result;
-  } catch (error) {
-    telemetry.trackException({ exception: error, properties: { correlationId, operation } });
-    if (error.statusCode === 429) await backoff(attempt); // Retry-After
-    throw error;
-  }
+    [RelayCommand(CanExecute = nameof(IsValid))]
+    private async Task SubmitAsync(CancellationToken token)
+    {
+        try { await _orderService.PlaceAsync(Order, token); }
+        catch (HttpRequestException ex) { ErrorMessage = ex.Message; }
+    }
 }
 ```
 
-### Resilience Patterns
-- Retry with exponential backoff: `delay = min(baseDelay * 2^attempt + jitter, maxDelay)`
-- Circuit breaker: open after 50% failure rate in 30s window, half-open after cooldown
-- Connection pooling for database and HTTP clients (max connections from config)
-- Graceful shutdown on SIGTERM — drain in-flight requests, close connections, flush telemetry
+Manual `INotifyPropertyChanged` only when toolkit generators cannot apply (e.g., non-partial classes in legacy assemblies). Never raise `PropertyChanged` for properties that didn't change.
 
-### Performance Patterns
-- Streaming responses (SSE/WebSocket) for real-time user experience
-- Async/parallel processing for independent operations (`Promise.all` / `asyncio.gather`)
-- Cache with TTL from configuration (Redis or in-memory)
-- Batch operations for bulk processing (embeddings: max 16/call, classification: batch)
+## Data Binding and Converters
 
-## Code Quality Standards
+Bind in XAML with `Mode`, `UpdateSourceTrigger`, and `FallbackValue`. Never use `ElementName` across `DataTemplate` boundaries — use `RelativeSource` or pass via `DataContext`.
 
-- TypeScript with `strict: true` in tsconfig OR Python with type hints on all functions
-- No `any` types in TypeScript — define proper interfaces, type guards, discriminated unions
-- Structured JSON logging only — never `console.log` in production code
-- Every `async` operation wrapped in try/catch with actionable, context-rich error messages
-- No commented-out code — use feature flags or remove. No TODO without linked issue number
-- Functions ≤ 50 lines, files ≤ 300 lines — extract when growing beyond limits
-- Consistent naming: camelCase (TypeScript), snake_case (Python), kebab-case (files/folders)
-- JSDoc/docstrings on all public functions with parameter descriptions and return types
+```xml
+<TextBox Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+         ValidatesOnNotifyDataErrors=True}" />
+<TextBlock Text="{Binding Status, Converter={StaticResource StatusToTextConverter},
+           FallbackValue='Unknown'}" />
+```
 
-## Testing Requirements
+`IValueConverter` implementations must be stateless and null-safe. Register as `StaticResource` in merged dictionaries — never instantiate in code-behind.
 
-- Unit tests for business logic (80%+ coverage target, measured in CI)
-- Integration tests for Azure SDK interactions (mock with nock/responses/WireMock)
-- End-to-end tests for critical user journeys (Playwright/Cypress)
-- Mutation testing for critical paths (Stryker for TS, mutmut for Python)
-- No flaky tests — fix root cause or quarantine with tracking issue
-- Evaluation pipeline (`eval.py`) passes all quality thresholds before production
+```csharp
+public class BoolToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type t, object p, CultureInfo c)
+        => value is true ? Visibility.Visible : Visibility.Collapsed;
+    public object ConvertBack(object value, Type t, object p, CultureInfo c)
+        => value is Visibility.Visible;
+}
+```
 
-## Security Checklist
+## Styles, Templates, and Resources
 
-- [ ] `DefaultAzureCredential` for all Azure service authentication
-- [ ] Secrets stored exclusively in Azure Key Vault
-- [ ] Private endpoints for data-plane operations in production
-- [ ] Content Safety API for all user-facing LLM outputs
-- [ ] Input validation and sanitization (prompt injection defense)
-- [ ] PII detection and redaction before logging
-- [ ] CORS with explicit origin allowlist (never `*` in production)
-- [ ] TLS 1.2+ enforced on all connections
-- [ ] Dependency audit (`npm audit` / `pip audit`) in CI pipeline
-- [ ] Rate limiting per user/IP (60 req/min default)
+Define `ControlTemplate` for custom chrome, `DataTemplate` for data presentation. Keep `ResourceDictionary` files ≤ 200 lines — split by domain (`Buttons.xaml`, `Colors.xaml`). Merge in `App.xaml`:
+
+```xml
+<Application.Resources>
+    <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="Themes/Colors.xaml" />
+            <ResourceDictionary Source="Themes/Buttons.xaml" />
+            <ResourceDictionary Source="Themes/DataTemplates.xaml" />
+        </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+</Application.Resources>
+```
+
+Use `BasedOn` for style inheritance. Never duplicate setters across styles — extract a base style.
+
+## UserControls vs Custom Controls
+
+Use `UserControl` for composed UI (multiple controls, fixed layout). Use custom controls (`Control` subclass + `Generic.xaml`) when consumers need to re-template. Always define `DefaultStyleKey` in the custom control constructor. Dependency properties for any value that should be bindable or animatable:
+
+```csharp
+public static readonly DependencyProperty HeaderProperty =
+    DependencyProperty.Register(nameof(Header), typeof(string), typeof(CardControl),
+        new PropertyMetadata(string.Empty, OnHeaderChanged));
+
+private static void OnHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    => ((CardControl)d).OnHeaderChanged((string)e.OldValue, (string)e.NewValue);
+```
+
+## Virtualization
+
+Enable `VirtualizingStackPanel.IsVirtualizing="True"` and `VirtualizationMode="Recycling"` on all `ListBox`/`ListView`/`DataGrid` with >50 items. Set `ScrollViewer.CanContentScroll="True"` (item-based scrolling). For variable-height items use `VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"`. Never wrap virtualized controls in a `StackPanel` — it gives infinite height and defeats virtualization.
+
+## Threading and Async
+
+UI-bound work must run on the dispatcher thread. Use `async/await` — not `Dispatcher.Invoke` — for async-to-UI marshalling. `Task.Run` for CPU-bound work only.
+
+```csharp
+[RelayCommand]
+private async Task LoadDataAsync()
+{
+    IsLoading = true;
+    var data = await Task.Run(() => _repo.QueryLargeDataset()); // off UI thread
+    Items = new ObservableCollection<Item>(data); // auto-marshalled by await
+    IsLoading = false;
+}
+```
+
+Never call `Dispatcher.Invoke` inside a `Task.Run` — use `await` to return to the UI context. Never block the UI thread with `.Result` or `.Wait()`.
+
+## Input Validation (INotifyDataErrorInfo)
+
+Implement `INotifyDataErrorInfo` via `ObservableValidator` from CommunityToolkit. Use `DataAnnotations` for declarative rules:
+
+```csharp
+public partial class RegisterViewModel : ObservableValidator
+{
+    [ObservableProperty]
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress]
+    private string _email = string.Empty;
+
+    partial void OnEmailChanged(string value) => ValidateProperty(value, nameof(Email));
+}
+```
+
+Bind with `ValidatesOnNotifyDataErrors=True`. Show errors via `Validation.ErrorTemplate` or `AdornedElementPlaceholder`.
+
+## Navigation and DI
+
+Use Prism `IRegionManager` for region-based navigation. Register views and ViewModels in `DryIoc` container:
+
+```csharp
+protected override void RegisterTypes(IContainerRegistry cr)
+{
+    cr.RegisterForNavigation<OrdersView, OrdersViewModel>();
+    cr.RegisterSingleton<IOrderService, OrderService>();
+}
+// Navigate with parameters
+_regionManager.RequestNavigate("MainRegion", "OrdersView",
+    new NavigationParameters { { "customerId", id } });
+```
+
+ViewModels implement `INavigationAware` for `OnNavigatedTo`/`OnNavigatedFrom` lifecycle. Dispose subscriptions in `OnNavigatedFrom`. Constructor injection only — no service locator.
+
+## Testing ViewModels
+
+Test ViewModels in isolation with xUnit/NUnit. Mock dependencies with NSubstitute or Moq. No UI thread required — `ObservableObject` works off-dispatcher in tests:
+
+```csharp
+[Fact]
+public async Task SubmitCommand_ValidOrder_CallsService()
+{
+    var service = Substitute.For<IOrderService>();
+    var vm = new OrderViewModel(service) { IsValid = true };
+    await vm.SubmitCommand.ExecuteAsync(null);
+    await service.Received(1).PlaceAsync(Arg.Any<Order>(), Arg.Any<CancellationToken>());
+}
+```
+
+Test `CanExecute` state changes, property change notifications (`vm.PropertyChanged += ...`), and validation errors.
+
+## MSIX Packaging
+
+Package via `.wapproj` or single-project MSIX. Declare capabilities in `Package.appxmanifest` — request only what's needed. Use `Windows.Storage.ApplicationData` for local settings, not raw file paths. Auto-update via `AppInstaller` file with `UpdateFrequency`. Sign with trusted certificate for sideloading or submit to Microsoft Store.
 
 ## Anti-Patterns
 
-- ❌ Hardcoding API keys, connection strings, or secrets in source code
-- ❌ Using `console.log` instead of structured Application Insights logging
-- ❌ Missing error handling on async operations (unhandled promise rejections)
-- ❌ Public endpoints in production without authentication and authorization
-- ❌ Unbounded queries without pagination or result limits
-- ❌ Not implementing health check endpoint (load balancer can't detect unhealthy)
-- ❌ Logging PII, full user prompts, or secret values — even in debug mode
-- ❌ Using `temperature > 0.5` in production without documented justification
-- ❌ Deploying without Content Safety enabled for user-facing endpoints
+- ❌ Code-behind with business logic — move to ViewModel
+- ❌ `Dispatcher.Invoke` wrapping every async call instead of `await`
+- ❌ Wrapping `ListView` in `ScrollViewer` — kills virtualization
+- ❌ `ObservableCollection` bulk adds without `CollectionViewSource` — use `AddRange` extensions or replace the collection
+- ❌ Service locator (`Container.Resolve<T>()` in ViewModels) — use constructor injection
+- ❌ Global `StaticResource` keys without namespacing — causes merge collisions
+- ❌ Storing secrets in `app.config` or embedded resources — use DPAPI or Azure Key Vault
+- ❌ `Thread.Sleep` or `.Result` on the UI thread — freezes the application
+- ❌ Raising `PropertyChanged` with magic strings — use `nameof()` or source generators
 
 ## WAF Alignment
 
-### Security
-- DefaultAzureCredential for all auth — zero API keys in code
-- Key Vault for secrets, certificates, encryption keys
-- Private endpoints for data-plane in production
-- Content Safety API, PII detection + redaction, input validation
-
-### Reliability
-- Retry with exponential backoff (3 retries, 1-30s jitter)
-- Circuit breaker (50% failure → open 30s)
-- Health check at /health with dependency status
-- Graceful degradation, connection pooling, SIGTERM handling
-
-### Cost Optimization
-- max_tokens from config — never unlimited
-- Model routing (gpt-4o-mini for classification, gpt-4o for reasoning)
-- Semantic caching with Redis (TTL from config)
-- Right-sized SKUs, FinOps telemetry (token usage per request)
-
-### Operational Excellence
-- Structured JSON logging with Application Insights + correlation IDs
-- Custom metrics: latency p50/p95/p99, token usage, quality scores
-- Automated Bicep deployment via GitHub Actions (staging → prod)
-- Feature flags for gradual rollout, incident runbooks
+| Pillar | WPF Practice |
+|--------|-------------|
+| **Reliability** | Async commands with cancellation, global `DispatcherUnhandledException` handler, input validation before submit, graceful offline fallback with cached data |
+| **Security** | DPAPI/Key Vault for secrets, input sanitization in converters, MSIX signing, no secrets in XAML resources, least-privilege package capabilities |
+| **Cost Optimization** | Virtualized lists reduce memory, lazy-load heavy views via region navigation, reuse `DataTemplate` and styles, `Freezable.Freeze()` on shared brushes/geometries |
+| **Operational Excellence** | Serilog/AppInsights structured logging, MSIX auto-update, CI build with `dotnet publish`, ViewModel unit tests in pipeline |
+| **Performance** | UI virtualization, `Binding.IsAsync` for slow properties, `CollectionView` filtering over LINQ re-query, `Freeze()` on immutable resources, compiled bindings via `x:Bind` (WinUI migration path) |
+| **Responsible AI** | Content safety filtering before displaying AI-generated text, user consent for telemetry collection, accessible UI (AutomationProperties, high-contrast themes) |
