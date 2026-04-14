@@ -92,7 +92,7 @@ When reviewing PRs that add or modify agents, instructions, skills, hooks, or pl
 
 ### Naming Convention (All Primitives)
 - All files: **lowercase-hyphen** (no underscores, no camelCase)
-- Examples: `frootai-rag-architect.agent.md`, `python-waf.instructions.md`, `frootai-play-initializer/SKILL.md`
+- Examples: `fai-rag-architect.agent.md`, `python-waf.instructions.md`, `fai-play-initializer/SKILL.md`
 
 ### Frontmatter Requirements
 
