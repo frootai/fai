@@ -327,6 +327,45 @@ function loadGlossary(modules) {
 const modules = await loadModulesWithAutoUpdate();
 const glossary = loadGlossary(modules);
 
+// ─── BM25 Search Index ─────────────────────────────────────────────
+// Loaded from pre-built search-index.json. Falls back to Jaccard if missing.
+const SEARCH_INDEX_PATH = join(__dirname, "search-index.json");
+let BM25_INDEX = null;
+try {
+  if (existsSync(SEARCH_INDEX_PATH)) {
+    BM25_INDEX = JSON.parse(readFileSync(SEARCH_INDEX_PATH, "utf-8"));
+    console.error(`[frootai] BM25 index loaded: ${BM25_INDEX.stats.docs} docs, ${BM25_INDEX.stats.terms} terms`);
+  }
+} catch (e) {
+  console.error("[frootai] BM25 index load failed, using Jaccard fallback:", e.message);
+}
+
+/**
+ * Score a single document against a query using BM25.
+ * Returns 0..∞ (unnormalized). Higher = more relevant.
+ */
+function bm25Score(queryTokens, doc) {
+  if (!BM25_INDEX) return 0;
+  const { idf, params } = BM25_INDEX;
+  const { k1, b, avgDocLen } = params;
+  let score = 0;
+  const docLen = doc.len;
+  for (const term of queryTokens) {
+    if (!idf[term] || !doc.tf[term]) continue;
+    const tf = doc.tf[term];
+    const tfScore = (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (docLen / avgDocLen)));
+    score += idf[term] * tfScore;
+  }
+  return score;
+}
+
+/** Tokenize a query string for BM25 (matches build-search-index.js tokenizer) */
+const STOP_WORDS_BM25 = new Set(["a","an","the","and","or","but","in","on","at","to","for","of","with","by","from","up","out","as","is","was","are","were","be","been","being","have","has","had","do","does","did","will","would","could","should","may","might","shall","can","need","that","this","these","those","it","its","not","also","but","if","then","when","where","who","which","how","what","all","both","each","few","more","most","other","some","such","than","too","very","just","about","above","after","before","between","into","through","during","including","until","against","among","throughout","within","without","over","under","again","so","yet","only","even","back","still"]);
+
+function tokenizeQuery(text) {
+  return text.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).filter(t => t.length >= 3 && !STOP_WORDS_BM25.has(t));
+}
+
 // ─── MCP Server ────────────────────────────────────────────────────
 
 const PKG_VERSION = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf-8")).version;
@@ -519,6 +558,38 @@ server.tool(
 
     const queryLower = query.toLowerCase();
     const queryWords = queryLower.split(/\s+/).filter((w) => w.length > 2);
+
+    // BM25 path — score knowledge docs from the index
+    if (BM25_INDEX) {
+      const queryTokens = tokenizeQuery(query);
+      const knowledgeDocs = BM25_INDEX.docs.filter(d => d.meta?.type === "module");
+      const scored = knowledgeDocs.map(doc => ({
+        ...doc,
+        bm25: bm25Score(queryTokens, doc),
+      })).filter(d => d.bm25 > 0).sort((a, b) => b.bm25 - a.bm25).slice(0, max_results);
+
+      if (scored.length > 0) {
+        // Resolve content from live modules
+        const resultText = scored.map((doc, i) => {
+          const mod = modules[doc.meta.moduleId];
+          if (!mod) return null;
+          const section = mod.sections.find(s => s.title === doc.meta.sectionTitle) || mod.sections[0];
+          const preview = section ? section.content.substring(0, 500) + (section.content.length > 500 ? "..." : "") : "(no preview)";
+          return `### ${i + 1}. ${doc.meta.sectionTitle || doc.title}\n*${mod.emoji || ""} ${mod.layer || ""} → ${mod.title} (${doc.meta.moduleId})*\n\n${preview}`;
+        }).filter(Boolean).join("\n\n---\n\n");
+
+        const response = {
+          content: [{
+            type: "text",
+            text: `Found ${scored.length} relevant sections for "${query}" (BM25):\n\n${resultText}\n\n---\nUse get_module with module_id and section to read the full content.`,
+          }],
+        };
+        searchCache.set(cacheKey, response);
+        return response;
+      }
+    }
+
+    // Fallback: legacy keyword scoring
 
     // Score each section across all modules
     const scored = [];
@@ -1678,6 +1749,7 @@ const PRICING = {
 
 // ── Tool: semantic_search_plays ────────────────────────────────────
 
+/** Legacy Jaccard fallback (used when BM25 index not available) */
 function computeSimilarity(query, text) {
   const qt = query.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
   const tt = text.toLowerCase().split(/\s+/);
@@ -1689,23 +1761,45 @@ function computeSimilarity(query, text) {
 
 server.tool(
   "semantic_search_plays",
-  "SMART PLAY SEARCH — Describe what you want to build in natural language, get top matching solution plays ranked by relevance with confidence scores.",
+  "SMART PLAY SEARCH — Describe what you want to build in natural language, get top matching solution plays ranked by relevance with confidence scores. Powered by BM25 ranking over 101 indexed plays.",
   {
     query: z.string().describe("Describe what you want to build (e.g., 'process invoices', 'RAG chatbot', 'edge AI on IoT')"),
     top_k: z.number().optional().describe("Number of results (default: 3, max: 5)"),
   },
   async ({ query, top_k = 3 }) => {
     const k = Math.min(Math.max(top_k, 1), 5);
-    const scored = PLAY_DATA.map(p => ({
-      ...p, score: computeSimilarity(query, `${p.name} ${p.pattern} ${p.services.join(" ")}`)
-    })).sort((a, b) => b.score - a.score).slice(0, k);
+
+    let scored;
+    if (BM25_INDEX) {
+      const queryTokens = tokenizeQuery(query);
+      // Only score play docs from the BM25 index
+      const playDocs = BM25_INDEX.docs.filter(d => d.meta?.type === "play");
+      const bm25Scored = playDocs.map(doc => ({
+        id: doc.meta.id,
+        bm25: bm25Score(queryTokens, doc),
+        title: doc.title,
+      })).sort((a, b) => b.bm25 - a.bm25);
+
+      // Merge with PLAY_DATA for display info
+      const maxScore = bm25Scored[0]?.bm25 || 1;
+      scored = bm25Scored.slice(0, k).map(b => {
+        const p = PLAY_DATA.find(pd => pd.id === b.id);
+        return { ...(p || { id: b.id, name: b.title, cx: "?", services: [] }), score: maxScore > 0 ? b.bm25 / maxScore : 0 };
+      });
+    } else {
+      // Fallback: Jaccard similarity
+      scored = PLAY_DATA.map(p => ({
+        ...p, score: computeSimilarity(query, `${p.name} ${p.pattern} ${p.services.join(" ")}`)
+      })).sort((a, b) => b.score - a.score).slice(0, k);
+    }
 
     const results = scored.map((p, i) => {
-      const conf = p.score > 0.5 ? "🟢 High" : p.score > 0.25 ? "🟡 Medium" : "🔴 Low";
-      return `### ${i + 1}. Play ${p.id}: ${p.name}\n- **Confidence**: ${conf} (${(p.score * 100).toFixed(0)}%)\n- **Complexity**: ${p.cx}\n- **Services**: ${p.services.join(", ")}\n- **Guide**: /user-guide?play=${p.id}`;
+      const conf = p.score > 0.5 ? "🟢 High" : p.score > 0.2 ? "🟡 Medium" : "🔴 Low";
+      return `### ${i + 1}. Play ${p.id}: ${p.name}\n- **Relevance**: ${conf} (${(p.score * 100).toFixed(0)}%)\n- **Complexity**: ${p.cx}\n- **Services**: ${(p.services || []).join(", ")}\n- **Guide**: /user-guide?play=${p.id}`;
     }).join("\n\n");
 
-    return { content: [{ type: "text", text: `## 🔍 Smart Play Search\n**Query**: "${query}"\n\n${results}\n\n---\n> 💡 Use the [Configurator](https://frootai.dev/configurator) for guided selection.` }] };
+    const engine = BM25_INDEX ? "BM25" : "Jaccard";
+    return { content: [{ type: "text", text: `## 🔍 Smart Play Search (${engine})\n**Query**: "${query}"\n\n${results}\n\n---\n> 💡 Use the [Configurator](https://frootai.dev/configurator) for guided selection.` }] };
   }
 );
 
@@ -2964,15 +3058,24 @@ ${description}
     },
     { annotations: { readOnlyHint: false } },
     async ({ description, topK, scaffoldFromTop, playName }) => {
-      // Semantic search across all 100 plays
-      const scored = PLAY_DATA
-        .map(play => ({
-          play,
-          score: computeSimilarity(description, `${play.name} ${play.pattern}`),
-        }))
-        .filter(({ score }) => score > 0)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, topK);
+      // BM25-ranked search across all plays
+      let scored;
+      if (BM25_INDEX) {
+        const queryTokens = tokenizeQuery(description);
+        const playDocs = BM25_INDEX.docs.filter(d => d.meta?.type === "play");
+        const maxScore = Math.max(...playDocs.map(d => bm25Score(queryTokens, d)), 1);
+        scored = playDocs
+          .map(doc => ({ play: PLAY_DATA.find(p => p.id === doc.meta.id) || { id: doc.meta.id, name: doc.title, cx: "?", services: [], pattern: "" }, score: bm25Score(queryTokens, doc) / maxScore }))
+          .filter(({ score }) => score > 0.01)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, topK);
+      } else {
+        scored = PLAY_DATA
+          .map(play => ({ play, score: computeSimilarity(description, `${play.name} ${play.pattern}`) }))
+          .filter(({ score }) => score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, topK);
+      }
 
       if (scored.length === 0) {
         return { content: [{ type: "text", text: `No matching plays for "${description}". Try broader terms or use scaffold_play to create from scratch.` }] };
