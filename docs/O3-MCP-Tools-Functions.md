@@ -603,3 +603,99 @@ flowchart TB
 
 > **FrootAI O3** — *Tools are how AI gets things done. MCP is how we standardize it.*
 > Connect the brain to the body, safely and scalably.
+
+---
+
+## FAI MCP Server — Tool Reference (v5.0.1)
+
+The **FAI MCP Server** (`npx frootai-mcp`) exposes **45 tools** across 7 categories. Install once — your agent gets the entire FrootAI knowledge base, FAI Protocol runtime, scaffold generation, and plugin marketplace.
+
+```bash
+npx frootai-mcp           # stdio mode (VS Code, Claude Desktop, Cursor)
+npx frootai-mcp http      # HTTP/SSE mode (remote clients, Container Apps, k8s)
+```
+
+### Category 1: Static Knowledge (6 tools) — bundled, works offline
+| Tool | Description |
+|------|-------------|
+| `list_modules` | Browse 18 FROOT modules by layer (F1–T3) |
+| `get_module` | Read full module content — foundations, RAG, agents, MCP, ops |
+| `lookup_term` | 200+ AI/ML glossary definitions |
+| `search_knowledge` | Full-text search across all 18 modules |
+| `get_architecture_pattern` | 7 pre-built decision guides: RAG, agents, hosting, model selection, cost, determinism, multi-agent |
+| `get_froot_overview` | Complete FROOT framework summary (5 layers, 18 modules, 16 learning paths) |
+
+### Category 2: Live Tools (4 tools) — network-enabled, graceful offline fallback
+| Tool | Description |
+|------|-------------|
+| `fetch_azure_docs` | Search Microsoft Learn for up-to-date Azure service docs |
+| `fetch_external_mcp` | Discover MCP servers from public registries |
+| `list_community_plays` | Browse 100 solution plays from GitHub |
+| `get_github_agentic_os` | Complete .github Agentic OS 7-primitive guide |
+
+### Category 3: Agent Chain (3 tools) — build → review → tune
+| Tool | Description |
+|------|-------------|
+| `agent_build` | Architecture guidance + code patterns; suggests agent_review |
+| `agent_review` | Security + quality + compliance audit; suggests agent_tune |
+| `agent_tune` | Production readiness validation; final verdict |
+
+### Category 4: Ecosystem / Azure AI (10 tools)
+| Tool | Description |
+|------|-------------|
+| `get_model_catalog` | Azure AI model catalog: GPT-4o, o3, text-embedding-3, DALL-E, Whisper |
+| `get_azure_pricing` | Monthly cost estimates by scenario and scale |
+| `estimate_cost` | Itemized Azure cost estimate per solution play at dev or prod scale |
+| `compare_models` | Side-by-side model comparison for your use case |
+| `compare_plays` | Compare two solution plays: services, cost, complexity, team size |
+| `semantic_search_plays` | Natural language search across 100 solution plays |
+| `embedding_playground` | Cosine similarity between two texts — educational RAG demonstration |
+| `run_evaluation` | Quality scoring: groundedness, relevance, coherence, fluency (pass/fail) |
+| `validate_config` | Validate TuneKit configs (openai.json, guardrails.json) against best practices |
+| `generate_architecture_diagram` | Mermaid.js architecture diagram for any solution play |
+
+### Category 5: FAI Engine — The Open Glue (6 tools)
+The FAI Engine is the runtime for the FAI Protocol — it reads `fai-manifest.json`, resolves primitives, wires context, and activates guardrails.
+
+| Tool | Description |
+|------|-------------|
+| `wire_play` | Resolve FAI Protocol context for a play: bind primitives, activate guardrails, report wiring health |
+| `inspect_wiring` | Audit an existing play's wiring: primitives resolved, context chains, health score |
+| `validate_manifest` | Validate `fai-manifest.json` schema: required fields, primitive paths, guardrail thresholds |
+| `get_play_detail` | Full play specification: services, config, WAF alignment, evaluation metrics |
+| `list_primitives` | Browse 830+ primitives by type: agents (238), instructions (176), skills (282), hooks (10), plugins (77) |
+| `evaluate_quality` | Run quality evaluation with configurable thresholds — pass/fail with action recommendations |
+
+### Category 6: Scaffold & Create (3 tools)
+| Tool | Description |
+|------|-------------|
+| `scaffold_play` | Generate a complete solution play (24+ files) matching the Play 101 golden template; auto-wires fai-manifest.json |
+| `create_primitive` | Create an agent, instruction, or skill with proper frontmatter, WAF alignment, and naming convention |
+| `smart_scaffold` | Semantic search → find best matching existing play → scaffold it (AI-powered play selection) |
+
+### Category 7: Marketplace (13 tools) — npm for AI Primitives
+The FAI Marketplace contains 77+ AI primitive plugins across 8 categories.
+
+| Tool | Description |
+|------|-------------|
+| `marketplace_search` | Semantic search across 77+ plugins by use case |
+| `marketplace_browse` | Paginated listing with filters: solution-play, language, infrastructure, security, integration, mcp-development, testing, observability |
+| `install_plugin` | Copy plugin primitives into `.github/` with conflict detection |
+| `uninstall_plugin` | Remove plugin primitives cleanly from project |
+| `list_installed` | Scan `.github/` and match against marketplace registry |
+| `check_compatibility` | Validate plugin + play alignment + WAF pillars + file conflicts |
+| `validate_plugin` | Check `plugin.json` schema, naming convention, and file refs |
+| `compose_plugins` | Multi-install with cross-plugin conflict detection |
+| `publish_plugin` | Validate → generate marketplace entry → register in marketplace.json |
+| `check_plugin_updates` | Compare installed vs marketplace versions |
+| `resolve_dependencies` | Topological dependency resolution + recommended install order |
+| `list_external_plugins` | Browse community-plugins/ and external sources |
+| `marketplace_stats` | Full analytics: totals, categories, top plugins, play coverage per category |
+
+### Enterprise Features (v5.0.1)
+- **HTTP/SSE Transport**: `npx frootai-mcp http` — Streamable HTTP (MCP 2025-06-18 spec), multi-client sessions, API key auth
+- **Health Probes**: `GET /healthz` (liveness) + `GET /readyz` (readiness) — k8s/Container Apps compatible
+- **OpenTelemetry**: Opt-in via `OTEL_EXPORTER_OTLP_ENDPOINT` — custom FAI metrics: tool calls, duration, quality evals, plays wired
+- **MCP Sampling**: Server requests LLM completions from the connected client
+- **MCP Elicitation**: Server requests structured user input via JSON Schema forms
+- **TypeScript**: Fully typed source in `src/`, compiled to `dist/`, 38 vitest tests
