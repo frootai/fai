@@ -361,9 +361,10 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && node esbuild.config.mjs",
+    "vscode:prepublish": "npm run build:webview && npm run package",
+    "compile": "npm run check-types && npm run build:webview && node esbuild.config.mjs",
     "check-types": "tsc --noEmit",
+    "build:webview": "cd webview-ui && npm run build",
     "watch": "node esbuild.config.mjs --watch",
     "package": "npm run check-types && node esbuild.config.mjs --production",
     "lint": "eslint src/",

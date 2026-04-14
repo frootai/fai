@@ -1,13 +1,10 @@
 // FrootAI VS Code Extension v6.0.0 — TypeScript entry point
 // Legacy JS handles existing 25 commands.
-// New TypeScript modules add: searchAll, webview panels.
+// New TypeScript modules add: searchAll, React webview panels.
 
 import * as vscode from "vscode";
 import { searchAll } from "./commands/search";
-import { PlayDetailPanel } from "./webviews/PlayDetailPanel";
-import { EvaluationPanel } from "./webviews/EvaluationPanel";
-import { ScaffoldWizardPanel } from "./webviews/ScaffoldWizardPanel";
-import { McpToolExplorerPanel } from "./webviews/McpToolExplorerPanel";
+import { createReactPanel } from "./webviews/reactHost";
 import { SOLUTION_PLAYS } from "./data/plays";
 
 // Legacy extension handles existing commands + tree views
@@ -18,7 +15,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // Activate legacy (existing 25 commands, tree views, MCP provider)
   legacy.activate(context);
 
-  // ─── New Commands (Phase 2+3) ───
+  // ─── New Commands — React Webview Panels ───
 
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.searchAll", () => searchAll()),
@@ -28,22 +25,45 @@ export function activate(context: vscode.ExtensionContext): void {
       if (typeof playOrId === "string") {
         play = SOLUTION_PLAYS.find(p => p.id === playOrId) ?? SOLUTION_PLAYS[0];
       }
-      if (!play) {
-        play = SOLUTION_PLAYS[0];
-      }
-      PlayDetailPanel.createOrShow(play);
+      if (!play) { play = SOLUTION_PLAYS[0]; }
+
+      const panel = createReactPanel(context.extensionUri, "frootai.playDetail", `Play ${play.id} — ${play.name}`, {
+        panel: "playDetail",
+        play,
+      });
+      panel.webview.onDidReceiveMessage((msg: any) => {
+        if (msg.command === "initDevKit") { vscode.commands.executeCommand("frootai.initDevKit"); }
+        else if (msg.command === "initTuneKit") { vscode.commands.executeCommand("frootai.initTuneKit"); }
+        else if (msg.command === "cost") { vscode.commands.executeCommand("frootai.quickCostEstimate"); }
+        else if (msg.command === "website") { vscode.env.openExternal(vscode.Uri.parse(`https://frootai.dev/solution-plays/${play.dir}`)); }
+      });
     }),
 
     vscode.commands.registerCommand("frootai.openEvaluationDashboard", () => {
-      EvaluationPanel.createOrShow();
+      const panel = createReactPanel(context.extensionUri, "frootai.evaluation", "Evaluation Dashboard", {
+        panel: "evaluation",
+      });
+      panel.webview.onDidReceiveMessage((msg: any) => {
+        if (msg.command === "runEvaluation") { vscode.commands.executeCommand("frootai.runEvaluation"); }
+      });
     }),
 
     vscode.commands.registerCommand("frootai.openScaffoldWizard", () => {
-      ScaffoldWizardPanel.createOrShow();
+      const panel = createReactPanel(context.extensionUri, "frootai.scaffold", "Scaffold Wizard", {
+        panel: "scaffold",
+        plays: SOLUTION_PLAYS,
+      });
+      panel.webview.onDidReceiveMessage((msg: any) => {
+        if (msg.command === "scaffold") {
+          vscode.commands.executeCommand("frootai.initDevKit");
+        }
+      });
     }),
 
     vscode.commands.registerCommand("frootai.openMcpExplorer", () => {
-      McpToolExplorerPanel.createOrShow();
+      createReactPanel(context.extensionUri, "frootai.mcpExplorer", "MCP Tool Explorer", {
+        panel: "mcpExplorer",
+      });
     }),
   );
 }
