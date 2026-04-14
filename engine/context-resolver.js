@@ -7,8 +7,12 @@
  * and constructs the context object that all primitives share.
  */
 
-const { readFileSync, existsSync } = require('fs');
-const { join } = require('path');
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const ROOT = join(__dirname, '..');
 const DOCS_DIR = join(ROOT, 'docs');
@@ -156,4 +160,4 @@ function buildContext(contextConfig) {
   };
 }
 
-module.exports = { resolveKnowledge, resolveWAF, buildContext, MODULE_MAP, WAF_MAP };
+export { resolveKnowledge, resolveWAF, buildContext, MODULE_MAP, WAF_MAP };

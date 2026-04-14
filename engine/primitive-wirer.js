@@ -7,8 +7,8 @@
  * instructions constrain it, and which hooks guard it.
  */
 
-const { readFileSync, existsSync, statSync, readdirSync } = require('fs');
-const { resolve, basename, extname, join } = require('path');
+import { readFileSync, existsSync, statSync, readdirSync } from 'fs';
+import { resolve, basename, extname, join } from 'path';
 
 /**
  * Parse YAML frontmatter from a markdown file.
@@ -150,4 +150,4 @@ function wirePrimitives(resolvedPaths, context) {
   return { primitives, stats, errors };
 }
 
-module.exports = { wirePrimitives, loadPrimitive, parseFrontmatter };
+export { wirePrimitives, loadPrimitive, parseFrontmatter };

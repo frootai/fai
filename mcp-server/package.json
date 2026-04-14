@@ -16,7 +16,13 @@
   ],
   "scripts": {
     "start": "node index.js",
-    "build": "node build-knowledge.js",
+    "start:http": "node index.js http",
+    "build": "node build-knowledge.js && tsc --noEmit",
+    "build:ts": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "node build-knowledge.js"
   },
   "keywords": [
@@ -46,5 +52,11 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^4.1.4",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
   }
 }

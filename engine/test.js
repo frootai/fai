@@ -15,10 +15,20 @@
  * Exit: 0 = all pass, 1 = failures
  */
 
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
+
+import { loadManifest, resolvePaths } from './manifest-reader.js';
+import { buildContext } from './context-resolver.js';
+import { wirePrimitives, loadPrimitive, parseFrontmatter } from './primitive-wirer.js';
+import { loadHookConfig, runHooksForEvent } from './hook-runner.js';
+import { createEvaluator, DEFAULTS } from './evaluator.js';
+import { runPlay, findManifest, MCP_TOOL_DEFINITION } from './mcp-bridge.js';
+import { initEngine, printStatus } from './index.js';
 let passed = 0;
 let failed = 0;
 let total = 0;
@@ -53,7 +63,7 @@ function assertIncludes(arr, item, msg) {
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log('\n── manifest-reader.js ──');
 
-const { loadManifest, resolvePaths } = require('./manifest-reader');
+// (imported at top)
 
 test('loadManifest — loads Play 01 manifest successfully', () => {
   const result = loadManifest(path.join(ROOT, 'solution-plays/01-enterprise-rag/spec/fai-manifest.json'));
@@ -128,7 +138,7 @@ test('resolvePaths — converts relative paths to absolute', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log('\n── context-resolver.js ──');
 
-const { buildContext } = require('./context-resolver');
+// (imported at top)
 
 test('buildContext — resolves FROOT knowledge modules', () => {
   const ctx = buildContext({ knowledge: ['R2-RAG-Architecture'], waf: ['security'] });
@@ -157,7 +167,7 @@ test('buildContext — handles invalid module IDs gracefully', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log('\n── primitive-wirer.js ──');
 
-const { wirePrimitives, loadPrimitive, parseFrontmatter } = require('./primitive-wirer');
+// (imported at top)
 
 test('parseFrontmatter — extracts YAML frontmatter from agent file', () => {
   const content = `---
@@ -217,7 +227,7 @@ test('loadPrimitive — loads a hook directory', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log('\n── hook-runner.js ──');
 
-const { loadHookConfig, runHooksForEvent } = require('./hook-runner');
+// (imported at top)
 
 test('loadHookConfig — loads secrets-scanner hooks.json', () => {
   const hookDir = path.join(ROOT, 'hooks/frootai-secrets-scanner');
@@ -270,7 +280,7 @@ test('loadHookConfig — hooks have at least one event', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log('\n── evaluator.js ──');
 
-const { createEvaluator, DEFAULTS } = require('./evaluator');
+// (imported at top)
 
 test('createEvaluator — creates with default thresholds', () => {
   const ev = createEvaluator();
@@ -337,7 +347,7 @@ test('DEFAULTS — has all 5 standard metrics', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log('\n── mcp-bridge.js ──');
 
-const { runPlay, findManifest, MCP_TOOL_DEFINITION } = require('./mcp-bridge');
+// (imported at top)
 
 test('findManifest — finds Play 01 manifest', () => {
   const mf = findManifest('01');
@@ -378,7 +388,7 @@ test('MCP_TOOL_DEFINITION — has required MCP fields', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log('\n── index.js (integration) ──');
 
-const { initEngine, printStatus } = require('./index');
+// (imported at top)
 
 test('initEngine — loads Play 01 end-to-end', () => {
   const manifestPath = path.join(ROOT, 'solution-plays/01-enterprise-rag/spec/fai-manifest.json');

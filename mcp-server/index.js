@@ -27,25 +27,23 @@ import { z } from "zod";
 import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync as writeFileSync_fn, statSync as statSync_fn } from "fs";
 import { join, dirname, basename, resolve } from "path";
 import { fileURLToPath } from "url";
-import { createRequire } from "module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// ─── FAI Engine Bridge (CommonJS → ESM) ───────────────────────────
-// The engine is CommonJS; this server is ESM. createRequire() bridges them.
+// ─── FAI Engine Bridge (ESM → ESM) ────────────────────────────────
+// Both engine and server are now ESM. Direct dynamic import.
 // When running from repo: engine/ is available → engine tools register.
 // When running via npx: engine/ not shipped → graceful degradation.
 
 let faiEngine = null;
 try {
-  const esmRequire = createRequire(import.meta.url);
-  const engineBridge = esmRequire('../engine/mcp-bridge.js');
-  const engineIndex = esmRequire('../engine/index.js');
-  const engineEvaluator = esmRequire('../engine/evaluator.js');
-  const engineManifest = esmRequire('../engine/manifest-reader.js');
-  const engineContext = esmRequire('../engine/context-resolver.js');
-  const engineWirer = esmRequire('../engine/primitive-wirer.js');
+  const engineBridge = await import('../engine/mcp-bridge.js');
+  const engineIndex = await import('../engine/index.js');
+  const engineEvaluator = await import('../engine/evaluator.js');
+  const engineManifest = await import('../engine/manifest-reader.js');
+  const engineContext = await import('../engine/context-resolver.js');
+  const engineWirer = await import('../engine/primitive-wirer.js');
 
   faiEngine = {
     available: true,

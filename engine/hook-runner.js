@@ -6,9 +6,9 @@
  * Hooks run as bash scripts with configurable timeout and environment.
  */
 
-const { readFileSync, existsSync } = require('fs');
-const { join } = require('path');
-const { execSync } = require('child_process');
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
+import { execSync } from 'child_process';
 
 /**
  * Load hooks.json from a hook directory.
@@ -105,4 +105,4 @@ function runHooksForEvent(event, hookPaths, stdin = '') {
   return { results, blocked, errors };
 }
 
-module.exports = { loadHookConfig, runCommand, runHooksForEvent };
+export { loadHookConfig, runCommand, runHooksForEvent };

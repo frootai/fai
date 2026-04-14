@@ -17,11 +17,11 @@
  * and evaluation. Full runtime execution (hook running, agent dispatch) comes in v0.2.
  */
 
-const { loadManifest, resolvePaths } = require('./manifest-reader');
-const { buildContext } = require('./context-resolver');
-const { wirePrimitives } = require('./primitive-wirer');
-const { createEvaluator } = require('./evaluator');
-const { runHooksForEvent } = require('./hook-runner');
+import { loadManifest, resolvePaths } from './manifest-reader.js';
+import { buildContext } from './context-resolver.js';
+import { wirePrimitives } from './primitive-wirer.js';
+import { createEvaluator } from './evaluator.js';
+import { runHooksForEvent } from './hook-runner.js';
 
 /**
  * Initialize the FAI Engine with a manifest file.
@@ -139,7 +139,7 @@ function printStatus(engine) {
 
 // ─── CLI Entry Point ──────────────────────────────────
 
-if (require.main === module) {
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\\\/g, '/'))) {
   const args = process.argv.slice(2);
   const manifestPath = args.find(a => !a.startsWith('-'));
   const showStatus = args.includes('--status') || !args.find(a => a.startsWith('--'));
@@ -181,4 +181,4 @@ if (require.main === module) {
   process.exit(engine.success ? 0 : 1);
 }
 
-module.exports = { initEngine, printStatus };
+export { initEngine, printStatus };

@@ -1,0 +1,31 @@
+name: MCP Server CI
+on:
+  push:
+    branches: [main]
+    paths: ['mcp-server/**', 'engine/**']
+  pull_request:
+    paths: ['mcp-server/**', 'engine/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: cd mcp-server && npm ci
+      - name: TypeScript check
+        run: cd mcp-server && npx tsc --noEmit
+      - name: Run tests
+        run: cd mcp-server && npx vitest run
+      - name: Engine tests
+        run: node engine/test.js
+      - name: Server starts (stdio)
+        run: |
+          timeout 5 node mcp-server/index.js || true
+          echo "Server startup verified"

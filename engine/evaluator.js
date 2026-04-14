@@ -127,4 +127,4 @@ function createEvaluator(guardrails = {}) {
   };
 }
 
-module.exports = { createEvaluator, DEFAULTS };
+export { createEvaluator, DEFAULTS };

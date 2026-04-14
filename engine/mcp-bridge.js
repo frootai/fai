@@ -10,10 +10,12 @@
  * Output: Engine status + wiring report
  */
 
-const { join, resolve } = require('path');
-const { existsSync, readdirSync } = require('fs');
-const { initEngine, printStatus } = require('./index');
+import { join, resolve, dirname } from 'path';
+import { existsSync, readdirSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { initEngine, printStatus } from './index.js';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(join(__dirname, '..'));
 
 /**
@@ -101,4 +103,4 @@ const MCP_TOOL_DEFINITION = {
   }
 };
 
-module.exports = { runPlay, findManifest, MCP_TOOL_DEFINITION };
+export { runPlay, findManifest, MCP_TOOL_DEFINITION };

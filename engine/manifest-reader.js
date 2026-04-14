@@ -6,8 +6,8 @@
  * how primitives wire together for a solution play.
  */
 
-const { readFileSync, existsSync } = require('fs');
-const { join, resolve, dirname, basename } = require('path');
+import { readFileSync, existsSync } from 'fs';
+import { join, resolve, dirname, basename } from 'path';
 
 const WAF_PILLARS = [
   'security', 'reliability', 'cost-optimization',
@@ -132,4 +132,4 @@ function resolvePaths(manifest, playDir) {
   return { resolved, missing };
 }
 
-module.exports = { loadManifest, resolvePaths };
+export { loadManifest, resolvePaths };
