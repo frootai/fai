@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Copilot Thought Logging Waf — WAF-Aligned Coding Standards
+# Copilot Thought Logging — FAI Standards
 
 ## Core Rules
 

@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Containerization Waf — WAF-Aligned Coding Standards
+# Containerization — FAI Standards
 
 ## Core Rules
 

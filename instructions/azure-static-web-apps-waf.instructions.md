@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Azure Static Web Apps — WAF-Aligned Coding Standards
+# Azure Static Web Apps — FAI Standards
 
 ## Service Overview
 

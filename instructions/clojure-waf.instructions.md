@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Clojure Waf — WAF-Aligned Coding Standards
+# Clojure — FAI Standards
 
 ## Core Rules
 

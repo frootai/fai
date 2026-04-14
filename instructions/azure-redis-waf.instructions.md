@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Azure Cache for Redis — WAF-Aligned Coding Standards
+# Azure Cache for Redis — FAI Standards
 
 ## Service Overview
 

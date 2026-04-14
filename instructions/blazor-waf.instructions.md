@@ -7,7 +7,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Blazor — WAF-Aligned Coding Standards
+# Blazor — FAI Standards
 
 ## Render Modes (.NET 8+)
 

@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Azure DevOps — WAF-Aligned Coding Standards
+# Azure DevOps — FAI Standards
 
 ## Service Overview
 

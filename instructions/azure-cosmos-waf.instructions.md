@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Azure Cosmos DB — WAF-Aligned Coding Standards
+# Azure Cosmos DB — FAI Standards
 
 ## Service Overview
 

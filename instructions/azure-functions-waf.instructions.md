@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Azure Functions — WAF-Aligned Coding Standards
+# Azure Functions — FAI Standards
 
 ## Service Overview
 

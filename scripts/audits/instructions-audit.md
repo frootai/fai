@@ -1,8 +1,8 @@
 # FAI Instructions Audit Report
 
-> **Date:** April 13, 2026
-> **Scope:** 182 standalone instruction files (6 WAF core + 176 domain)
-> **Status:** ✅ COMPLETE — All 182 instructions audited (176 standalone + 6 WAF core)
+> **Date:** April 14, 2026 (Final)
+> **Scope:** 486 instruction files (176 standalone + 6 WAF core + 304 play)
+> **Status:** ✅ COMPLETE — All phases done, all gaps closed
 
 ---
 
@@ -138,3 +138,63 @@ All 486 instruction files across the entire FrootAI ecosystem are verified:
 - Phase 4 (Cross-links): Count consistency verified, play instructions clean, AGENTS.md + README.md clean
 
 **No further action required on instructions.**
+
+---
+
+## Phase 2: Content Rewrite — April 13-14, 2026
+
+### Problem Identified
+145 of 176 standalone instruction files contained **identical generic boilerplate** — same "Core Rules", same TypeScript code examples (even for Python/Java/Go frameworks), no domain-specific content. Only 31 files had real domain content.
+
+### Execution — 15 Batches
+
+| Batch | Files | Key Domains | Commit |
+|-------|-------|-------------|--------|
+| 1 | cost-python → django-waf | Python/TS cost, C++, C#, Dart, Dataverse, Debian, design patterns, Django | ✅ |
+| 2 | docker-waf → froot-f3-ai-glossary | Docker, .NET arch, Draw.io, EF Core, Electron, FastAPI, Flask, GenAI, LLM selection, AI glossary | ✅ |
+| 3 | froot-f4 → froot-r3-determinism | Agentic OS, Semantic Kernel, agent coding, MCP, AI Foundry, GPU infra, Copilot extensibility, prompts, RAG, determinism | ✅ |
+| 4 | froot-t1 → java-mcp-development | Fine-tuning, responsible AI, production deploy, GitHub Actions, Go MCP, Go, GraphQL, gRPC, HTML/CSS, Java MCP | ✅ |
+| 5 | java-waf → minimal-api-waf | Java, Kotlin MCP, Kotlin, Kubernetes, Laravel, localization, Markdown, MAUI, memory bank, Minimal APIs | ✅ |
+| 6 | mongodb-waf → pcf-waf | MongoDB, NestJS, Next.js, no-heredoc, Nuxt, object calisthenics, OpenAPI, opex CI/CD, opex monitoring, PCF | ✅ |
+| 7 | performance → play-04 | Performance (cross-lang, Python, TS), Pester, PHP MCP, PHP, plays 01-04 (RAG, landing zone, deterministic, voice AI) | ✅ |
+| 8 | play-05 → play-14 | Plays 05-14 (IT tickets, doc intel, multi-agent, Copilot Studio, AI Search, content mod, landing zone adv, AKS, fine-tuning, cost gateway) | ✅ |
+| 9 | play-15 → playwright-waf | Plays 15-23 (multimodal, Teams, observability, prompts, edge AI, anomaly, agentic RAG, swarm, browser agent) + Playwright | ✅ |
+| 10 | power-apps → pytest-waf | Power Apps (canvas + model-driven), Power Automate, Power BI, Power Pages, connectors, PowerShell, Prisma, Pydantic, pytest | ✅ |
+| 11 | python-mcp → ruby-mcp | Python MCP, Quarkus, R, RAI bias testing, RAI content safety, Rails, reliability (C#, Python, TS), Ruby MCP | ✅ |
+| 12 | ruby → security-python | Ruby, Rust MCP, Rust, Salesforce Apex, Salesforce LWC, Scala, security (Bicep, C#, OWASP, Python) | ✅ |
+| 13 | security-ts → swift-waf | Security TS, self-documenting code, shell, SignalR, Spring Boot, SQL optimization, SQLAlchemy, Svelte, Swift MCP, Swift | ✅ |
+| 14 | tailwind → vitest-waf | Tailwind, Copilot taming, Terraform (Azure + general), testing best practices, tRPC, TS MCP, TypeScript, uvicorn, Vitest | ✅ |
+| 15 | winui3 → zod-waf | WinUI 3, WordPress, WPF, xUnit, Zod — **FINAL BATCH** | ✅ |
+
+### Content Rewrite Results
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Generic boilerplate files | 145 / 176 (82%) | **0 / 176 (0%)** |
+| Files with domain-specific content | 31 / 176 (18%) | **176 / 176 (100%)** |
+| Avg line count | 134L (all same template) | **196L (real content)** |
+| Files with correct-language code | 31 | **176** |
+| H1 title format "{Domain} — FAI Standards" | ~31 | **176 / 176** |
+
+### Post-Rewrite Final Verification (April 14, 2026)
+
+| Check | Result |
+|-------|--------|
+| Generic boilerplate remaining | **0 / 176** ✅ |
+| Missing `applyTo` | **0 / 176** ✅ |
+| Missing `description` | **0 / 176** ✅ |
+| Stale `FrootAI` brand refs | **0 / 176** ✅ (8 found and fixed in post-rewrite audit) |
+| H1 title "— FAI Standards" | **176 / 176** ✅ (21 fixed in post-rewrite audit) |
+| README.md `FrootAI` refs | **0** ✅ |
+| Play instructions stale refs | **0 / 304** ✅ |
+| Website count match | **176 = 176** ✅ |
+| Line count range | **80L – 340L, avg 196L** ✅ |
+
+### FINAL VERDICT: ✅ ALL COMPLETE
+
+**Instruction improvisation fully done across both phases:**
+- **Phase 1 (Audit):** 486 files scanned, 432 stale refs fixed, frontmatter gaps closed
+- **Phase 2 (Rewrite):** 145 generic templates rewritten with domain-specific content in 15 batches
+- **Post-rewrite cleanup:** 8 stale refs + 21 H1 titles fixed
+- **All distribution channels verified clean**
+- **All 176 files now have unique, domain-specific coding standards with correct-language code examples**

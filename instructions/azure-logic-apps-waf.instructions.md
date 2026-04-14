@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Azure Logic Apps — WAF-Aligned Coding Standards
+# Azure Logic Apps — FAI Standards
 
 ## Service Overview
 

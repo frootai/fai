@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Azure App Service — WAF-Aligned Coding Standards
+# Azure App Service — FAI Standards
 
 ## Deployment & Slots
 

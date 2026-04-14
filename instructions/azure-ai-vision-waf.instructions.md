@@ -8,7 +8,7 @@ waf:
   - "cost-optimization"
 ---
 
-# Azure AI Vision — WAF-Aligned Coding Standards
+# Azure AI Vision — FAI Standards
 
 ## Image Analysis API
 

@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Copilot Studio Waf — WAF-Aligned Coding Standards
+# Copilot Studio — FAI Standards
 
 ## Core Rules
 

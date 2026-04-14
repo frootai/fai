@@ -125,10 +125,10 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 ## OCI Labels
 
 ```dockerfile
-LABEL org.opencontainers.image.source="https://github.com/frootai/myapp" \
+LABEL org.opencontainers.image.source="https://github.com/contoso/myapp" \
       org.opencontainers.image.title="myapp" \
       org.opencontainers.image.version="1.0.0" \
-      org.opencontainers.image.vendor="FrootAI" \
+      org.opencontainers.image.vendor="Contoso" \
       org.opencontainers.image.licenses="MIT"
 ```
 

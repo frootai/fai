@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Code Review Waf — WAF-Aligned Coding Standards
+# Code Review — FAI Standards
 
 ## Core Rules
 

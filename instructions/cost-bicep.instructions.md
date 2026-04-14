@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Cost Bicep — WAF-Aligned Coding Standards
+# Cost Bicep — FAI Standards
 
 ## Core Rules
 

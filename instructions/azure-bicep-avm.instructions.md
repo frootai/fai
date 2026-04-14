@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Azure Bicep AVM — WAF-Aligned Coding Standards
+# Azure Bicep AVM — FAI Standards
 
 ## Module Selection
 

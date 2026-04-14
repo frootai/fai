@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Context Engineering Waf — WAF-Aligned Coding Standards
+# Context Engineering — FAI Standards
 
 ## Core Rules
 

@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Azure Front Door & WAF — WAF-Aligned Coding Standards
+# Azure Front Door & — FAI Standards
 
 ## Service Overview
 

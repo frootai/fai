@@ -8,7 +8,7 @@ waf:
   - "operational-excellence"
 ---
 
-# Bicep Code Best Practices — WAF-Aligned Coding Standards
+# Bicep Code Best Practices — FAI Standards
 
 ## Module Design
 

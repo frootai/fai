@@ -8,7 +8,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Python — FAI WAF-Aligned Standards
+# Python — FAI Standards
 
 When writing or reviewing Python code in FAI projects, enforce these standards.
 

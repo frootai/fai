@@ -1,5 +1,5 @@
 ---
-description: "Next.js 16 App Router standards — Server Components by default, streaming with Suspense, Turbopack, Tailwind v4, static export for frootai.dev, and production optimization patterns."
+description: "Next.js 16 App Router standards — Server Components by default, streaming with Suspense, Turbopack, Tailwind v4, static export for FAI.dev, and production optimization patterns."
 applyTo: "**/*.tsx, **/*.ts, **/*.jsx, **/next.config.*"
 waf:
   - "performance-efficiency"
@@ -21,7 +21,7 @@ interface Props { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  return { title: `Play ${id} — FrootAI`, openGraph: { title: `Solution Play ${id}` } };
+  return { title: `Play ${id} — FAI`, openGraph: { title: `Solution Play ${id}` } };
 }
 
 export default async function PlayPage({ params }: Props) {
@@ -105,7 +105,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 // Images: always set width/height or fill — prevents CLS
-<Image src="/hero.webp" alt="FrootAI" width={1200} height={630} priority />
+<Image src="/hero.webp" alt="Contoso" width={1200} height={630} priority />
 // Fonts: apply in layout via <body className={inter.className}>
 ```
 

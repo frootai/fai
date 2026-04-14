@@ -9,7 +9,7 @@ waf:
   - "performance-efficiency"
 ---
 
-# Bicep — FAI WAF-Aligned Standards
+# Bicep — FAI Standards
 
 When writing or reviewing Bicep templates in FAI projects, enforce these standards.
 

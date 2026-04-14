@@ -47,7 +47,7 @@ Manifest defines the control's identity, properties, and resources. Structure:
 
 ```xml
 <manifest>
-  <control namespace="FrootAI" constructor="MyControl" version="1.0.0"
+  <control namespace="Contoso" constructor="MyControl" version="1.0.0"
            display-name-key="MyControl" description-key="MyControl_Desc"
            control-type="virtual" >
     <!-- Bound property: two-way binding to a form field -->
@@ -131,12 +131,12 @@ const image = await context.device.captureImage({ width: 800, height: 600 });
 ## CLI & Build
 
 ```bash
-pac pcf init --namespace FrootAI --name MyControl --template field --framework react
-pac pcf init --namespace FrootAI --name MyGrid --template dataset --framework react
+pac pcf init --namespace FAI --name MyControl --template field --framework react
+pac pcf init --namespace FAI --name MyGrid --template dataset --framework react
 npm install                       # restore dependencies
 npm run build                     # production bundle (Webpack)
 npm start watch                   # PCF Test Harness at localhost:8181
-pac solution init --publisher-name FrootAI --publisher-prefix fai
+pac solution init --publisher-name FAI --publisher-prefix fai
 pac solution add-reference --path ../MyControl
 msbuild /t:build /restore /p:configuration=Release   # or dotnet build
 pac solution import --path bin/Release/Solution.zip --environment https://org.crm.dynamics.com

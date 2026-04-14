@@ -1937,17 +1937,21 @@ server.tool(
   }
 );
 
-// ── Resources: Module listing ──────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// MCP RESOURCES — Protocol-native content discovery (Phase 1, T6)
+// ════════════════════════════════════════════════════════════════════
+
+// ── Resource: Overview ─────────────────────────────────────────────
 
 server.resource(
   "frootai-overview",
   "frootai://overview",
+  { mimeType: "text/plain" },
   async () => ({
-    contents: [
-      {
-        uri: "frootai://overview",
-        mimeType: "text/plain",
-        text: `FrootAI v3 — From Root to Fruit
+    contents: [{
+      uri: "frootai://overview",
+      mimeType: "text/plain",
+      text: `FrootAI — FAI Engine Runtime Interface
 The open glue that binds infrastructure, platform, and application.
 
 🌱 F — Foundations: GenAI Foundations, LLM Landscape, AI Glossary A-Z, .github Agentic OS
@@ -1956,12 +1960,344 @@ The open glue that binds infrastructure, platform, and application.
 🏗️ O — Operations: Azure AI Platform, Infrastructure, Copilot
 🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
-16 modules | 200+ AI terms | 25 tools (6 static + 4 live + 3 chain + 6 AI ecosystem + 6 compute) | 100 solution plays
+18 modules | 200+ AI terms | 29 tools | 100 solution plays | FAI Engine
+Engine: ${faiEngine?.available ? 'connected' : 'not available (npm mode)'}
 https://frootai.dev`,
-      },
-    ],
+    }],
   })
 );
+
+// ── Resources: FROOT Knowledge Modules ─────────────────────────────
+
+for (const [modId, mod] of Object.entries(modules)) {
+  server.resource(
+    `fai-module-${modId.toLowerCase()}`,
+    `fai://module/${modId}`,
+    { mimeType: "text/markdown" },
+    async () => ({
+      contents: [{
+        uri: `fai://module/${modId}`,
+        mimeType: "text/markdown",
+        text: mod.content.length > 15000
+          ? mod.content.substring(0, 15000) + "\n\n[truncated — use get_module with section parameter for specific parts]"
+          : mod.content,
+      }],
+    })
+  );
+}
+
+// ── Resources: FAI Protocol Schemas ────────────────────────────────
+
+const SCHEMA_DIR = join(__dirname, "..", "schemas");
+const SCHEMA_NAMES = ["agent", "instruction", "skill", "hook", "plugin", "fai-manifest", "fai-context"];
+
+for (const name of SCHEMA_NAMES) {
+  const schemaPath = join(SCHEMA_DIR, `${name}.schema.json`);
+  if (existsSync(schemaPath)) {
+    server.resource(
+      `fai-schema-${name}`,
+      `fai://schema/${name}`,
+      { mimeType: "application/json" },
+      async () => ({
+        contents: [{
+          uri: `fai://schema/${name}`,
+          mimeType: "application/json",
+          text: readFileSync(schemaPath, "utf-8"),
+        }],
+      })
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// MCP PROMPTS — Protocol-native templates (Phase 1, T7)
+// ════════════════════════════════════════════════════════════════════
+
+server.prompt(
+  "build",
+  "Start the FAI Builder workflow — get architecture guidance and building rules for a task.",
+  [{ name: "task", description: "What to build (e.g., 'RAG pipeline', 'voice AI agent', 'content moderation')", required: true }],
+  async ({ task }) => ({
+    messages: [{
+      role: "user",
+      content: { type: "text", text: `I want to build: ${task}\n\nPlease use the agent_build tool to get architecture guidance from the FrootAI knowledge base, then help me implement it following FAI DevKit patterns.` },
+    }],
+  })
+);
+
+server.prompt(
+  "review",
+  "Start the FAI Reviewer workflow — security, quality, and compliance audit.",
+  [{ name: "context", description: "What to review (optional — e.g., 'the RAG API I just built')", required: false }],
+  async ({ context }) => ({
+    messages: [{
+      role: "user",
+      content: { type: "text", text: `Review ${context || 'my implementation'} using the agent_review tool. Check for security issues (OWASP LLM Top 10), Azure best practices, config compliance, and WAF alignment.` },
+    }],
+  })
+);
+
+server.prompt(
+  "tune",
+  "Start the FAI Tuner workflow — validate production readiness.",
+  [{ name: "context", description: "What to validate for production (optional)", required: false }],
+  async ({ context }) => ({
+    messages: [{
+      role: "user",
+      content: { type: "text", text: `Validate ${context || 'my project'} for production readiness using the agent_tune tool. Check TuneKit configs (openai.json, guardrails.json), evaluation thresholds, and infrastructure templates.` },
+    }],
+  })
+);
+
+if (faiEngine?.available) {
+  server.prompt(
+    "wire",
+    "Wire a solution play — load the FAI Protocol manifest and inspect how primitives connect.",
+    [{ name: "playId", description: "Play ID (e.g., '01', '21-agentic-rag')", required: true }],
+    async ({ playId }) => ({
+      messages: [{
+        role: "user",
+        content: { type: "text", text: `Wire solution play ${playId} using the wire_play tool to load its FAI Protocol manifest and see the wiring status. Then use inspect_wiring to show the detailed primitive graph — which agents, skills, instructions, and hooks are connected through the FAI Layer.` },
+      }],
+    })
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════
+// FAI ENGINE TOOLS — The Differentiator (Phase 1)
+// These tools are what no other MCP server in the world can do.
+// They only register when the FAI Engine is available (repo mode).
+// ════════════════════════════════════════════════════════════════════
+
+if (faiEngine && faiEngine.available) {
+
+  // ── Tool: wire_play ────────────────────────────────────────────────
+
+  server.tool(
+    "wire_play",
+    "FAI ENGINE — Wire a solution play using the FAI Protocol. Reads fai-manifest.json, resolves FROOT knowledge context, wires all primitives (agents, instructions, skills, hooks) with shared context, and checks quality gates. This is the FAI Layer in action — no other MCP server can do this.",
+    {
+      playId: z.string().optional().describe("Play ID (e.g., '01', '01-enterprise-rag'). Searches solution-plays/ for the manifest."),
+      manifestPath: z.string().optional().describe("Direct path to fai-manifest.json (for custom locations)."),
+    },
+    { annotations: { readOnlyHint: true, openWorldHint: false } },
+    async ({ playId, manifestPath }) => {
+      if (!playId && !manifestPath) {
+        return { content: [{ type: "text", text: "❌ Provide either playId or manifestPath." }], isError: true };
+      }
+
+      const result = faiEngine.runPlay({ playId, manifestPath });
+
+      if (!result.success && result.error) {
+        return { content: [{ type: "text", text: `❌ ${result.error}` }], isError: true };
+      }
+
+      const report = [
+        `## 🍊 FAI Engine — Wiring Report`,
+        ``,
+        `| Aspect | Value |`,
+        `|--------|-------|`,
+        `| **Play** | ${result.play || 'unknown'} |`,
+        `| **Version** | ${result.version || '?'} |`,
+        `| **Status** | ${result.errors?.length === 0 ? '✅ All primitives wired' : `⚠️ Wired with ${result.errors?.length || 0} issue(s)`} |`,
+        `| **Duration** | ${result.duration}ms |`,
+        ``,
+        `### Context (FAI Layer)`,
+        `- **Scope**: ${result.context?.scope || 'default'}`,
+        `- **Knowledge Modules**: ${result.context?.modules?.join(', ') || 'none'}`,
+        `- **WAF Pillars**: ${result.context?.wafCount || 0} enforced`,
+        ``,
+        `### Primitives Wired`,
+        `| Type | Count |`,
+        `|------|-------|`,
+        `| Agents | ${result.wiring?.agents || 0} |`,
+        `| Instructions | ${result.wiring?.instructions || 0} |`,
+        `| Skills | ${result.wiring?.skills || 0} |`,
+        `| Hooks | ${result.wiring?.hooks || 0} |`,
+        `| Workflows | ${result.wiring?.workflows || 0} |`,
+        `| **Total** | **${result.wiring?.total || 0}** |`,
+        ``,
+        `### Quality Gates`,
+        `| Metric | Threshold | Action if Failed |`,
+        `|--------|-----------|-----------------|`,
+        `| Groundedness | ≥ ${((result.guardrails?.groundedness || 0.95) * 100).toFixed(0)}% | retry |`,
+        `| Coherence | ≥ ${((result.guardrails?.coherence || 0.90) * 100).toFixed(0)}% | retry |`,
+        `| Relevance | ≥ ${((result.guardrails?.relevance || 0.85) * 100).toFixed(0)}% | warn |`,
+        `| Safety | = 0 violations | block |`,
+        `| Cost | ≤ $${result.guardrails?.costPerQuery || 0.01}/query | alert |`,
+      ];
+
+      if (result.errors?.length > 0) {
+        report.push(``, `### ⚠️ Issues (${result.errors.length})`);
+        result.errors.forEach(e => report.push(`- ${e}`));
+      }
+
+      report.push(``, `---`, `*FAI Protocol — the binding glue for AI primitives*`);
+      return { content: [{ type: "text", text: report.join('\n') }] };
+    }
+  );
+
+  // ── Tool: validate_manifest ────────────────────────────────────────
+
+  server.tool(
+    "validate_manifest",
+    "FAI PROTOCOL VALIDATOR — Validate a fai-manifest.json file against the FAI Protocol specification. Checks play ID format, semantic versioning, knowledge module references, WAF pillar names, guardrail ranges, and primitive path existence.",
+    {
+      playId: z.string().describe("Play ID to validate (e.g., '01', '21-agentic-rag')"),
+    },
+    { annotations: { readOnlyHint: true, openWorldHint: false } },
+    async ({ playId }) => {
+      const mfPath = faiEngine.findManifest(playId);
+      if (!mfPath) {
+        return { content: [{ type: "text", text: `❌ Play "${playId}" not found in solution-plays/.` }], isError: true };
+      }
+
+      const { manifest, playDir, errors } = faiEngine.loadManifest(mfPath);
+      if (!manifest) {
+        return { content: [{ type: "text", text: `❌ Failed to load manifest:\n${errors.join('\n')}` }], isError: true };
+      }
+
+      const { resolved, missing } = faiEngine.resolvePaths(manifest, playDir);
+      const allErrors = [...errors, ...missing.map(m => `Missing file: ${m}`)];
+
+      const checks = [
+        `✅ play: "${manifest.play}" (valid NN-kebab-case)`,
+        `✅ version: "${manifest.version}" (valid semver)`,
+        `${manifest.context?.knowledge?.length > 0 ? '✅' : '❌'} knowledge: ${manifest.context?.knowledge?.length || 0} module(s) — ${(manifest.context?.knowledge || []).join(', ')}`,
+        `${manifest.context?.waf?.length > 0 ? '✅' : '❌'} waf: ${(manifest.context?.waf || []).join(', ') || 'none'}`,
+        `${manifest.primitives?.agents ? '✅' : '⚠️'} agents: ${manifest.primitives?.agents?.length || 0} declared`,
+        `${manifest.primitives?.instructions ? '✅' : '⚠️'} instructions: ${manifest.primitives?.instructions?.length || 0} declared`,
+        `${manifest.primitives?.skills ? '✅' : '⚠️'} skills: ${manifest.primitives?.skills?.length || 0} declared`,
+        `${manifest.primitives?.hooks ? '✅' : '⚠️'} hooks: ${manifest.primitives?.hooks?.length || 0} declared`,
+        `${manifest.primitives?.guardrails ? '✅' : '⚠️'} guardrails: ${manifest.primitives?.guardrails ? 'defined' : 'missing'}`,
+        `${missing.length === 0 ? '✅' : '❌'} paths: ${missing.length === 0 ? 'all resolved' : `${missing.length} missing`}`,
+      ];
+
+      const verdict = allErrors.length === 0
+        ? '✅ **VALID** — Manifest passes all FAI Protocol checks.'
+        : `⚠️ **${allErrors.length} ISSUE(S)** — Review before deploying.`;
+
+      return {
+        content: [{
+          type: "text",
+          text: `## 📋 FAI Manifest Validation — ${manifest.play}\n\n${checks.join('\n')}\n\n${verdict}${allErrors.length > 0 ? '\n\n### Issues\n' + allErrors.map(e => `- ${e}`).join('\n') : ''}`
+        }]
+      };
+    }
+  );
+
+  // ── Tool: evaluate_quality ─────────────────────────────────────────
+
+  server.tool(
+    "evaluate_quality",
+    "FAI QUALITY GATES — Evaluate AI output quality against guardrail thresholds from the FAI Protocol manifest. When a playId is provided, loads play-specific thresholds instead of defaults. Supports: groundedness, coherence, relevance, safety, cost.",
+    {
+      scores: z.record(z.number()).describe("Metric scores e.g. {groundedness: 0.97, coherence: 0.93, relevance: 0.88, safety: 0, cost: 0.008}"),
+      playId: z.string().optional().describe("Play ID to load play-specific guardrail thresholds from fai-manifest.json"),
+    },
+    { annotations: { readOnlyHint: true, idempotentHint: true } },
+    async ({ scores, playId }) => {
+      let guardrails = {};
+
+      if (playId) {
+        const mfPath = faiEngine.findManifest(playId);
+        if (mfPath) {
+          const { manifest } = faiEngine.loadManifest(mfPath);
+          if (manifest?.primitives?.guardrails) {
+            guardrails = manifest.primitives.guardrails;
+          }
+        }
+      }
+
+      const evaluator = faiEngine.createEvaluator(guardrails);
+      const result = evaluator.evaluate(scores);
+      return { content: [{ type: "text", text: evaluator.formatReport(result) }] };
+    }
+  );
+
+  // ── Tool: inspect_wiring ───────────────────────────────────────────
+
+  server.tool(
+    "inspect_wiring",
+    "FAI LAYER X-RAY — Inspect how primitives are wired inside a solution play. Shows each agent, its skills, constraining instructions, guarding hooks, shared knowledge context, and WAF alignment. The visual proof that the FAI Protocol works.",
+    {
+      playId: z.string().describe("Play ID to inspect (e.g., '01', '21-agentic-rag')"),
+    },
+    { annotations: { readOnlyHint: true, openWorldHint: false } },
+    async ({ playId }) => {
+      const mfPath = faiEngine.findManifest(playId);
+      if (!mfPath) {
+        return { content: [{ type: "text", text: `❌ Play "${playId}" not found.` }], isError: true };
+      }
+
+      const engine = faiEngine.initEngine(mfPath);
+
+      const lines = [
+        `## 🔬 FAI Layer X-Ray — ${engine.manifest?.play || playId}`,
+        ``,
+        `### Shared Context (injected into every primitive)`,
+        `- **Scope**: ${engine.context?.scope || 'default'}`,
+        `- **Knowledge**: ${engine.context?.modules?.join(', ') || 'none'} (${engine.context?.knowledgeCount || 0} module(s))`,
+        `- **WAF**: ${engine.context?.wafCount || 0} pillar(s) enforced`,
+        ``,
+        `### Primitive Graph`,
+      ];
+
+      const w = engine.wiring;
+      if (w?.primitives) {
+        for (const [type, items] of Object.entries(w.primitives)) {
+          if (!Array.isArray(items) || items.length === 0) continue;
+          lines.push(``, `#### ${type.charAt(0).toUpperCase() + type.slice(1)} (${items.length})`);
+          for (const p of items) {
+            const name = p.name || p.path?.split(/[/\\]/).pop() || 'unknown';
+            lines.push(`- **${name}**`);
+            if (p.description) lines.push(`  - Description: ${p.description}`);
+            if (p.waf && Array.isArray(p.waf) && p.waf.length > 0) {
+              lines.push(`  - WAF: ${p.waf.join(', ')}`);
+            }
+            if (p.sharedContext) {
+              lines.push(`  - Context: scope=${p.sharedContext.scope}, ${p.sharedContext.knowledgeModules?.length || 0} modules, ${p.sharedContext.wafPillars?.length || 0} WAF pillars`);
+            }
+          }
+        }
+      }
+
+      const s = w?.stats || {};
+      lines.push(``, `### Wiring Summary`);
+      lines.push('```');
+      lines.push(`Agents (${s.agents || 0}) ──→ constrained by ──→ Instructions (${s.instructions || 0})`);
+      lines.push(`  │`);
+      lines.push(`  ├── invoke ──→ Skills (${s.skills || 0})`);
+      lines.push(`  ├── guarded by ──→ Hooks (${s.hooks || 0})`);
+      lines.push(`  └── automated by ──→ Workflows (${s.workflows || 0})`);
+      lines.push(`  │`);
+      lines.push(`  └── ALL share ──→ FAI Context (${engine.context?.knowledgeCount || 0} knowledge + ${engine.context?.wafCount || 0} WAF)`);
+      lines.push('```');
+
+      // Quality gates
+      if (engine.evaluator?.thresholds) {
+        const t = engine.evaluator.thresholds;
+        lines.push(``, `### Quality Gates (from manifest)`);
+        lines.push(`| Metric | Threshold |`);
+        lines.push(`|--------|-----------|`);
+        lines.push(`| Groundedness | ≥ ${(t.groundedness * 100).toFixed(0)}% |`);
+        lines.push(`| Coherence | ≥ ${(t.coherence * 100).toFixed(0)}% |`);
+        lines.push(`| Relevance | ≥ ${(t.relevance * 100).toFixed(0)}% |`);
+        lines.push(`| Safety | ${t.safety} violations max |`);
+        lines.push(`| Cost | ≤ $${t.costPerQuery}/query |`);
+      }
+
+      if (engine.errors?.length > 0) {
+        lines.push(``, `### ⚠️ Issues (${engine.errors.length})`);
+        engine.errors.forEach(e => lines.push(`- ${e}`));
+      }
+
+      lines.push(``, `---`, `*This is the FAI Layer — shared context that makes standalone primitives work as one system.*`);
+      return { content: [{ type: "text", text: lines.join('\n') }] };
+    }
+  );
+
+} // end if (faiEngine.available)
 
 // ─── Start Server ──────────────────────────────────────────────────
 
