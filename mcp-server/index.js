@@ -840,7 +840,7 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 - **101 Solution Plays** — Pre-tuned Azure AI blueprints (DevKit + TuneKit + SpecKit)
 - **830+ FAI Primitives** — 238 agents, 176 instructions, 322 skills, 10 hooks
 - **77 Plugins** — Composable packages (1,008 bundled items) via \`npx frootai install\`
-- **25 MCP Tools** — 6 static + 4 live + 3 chain + 7 ecosystem + 2 dev tools
+- **45 MCP Tools** — 6 static + 4 live + 3 chain + 10 ecosystem + 6 engine + 3 scaffold + 13 marketplace
 - **16 Cookbook Recipes** — Step-by-step guides from init to production
 - **12 Agentic Workflows** — CI/CD with safe-outputs
 - **18 Knowledge Modules** — 200+ terms, 7 architecture patterns
@@ -855,11 +855,14 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 **Website**: https://frootai.dev`;
 
     // Add ecosystem data from knowledge.json if available
-    const eco = KNOWLEDGE.ecosystem;
-    if (eco) {
-      const primLines = Object.entries(eco.primitives || {}).map(([k, v]) => `- **${k}**: ${v.count} (${v.desc})`).join("\n");
-      overview += `\n\n## Primitives Catalog\n${primLines}`;
-    }
+    try {
+      const bundle = JSON.parse(readFileSync(KNOWLEDGE_BUNDLE, "utf-8"));
+      const eco = bundle.ecosystem;
+      if (eco) {
+        const primLines = Object.entries(eco.primitives || {}).map(([k, v]) => `- **${k}**: ${v.count} (${v.desc})`).join("\n");
+        overview += `\n\n## Primitives Catalog\n${primLines}`;
+      }
+    } catch { /* ecosystem data optional */ }
 
     return {
       content: [{ type: "text", text: overview }],
@@ -1969,7 +1972,10 @@ server.tool(
   async ({ play_number }) => {
     const fs = await import("fs");
     const path = await import("path");
-    const playsDir = path.default.join(process.cwd(), "solution-plays");
+    // Try repo root (../solution-plays relative to mcp-server/) then cwd
+    const playsDir = fs.default.existsSync(path.default.join(__dirname, "..", "solution-plays"))
+      ? path.default.join(__dirname, "..", "solution-plays")
+      : path.default.join(process.cwd(), "solution-plays");
     let playDir = null;
     let playFolder = null;
     try {
