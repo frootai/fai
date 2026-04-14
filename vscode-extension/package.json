@@ -2,7 +2,7 @@
   "name": "frootai-vscode",
   "displayName": "FrootAI — AI Architecture Knowledge Engine",
   "description": "45 MCP tools · 101 solution plays · 830+ primitives · FAI Engine. The open glue for GenAI on Azure. Scaffold DevKit, TuneKit, SpecKit in one click.",
-  "version": "5.0.7",
+  "version": "6.0.0",
   "publisher": "frootai",
   "engines": {
     "vscode": "^1.95.0"
@@ -249,6 +249,13 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "frootai.searchAll",
+        "key": "ctrl+shift+f9",
+        "mac": "cmd+shift+f9"
+      }
+    ],
     "configuration": {
       "title": "FrootAI",
       "properties": {

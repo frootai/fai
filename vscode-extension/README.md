@@ -49,16 +49,20 @@ FrootAI is an intelligent way of packaging skills, knowledge, and the essential 
 
 The VS Code extension brings this entire ecosystem directly into your editor — no browser needed.
 
-| What | How |
-|------|-----|
-| **Browse Solution Plays** | Pre-tuned AI solutions (RAG, agents, landing zones, voice AI) — click to scaffold |
-| **Explore MCP Tools** | Click any tool to see documentation, input/output, and examples |
-| **Search AI Glossary** | Instant term lookup from the sidebar |
+| Feature | Description |
+|---------|-------------|
+| **4 Sidebar Panels** | Solution Plays, Primitives Catalog, FAI Protocol, MCP Tools |
+| **Global Search** | `Ctrl+Shift+F9` — fuzzy search across plays, tools, glossary |
+| **Play Detail Panel** | Rich webview with WAF alignment, quick actions, FAI Protocol |
+| **Evaluation Dashboard** | 5 metric cards with pass/fail visualization |
+| **Scaffold Wizard** | 4-step interactive wizard to bootstrap a play |
+| **MCP Tool Explorer** | Filterable grid of all 45 tools with copy-config |
+| **Getting Started** | 5-step walkthrough for new users |
 | **Scaffold in One Click** | Init DevKit, TuneKit, SpecKit (WAF alignment) |
 | **Estimate Azure Costs** | Pick a play + scale = monthly cost breakdown |
 | **Run Evaluations** | Auto-runs eval.py and shows quality dashboard |
 
-> **Works standalone**  no need to clone the FrootAI repo. Install the extension and go.
+> **Works standalone** — no need to clone the FrootAI repo. Install the extension and go.
 
 ---
 
@@ -236,6 +240,7 @@ solution-play/
 
 | Command | What |
 |---------|------|
+| `FrootAI: Search Everything` | Global search (plays, tools, glossary) |
 | `FrootAI: Browse All Plays` | Quick pick from all plays |
 | `FrootAI: Initialize DevKit` | .github Agentic OS files |
 | `FrootAI: Initialize TuneKit` | AI config + evaluation files |
