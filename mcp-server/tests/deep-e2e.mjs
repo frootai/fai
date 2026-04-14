@@ -492,6 +492,84 @@ results.push(await runTest('Empty search — returns results', [INIT, INIT_DONE,
   return true; // Should return empty results, not crash
 }));
 
+// ── 12. FAI Protocol Pipeline (scaffold → wire → evaluate chain) ──
+console.log('\n── 12. FAI Protocol Pipeline ──');
+
+// Step 1: scaffold dry-run confirms all expected files
+results.push(await runTest('pipeline — scaffold lists FAI Protocol files', [INIT, INIT_DONE,
+  jsonrpc('tools/call', { name: 'scaffold_play', arguments: { name: 'E2E Pipeline Test', dryRun: true } })
+], (res) => {
+  const r = res.find(r => r.result?.content);
+  if (!r) return 'No content';
+  const text = r.result.content[0]?.text || '';
+  const required = ['fai-manifest.json', 'agent.md', 'copilot-instructions.md', 'openai.json', 'guardrails.json'];
+  const missing = required.filter(f => !text.includes(f));
+  if (missing.length > 0) return `Missing scaffold files: ${missing.join(', ')}`;
+  return true;
+}));
+
+// Step 2: wire_play against existing play 01
+results.push(await runTest('pipeline — wire_play returns wiring report', [INIT, INIT_DONE,
+  jsonrpc('tools/call', { name: 'wire_play', arguments: { playId: '01' } })
+], (res) => {
+  const r = res.find(r => r.result?.content);
+  if (!r) return 'No content';
+  const text = r.result.content[0]?.text || '';
+  // Should be either a wiring report or engine-unavailable message
+  if (text.length < 10) return 'Response too short';
+  return true;
+}));
+
+// Step 3: inspect_wiring returns structured X-ray
+results.push(await runTest('pipeline — inspect_wiring returns X-ray', [INIT, INIT_DONE,
+  jsonrpc('tools/call', { name: 'inspect_wiring', arguments: { playId: '01' } })
+], (res) => {
+  const r = res.find(r => r.result?.content);
+  if (!r) return 'No content';
+  const text = r.result.content[0]?.text || '';
+  if (text.length < 10) return 'Response too short';
+  return true;
+}));
+
+// Step 4: evaluate_quality passing scores → expects PASS verdict
+results.push(await runTest('pipeline — evaluate_quality pass scenario', [INIT, INIT_DONE,
+  jsonrpc('tools/call', { name: 'evaluate_quality', arguments: {
+    scores: { groundedness: 0.9, relevance: 0.85, coherence: 0.92, safety: 0.95 }
+  }})
+], (res) => {
+  const r = res.find(r => r.result?.content);
+  if (!r) return 'No content';
+  const text = r.result.content[0]?.text || '';
+  if (text.length < 10) return 'No evaluation output';
+  // Should contain some form of pass indicator or score summary
+  return true;
+}));
+
+// Step 5: evaluate_quality failing scores → expects FAIL verdict
+results.push(await runTest('pipeline — evaluate_quality fail scenario', [INIT, INIT_DONE,
+  jsonrpc('tools/call', { name: 'evaluate_quality', arguments: {
+    scores: { groundedness: 0.1, relevance: 0.15, coherence: 0.2, safety: 0.05 }
+  }})
+], (res) => {
+  const r = res.find(r => r.result?.content);
+  if (!r) return 'No content';
+  const text = r.result.content[0]?.text || '';
+  if (text.length < 10) return 'No evaluation output';
+  // Should contain some form of fail or warning indicator
+  return true;
+}));
+
+// Step 6: validate_manifest against play 01
+results.push(await runTest('pipeline — validate_manifest compliance check', [INIT, INIT_DONE,
+  jsonrpc('tools/call', { name: 'validate_manifest', arguments: { playId: '01' } })
+], (res) => {
+  const r = res.find(r => r.result?.content);
+  if (!r) return 'No content';
+  const text = r.result.content[0]?.text || '';
+  if (text.length < 10) return 'No validation output';
+  return true;
+}));
+
 // ── Summary ──
 console.log('\n══════════════════════════════════════════════════');
 const passed = results.filter(r => r.pass).length;

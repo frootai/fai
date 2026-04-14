@@ -24,7 +24,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync as writeFileSync_fn, statSync as statSync_fn } from "fs";
+import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync as writeFileSync_fn, statSync as statSync_fn, watch as fsWatch } from "fs";
 import { join, dirname, basename, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -126,6 +126,33 @@ function mcpError(message, details) {
 
 function mcpNotFound(entity, id) {
   return { content: [{ type: "text", text: `❌ ${entity} "${id}" not found.` }], isError: true };
+}
+
+/**
+ * MCP Structured Logging — RFC 5424 severity levels.
+ * Emits notifications/message to the connected MCP client when available.
+ * Falls back to console.error for stdio-level visibility.
+ *
+ * @param {McpServer} server  - active server instance
+ * @param {'debug'|'info'|'notice'|'warning'|'error'|'critical'|'alert'|'emergency'} level
+ * @param {string} logger     - component name (e.g. "search", "engine", "cache")
+ * @param {*} data            - any JSON-serializable payload
+ */
+function mcpLog(server, level, logger, data) {
+  const payload = { level, logger, data };
+  try {
+    // sendLoggingMessage is part of McpServer's built-in logging capability
+    if (typeof server.sendLoggingMessage === 'function') {
+      server.sendLoggingMessage(payload);
+    } else {
+      // Fallback: emit raw notification for servers that expose sendNotification
+      server.server?.notification?.({ method: "notifications/message", params: payload });
+    }
+  } catch {
+    // Never let logging errors break tool execution
+  }
+  // Always mirror to stderr so stdio clients see it
+  console.error(`[frootai:${logger}] ${level}: ${typeof data === 'string' ? data : JSON.stringify(data)}`);
 }
 
 // Initialize middleware
@@ -391,6 +418,9 @@ function createConfiguredServer() {
   const server = new McpServer({
     name: "frootai",
     version: PKG_VERSION,
+    capabilities: {
+      resources: { listChanged: true },
+    },
   });
 
 // ── Tool: list_modules ─────────────────────────────────────────────
@@ -399,6 +429,7 @@ server.tool(
   "list_modules",
   "List all FrootAI modules organized by FROOT layer (Foundations, Reasoning, Orchestration, Operations, Transformation). Use this to explore the knowledge base structure.",
   {},
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async () => {
     const result = [];
     for (const [layerKey, layer] of Object.entries(FROOT_MAP)) {
@@ -432,6 +463,7 @@ server.tool(
       .optional()
       .describe("Optional: specific section title to retrieve (e.g., 'Key Takeaways')"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ module_id, section }) => {
     const id = module_id.toUpperCase();
     const mod = modules[id];
@@ -490,6 +522,7 @@ server.tool(
   {
     term: z.string().describe("The AI/ML term to look up (e.g., 'transformer', 'top-k', 'fine-tuning')"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ term }) => {
     const key = term.toLowerCase().trim();
 
@@ -550,11 +583,17 @@ server.tool(
       .default(5)
       .describe("Maximum number of matching sections to return (default: 5)"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ query, max_results = 5 }) => {
     // Check cache first
     const cacheKey = `search:${query}:${max_results}`;
     const cached = searchCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      mcpLog(server, 'debug', 'search', { event: 'cache_hit', query, max_results });
+      return cached;
+    }
+
+    mcpLog(server, 'debug', 'search', { event: 'bm25_query', query, max_results });
 
     const queryLower = query.toLowerCase();
     const queryWords = queryLower.split(/\s+/).filter((w) => w.length > 2);
@@ -682,6 +721,7 @@ server.tool(
       ])
       .describe("The architecture scenario to get guidance for"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ scenario }) => {
     const patterns = {
       rag_pipeline: {
@@ -880,6 +920,7 @@ server.tool(
   "get_froot_overview",
   "Get a complete overview of the FROOT framework — all 5 layers, 16 modules, what each layer covers, and how they connect. Use when asked 'what is FrootAI' or 'show me the framework'.",
   {},
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async () => {
     const overview = `# FrootAI — The FROOT Framework Overview
 
@@ -986,6 +1027,7 @@ server.tool(
   {
     service: z.string().describe("Azure service name or topic (e.g., 'azure-openai', 'ai-search', 'container-apps', 'ai-foundry', 'content-safety')"),
   },
+  { annotations: { readOnlyHint: true, openWorldHint: true } },
   async ({ service }) => {
     // Rate limiting + caching for live tools
     if (!liveLimiter.allow('fetch_azure_docs')) {
@@ -1045,6 +1087,7 @@ server.tool(
   {
     query: z.string().describe("What kind of MCP server you're looking for (e.g., 'github', 'database', 'slack', 'jira', 'azure')"),
   },
+  { annotations: { readOnlyHint: true, openWorldHint: true } },
   async ({ query }) => {
     // Rate limiting + caching
     if (!liveLimiter.allow('fetch_external_mcp')) {
@@ -1112,6 +1155,7 @@ server.tool(
   {
     filter: z.string().optional().describe("Filter by keyword (e.g., 'rag', 'agent', 'landing-zone')"),
   },
+  { annotations: { readOnlyHint: true, openWorldHint: true } },
   async ({ filter }) => {
     // Try live from GitHub API
     const apiUrl = "https://api.github.com/repos/frootai/frootai/contents/solution-plays";
@@ -1171,6 +1215,7 @@ server.tool(
       "overview", "instructions", "prompts", "agents", "skills", "hooks", "workflows", "plugins"
     ]).optional().default("overview").describe("Which primitive to explain (or 'overview' for all)"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ primitive = "overview" }) => {
     const guides = {
       overview: `## .github Agentic OS — Overview
@@ -1302,6 +1347,7 @@ server.tool(
   {
     task: z.string().describe("What the user wants to build (e.g., 'IT ticket classification API', 'RAG pipeline', 'agent hosting')"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ task }) => {
     // Search knowledge for relevant patterns
     const queryLower = task.toLowerCase();
@@ -1353,6 +1399,7 @@ server.tool(
   {
     context: z.string().optional().describe("Optional: what was built or what to review (e.g., 'the IT ticket classification API')"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ context }) => {
     return {
       content: [{
@@ -1398,6 +1445,7 @@ server.tool(
   {
     context: z.string().optional().describe("Optional: what solution or config to validate"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ context }) => {
     return {
       content: [{
@@ -1450,6 +1498,7 @@ server.tool(
   {
     category: z.enum(["all", "gpt", "embedding", "image", "speech"]).optional().describe("Filter by model category (default: all)"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ category = "all" }) => {
     const models = [
       { name: "gpt-4o", category: "gpt", context: "128K", pricing: "$2.50/1M input, $10/1M output", speed: "Fast", quality: "Highest", bestFor: "Complex reasoning, multi-modal, production agents" },
@@ -1496,6 +1545,7 @@ server.tool(
     scenario: z.enum(["rag", "agent", "batch", "realtime", "custom"]).describe("Solution scenario type"),
     scale: z.enum(["dev", "staging", "production"]).optional().describe("Scale tier (default: production)"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ scenario, scale = "production" }) => {
     const estimates = {
       rag: {
@@ -1561,6 +1611,7 @@ server.tool(
     useCase: z.string().describe("What you're building (e.g., 'RAG chatbot', 'code review agent', 'document extraction')"),
     priority: z.enum(["cost", "quality", "speed", "context"]).optional().describe("What matters most (default: quality)"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ useCase, priority = "quality" }) => {
     const recommendations = {
       cost: { primary: "gpt-4o-mini", secondary: "gpt-4.1-nano", reasoning: "Lowest cost per token while maintaining acceptable quality. Use mini for most tasks, nano for high-throughput classification." },
@@ -1766,8 +1817,10 @@ server.tool(
     query: z.string().describe("Describe what you want to build (e.g., 'process invoices', 'RAG chatbot', 'edge AI on IoT')"),
     top_k: z.number().optional().describe("Number of results (default: 3, max: 5)"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ query, top_k = 3 }) => {
     const k = Math.min(Math.max(top_k, 1), 5);
+    mcpLog(server, 'debug', 'plays', { event: 'search', query, k, engine: BM25_INDEX ? 'bm25' : 'jaccard' });
 
     let scored;
     if (BM25_INDEX) {
@@ -1812,6 +1865,7 @@ server.tool(
     play: z.string().describe("Play number: 01-20"),
     scale: z.enum(["dev", "prod"]).optional().describe("Scale: 'dev' (default) or 'prod'"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ play, scale = "dev" }) => {
     const num = play.padStart(2, "0");
     const pd = PLAY_DATA.find(p => p.id === num);
@@ -1839,6 +1893,7 @@ server.tool(
     config_content: z.string().describe("JSON content of the config file"),
     play: z.string().optional().describe("Play number for play-specific rules"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ config_type, config_content, play }) => {
     let config;
     try { config = JSON.parse(config_content); }
@@ -1885,6 +1940,7 @@ server.tool(
   {
     plays: z.string().describe("Comma-separated play numbers to compare (e.g., '01,03' or '01,07,14')"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ plays }) => {
     const nums = plays.split(",").map(p => p.trim().padStart(2, "0")).slice(0, 3);
     const selected = nums.map(n => PLAY_DATA.find(p => p.id === n)).filter(Boolean);
@@ -1931,6 +1987,7 @@ server.tool(
   {
     play: z.string().describe("Play number: 01-20"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ play }) => {
     const num = play.padStart(2, "0");
     const pd = PLAY_DATA.find(p => p.id === num);
@@ -1961,6 +2018,7 @@ server.tool(
     thresholds: z.record(z.number()).optional().describe("Custom thresholds (default: 4.0 for all). e.g. {groundedness: 4.5, relevance: 3.5}"),
     play: z.string().optional().describe("Solution play number for context (e.g. '01')"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ scores, thresholds, play }) => {
     const defaultThresholds = { groundedness: 4.0, relevance: 4.0, coherence: 4.0, fluency: 4.0, safety: 4.0 };
     const t = { ...defaultThresholds, ...thresholds };
@@ -2009,6 +2067,7 @@ server.tool(
     text1: z.string().describe("First text to compare"),
     text2: z.string().describe("Second text to compare"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ text1, text2 }) => {
     // Tokenize and compute Jaccard-like similarity
     const tokenize = (t) => [...new Set(t.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w.length >= 3))];
@@ -2033,6 +2092,7 @@ server.tool(
     type: z.enum(["agents", "instructions", "skills", "hooks", "plugins", "workflows", "cookbook"]).describe("Primitive type to list"),
     limit: z.number().optional().default(20).describe("Max results to return (default 20)"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ type, limit }) => {
     const fs = await import("fs");
     const path = await import("path");
@@ -2079,6 +2139,7 @@ server.tool(
   {
     play_number: z.string().describe("Play number (01-100) or partial name to search for"),
   },
+  { annotations: { readOnlyHint: true, idempotentHint: true } },
   async ({ play_number }) => {
     const fs = await import("fs");
     const path = await import("path");
@@ -2377,7 +2438,9 @@ if (faiEngine && faiEngine.available) {
         return { content: [{ type: "text", text: "❌ Provide either playId or manifestPath." }], isError: true };
       }
 
+      mcpLog(server, 'info', 'engine', { event: 'wire_play', playId, manifestPath });
       const result = faiEngine.runPlay({ playId, manifestPath });
+      mcpLog(server, result.errors?.length ? 'warning' : 'info', 'engine', { event: 'wire_complete', playId, errors: result.errors?.length || 0, duration: result.duration });
 
       if (!result.success && result.error) {
         return { content: [{ type: "text", text: `❌ ${result.error}` }], isError: true };
@@ -2632,7 +2695,22 @@ if (faiEngine && faiEngine.available) {
       dryRun: z.boolean().optional().default(false).describe("Preview file list without creating"),
     },
     { annotations: { destructiveHint: true, idempotentHint: false } },
-    async ({ name, description, model, wafPillars, temperature, generateInfra, dryRun }) => {
+    async ({ name, description, model, wafPillars, temperature, generateInfra, dryRun }, { signal, _meta } = {}) => {
+      // Extract progressToken from MCP call metadata (if client sent one)
+      const progressToken = _meta?.progressToken ?? null;
+
+      /** Emit notifications/progress if client provided a progressToken */
+      function sendProgress(progress, total, message) {
+        if (progressToken == null) return;
+        try {
+          server.server?.notification({
+            method: "notifications/progress",
+            params: { progressToken, progress, total, message },
+          });
+        } catch {
+          // Client may have disconnected — ignore
+        }
+      }
       const slug = kebabCase(name);
       const playNum = nextPlayNumber();
       const playId = `${playNum}-${slug}`;
@@ -2645,8 +2723,7 @@ if (faiEngine && faiEngine.available) {
       }
 
       const files = [];
-
-      // ── agent.md (root orchestrator) ────────────────────────
+      sendProgress(0, 1, `Planning scaffold for ${playId}...`);
       files.push({ path: "agent.md", content: `---
 description: "${desc}"
 tools: ["terminal", "file", "search"]
@@ -2918,11 +2995,16 @@ param projectName string = '${slug}'
       }
 
       // Create all files
-      for (const f of files) {
+      mcpLog(server, 'info', 'scaffold', { event: 'start', playId, fileCount: files.length });
+      for (const [i, f] of files.entries()) {
         safeWrite(join(playDir, f.path), f.content);
+        sendProgress(i + 1, files.length, `Created ${f.path}`);
+        mcpLog(server, 'debug', 'scaffold', { event: 'file_created', n: i + 1, total: files.length, path: f.path });
       }
+      mcpLog(server, 'info', 'scaffold', { event: 'complete', playId, fileCount: files.length });
 
       // Wire the play to verify
+      sendProgress(files.length, files.length, 'Verifying FAI Protocol wiring...');
       let wiringStatus = "not verified";
       try {
         const result = faiEngine.runPlay({ manifestPath: join(playDir, "spec", "fai-manifest.json") });
@@ -3057,7 +3139,16 @@ ${description}
       playName: z.string().optional().describe("Name for the new play (required if scaffoldFromTop=true)"),
     },
     { annotations: { readOnlyHint: false } },
-    async ({ description, topK, scaffoldFromTop, playName }) => {
+    async ({ description, topK, scaffoldFromTop, playName }, { _meta } = {}) => {
+      const progressToken = _meta?.progressToken ?? null;
+      function sendProgress(progress, total, message) {
+        if (progressToken == null) return;
+        try {
+          server.server?.notification({ method: "notifications/progress", params: { progressToken, progress, total, message } });
+        } catch { /* client disconnected */ }
+      }
+
+      sendProgress(0, 3, `Searching ${PLAY_DATA.length} plays for best match...`);
       // BM25-ranked search across all plays
       let scored;
       if (BM25_INDEX) {
@@ -3081,6 +3172,7 @@ ${description}
         return { content: [{ type: "text", text: `No matching plays for "${description}". Try broader terms or use scaffold_play to create from scratch.` }] };
       }
 
+      sendProgress(1, 3, `Ranked ${scored.length} matches — building response...`);
       const matches = scored.map(({ play, score }, i) =>
         `### ${i + 1}. Play ${play.id} — ${play.name} (${(score * 100).toFixed(0)}% match)\n- **Services**: ${play.services.join(", ")}\n- **Complexity**: ${play.cx}\n- **Keywords**: ${play.pattern.split(" ").slice(0, 10).join(", ")}`
       ).join("\n\n");
@@ -3091,6 +3183,7 @@ ${description}
         scaffoldResult = `\n\n---\n\n💡 To scaffold from this template, run:\n\`scaffold_play name="${playName}" description="${description}" model="gpt-4o"\``;
       }
 
+      sendProgress(3, 3, 'Done');
       return {
         content: [{
           type: "text",
@@ -3954,6 +4047,43 @@ ${description}
     }
   );
 
+  // ── Subscribable Resources: fs.watch on solution-plays/ ───────────
+  // When running in repo mode (engine available), watch for new/removed plays
+  // and notify connected clients via resources/list_changed.
+  // This enables MCP clients to auto-refresh their resource list.
+  const playsWatchDir = join(__dirname, "..", "solution-plays");
+  if (faiEngine?.available && existsSync(playsWatchDir)) {
+    let watchDebounce = null;
+    try {
+      fsWatch(playsWatchDir, { recursive: false }, (eventType, filename) => {
+        if (!filename) return;
+        // Debounce rapid changes (e.g. scaffolding writes many files quickly)
+        clearTimeout(watchDebounce);
+        watchDebounce = setTimeout(() => {
+          try {
+            // sendResourceListChanged is the McpServer helper for this notification
+            if (typeof server.sendResourceListChanged === 'function') {
+              server.sendResourceListChanged();
+            } else {
+              // Raw notification fallback
+              server.server?.notification?.({
+                method: "notifications/resources/list_changed",
+                params: {}
+              });
+            }
+            mcpLog(server, 'info', 'resources', { event: 'list_changed', trigger: filename });
+          } catch {
+            // Client may have disconnected — ignore
+          }
+        }, 250);
+      });
+      mcpLog(server, 'info', 'resources', { event: 'watch_started', dir: 'solution-plays/' });
+    } catch (watchErr) {
+      // fs.watch can fail in some environments (containers, network drives) — degrade gracefully
+      mcpLog(server, 'warning', 'resources', { event: 'watch_failed', reason: watchErr.message });
+    }
+  }
+
   return server;
 } // end createConfiguredServer()
 
@@ -3963,19 +4093,6 @@ ${description}
 
 import { randomUUID } from "crypto";
 import http from "http";
-
-// ── MCP Logging ───────────────────────────────────────────────────
-
-const LOG_LEVELS = ["debug", "info", "notice", "warning", "error", "critical", "alert", "emergency"];
-let minLogLevel = "info";
-
-function mcpLog(level, logger, data) {
-  if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(minLogLevel)) return;
-  // Logging is emitted to stderr in HTTP mode (no single server to send to)
-  if (LOG_LEVELS.indexOf(level) >= LOG_LEVELS.indexOf("warning")) {
-    console.error(`[${level}] ${logger}: ${typeof data === 'string' ? data : JSON.stringify(data)}`);
-  }
-}
 
 // ── Session Manager (for HTTP transport) ──────────────────────────
 
@@ -4143,6 +4260,72 @@ if (transportMode === "http" || transportMode === "streamableHttp") {
         sessionMgr.terminate(sessionId);
       }
       res.writeHead(200); res.end(); return;
+    }
+
+    // ── GET /mcp — Resumable SSE event stream (T44) ─────────────
+    // Clients subscribe to receive server notifications (tool list changes,
+    // resource updates, log messages). Supports Last-Event-ID replay from
+    // an in-memory ring buffer (last 50 events per session).
+    if (req.method === "GET" && req.url === MCP_PATH) {
+      if (!sessionId || !sessionTransports.has(sessionId)) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "SSE stream requires an active Mcp-Session-Id" }));
+        return;
+      }
+      const { server: sseServer } = sessionTransports.get(sessionId);
+
+      // Set SSE response headers
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no", // nginx passthrough
+      });
+      res.write(": FrootAI MCP SSE stream connected\n\n");
+
+      // Drain any buffered events since Last-Event-ID
+      const lastEventId = req.headers["last-event-id"];
+      const sessionData = sessionTransports.get(sessionId);
+      const eventBuffer = sessionData.eventBuffer ?? (sessionData.eventBuffer = []);
+      let replayFrom = 0;
+      if (lastEventId) {
+        const idx = eventBuffer.findIndex(e => e.id === lastEventId);
+        replayFrom = idx >= 0 ? idx + 1 : 0;
+      }
+      for (const evt of eventBuffer.slice(replayFrom)) {
+        res.write(`id: ${evt.id}\ndata: ${evt.data}\n\n`);
+      }
+
+      // Hook server notifications → SSE stream
+      let eventSeq = eventBuffer.length;
+      const notifHandler = (notification) => {
+        const evtId = `${sessionId}-${eventSeq++}`;
+        const data = JSON.stringify(notification);
+        // Add to ring buffer (keep last 50 events)
+        eventBuffer.push({ id: evtId, data });
+        if (eventBuffer.length > 50) eventBuffer.shift();
+        if (!res.writableEnded) res.write(`id: ${evtId}\ndata: ${data}\n\n`);
+      };
+
+      // Patch sendLoggingMessage to also emit to SSE
+      const origSendLog = sseServer.sendLoggingMessage?.bind(sseServer);
+      if (origSendLog) {
+        sseServer.sendLoggingMessage = (payload) => {
+          notifHandler({ method: "notifications/message", params: payload });
+          return origSendLog(payload);
+        };
+      }
+      // Keep-alive heartbeat every 15s
+      const heartbeat = setInterval(() => {
+        if (!res.writableEnded) res.write(": heartbeat\n\n");
+      }, 15_000);
+
+      req.on("close", () => {
+        clearInterval(heartbeat);
+        // Restore original sendLoggingMessage
+        if (origSendLog) sseServer.sendLoggingMessage = origSendLog;
+      });
+      return; // Don't end response — it stays open
     }
 
     // Existing session — route to its transport
