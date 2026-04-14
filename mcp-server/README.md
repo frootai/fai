@@ -111,40 +111,66 @@ pip install frootai-mcp                      # Python
 
 ---
 
-### MCP Tools
+### MCP Tools (45 total)
 
-**Static**  bundled knowledge, works offline
-- `list_modules`  browse FROOT knowledge modules by layer
-- `get_module`  read any module in full
-- `lookup_term`  AI/ML glossary lookup
+**Static** — bundled knowledge, works offline
+- `list_modules`  browse 18 FROOT knowledge modules by layer
+- `get_module`  read any module in full (F1–T3)
+- `lookup_term`  200+ AI/ML glossary definitions
 - `search_knowledge`  full-text search across all modules
-- `get_architecture_pattern`  architecture decision guides
-- `get_froot_overview`  complete framework summary
+- `get_architecture_pattern`  7 pre-built architecture decision guides
+- `get_froot_overview`  complete FROOT framework summary
 
-**Live**  network-enabled, graceful offline fallback
+**Live** — network-enabled, graceful offline fallback
 - `fetch_azure_docs`  search Microsoft Learn for Azure docs
 - `fetch_external_mcp`  discover MCP servers from public registries
-- `list_community_plays`  browse solution plays from GitHub
-- `get_github_agentic_os`  .github Agentic OS implementation guide
+- `list_community_plays`  browse 100 solution plays from GitHub
+- `get_github_agentic_os`  .github Agentic OS 7-primitive guide
 
-**Agent Chain**  build  review  tune
-- `agent_build`  architecture guidance + code patterns
-- `agent_review`  security, quality, compliance audit
-- `agent_tune`  production readiness validation
+**Agent Chain** — build → review → tune
+- `agent_build`  architecture guidance + code patterns, suggests review
+- `agent_review`  security, quality, compliance audit, suggests tune
+- `agent_tune`  production readiness validation + verdict
 
-**Ecosystem**  Azure AI intelligence
-- `get_model_catalog`  Azure AI model catalog with pricing
-- `get_azure_pricing`  monthly cost estimates for Azure services
-- `compare_models`  side-by-side model comparison
-- `compare_plays`  compare solution plays
-
-**Compute**  real calculations, not just lookups
+**Ecosystem** — Azure AI intelligence
+- `get_model_catalog`  Azure AI model catalog with pricing tiers
+- `get_azure_pricing`  monthly cost estimates by scenario + scale
 - `estimate_cost`  itemized Azure cost estimate per play + scale
-- `validate_config`  validate configs against best practices
-- `generate_architecture_diagram`  Mermaid architecture diagrams
-- `embedding_playground`  cosine similarity between texts
-- `semantic_search_plays`  semantic search across solution plays
-- `run_evaluation`  quality scoring with configurable thresholds
+- `compare_models`  side-by-side model comparison for your use case
+- `compare_plays`  compare two solution plays (services, cost, complexity)
+- `semantic_search_plays`  natural language search across 100 plays
+- `embedding_playground`  cosine similarity — educational RAG tool
+- `run_evaluation`  quality scoring (groundedness, relevance, coherence, fluency)
+- `validate_config`  validate TuneKit configs against best practices
+- `generate_architecture_diagram`  Mermaid.js diagram for any play
+
+**FAI Engine** — the open glue (FAI Protocol runtime)
+- `wire_play`  resolve FAI Protocol context, bind primitives, activate guardrails
+- `inspect_wiring`  audit a play's wiring — primitives, context, health score
+- `validate_manifest`  validate `fai-manifest.json` schema + completeness
+- `get_play_detail`  full play spec — services, config, WAF alignment, evaluation
+- `list_primitives`  browse 830+ primitives by type (agents, skills, hooks…)
+- `evaluate_quality`  run quality evaluation with configurable pass/fail thresholds
+
+**Scaffold & Create** — generate production-ready plays and primitives
+- `scaffold_play`  generate a complete play (24+ files) with FAI Protocol auto-wired
+- `create_primitive`  create an agent, instruction, or skill with proper frontmatter
+- `smart_scaffold`  semantic search → find best matching play → scaffold it
+
+**Marketplace** — plugin ecosystem (npm for AI primitives)
+- `marketplace_search`  semantic search across 77+ plugins by use case
+- `marketplace_browse`  paginated listing with 8 category filters
+- `install_plugin`  copy plugin primitives into `.github/` with conflict detection
+- `uninstall_plugin`  remove plugin primitives cleanly
+- `list_installed`  scan `.github/` and match against marketplace registry
+- `check_compatibility`  validate plugin + play alignment + WAF + file conflicts
+- `validate_plugin`  check `plugin.json` schema, naming, and file refs
+- `compose_plugins`  multi-install with cross-plugin conflict detection
+- `publish_plugin`  validate → generate marketplace entry → register
+- `check_plugin_updates`  compare installed vs marketplace versions
+- `resolve_dependencies`  topological dependency resolution + install order
+- `list_external_plugins`  browse community plugins from external sources
+- `marketplace_stats`  full analytics: totals, categories, top plugins, play coverage
 
 ---
 
@@ -187,6 +213,37 @@ my-ai-project/
 
 ---
 
+### HTTP Transport (Remote MCP)
+
+Run as a remote HTTP server alongside stdio — no config change needed:
+
+```bash
+# Stdio (default — local agents, VS Code, Claude Desktop)
+npx frootai-mcp
+
+# HTTP server — remote clients, Container Apps, k8s
+npx frootai-mcp http
+PORT=8080 npx frootai-mcp http
+
+# With API key auth
+FAI_AUTH_MODE=apikey FAI_API_KEYS=my-secret-key npx frootai-mcp http
+
+# Docker
+docker run -p 3000:3000 ghcr.io/frootai/frootai-mcp http
+```
+
+Connect a remote client:
+
+```json
+{ "servers": { "frootai": { "type": "http", "url": "https://your-host:3000/mcp" } } }
+```
+
+Health probes (Kubernetes / Container Apps):
+- `GET /healthz` — liveness (status, version, uptime, engine)
+- `GET /readyz` — readiness (modules loaded, sessions, cache stats)
+
+---
+
 ### Agent FAI REST API
 
 Chat with Agent FAI  grounded in FrootAI knowledge: [frootai.dev/chatbot](https://frootai.dev/chatbot)
@@ -199,10 +256,14 @@ Chat with Agent FAI  grounded in FrootAI knowledge: [frootai.dev/chatbot](https:
 
 ### What Ships Inside
 
-- **FROOT Knowledge Modules**  Foundations, Reasoning, Orchestration, Operations, Transformation
-- **AI Glossary**  comprehensive AI/ML term definitions
-- **Solution Plays**  pre-tuned deployable solutions with .github Agentic OS
-- **Architecture Decision Guides**  RAG, agents, hosting, model selection, cost optimization, determinism
+- **FROOT Knowledge Modules** — 18 modules across Foundations, Reasoning, Orchestration, Operations, Transformation
+- **AI Glossary** — 200+ AI/ML term definitions
+- **100 Solution Plays** — pre-tuned deployable solutions with .github Agentic OS
+- **830+ Primitives** — agents, instructions, skills, hooks, plugins, workflows
+- **FAI Engine** — FAI Protocol runtime: wire, inspect, validate, evaluate
+- **FAI Marketplace** — 77+ plugins searchable and installable via MCP
+- **Architecture Decision Guides** — RAG, agents, hosting, model selection, cost optimization, determinism
+- **OpenTelemetry** — opt-in observability (OTEL_EXPORTER_OTLP_ENDPOINT)
 
 > The FrootAI ecosystem is growing. New modules, plays, and tools are added with every release.
 
