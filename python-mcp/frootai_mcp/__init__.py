@@ -1,21 +1,16 @@
 """FrootAI MCP Server — Python Implementation.
 
-AI architecture knowledge + compute tools.
-25 tools, 18 modules, 200+ terms, 100 solution plays.
+AI architecture knowledge engine powered by FastMCP.
+45 tools, 4 resources, 6 prompts, BM25 search, 100 solution plays, 830+ primitives.
 
 Usage:
     pip install frootai-mcp
     frootai-mcp-py
 
 Or in Python:
-    from frootai_mcp import FrootAIMCP
-    server = FrootAIMCP()
-    server.run()
+    from frootai_mcp.server import mcp
+    mcp.run(transport="stdio")
 """
 
-__version__ = "3.5.0"
+__version__ = "5.1.0"
 __author__ = "Pavleen Bali"
-
-from frootai_mcp.server import FrootAIMCP, main
-
-__all__ = ["FrootAIMCP", "main", "__version__"]
