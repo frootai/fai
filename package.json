@@ -20,6 +20,7 @@
     "release": "node scripts/release-channel.js",
     "release:dry": "node scripts/release-channel.js --dry-run",
     "release:mcp": "node scripts/release-channel.js mcp patch",
+    "release:cli": "node scripts/release-channel.js cli patch",
     "release:ext": "node scripts/release-channel.js ext patch",
     "release:sdk": "node scripts/release-channel.js sdk patch",
     "release:pymcp": "node scripts/release-channel.js pymcp patch",

@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 
-// ─── CLI Delegation ─────────────────────────────────
-// When invoked as `npx frootai-mcp info 01` (CLI args), delegate to cli.js
+// ─── CLI Redirect ─────────────────────────────────
+// CLI has moved to the `frootai` package. Show helpful message.
 const CLI_COMMANDS = ['init', 'scaffold', 'install', 'deploy', 'info', 'list', 'search', 'cost', 'validate', 'doctor', 'primitives', 'protocol', 'version', 'help', '--help', '-h', '--version', '-v'];
 if (CLI_COMMANDS.includes(process.argv[2])) {
-  const { execFileSync } = await import('child_process');
-  const { fileURLToPath: toPath } = await import('url');
-  const { dirname: dir, join: pjoin } = await import('path');
-  const cli = pjoin(dir(toPath(import.meta.url)), 'cli.js');
-  try { execFileSync(process.execPath, [cli, ...process.argv.slice(2)], { stdio: 'inherit' }); }
-  catch (e) { process.exit(e.status || 1); }
+  const cmd = process.argv.slice(2).join(' ');
+  console.error(`\n  ⚠️  CLI commands have moved to the \x1b[1mfrootai\x1b[0m package.\n`);
+  console.error(`  Instead of:  npx frootai-mcp ${cmd}`);
+  console.error(`  Use:         npx frootai ${cmd}\n`);
+  console.error(`  Install:     npm i -g frootai\n`);
   process.exit(0);
 }
 

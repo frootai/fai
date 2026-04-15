@@ -39,7 +39,7 @@ const filteredArgs = args.filter(a => a !== "--dry-run");
 const channel = filteredArgs[0];
 const bumpType = filteredArgs[1] || "patch";
 
-if (!channel || !["mcp", "ext", "sdk", "pymcp", "all"].includes(channel)) {
+if (!channel || !["mcp", "cli", "ext", "sdk", "pymcp", "all"].includes(channel)) {
     console.log(`
 FrootAI Release Manager
 ═══════════════════════
@@ -48,6 +48,7 @@ Usage: node scripts/release-channel.js [--dry-run] <channel> <bump>
 
 Channels:
   mcp     npm MCP Server + Docker        (tag: mcp-vX.Y.Z)
+  cli     npm CLI & SDK (frootai)        (tag: cli-vX.Y.Z)
   ext     VS Code Extension              (tag: ext-vX.Y.Z)
   sdk     Python SDK (PyPI)              (tag: sdk-vX.Y.Z)
   pymcp   Python MCP (PyPI)             (tag: pymcp-vX.Y.Z)
@@ -110,20 +111,24 @@ const channels = {
         name: "npm MCP Server + Docker",
         file: "mcp-server/package.json",
         read: () => readJsonVersion("mcp-server/package.json"),
-        write: (v) => {
-            writeJsonVersion("mcp-server/package.json", v);
-            // Keep frootai alias package in sync
-            const aliasFile = "cli/package.json";
-            if (fs.existsSync(aliasFile)) {
-                const content = fs.readFileSync(aliasFile, "utf8");
-                let updated = content.replace(/"version":\s*"[^"]*"/, `"version": "${v}"`);
-                updated = updated.replace(/"frootai-mcp":\s*"\^[^"]*"/, `"frootai-mcp": "^${v}"`);
-                fs.writeFileSync(aliasFile, updated);
-                console.log(`  ✅ cli/package.json (alias) → ${v}`);
-            }
-        },
+        write: (v) => writeJsonVersion("mcp-server/package.json", v),
         tagPrefix: "mcp-v",
         serverRef: "FROOTAI_MCP_VERSION",
+        serverFormat: (v) => `"@${v}"`,
+    },
+    cli: {
+        name: "npm CLI & SDK (frootai)",
+        file: "cli/package.json",
+        read: () => readJsonVersion("cli/package.json"),
+        write: (v) => {
+            writeJsonVersion("cli/package.json", v);
+            // Keep frootai-mcp dependency in sync
+            const content = fs.readFileSync("cli/package.json", "utf8");
+            const updated = content.replace(/"frootai-mcp":\s*"\^[^"]*"/, `"frootai-mcp": "^${v}"`);
+            fs.writeFileSync("cli/package.json", updated);
+        },
+        tagPrefix: "cli-v",
+        serverRef: "FROOTAI_CLI_VERSION",
         serverFormat: (v) => `"@${v}"`,
     },
     ext: {

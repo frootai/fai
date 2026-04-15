@@ -1,7 +1,7 @@
 {
   "name": "frootai-mcp",
-  "version": "5.1.3",
-  "description": "FrootAI™ MCP Server + CLI — The open glue for the GenAI ecosystem. 45 MCP tools, 104 solution plays, 830+ primitives. CLI: install plays from GitHub, info dashboards, cost estimates, scaffold, validate. HTTP/stdio transport, Node.js 18+.",
+  "version": "5.2.0",
+  "description": "FrootAI™ MCP Server — The open glue for the GenAI ecosystem. 45 MCP tools, 104 solution plays, 830+ primitives. HTTP/stdio transport, Node.js 18+. For CLI commands use the `frootai` package.",
   "main": "index.js",
   "types": "dist/server.d.ts",
   "exports": {
@@ -14,16 +14,17 @@
       "types": "./dist/server.d.ts",
       "import": "./dist/server.js",
       "default": "./dist/server.js"
-    }
+    },
+    "./knowledge.json": "./knowledge.json",
+    "./search-index.json": "./search-index.json",
+    "./package.json": "./package.json"
   },
   "type": "module",
   "bin": {
-    "frootai-mcp": "./index.js",
-    "frootai": "./cli.js"
+    "frootai-mcp": "./index.js"
   },
   "files": [
     "index.js",
-    "cli.js",
     "auto-update.js",
     "knowledge.json",
     "search-index.json",
@@ -57,7 +58,6 @@
     "knowledge-base",
     "semantic-kernel",
     "copilot",
-    "cli",
     "solution-plays",
     "ai-primitives",
     "devkit"

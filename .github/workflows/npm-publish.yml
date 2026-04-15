@@ -3,7 +3,8 @@ name: Publish to npm (frootai-mcp + frootai)
 on:
   push:
     tags:
-      - 'mcp-v*'    # Channel-specific: mcp-v5.0.2
+      - 'mcp-v*'    # Channel-specific: mcp-v5.2.0
+      - 'cli-v*'    # CLI-specific: cli-v5.2.0
       - 'rel-v*'    # Unified release: rel-v2025.04.09 triggers ALL channels
   workflow_dispatch:
 
@@ -11,7 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  publish-mcp:
+    name: Publish frootai-mcp
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -38,45 +40,65 @@ jobs:
             echo "Publishing frootai-mcp@$LOCAL (npm has $NPM)"
           fi
 
-      - name: Publish to npm
+      - name: Publish frootai-mcp to npm
         if: steps.version_check.outputs.skip != 'true'
         working-directory: mcp-server
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Sync frootai alias version
+      - name: Summary
+        if: always()
         run: |
-          LOCAL=${{ steps.version_check.outputs.local }}
-          cd cli
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
-            pkg.version = '${LOCAL}';
-            pkg.dependencies['frootai-mcp'] = '^${LOCAL}';
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
-          echo "frootai alias synced to v${LOCAL}"
+          echo "## frootai-mcp" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ steps.version_check.outputs.local }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm | ${{ steps.version_check.outputs.npm }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${{ steps.version_check.outputs.skip == 'true' && 'Skipped' || 'Published' }} |" >> $GITHUB_STEP_SUMMARY
 
-      - name: Publish frootai alias to npm
+  publish-cli:
+    name: Publish frootai (CLI)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: publish-mcp
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check if version is newer than npm
+        id: cli_check
         working-directory: cli
         run: |
-          ALIAS_NPM=$(npm view frootai version 2>/dev/null || echo "0.0.0")
-          ALIAS_LOCAL=$(node -p "require('./package.json').version")
-          if [ "$ALIAS_LOCAL" != "$ALIAS_NPM" ]; then
-            npm publish --access public
-            echo "::notice::✅ frootai@${ALIAS_LOCAL} published!"
+          LOCAL=$(node -p "require('./package.json').version")
+          NPM=$(npm view frootai version 2>/dev/null || echo "0.0.0")
+          echo "local=$LOCAL" >> $GITHUB_OUTPUT
+          echo "npm=$NPM" >> $GITHUB_OUTPUT
+          if [ "$LOCAL" = "$NPM" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "frootai@$LOCAL already published — skipping."
           else
-            echo "frootai@${ALIAS_LOCAL} already published — skipping."
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "Publishing frootai@$LOCAL (npm has $NPM)"
           fi
+
+      - name: Publish frootai to npm
+        if: steps.cli_check.outputs.skip != 'true'
+        working-directory: cli
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Summary
         if: always()
         run: |
-          echo "## npm Publish" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | Version | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|---------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| frootai-mcp | ${{ steps.version_check.outputs.local }} | ${{ steps.version_check.outputs.skip == 'true' && 'Skipped' || 'Published' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| frootai | ${{ steps.version_check.outputs.local }} | Alias synced |" >> $GITHUB_STEP_SUMMARY
+          echo "## frootai (CLI)" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ steps.cli_check.outputs.local }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm | ${{ steps.cli_check.outputs.npm }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${{ steps.cli_check.outputs.skip == 'true' && 'Skipped' || 'Published' }} |" >> $GITHUB_STEP_SUMMARY

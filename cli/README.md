@@ -1,31 +1,60 @@
 # frootai
 
-> **Alias package** for [`frootai-mcp`](https://www.npmjs.com/package/frootai-mcp) — the FrootAI AI Primitive Unification Ecosystem.
+> **FrootAI™ CLI & SDK** — AI Primitive Unification Ecosystem
 
-This package lets you use the shorter `npx frootai` command instead of `npx frootai-mcp`.
+The official CLI for [FrootAI](https://frootai.dev) — 100 solution plays, 830+ AI primitives, and the FAI Protocol.
 
-## Usage
+## Installation
 
 ```bash
-# CLI commands
-npx frootai help                    # Show all commands
-npx frootai info 01                 # Play details + cost estimate
-npx frootai list                    # Browse all 100 solution plays
-npx frootai scaffold 01             # Download play to current directory
-npx frootai deploy                  # Guided Azure deployment
+# Run directly (no install needed)
+npx frootai help
 
-# MCP Server (same as npx frootai-mcp)
-npx frootai                         # Starts MCP server on stdin/stdout
+# Or install globally
+npm i -g frootai
 ```
 
-## MCP Configuration
+## CLI Commands
+
+```bash
+# Explore
+frootai help                              # Show all commands
+frootai info 01                           # Play details, cost estimate, architecture
+frootai list                              # Browse all 100 solution plays
+frootai search "RAG architecture"         # Search knowledge base
+frootai cost 01 --scale prod              # Detailed cost breakdown
+
+# Build
+frootai init                              # Interactive project scaffolding
+frootai scaffold 01                       # Download play + generate templates
+frootai scaffold 01 --kit devkit          # DevKit only
+frootai install 01                        # Download play files to current dir
+
+# Deploy
+frootai deploy                            # Guided Azure deployment wizard
+frootai deploy --dry-run                  # Preview without deploying
+frootai deploy -y --resource-group myRG   # Non-interactive deploy
+
+# Validate
+frootai validate                          # Check project structure
+frootai validate --waf                    # WAF alignment scorecard
+frootai doctor                            # Health check for your setup
+```
+
+## MCP Server
+
+For the MCP server (AI agent integration), use the companion package:
+
+```bash
+npx frootai-mcp                           # Starts MCP server on stdin/stdout
+```
 
 ```json
 {
   "mcpServers": {
     "frootai": {
       "command": "npx",
-      "args": ["frootai"]
+      "args": ["frootai-mcp"]
     }
   }
 }
@@ -35,4 +64,5 @@ npx frootai                         # Starts MCP server on stdin/stdout
 
 - **Website**: [frootai.dev](https://frootai.dev)
 - **GitHub**: [github.com/frootai/frootai](https://github.com/frootai/frootai)
-- **Core package**: [frootai-mcp on npm](https://www.npmjs.com/package/frootai-mcp)
+- **MCP Server**: [frootai-mcp on npm](https://www.npmjs.com/package/frootai-mcp)
+- **Solution Plays**: [frootai.dev/solution-plays](https://frootai.dev/solution-plays)
