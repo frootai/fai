@@ -1,78 +1,52 @@
-// FrootAI VS Code Extension v6.0.0 — TypeScript entry point
-// Legacy JS handles existing 25 commands.
-// New TypeScript modules add: searchAll, React webview panels.
+// FrootAI VS Code Extension v6.2.1
+// Legacy extension.js handles tree views + 25 commands.
+// This TS entry point adds React webview panel commands on top.
 
 import * as vscode from "vscode";
 import { searchAll } from "./commands/search";
 import { createReactPanel } from "./webviews/reactHost";
-import { SidebarProvider } from "./providers/SidebarProvider";
 import { SOLUTION_PLAYS } from "./data/plays";
 
-// Legacy extension handles existing commands + tree views
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const legacy = require("./extension.js");
 
+let _activated = false;
+
 export function activate(context: vscode.ExtensionContext): void {
-  // Activate legacy (existing 25 commands, MCP provider)
+  if (_activated) return;
+  _activated = true;
+
+  // Legacy handles tree views + existing commands
   legacy.activate(context);
 
-  // ─── React Sidebar ───
-  const sidebarProvider = new SidebarProvider(context.extensionUri);
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider),
-  );
+  // New React panel commands — safe registration (skip if already exists)
+  const safeRegister = (id: string, fn: (...args: any[]) => any) => {
+    try { context.subscriptions.push(vscode.commands.registerCommand(id, fn)); }
+    catch { /* already registered by legacy — OK */ }
+  };
 
-  // ─── New Commands — React Webview Panels ───
+  safeRegister("frootai.searchAll", () => searchAll());
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand("frootai.searchAll", () => searchAll()),
+  safeRegister("frootai.openPlayDetail", (playOrId?: any) => {
+    let play = playOrId;
+    if (typeof playOrId === "string") {
+      play = SOLUTION_PLAYS.find(p => p.id === playOrId) ?? SOLUTION_PLAYS[0];
+    }
+    if (!play) play = SOLUTION_PLAYS[0];
+    createReactPanel(context.extensionUri, "frootai.playDetail", `Play ${play.id} — ${play.name}`, { panel: "playDetail", play });
+  });
 
-    vscode.commands.registerCommand("frootai.openPlayDetail", (playOrId?: any) => {
-      let play = playOrId;
-      if (typeof playOrId === "string") {
-        play = SOLUTION_PLAYS.find(p => p.id === playOrId) ?? SOLUTION_PLAYS[0];
-      }
-      if (!play) { play = SOLUTION_PLAYS[0]; }
+  safeRegister("frootai.openEvaluationDashboard", () => {
+    createReactPanel(context.extensionUri, "frootai.evaluation", "Evaluation Dashboard", { panel: "evaluation" });
+  });
 
-      const panel = createReactPanel(context.extensionUri, "frootai.playDetail", `Play ${play.id} — ${play.name}`, {
-        panel: "playDetail",
-        play,
-      });
-      panel.webview.onDidReceiveMessage((msg: any) => {
-        if (msg.command === "initDevKit") { vscode.commands.executeCommand("frootai.initDevKit"); }
-        else if (msg.command === "initTuneKit") { vscode.commands.executeCommand("frootai.initTuneKit"); }
-        else if (msg.command === "cost") { vscode.commands.executeCommand("frootai.quickCostEstimate"); }
-        else if (msg.command === "website") { vscode.env.openExternal(vscode.Uri.parse(`https://frootai.dev/solution-plays/${play.dir}`)); }
-      });
-    }),
+  safeRegister("frootai.openScaffoldWizard", () => {
+    createReactPanel(context.extensionUri, "frootai.scaffold", "Scaffold Wizard", { panel: "scaffold", plays: SOLUTION_PLAYS });
+  });
 
-    vscode.commands.registerCommand("frootai.openEvaluationDashboard", () => {
-      const panel = createReactPanel(context.extensionUri, "frootai.evaluation", "Evaluation Dashboard", {
-        panel: "evaluation",
-      });
-      panel.webview.onDidReceiveMessage((msg: any) => {
-        if (msg.command === "runEvaluation") { vscode.commands.executeCommand("frootai.runEvaluation"); }
-      });
-    }),
-
-    vscode.commands.registerCommand("frootai.openScaffoldWizard", () => {
-      const panel = createReactPanel(context.extensionUri, "frootai.scaffold", "Scaffold Wizard", {
-        panel: "scaffold",
-        plays: SOLUTION_PLAYS,
-      });
-      panel.webview.onDidReceiveMessage((msg: any) => {
-        if (msg.command === "scaffold") {
-          vscode.commands.executeCommand("frootai.initDevKit");
-        }
-      });
-    }),
-
-    vscode.commands.registerCommand("frootai.openMcpExplorer", () => {
-      createReactPanel(context.extensionUri, "frootai.mcpExplorer", "MCP Tool Explorer", {
-        panel: "mcpExplorer",
-      });
-    }),
-  );
+  safeRegister("frootai.openMcpExplorer", () => {
+    createReactPanel(context.extensionUri, "frootai.mcpExplorer", "MCP Tool Explorer", { panel: "mcpExplorer" });
+  });
 }
 
 export function deactivate(): void {
