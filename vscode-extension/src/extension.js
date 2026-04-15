@@ -2024,13 +2024,6 @@ function activate(context) {
     })
   );
 
-  // ── Command: Open Setup Guide ──
-  context.subscriptions.push(
-    vscode.commands.registerCommand("frootai.openSetupGuide", () => {
-      vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/setup-guide"));
-    })
-  );
-
   // ── Register MCP Server Definition Provider (VS Code @mcp gallery) ──
   // This is what makes FrootAI appear in VS Code's Extensions view under @mcp.
   // Users can install it with one click and get 45 tools in Copilot Agent mode.
