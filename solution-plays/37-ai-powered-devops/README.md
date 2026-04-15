@@ -26,6 +26,60 @@ code .  # Use @builder for incident pipeline, @reviewer for safety audit, @tuner
 | Azure DevOps / GitHub | CI/CD pipeline integration |
 | Azure Functions | Incident pipeline execution |
 
+```mermaid
+graph TB
+    subgraph Operations Team
+        SRE[SRE / Platform Engineer]
+        Dashboard[Ops Dashboard<br/>Incident Feed · MTTR · AI Accuracy]
+    end
+
+    subgraph Telemetry Ingestion
+        Monitor[Azure Monitor<br/>Metrics · Alerts · Diagnostics]
+        LogAnalytics[Log Analytics<br/>KQL Queries · Anomaly Detection · Audit Trail]
+    end
+
+    subgraph AIOps Engine
+        Functions[Azure Functions<br/>Alert Ingestion · AI Triage Dispatch · Remediation Executor]
+        OpenAI[Azure OpenAI — GPT-4o<br/>Root-Cause Analysis · Runbook Generation · Risk Scoring]
+        Mini[Azure OpenAI — GPT-4o-mini<br/>Alert Classification · Deduplication · Summaries]
+    end
+
+    subgraph Knowledge Store
+        CosmosDB[Cosmos DB<br/>Incident History · Correlation Patterns · Playbooks]
+    end
+
+    subgraph Automation
+        DevOps[Azure DevOps Pipelines<br/>Auto-Remediation · Rollback · Scale-out]
+        GitHub[GitHub Actions<br/>IaC Drift Fix · Config Restore · PR Generation]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · PATs · Webhook Secrets]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>AIOps Latency · Triage Accuracy · Remediation Success]
+    end
+
+    Monitor -->|Alerts & Metrics| Functions
+    LogAnalytics -->|Correlated Logs| Functions
+    Functions -->|Classify Alert| Mini
+    Functions -->|Root-Cause Analysis| OpenAI
+    Functions -->|Historical Lookup| CosmosDB
+    OpenAI -->|Analysis + Runbook| Functions
+    Functions -->|Auto-Remediate| DevOps
+    Functions -->|IaC Drift Fix| GitHub
+    Functions -->|Store Finding| CosmosDB
+    Functions -->|Audit Trail| LogAnalytics
+    SRE -->|Review / Approve| Dashboard
+    Dashboard -->|Query Incidents| CosmosDB
+    MI -->|Secrets| KV
+    Functions -->|Traces| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## Capabilities
 | Capability | Description |
 |-----------|-------------|
@@ -46,8 +100,18 @@ code .  # Use @builder for incident pipeline, @reviewer for safety audit, @tuner
 | 4 prompts | `/deploy` (AIOps pipeline), `/test` (incident sim), `/review` (remediation safety), `/evaluate` (accuracy) |
 
 ## Cost
-| Dev | Prod (50 incidents/mo) |
-|-----|------------------------|
-| $30–80/mo | ~$5/mo AI + infra costs |
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Azure OpenAI | $40 (PAYG) | $250 (PAYG) | $900 (PTU) |
+| Azure Monitor | $0 (Free) | $80 (Pay-per-GB) | $300 (Commitment) |
+| Azure DevOps | $0 (Basic) | $40 (Hosted Agents) | $120 (Self-hosted) |
+| Azure Functions | $0 (Consumption) | $15 (Consumption) | $120 (Premium EP1) |
+| Cosmos DB | $5 (Serverless) | $60 (800 RU/s) | $350 (4000 RU/s) |
+| Log Analytics | $0 (Free) | $40 (Pay-per-GB) | $150 (Commitment) |
+| Key Vault | $1 (Standard) | $3 (Standard) | $10 (Premium HSM) |
+| Application Insights | $0 (Free) | $20 (Pay-per-GB) | $80 (Pay-per-GB) |
+| **Total** | **$46/mo** | **$508/mo** | **$2,030/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/37-ai-powered-devops](https://frootai.dev/solution-plays/37-ai-powered-devops)

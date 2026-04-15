@@ -27,6 +27,60 @@ code .  # Use @builder for extraction/classification, @reviewer for accuracy aud
 | Cosmos DB | Classification results, comparison logs |
 | Azure Functions | Workflow orchestration |
 
+```mermaid
+graph TB
+    subgraph Users
+        Operator[Document Operator / Business User]
+        API[Upstream Systems / API Clients]
+    end
+
+    subgraph Intake
+        BlobIn[Blob Storage<br/>Document Uploads · PDF · Images · Scans]
+        Functions[Azure Functions<br/>Pipeline Orchestrator · Classification · Routing]
+    end
+
+    subgraph Extraction Engine
+        DocIntel[Document Intelligence<br/>Prebuilt Models · Custom Models · Layout Analysis]
+        OpenAI[Azure OpenAI — GPT-4o<br/>Schema Mapping · Entity Resolution · Cross-Doc Reasoning]
+        Mini[Azure OpenAI — GPT-4o-mini<br/>Field Validation · Normalization · Summary]
+    end
+
+    subgraph Data Layer
+        CosmosDB[Cosmos DB<br/>Extracted Fields · Schema Definitions · Processing Audit]
+        AISearch[Azure AI Search<br/>Full-text · Semantic Search · Faceted Navigation]
+    end
+
+    subgraph Storage
+        BlobOut[Blob Storage<br/>Processed Outputs · Training Data · Archives]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Encryption Keys · Connection Strings]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Extraction Accuracy · Latency · Error Rates]
+    end
+
+    Operator -->|Upload Documents| BlobIn
+    API -->|Submit via API| Functions
+    BlobIn -->|Blob Trigger| Functions
+    Functions -->|Classify & Route| DocIntel
+    DocIntel -->|Raw Extraction| Functions
+    Functions -->|Semantic Enrichment| OpenAI
+    Functions -->|Validate & Normalize| Mini
+    Functions -->|Store Results| CosmosDB
+    Functions -->|Index Content| AISearch
+    Functions -->|Archive Processed| BlobOut
+    Operator -->|Search & Query| AISearch
+    Operator -->|View Extractions| CosmosDB
+    MI -->|Secrets| KV
+    Functions -->|Traces| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## Key Metrics
 - Classification: ≥92% · Layout F1: ≥88% · Comparison: ≥85% · PII recall: ≥99%
 
@@ -38,8 +92,18 @@ code .  # Use @builder for extraction/classification, @reviewer for accuracy aud
 | 4 prompts | `/deploy` (understanding pipeline), `/test` (extraction/workflow), `/review` (PII/accuracy), `/evaluate` (classification) |
 
 ## Cost
-| Dev | Prod (5K docs/day) |
-|-----|--------------------|
-| $80–200/mo | ~$3.5K-5.8K/mo (optimize with smart model routing) |
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Document Intelligence | $0 (Free) | $150 (Standard S0) | $600 (Standard S0) |
+| Azure OpenAI | $50 (PAYG) | $350 (PAYG) | $1,100 (PTU) |
+| Cosmos DB | $5 (Serverless) | $80 (1000 RU/s) | $400 (5000 RU/s) |
+| Azure Functions | $0 (Consumption) | $120 (Premium EP1) | $240 (Premium EP2) |
+| Blob Storage | $3 (Hot LRS) | $30 (Hot LRS) | $100 (Hot GRS+WORM) |
+| Azure AI Search | $0 (Free) | $250 (Standard S1) | $500 (Standard S2) |
+| Key Vault | $1 (Standard) | $5 (Standard) | $15 (Premium HSM) |
+| Application Insights | $0 (Free) | $25 (Pay-per-GB) | $100 (Pay-per-GB) |
+| **Total** | **$59/mo** | **$1,010/mo** | **$3,055/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/38-document-understanding-v2](https://frootai.dev/solution-plays/38-document-understanding-v2)

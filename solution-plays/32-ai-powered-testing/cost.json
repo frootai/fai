@@ -1,0 +1,199 @@
+{
+  "play": "32",
+  "name": "AI-Powered Testing",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for test generation, mutation analysis, and failure root-cause reasoning",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 40,
+          "note": "~100K tokens/day, test generation experiments"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 250,
+          "note": "~2M tokens/day, CI-integrated generation"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 800,
+          "note": "Provisioned throughput for parallel test generation across repos"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Test generation engine — code parsing, mutation injection, coverage analysis, API gateway",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 90,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 280,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Container Registry",
+      "category": "Compute",
+      "purpose": "Docker images for sandbox test execution environments per language runtime",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 5,
+          "note": "10GB storage, dev images"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 20,
+          "note": "100GB storage, geo-replication"
+        },
+        "enterprise": {
+          "sku": "Premium",
+          "cost": 50,
+          "note": "500GB, private endpoints, content trust"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Test results storage, mutation scores, coverage history, repository metadata",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~5K RUs, test result history"
+        },
+        "prod": {
+          "sku": "Provisioned 600 RU/s",
+          "cost": 50,
+          "note": "Multi-partition, 50GB, session consistency"
+        },
+        "enterprise": {
+          "sku": "Provisioned 3000 RU/s",
+          "cost": 250,
+          "note": "Multi-region, 300GB, analytics feed"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Source code snapshots, generated test files, coverage reports, mutation logs",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~5GB artifacts"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 12,
+          "note": "~200GB, lifecycle policies"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 40,
+          "note": "~1TB, geo-redundant"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "GitHub tokens, OpenAI API keys, repository access credentials",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~25K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Test generation metrics, mutation detection rates, CI pipeline latency tracking",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~40GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 80,
+          "note": "~160GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging — generation runs, sandbox executions, GitHub webhook events",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 12,
+          "note": "~8GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 45,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 63,
+    "prod": 457,
+    "enterprise": 1555
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for boilerplate unit test generation — reserve GPT-4o for complex integration test reasoning and mutation analysis",
+    "Cache mutation analysis results per function signature — skip re-analysis for unchanged code between CI runs",
+    "Use Container Apps scale-to-zero for dev — test generation workloads are bursty and align well with consumption pricing",
+    "Implement per-repo token budgets to prevent cost spikes from large monorepo test generation sweeps",
+    "Use Cosmos DB serverless for dev — saves $45/month vs provisioned for intermittent test result storage",
+    "Deduplicate generated tests against existing test suites before execution — reduces sandbox compute costs by 30-50%"
+  ]
+}

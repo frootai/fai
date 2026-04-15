@@ -27,6 +27,52 @@ code .  # Use @builder for multimodal pipeline, @reviewer for safety audit, @tun
 | Content Safety | Per-modality content filtering |
 | Container Apps | Multimodal agent runtime |
 
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Client Application]
+    end
+
+    subgraph Agent Runtime
+        Router[Container Apps<br/>Input Router · Modality Detection · Orchestrator]
+    end
+
+    subgraph AI Processing
+        Vision[Azure AI Vision<br/>OCR · Object Detection · Image Analysis]
+        OpenAI[Azure OpenAI — GPT-4o Vision<br/>Multimodal Reasoning · Text + Image + Audio Context]
+        Speech[Azure AI Speech — STT<br/>Audio Transcription · Language Detection]
+    end
+
+    subgraph Data Layer
+        Blob[Blob Storage<br/>Image Uploads · Audio Files · Processed Outputs]
+        Redis[Azure Redis Cache<br/>Session State · Context Buffer · Analysis Cache]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Service Credentials]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Modality Metrics · Latency · Token Usage]
+    end
+
+    User -->|Text / Image / Audio| Router
+    Router -->|Image Input| Vision
+    Router -->|Audio Input| Speech
+    Vision -->|Image Analysis| Router
+    Speech -->|Transcription| Router
+    Router -->|Multimodal Prompt| OpenAI
+    OpenAI -->|Response| Router
+    Router -->|Streaming Response| User
+    Router -->|Store Media| Blob
+    Router -->|Session + Cache| Redis
+    MI -->|Secrets| KV
+    Router -->|Traces| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## Key Metrics
 - Image accuracy: ≥85% · Audio WER: <10% · Cross-modal: ≥80% · Safety: 100%
 
@@ -37,12 +83,19 @@ code .  # Use @builder for multimodal pipeline, @reviewer for safety audit, @tun
 | 3 skills | Deploy (103 lines), Evaluate (104 lines), Tune (107 lines) |
 | 4 prompts | `/deploy` (multimodal pipeline), `/test` (cross-modal), `/review` (per-modality safety), `/evaluate` (accuracy) |
 
-## Cost Per Request
-| Input | Cost |
-|-------|------|
-| Text only | ~$0.005 |
-| Image + text | ~$0.008-0.015 |
-| Audio + text | ~$0.01 |
-| All modalities | ~$0.023 |
+## Cost
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Azure OpenAI | $60 (PAYG) | $400 (PAYG) | $1,200 (PTU) |
+| Azure AI Vision | $0 (Free) | $50 (Standard S1) | $150 (Standard S1) |
+| Container Apps | $10 (Consumption) | $100 (Dedicated) | $300 (Dedicated HA) |
+| Azure AI Speech | $0 (Free) | $40 (Standard S0) | $120 (Standard S0) |
+| Blob Storage | $3 (Hot LRS) | $25 (Hot LRS) | $80 (Hot GRS) |
+| Redis Cache | $15 (Basic C0) | $55 (Standard C1) | $200 (Premium P1) |
+| Key Vault | $1 (Standard) | $3 (Standard) | $10 (Premium HSM) |
+| Application Insights | $0 (Free) | $25 (Pay-per-GB) | $100 (Pay-per-GB) |
+| **Total** | **$89/mo** | **$698/mo** | **$2,160/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/36-multimodal-agent](https://frootai.dev/solution-plays/36-multimodal-agent)

@@ -13,6 +13,59 @@ Automated adversarial testing of AI systems — systematic jailbreak probing, pr
 | Secrets | Azure Key Vault | API keys for attacker and target |
 | Telemetry | Application Insights | Track attack results, detection rates |
 
+```mermaid
+graph TB
+    subgraph Red Team
+        Operator[AI Safety Engineer]
+        Dashboard[Red Team Dashboard<br/>Findings · Vulnerability Trends · Coverage Reports]
+    end
+
+    subgraph Campaign Engine
+        Functions[Azure Functions<br/>Campaign Orchestrator · Attack Executor · Report Generator]
+        Foundry[Azure AI Foundry<br/>Evaluation Pipelines · Model Registry · Safety Benchmarks]
+    end
+
+    subgraph Attack & Target
+        Attacker[Azure OpenAI — GPT-4o-mini<br/>Adversarial Prompt Generator · Attack Synthesis]
+        Target[Target Model Endpoint<br/>GPT-4o · GPT-4o-mini · Custom Fine-tuned · Any AI Endpoint]
+    end
+
+    subgraph Safety Evaluation
+        ContentSafety[Azure AI Content Safety<br/>Harm Detection · Prompt Shields · Groundedness · Jailbreak]
+    end
+
+    subgraph Data Layer
+        CosmosDB[Cosmos DB<br/>Findings · Attack Scenarios · Vulnerability Patterns · Remediation]
+        Blob[Blob Storage<br/>Attack Prompts · Responses · Reports · Evidence Artifacts]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Target API Keys · Foundry Credentials · Safety Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Attack Success Rate · Safety Scores · Campaign Coverage]
+    end
+
+    Operator -->|Configure Campaign| Dashboard
+    Dashboard -->|Launch / Review| Functions
+    Functions -->|Generate Attacks| Attacker
+    Attacker -->|Adversarial Prompts| Functions
+    Functions -->|Send Attack Prompts| Target
+    Target -->|Model Response| Functions
+    Functions -->|Evaluate Safety| ContentSafety
+    Functions -->|Run Eval Pipeline| Foundry
+    ContentSafety -->|Safety Scores| Functions
+    Functions -->|Store Findings| CosmosDB
+    Functions -->|Archive Evidence| Blob
+    Dashboard -->|Query Results| CosmosDB
+    MI -->|Secrets| KV
+    Functions -->|Traces| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## How It Differs from Related Plays
 
 | Aspect | Play 30 (AI Security) | **Play 41 (Red Teaming)** | Play 10 (Content Moderation) |
@@ -73,6 +126,22 @@ Automated adversarial testing of AI systems — systematic jailbreak probing, pr
 # 4. Generate vulnerability scorecard
 /evaluate
 ```
+
+## Cost
+
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Azure AI Foundry | $0 (Basic) | $50 (Standard) | $150 (Standard HA) |
+| AI Content Safety | $0 (Free) | $60 (Standard S0) | $200 (Standard S0) |
+| Azure OpenAI | $60 (PAYG) | $400 (PAYG) | $1,200 (PTU) |
+| Azure Functions | $0 (Consumption) | $15 (Consumption) | $120 (Premium EP1) |
+| Cosmos DB | $5 (Serverless) | $60 (800 RU/s) | $350 (4000 RU/s) |
+| Blob Storage | $2 (Hot LRS) | $15 (Hot LRS) | $50 (Hot GRS+WORM) |
+| Key Vault | $1 (Standard) | $5 (Standard) | $15 (Premium HSM) |
+| Application Insights | $0 (Free) | $20 (Pay-per-GB) | $80 (Pay-per-GB) |
+| **Total** | **$68/mo** | **$625/mo** | **$2,165/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 ## Key Metrics
 

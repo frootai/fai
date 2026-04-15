@@ -1,0 +1,199 @@
+{
+  "play": "38",
+  "name": "Document Understanding V2",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure Document Intelligence",
+      "category": "AI Services",
+      "purpose": "Advanced document extraction — custom models for invoices, contracts, forms with layout-aware field extraction and table parsing",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500 pages free/month, custom model training"
+        },
+        "prod": {
+          "sku": "Standard S0",
+          "cost": 150,
+          "note": "~10K pages/month, prebuilt + 5 custom models"
+        },
+        "enterprise": {
+          "sku": "Standard S0",
+          "cost": 600,
+          "note": "~50K pages/month, 20+ custom models, batch processing"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for semantic document understanding — schema mapping, entity resolution, cross-document reasoning, and summary generation",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 50,
+          "note": "~80K tokens/day, extraction refinement testing"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 350,
+          "note": "~3M tokens/day, production document pipelines"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1100,
+          "note": "Provisioned throughput for real-time document processing"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Extracted document metadata, field mappings, custom schema definitions, processing audit trail, entity relationships",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~5K RUs, document metadata store"
+        },
+        "prod": {
+          "sku": "Provisioned 1000 RU/s",
+          "cost": 80,
+          "note": "Multi-partition, 100GB, strong consistency for audit"
+        },
+        "enterprise": {
+          "sku": "Provisioned 5000 RU/s",
+          "cost": 400,
+          "note": "Multi-region, 1TB, cross-document entity graph"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Document processing pipeline orchestration — intake, extraction, AI enrichment, validation, output routing",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M executions free, pipeline testing"
+        },
+        "prod": {
+          "sku": "Premium EP1",
+          "cost": 120,
+          "note": "Always-warm for low-latency document processing, VNET"
+        },
+        "enterprise": {
+          "sku": "Premium EP2",
+          "cost": 240,
+          "note": "2 vCPU, 7GB, high-throughput batch + real-time"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Source document repository — PDFs, images, scanned forms, processed outputs, training data for custom models",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 3,
+          "note": "~10GB document files"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 30,
+          "note": "~500GB, lifecycle policies, versioning"
+        },
+        "enterprise": {
+          "sku": "Hot GRS + WORM",
+          "cost": 100,
+          "note": "~5TB, geo-redundant, immutable for compliance"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Search",
+      "category": "AI Services",
+      "purpose": "Full-text and semantic search over extracted document content — field-level search, faceted navigation, document discovery",
+      "tiers": {
+        "dev": {
+          "sku": "Free",
+          "cost": 0,
+          "note": "50MB, 3 indexes, basic search"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 250,
+          "note": "25GB, semantic ranker, custom skillsets"
+        },
+        "enterprise": {
+          "sku": "Standard S2",
+          "cost": 500,
+          "note": "100GB, high-scale, availability zones"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Document Intelligence keys, OpenAI credentials, storage connection strings, customer encryption keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 5,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 15,
+          "note": "HSM-backed keys, CMK for document encryption"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Pipeline performance — extraction accuracy, processing latency, AI enrichment times, error rates per document type",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 59,
+    "prod": 1010,
+    "enterprise": 3055
+  },
+  "optimization_tips": [
+    "Use Document Intelligence prebuilt models (invoice, receipt, ID) before training custom models — prebuilt models are cheaper per page and require no training cost",
+    "Implement document classification as the first pipeline step — route simple forms to prebuilt models and only use custom models + GPT-4o for complex documents",
+    "Cache extraction results by document content hash — re-uploads of identical documents skip re-processing entirely",
+    "Use GPT-4o-mini for field validation and simple entity normalization — reserve GPT-4o for cross-document reasoning and complex schema mapping",
+    "Move processed documents to Cool storage tier after 7 days — most documents are only actively accessed during processing",
+    "Use AI Search Free tier for development — upgrade to Standard only when you need semantic ranking or more than 50MB index size"
+  ]
+}

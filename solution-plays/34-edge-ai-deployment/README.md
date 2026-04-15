@@ -31,6 +31,54 @@ code .  # Use @builder for packaging/IoT, @reviewer for device audit, @tuner for
 | IoT Edge Runtime | On-device container execution |
 | Azure Monitor | Fleet health, telemetry collection |
 
+```mermaid
+graph TB
+    subgraph Edge Devices
+        Device[Edge Device / IoT Gateway<br/>ONNX Runtime · Local Inference · Telemetry Agent]
+    end
+
+    subgraph IoT Platform
+        IoTHub[Azure IoT Hub<br/>Device Management · Module Deploy · Telemetry Ingestion]
+        EventGrid[Azure Event Grid<br/>Model Update Events · Device Status Notifications]
+    end
+
+    subgraph Model Pipeline
+        Functions[Azure Functions<br/>Conversion Trigger · Validation · Device Notification]
+        ACI[Container Instances<br/>ONNX Conversion · INT8 Quantization · Benchmarking]
+    end
+
+    subgraph Storage
+        Blob[Blob Storage<br/>Model Registry · ONNX Artifacts · Edge Telemetry]
+        ACR[Container Registry<br/>Edge Runtime Images · ONNX Serving Containers]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Device Keys · Model Signing Certs]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        Monitor[Azure Monitor<br/>Device Health · Inference Latency · Model Drift]
+    end
+
+    Device -->|Telemetry / Metrics| IoTHub
+    IoTHub -->|Model Deploy / Config| Device
+    IoTHub -->|Device Events| EventGrid
+    EventGrid -->|Trigger Pipeline| Functions
+    Functions -->|Start Conversion| ACI
+    ACI -->|Read Source Model| Blob
+    ACI -->|Write ONNX Model| Blob
+    ACI -->|Push Runtime Image| ACR
+    Functions -->|Deploy to Devices| IoTHub
+    IoTHub -->|Pull Container| ACR
+    Device -->|Upload Telemetry| Blob
+    MI -->|Secrets| KV
+    Device -->|Health Metrics| Monitor
+    IoTHub -->|Hub Metrics| Monitor
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## Rollout Strategy
 | Phase | % of Fleet | Duration | Gate |
 |-------|-----------|----------|------|
@@ -50,8 +98,18 @@ code .  # Use @builder for packaging/IoT, @reviewer for device audit, @tuner for
 | 4 prompts | `/deploy` (fleet rollout), `/test` (container + offline), `/review` (security/rollback), `/evaluate` (fleet health) |
 
 ## Cost
-| Dev | Prod (1000 devices, weekly updates) |
-|-----|-------------------------------------|
-| $20–50/mo | ~$60/mo (ACR + IoT Hub + bandwidth) |
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Azure IoT Hub | $0 (Free) | $25 (Standard S1) | $250 (Standard S3) |
+| Container Instances | $20 (Standard) | $80 (Standard) | $350 (Standard GPU) |
+| Container Registry | $5 (Basic) | $20 (Standard) | $50 (Premium) |
+| Blob Storage | $3 (Hot LRS) | $20 (Hot LRS) | $80 (Hot GRS) |
+| Event Grid | $0 (Free) | $5 (Standard) | $25 (Standard) |
+| Azure Monitor | $0 (Free) | $25 (Pay-per-GB) | $100 (Pay-per-GB) |
+| Key Vault | $1 (Standard) | $3 (Standard) | $10 (Premium HSM) |
+| Azure Functions | $0 (Consumption) | $5 (Consumption) | $75 (Premium EP1) |
+| **Total** | **$29/mo** | **$183/mo** | **$940/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/34-edge-ai-deployment](https://frootai.dev/solution-plays/34-edge-ai-deployment)

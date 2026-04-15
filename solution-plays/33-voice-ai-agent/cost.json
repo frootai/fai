@@ -1,0 +1,199 @@
+{
+  "play": "33",
+  "name": "Voice AI Agent",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure AI Speech",
+      "category": "AI Services",
+      "purpose": "Real-time STT and TTS — speech recognition, voice synthesis, custom neural voice",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 5,
+          "note": "5 hrs free STT, ~20 hrs total with pay-as-you-go overflow"
+        },
+        "prod": {
+          "sku": "Standard S0",
+          "cost": 200,
+          "note": "~500 hrs STT + 2M TTS characters/month"
+        },
+        "enterprise": {
+          "sku": "Standard S0 + Custom Neural Voice",
+          "cost": 800,
+          "note": "~3,000 hrs STT, custom voice model, batch synthesis"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for conversational reasoning, intent resolution, and contextual dialogue management",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 45,
+          "note": "~100K tokens/day, dialogue testing"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 350,
+          "note": "~3M tokens/day, multi-turn voice conversations"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1200,
+          "note": "Provisioned throughput for sub-second latency at scale"
+        }
+      }
+    },
+    {
+      "name": "Azure Communication Services",
+      "category": "Communication",
+      "purpose": "PSTN calling, SIP trunking, WebRTC — inbound/outbound voice connectivity",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 15,
+          "note": "~500 minutes, US local number"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 150,
+          "note": "~10K minutes, toll-free + local, SIP trunk"
+        },
+        "enterprise": {
+          "sku": "Pay-As-You-Go + Direct Routing",
+          "cost": 500,
+          "note": "~50K minutes, multi-region, existing PSTN integration"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Voice agent runtime — WebSocket session manager, STT→LLM→TTS streaming pipeline, call state machine",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 15,
+          "note": "0.5 vCPU, 1GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 120,
+          "note": "1 vCPU, 2GB, min 2 replicas, WebSocket affinity"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 350,
+          "note": "2 vCPU, 4GB, multi-region, 4+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Redis Cache",
+      "category": "Data",
+      "purpose": "Conversation session state, call context window, real-time turn tracking",
+      "tiers": {
+        "dev": {
+          "sku": "Basic C0",
+          "cost": 15,
+          "note": "250MB, single node"
+        },
+        "prod": {
+          "sku": "Standard C1",
+          "cost": 55,
+          "note": "1GB, replica, 99.9% SLA"
+        },
+        "enterprise": {
+          "sku": "Premium P1",
+          "cost": 200,
+          "note": "6GB, clustering, zone redundancy"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Call transcripts, conversation history, agent knowledge base, call analytics",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~5K RUs, transcript storage"
+        },
+        "prod": {
+          "sku": "Provisioned 800 RU/s",
+          "cost": 65,
+          "note": "Multi-partition, 100GB, session consistency"
+        },
+        "enterprise": {
+          "sku": "Provisioned 4000 RU/s",
+          "cost": 300,
+          "note": "Multi-region, 500GB, strong consistency"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Speech API keys, OpenAI credentials, SIP trunk authentication secrets",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Call latency, STT/TTS performance, LLM response time, conversation quality metrics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 30,
+          "note": "~60GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 120,
+          "note": "~250GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 101,
+    "prod": 973,
+    "enterprise": 3480
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for simple FAQ and routing intents — reserve GPT-4o for complex multi-turn reasoning and escalation decisions",
+    "Enable STT streaming with partial results to start LLM processing before the caller finishes speaking — reduces perceived latency by 40%",
+    "Cache frequently asked question responses in Redis with 15-minute TTL — avoids redundant LLM calls for common intents",
+    "Use Communication Services Direct Routing with existing PBX to eliminate per-minute PSTN charges for enterprise telephony",
+    "Right-size Redis tier — Basic C0 handles ~50 concurrent calls; upgrade only when session count exceeds capacity",
+    "Implement call summarization with GPT-4o-mini post-call instead of real-time — saves 60% on transcript analysis tokens"
+  ]
+}

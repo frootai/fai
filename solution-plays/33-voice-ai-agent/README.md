@@ -28,6 +28,57 @@ code .  # Use @builder for dialog/voice, @reviewer for compliance audit, @tuner 
 | Cosmos DB | Dialog state persistence across sessions |
 | Container Apps | Voice agent runtime |
 
+```mermaid
+graph TB
+    subgraph Caller Layer
+        Caller[Caller / Phone / WebRTC]
+    end
+
+    subgraph Communication
+        ACS[Azure Communication Services<br/>PSTN · SIP Trunk · WebRTC Gateway]
+    end
+
+    subgraph Voice Agent Runtime
+        Agent[Container Apps<br/>WebSocket Manager · Call State Machine · Streaming Pipeline]
+    end
+
+    subgraph AI Engine
+        STT[Azure AI Speech — STT<br/>Real-time Recognition · Streaming Partial Results]
+        OpenAI[Azure OpenAI — GPT-4o<br/>Conversational Reasoning · Intent Resolution]
+        TTS[Azure AI Speech — TTS<br/>Neural Voice Synthesis · SSML]
+    end
+
+    subgraph Data Layer
+        Redis[Azure Redis Cache<br/>Session State · Conversation Context · Turn Tracking]
+        CosmosDB[Cosmos DB<br/>Call Transcripts · Conversation History · Analytics]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · SIP Secrets]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Call Latency · STT/TTS Perf · LLM Response Time]
+    end
+
+    Caller -->|Voice Call| ACS
+    ACS -->|Audio Stream / WebSocket| Agent
+    Agent -->|Audio Chunks| STT
+    STT -->|Transcribed Text| Agent
+    Agent -->|Prompt + Context| OpenAI
+    OpenAI -->|Response Text| Agent
+    Agent -->|Text to Synthesize| TTS
+    TTS -->|Audio Stream| Agent
+    Agent -->|Audio Response| ACS
+    Agent -->|Read/Write Context| Redis
+    Agent -->|Store Transcript| CosmosDB
+    MI -->|Secrets| KV
+    Agent -->|Traces| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## Key Metrics
 - Intent accuracy: ≥92% · Dialog completion: ≥80% · Latency: <2s · Voice MOS: ≥4.0/5.0
 
@@ -39,10 +90,18 @@ code .  # Use @builder for dialog/voice, @reviewer for compliance audit, @tuner 
 | 4 prompts | `/deploy` (dialog + voice), `/test` (interaction loop), `/review` (compliance), `/evaluate` (intent/quality) |
 
 ## Cost
-| Conversation Length | Cost |
-|---------------------|------|
-| Short (3 turns) | ~$0.016 |
-| Medium (8 turns) | ~$0.045 |
-| Long (15 turns) | ~$0.088 |
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Azure AI Speech | $5 (Free+overflow) | $200 (Standard S0) | $800 (S0+Custom Voice) |
+| Azure OpenAI | $45 (PAYG) | $350 (PAYG) | $1,200 (PTU) |
+| Communication Services | $15 (PAYG) | $150 (PAYG) | $500 (Direct Routing) |
+| Container Apps | $15 (Consumption) | $120 (Dedicated) | $350 (Dedicated HA) |
+| Redis Cache | $15 (Basic C0) | $55 (Standard C1) | $200 (Premium P1) |
+| Cosmos DB | $5 (Serverless) | $65 (800 RU/s) | $300 (4000 RU/s) |
+| Key Vault | $1 (Standard) | $3 (Standard) | $10 (Premium HSM) |
+| Application Insights | $0 (Free) | $30 (Pay-per-GB) | $120 (Pay-per-GB) |
+| **Total** | **$101/mo** | **$973/mo** | **$3,480/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/33-voice-ai-agent](https://frootai.dev/solution-plays/33-voice-ai-agent)

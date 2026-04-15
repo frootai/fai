@@ -1,0 +1,199 @@
+{
+  "play": "36",
+  "name": "Multimodal Agent",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o with vision for text + image reasoning, multimodal conversation, and audio transcription analysis",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 60,
+          "note": "~80K tokens/day including image tokens, multimodal testing"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 400,
+          "note": "~3M tokens/day, high-res image analysis at scale"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1200,
+          "note": "Provisioned throughput for real-time multimodal processing"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Vision",
+      "category": "AI Services",
+      "purpose": "Image analysis, OCR, object detection, spatial analysis — pre-processing before GPT-4o vision",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "20 calls/min, 5K/month free"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 50,
+          "note": "~50K transactions/month"
+        },
+        "enterprise": {
+          "sku": "Standard S1",
+          "cost": 150,
+          "note": "~200K transactions/month, custom models"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Multimodal agent runtime — input router, modality detection, orchestration, streaming responses",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 100,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 300,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Speech",
+      "category": "AI Services",
+      "purpose": "Audio input processing — speech-to-text for voice messages, audio file transcription",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5 hrs free STT/month"
+        },
+        "prod": {
+          "sku": "Standard S0",
+          "cost": 40,
+          "note": "~100 hrs STT/month"
+        },
+        "enterprise": {
+          "sku": "Standard S0",
+          "cost": 120,
+          "note": "~400 hrs STT/month, custom speech models"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Multimodal asset store — uploaded images, audio files, processed outputs, conversation attachments",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 3,
+          "note": "~10GB media files"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 25,
+          "note": "~500GB, lifecycle policies, CDN integration"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 80,
+          "note": "~3TB, geo-redundant, immutable media"
+        }
+      }
+    },
+    {
+      "name": "Azure Redis Cache",
+      "category": "Data",
+      "purpose": "Conversation session state, multimodal context buffer, processed image embeddings cache",
+      "tiers": {
+        "dev": {
+          "sku": "Basic C0",
+          "cost": 15,
+          "note": "250MB, single node"
+        },
+        "prod": {
+          "sku": "Standard C1",
+          "cost": 55,
+          "note": "1GB, replica, 99.9% SLA"
+        },
+        "enterprise": {
+          "sku": "Premium P1",
+          "cost": 200,
+          "note": "6GB, clustering, zone redundancy"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "OpenAI API keys, Vision API credentials, Speech service keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Multimodal processing metrics — per-modality latency, token usage, image/audio processing times",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 89,
+    "prod": 698,
+    "enterprise": 2160
+  },
+  "optimization_tips": [
+    "Use Azure AI Vision for pre-filtering before GPT-4o vision — extract text via OCR and detect objects to reduce image token consumption by 40-60%",
+    "Resize images to 512x512 or lower resolution before sending to GPT-4o vision — detail:low mode uses 85 tokens vs 765+ for high-res",
+    "Cache image analysis results in Redis by content hash — identical images skip re-processing entirely",
+    "Use GPT-4o-mini for text-only turns in multimodal conversations — only invoke GPT-4o vision when the message contains image/audio",
+    "Implement audio chunking with Speech STT before sending to GPT-4o — transcribe first, then reason over text to avoid vision token costs",
+    "Use Blob Storage lifecycle policies to move processed media to Cool tier after 24 hours — most media is only accessed during the active conversation"
+  ]
+}

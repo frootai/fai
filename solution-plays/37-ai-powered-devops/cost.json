@@ -1,0 +1,199 @@
+{
+  "play": "37",
+  "name": "AI-Powered DevOps",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for incident root-cause analysis, runbook generation, change-risk scoring, and auto-remediation plan synthesis",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 40,
+          "note": "~60K tokens/day, incident analysis testing"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 250,
+          "note": "~2M tokens/day, real-time incident triage at scale"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 900,
+          "note": "Provisioned throughput for sub-second incident correlation"
+        }
+      }
+    },
+    {
+      "name": "Azure Monitor",
+      "category": "Monitoring",
+      "purpose": "Centralized telemetry ingestion — metrics, logs, alerts, and diagnostic data from all monitored resources",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month ingestion, basic metric alerts"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 80,
+          "note": "~50GB/month, custom metrics, multi-resource alerts"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 300,
+          "note": "500GB/day, Sentinel integration, 365-day retention"
+        }
+      }
+    },
+    {
+      "name": "Azure DevOps",
+      "category": "DevOps",
+      "purpose": "Pipeline orchestration, work item management, artifact repository, AI-generated release notes and change approval",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 0,
+          "note": "5 users free, 1 parallel job"
+        },
+        "prod": {
+          "sku": "Basic + Hosted Agents",
+          "cost": 40,
+          "note": "10 users, 2 parallel jobs, 1800 min/month"
+        },
+        "enterprise": {
+          "sku": "Basic + Self-hosted",
+          "cost": 120,
+          "note": "50+ users, 10 parallel jobs, unlimited minutes"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Event-driven incident handlers — alert ingestion, AI triage dispatch, remediation execution, notification routing",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M executions free, alert handler testing"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 15,
+          "note": "~3M executions/month, event-driven remediation"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 120,
+          "note": "Always-warm, VNET integration, <1s cold start"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Incident knowledge base — past incidents, root causes, remediation playbooks, correlation patterns",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~5K RUs, incident history store"
+        },
+        "prod": {
+          "sku": "Provisioned 800 RU/s",
+          "cost": 60,
+          "note": "Multi-partition, 50GB, strong consistency for audit"
+        },
+        "enterprise": {
+          "sku": "Provisioned 4000 RU/s",
+          "cost": 350,
+          "note": "Multi-region, 500GB, sub-10ms incident lookups"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized log store for KQL-based incident correlation, AI-driven anomaly detection, and audit trail",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 40,
+          "note": "~30GB/day, 90-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 150,
+          "note": "300GB/day, 365-day retention, Sentinel SIEM"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "OpenAI API keys, DevOps PATs, webhook secrets, remediation service credentials",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~20K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "AIOps pipeline performance — incident detection latency, AI triage accuracy, remediation success rates",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~40GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 80,
+          "note": "~160GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 46,
+    "prod": 508,
+    "enterprise": 2030
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for low-severity alert classification and runbook lookups — reserve GPT-4o for complex root-cause analysis across correlated incidents",
+    "Cache incident correlation patterns in Cosmos DB — identical alert fingerprints skip AI analysis and return known root causes instantly",
+    "Implement alert deduplication and grouping before AI triage — reduces token consumption by 60-80% during incident storms",
+    "Use Log Analytics Basic tier for high-volume diagnostic logs that rarely need querying — saves 50% vs Analytics tier",
+    "Schedule non-urgent AI analyses (trend reports, postmortem generation) during off-peak hours on Consumption Functions",
+    "Configure Azure Monitor alert suppression rules to avoid duplicate AI triage calls for known maintenance windows"
+  ]
+}

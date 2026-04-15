@@ -15,6 +15,59 @@ Production-grade Microsoft Copilot Studio solution with declarative agents, Type
 | Responses | Adaptive Cards v1.5 | Rich interactive cards in Teams with actions/deep links |
 | Secrets | Azure Key Vault | Graph credentials, OpenAI key, plugin auth |
 
+```mermaid
+graph TB
+    subgraph End Users
+        User[Employee / Customer]
+        Teams[Microsoft Teams<br/>Chat Channel]
+        Web[Website / Custom App<br/>Embedded Bot Widget]
+    end
+
+    subgraph Copilot Studio Platform
+        Studio[Copilot Studio<br/>Topic Authoring · Dialog Management · Generative Answers]
+    end
+
+    subgraph AI & Knowledge
+        OpenAI[Azure OpenAI — GPT-4o<br/>Generative Answers · Plugin Reasoning · Complex Dialog]
+        AISearch[Azure AI Search<br/>Knowledge Index · Semantic Ranking · Citations]
+    end
+
+    subgraph Plugin Layer
+        Functions[Azure Functions<br/>Custom Plugins · API Connectors · Business Logic]
+    end
+
+    subgraph Data & Integration
+        Dataverse[Dataverse<br/>Bot Config · Conversation Logs · Custom Entities]
+        Graph[Microsoft Graph<br/>User Profile · Calendar · SharePoint · Org Chart]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Client Secrets · Plugin Credentials]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Conversation Analytics · Plugin Metrics · Satisfaction]
+    end
+
+    User -->|Chat| Teams
+    User -->|Chat| Web
+    Teams -->|Message| Studio
+    Web -->|Message| Studio
+    Studio -->|Generative Answer| OpenAI
+    Studio -->|Search Knowledge| AISearch
+    Studio -->|Execute Plugin| Functions
+    Studio -->|Read/Write Data| Dataverse
+    Studio -->|User Context| Graph
+    Functions -->|External APIs| Graph
+    OpenAI -->|Grounded Response| Studio
+    Studio -->|Response| User
+    MI -->|Secrets| KV
+    Studio -->|Telemetry| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## How It Differs from Play 08 (Copilot Studio Bot)
 
 | Aspect | Play 08 (Basic) | **Play 40 (Advanced)** |
@@ -76,6 +129,22 @@ Production-grade Microsoft Copilot Studio solution with declarative agents, Type
 # 4. Evaluate plugin accuracy and grounding quality
 /evaluate
 ```
+
+## Cost
+
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Copilot Studio | $0 (Trial) | $200 (Per-session) | $600 (Capacity Pack) |
+| Azure OpenAI | $40 (PAYG) | $300 (PAYG) | $1,000 (PTU) |
+| Dataverse | $0 (Included) | $40 (Included+Capacity) | $120 (Capacity Pack) |
+| Microsoft Graph API | $0 (Included) | $0 (Included) | $0 (Included) |
+| Azure AI Search | $0 (Free) | $75 (Basic) | $250 (Standard S1) |
+| Azure Functions | $0 (Consumption) | $15 (Consumption) | $120 (Premium EP1) |
+| Key Vault | $1 (Standard) | $3 (Standard) | $10 (Premium HSM) |
+| Application Insights | $0 (Free) | $20 (Pay-per-GB) | $80 (Pay-per-GB) |
+| **Total** | **$41/mo** | **$653/mo** | **$2,180/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 ## Key Metrics
 

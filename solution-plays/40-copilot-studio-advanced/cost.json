@@ -1,0 +1,199 @@
+{
+  "play": "40",
+  "name": "Copilot Studio Advanced",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Microsoft Copilot Studio",
+      "category": "Platform",
+      "purpose": "Low-code/no-code bot builder with generative answers, topic authoring, plugin extensibility, and multi-channel deployment",
+      "tiers": {
+        "dev": {
+          "sku": "Trial",
+          "cost": 0,
+          "note": "Trial license, limited sessions"
+        },
+        "prod": {
+          "sku": "Per-session",
+          "cost": 200,
+          "note": "~1K sessions/month at $0.20/session"
+        },
+        "enterprise": {
+          "sku": "Per-session + Capacity Pack",
+          "cost": 600,
+          "note": "~5K sessions/month, capacity packs for volume"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for generative answers, custom plugin reasoning, complex dialog handling, and knowledge-grounded responses",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 40,
+          "note": "~60K tokens/day, plugin testing"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 300,
+          "note": "~2.5M tokens/day, production conversations"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1000,
+          "note": "Provisioned throughput for high-volume enterprise bots"
+        }
+      }
+    },
+    {
+      "name": "Microsoft Dataverse",
+      "category": "Data",
+      "purpose": "Bot configuration, conversation logs, topic definitions, plugin metadata, and custom entity storage for bot knowledge",
+      "tiers": {
+        "dev": {
+          "sku": "Included",
+          "cost": 0,
+          "note": "Included with Copilot Studio trial, 1GB"
+        },
+        "prod": {
+          "sku": "Included + Capacity",
+          "cost": 40,
+          "note": "Included base + 10GB additional capacity"
+        },
+        "enterprise": {
+          "sku": "Capacity Pack",
+          "cost": 120,
+          "note": "50GB+, premium connectors, audit logging"
+        }
+      }
+    },
+    {
+      "name": "Microsoft Graph API",
+      "category": "Integration",
+      "purpose": "User profile resolution, Teams presence, SharePoint knowledge sources, Outlook calendar booking, and organizational directory",
+      "tiers": {
+        "dev": {
+          "sku": "Included",
+          "cost": 0,
+          "note": "Included with M365 license"
+        },
+        "prod": {
+          "sku": "Included",
+          "cost": 0,
+          "note": "Included with M365 license"
+        },
+        "enterprise": {
+          "sku": "Included",
+          "cost": 0,
+          "note": "Included with M365 license, metered connectors if needed"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Search",
+      "category": "AI Services",
+      "purpose": "Knowledge base indexing for generative answers — SharePoint, web pages, custom data sources with semantic ranking",
+      "tiers": {
+        "dev": {
+          "sku": "Free",
+          "cost": 0,
+          "note": "50MB, 3 indexes"
+        },
+        "prod": {
+          "sku": "Basic",
+          "cost": 75,
+          "note": "2GB, 15 indexes, semantic ranker"
+        },
+        "enterprise": {
+          "sku": "Standard S1",
+          "cost": 250,
+          "note": "25GB, private endpoints, availability zones"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Custom plugin backend — API connectors, business logic, data transformation, external system integration",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M executions free, plugin testing"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 15,
+          "note": "~2M executions/month, plugin backends"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 120,
+          "note": "Always-warm, VNET integration, sub-second response"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "OpenAI API keys, plugin API credentials, Graph client secrets, external connector tokens",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~20K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Bot analytics — conversation completion rates, plugin success/failure, generative answer quality, user satisfaction",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~40GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 80,
+          "note": "~160GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 41,
+    "prod": 653,
+    "enterprise": 2180
+  },
+  "optimization_tips": [
+    "Use Copilot Studio's built-in generative answers for FAQ-style queries — only route complex multi-turn conversations to custom Azure OpenAI plugins",
+    "Leverage SharePoint as a knowledge source directly in Copilot Studio — avoids duplicating content into a separate AI Search index for common scenarios",
+    "Use GPT-4o-mini for simple plugin orchestration and entity extraction — reserve GPT-4o for complex reasoning that requires multi-step dialog",
+    "Implement conversation topic caching — frequently asked questions resolve from cached topics without invoking AI services",
+    "Monitor session consumption carefully — each user interaction counts as a session, so design topics to resolve in fewer turns",
+    "Use Azure Functions Consumption plan for low-traffic plugins — only upgrade to Premium when cold start latency impacts user experience"
+  ]
+}

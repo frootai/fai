@@ -1,0 +1,199 @@
+{
+  "play": "35",
+  "name": "AI Compliance Engine",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for policy interpretation, compliance gap analysis, remediation recommendation, and audit report generation",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 50,
+          "note": "~120K tokens/day, policy rule testing"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 300,
+          "note": "~2.5M tokens/day, continuous compliance scanning"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1000,
+          "note": "Provisioned throughput for real-time compliance across subscriptions"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Compliance findings, audit trails, policy rule definitions, remediation history, evidence repository",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~8K RUs, compliance findings storage"
+        },
+        "prod": {
+          "sku": "Provisioned 1000 RU/s",
+          "cost": 80,
+          "note": "Multi-partition, 100GB, strong consistency for audit integrity"
+        },
+        "enterprise": {
+          "sku": "Provisioned 5000 RU/s",
+          "cost": 400,
+          "note": "Multi-region, 1TB, immutable audit records"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Compliance scan orchestration — scheduled policy checks, event-driven rule evaluation, remediation triggers",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M executions free, scheduled scans"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 15,
+          "note": "~2M executions/month, event-driven"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 120,
+          "note": "Always-warm, VNET integration, no cold start"
+        }
+      }
+    },
+    {
+      "name": "Azure Event Grid",
+      "category": "Integration",
+      "purpose": "Resource change notifications, policy violation alerts, remediation workflow triggers",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 0,
+          "note": "First 100K operations free"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 5,
+          "note": "~5M events/month"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 30,
+          "note": "~60M events/month, dead-letter, retry policies"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "OpenAI API keys, signing certificates for audit reports, encryption keys for compliance evidence",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 5,
+          "note": "~50K operations/month, audit report signing"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 15,
+          "note": "HSM-backed keys, FIPS 140-2 Level 2 compliance"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Compliance evidence artifacts — scan reports, policy documents, remediation screenshots, audit exports",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~5GB evidence files"
+        },
+        "prod": {
+          "sku": "Hot LRS + WORM",
+          "cost": 20,
+          "note": "~300GB, immutable blob policies for audit retention"
+        },
+        "enterprise": {
+          "sku": "Hot GRS + WORM",
+          "cost": 75,
+          "note": "~2TB, geo-redundant, legal hold, 7-year retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized compliance audit log — scan results, policy changes, remediation actions, access events",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~15GB/day, 90-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 80,
+          "note": "200GB/day, 365-day retention, Sentinel integration"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Compliance engine performance — scan duration, rule evaluation latency, API response times",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~40GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 80,
+          "note": "~160GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 58,
+    "prod": 465,
+    "enterprise": 1800
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for routine policy checks (tag validation, naming compliance) — reserve GPT-4o for complex regulatory gap analysis",
+    "Cache compliance rule evaluations per resource type — re-evaluate only when the resource configuration or policy version changes",
+    "Use Cosmos DB serverless for dev — saves $75/month vs provisioned when compliance scans run only a few times daily",
+    "Implement incremental scanning — only evaluate resources changed since last scan via Event Grid notifications instead of full sweeps",
+    "Use Blob Storage immutable policies only for production/enterprise — dev environments don't need WORM compliance",
+    "Schedule full compliance sweeps during off-peak hours to take advantage of lower consumption-tier pricing on Functions"
+  ]
+}

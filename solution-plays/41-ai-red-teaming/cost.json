@@ -1,0 +1,199 @@
+{
+  "play": "41",
+  "name": "AI Red Teaming",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure AI Foundry",
+      "category": "AI Platform",
+      "purpose": "Red team orchestration hub — attack scenario management, evaluation pipelines, model endpoint configuration, and safety assessment workflows",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 0,
+          "note": "Included workspace, manual evaluation runs"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 50,
+          "note": "Automated evaluation pipelines, scheduled red team runs"
+        },
+        "enterprise": {
+          "sku": "Standard HA",
+          "cost": 150,
+          "note": "Multi-project, dedicated compute for continuous red teaming"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Content Safety",
+      "category": "AI Services",
+      "purpose": "Automated safety scoring — evaluates AI responses for hate, violence, self-harm, sexual content, jailbreak detection, and prompt injection",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5K transactions/month, manual testing"
+        },
+        "prod": {
+          "sku": "Standard S0",
+          "cost": 60,
+          "note": "~60K evaluations/month, Prompt Shields enabled"
+        },
+        "enterprise": {
+          "sku": "Standard S0",
+          "cost": 200,
+          "note": "~250K evaluations/month, custom blocklists, groundedness detection"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "Dual role — (1) target model under test (GPT-4o, GPT-4o-mini), (2) adversarial prompt generator for automated attack synthesis",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 60,
+          "note": "~100K tokens/day, attack prompt generation + target evaluation"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 400,
+          "note": "~4M tokens/day, automated red team campaigns"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1200,
+          "note": "Provisioned throughput for continuous red teaming across models"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Red team campaign orchestration — attack scenario execution, response collection, safety evaluation dispatch, report generation",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M executions free, manual campaigns"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 15,
+          "note": "~3M executions/month, automated campaigns"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 120,
+          "note": "Always-warm, VNET isolation, parallel attack execution"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Red team findings database — attack scenarios, model responses, safety scores, vulnerability patterns, remediation tracking",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~5K RUs, findings store"
+        },
+        "prod": {
+          "sku": "Provisioned 800 RU/s",
+          "cost": 60,
+          "note": "Multi-partition, 50GB, campaign history"
+        },
+        "enterprise": {
+          "sku": "Provisioned 4000 RU/s",
+          "cost": 350,
+          "note": "Multi-region, 500GB, cross-model vulnerability tracking"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Red team artifacts — attack prompts, model responses, evaluation reports, evidence screenshots, campaign exports",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~5GB artifacts"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 15,
+          "note": "~200GB, versioned reports"
+        },
+        "enterprise": {
+          "sku": "Hot GRS + WORM",
+          "cost": 50,
+          "note": "~1TB, immutable evidence for compliance audits"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Target model API keys, Foundry credentials, Content Safety keys, red team service principal secrets",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 5,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 15,
+          "note": "HSM-backed keys, compliance audit trail"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Red team pipeline metrics — attack success rates, safety score distributions, model vulnerability trends, campaign coverage",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~40GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 80,
+          "note": "~160GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 68,
+    "prod": 625,
+    "enterprise": 2165
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini as the adversarial prompt generator — it produces creative attack prompts at 1/10th the cost of GPT-4o, which should be reserved as the target model",
+    "Batch red team evaluations during off-peak hours — Content Safety API has lower latency and Functions cost less on Consumption plans during low-traffic periods",
+    "Cache known-safe responses by prompt fingerprint — skip Content Safety evaluation for prompts that have been evaluated within the last 24 hours with identical model versions",
+    "Use Azure AI Foundry's built-in evaluation metrics before custom evaluations — saves development time and provides standardized safety benchmarks",
+    "Implement progressive attack complexity — start with simple prompt injections (low token cost) and only escalate to complex multi-turn attacks for models that pass initial screening",
+    "Share Cosmos DB and Blob Storage across multiple target models — red team infrastructure costs are fixed, so test more models to amortize per-model cost"
+  ]
+}

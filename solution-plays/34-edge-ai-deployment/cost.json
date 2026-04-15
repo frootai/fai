@@ -1,0 +1,199 @@
+{
+  "play": "34",
+  "name": "Edge AI Deployment",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure IoT Hub",
+      "category": "IoT",
+      "purpose": "Device management, model deployment orchestration, telemetry ingestion, edge-to-cloud sync",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "8K messages/day, 500 device identities"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 25,
+          "note": "400K messages/day per unit, 2 units"
+        },
+        "enterprise": {
+          "sku": "Standard S3",
+          "cost": 250,
+          "note": "300M messages/day, unlimited devices"
+        }
+      }
+    },
+    {
+      "name": "Container Instances",
+      "category": "Compute",
+      "purpose": "Cloud-side model quantization, ONNX conversion, benchmark testing before edge deployment",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 20,
+          "note": "2 vCPU, 4GB, ~40 hrs/month for conversions"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 80,
+          "note": "4 vCPU, 8GB, scheduled quantization jobs"
+        },
+        "enterprise": {
+          "sku": "Standard GPU",
+          "cost": 350,
+          "note": "GPU-accelerated quantization, parallel model builds"
+        }
+      }
+    },
+    {
+      "name": "Azure Container Registry",
+      "category": "Compute",
+      "purpose": "Edge container images — ONNX runtime, quantized models, inference service, update agents",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 5,
+          "note": "10GB storage, dev model images"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 20,
+          "note": "100GB storage, geo-replication"
+        },
+        "enterprise": {
+          "sku": "Premium",
+          "cost": 50,
+          "note": "500GB, private endpoints, content trust, signed images"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Model registry — ONNX models, quantization artifacts, edge telemetry uploads, training data",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 3,
+          "note": "~10GB models + telemetry"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 20,
+          "note": "~500GB, lifecycle tiering to Cool"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 80,
+          "note": "~3TB, geo-redundant, immutable blobs"
+        }
+      }
+    },
+    {
+      "name": "Azure Event Grid",
+      "category": "Integration",
+      "purpose": "Model update notifications, device status events, deployment pipeline triggers",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 0,
+          "note": "First 100K operations free"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 5,
+          "note": "~5M events/month"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 25,
+          "note": "~50M events/month, dead-letter storage"
+        }
+      }
+    },
+    {
+      "name": "Azure Monitor",
+      "category": "Monitoring",
+      "purpose": "Edge device health, inference latency, model accuracy drift, deployment rollout tracking",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "Basic metrics, 31-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~30GB/month, custom dashboards"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~150GB/month, 90-day retention, alerting"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Device provisioning keys, model signing certificates, IoT Hub connection strings",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~500 operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~20K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, device certificate management"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Model conversion pipeline — trigger quantization jobs, validate ONNX exports, notify devices",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M executions free"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 5,
+          "note": "~500K executions/month"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 75,
+          "note": "Always-warm, VNET integration, no cold start"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 29,
+    "prod": 183,
+    "enterprise": 940
+  },
+  "optimization_tips": [
+    "Use IoT Hub Free tier for dev with up to 500 devices — upgrade to S1 only when message volume exceeds 8K/day",
+    "Run model quantization in Container Instances on a schedule (nightly) instead of always-on — saves 70% vs dedicated compute",
+    "Use INT8 quantization for edge models — reduces model size 4x with <2% accuracy loss, saving bandwidth and storage costs",
+    "Implement delta model updates via IoT Hub — only push changed layers instead of full model files to reduce bandwidth costs",
+    "Tier telemetry storage with lifecycle policies — move inference logs to Cool storage after 7 days, Archive after 30 days",
+    "Use Event Grid filtering to limit notifications to only deployment-critical events — reduces unnecessary function invocations"
+  ]
+}

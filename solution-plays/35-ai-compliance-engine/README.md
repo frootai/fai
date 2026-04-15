@@ -19,6 +19,60 @@ code .  # Use @builder for checks/audit, @reviewer for coverage audit, @tuner fo
 | Azure Storage | Reports, evidence snapshots, archives |
 | Azure Functions | Scheduled compliance check execution |
 
+```mermaid
+graph TB
+    subgraph Compliance Team
+        User[Compliance Officer / Auditor]
+        Dashboard[Compliance Dashboard<br/>Findings · Posture Score · Audit Reports]
+    end
+
+    subgraph Scan Engine
+        Functions[Azure Functions<br/>Scan Orchestrator · Rule Evaluator · Report Generator]
+        EventGrid[Azure Event Grid<br/>Resource Change Events · Scan Triggers]
+    end
+
+    subgraph Azure Platform
+        Policy[Azure Policy<br/>Built-in + Custom Definitions · Assignment State]
+        ARG[Azure Resource Graph<br/>Resource Configuration Queries]
+    end
+
+    subgraph AI Engine
+        OpenAI[Azure OpenAI — GPT-4o<br/>Policy Interpretation · Gap Analysis · Remediation]
+        Mini[Azure OpenAI — GPT-4o-mini<br/>Finding Classification · Report Summarization]
+    end
+
+    subgraph Data Layer
+        CosmosDB[Cosmos DB<br/>Findings · Audit Trails · Rule Definitions · Remediation History]
+        Blob[Blob Storage — WORM<br/>Evidence Artifacts · Scan Reports · Policy Documents]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Signing Certs · Encryption Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        LogAnalytics[Log Analytics<br/>Audit Logs · Scan Events · Access History]
+        AppInsights[Application Insights<br/>Scan Performance · Rule Latency]
+    end
+
+    User -->|Configure Rules / View| Dashboard
+    Dashboard -->|Query Findings| CosmosDB
+    EventGrid -->|Resource Changed| Functions
+    Functions -->|Scheduled Scans| ARG
+    Functions -->|Check Policy State| Policy
+    Functions -->|Analyze Compliance| OpenAI
+    Functions -->|Classify & Summarize| Mini
+    Functions -->|Store Findings| CosmosDB
+    Functions -->|Archive Evidence| Blob
+    Functions -->|Generate Report| Dashboard
+    MI -->|Secrets| KV
+    Functions -->|Audit Trail| LogAnalytics
+    Functions -->|Traces| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## Supported Frameworks
 | Framework | Checks | Focus |
 |-----------|--------|-------|
@@ -41,8 +95,18 @@ code .  # Use @builder for checks/audit, @reviewer for coverage audit, @tuner fo
 **Note:** This is a regulatory compliance play. TuneKit covers check frequency per risk level, false positive reduction, risk scoring weight calibration, evidence retention policies, and framework-specific tuning — not AI model parameters.
 
 ## Cost
-| Dev | Prod |
-|-----|------|
-| $50–150/mo | $300–1K/mo |
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Azure OpenAI | $50 (PAYG) | $300 (PAYG) | $1,000 (PTU) |
+| Cosmos DB | $5 (Serverless) | $80 (1000 RU/s) | $400 (5000 RU/s) |
+| Azure Functions | $0 (Consumption) | $15 (Consumption) | $120 (Premium EP1) |
+| Event Grid | $0 (Free) | $5 (Standard) | $30 (Standard) |
+| Key Vault | $1 (Standard) | $5 (Standard) | $15 (Premium HSM) |
+| Blob Storage | $2 (Hot LRS) | $20 (Hot LRS+WORM) | $75 (Hot GRS+WORM) |
+| Log Analytics | $0 (Free) | $20 (Pay-per-GB) | $80 (Commitment) |
+| Application Insights | $0 (Free) | $20 (Pay-per-GB) | $80 (Pay-per-GB) |
+| **Total** | **$58/mo** | **$465/mo** | **$1,800/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/35-ai-compliance-engine](https://frootai.dev/solution-plays/35-ai-compliance-engine)

@@ -14,6 +14,60 @@ Real-time meeting transcription, speaker diarization, action item extraction, su
 | Hosting | Azure Container Apps | Scalable meeting processing runtime |
 | Secrets | Azure Key Vault | Speech key, OpenAI key, Graph credentials |
 
+```mermaid
+graph TB
+    subgraph Meeting Participants
+        User[Meeting Organizer / Attendee]
+        Teams[Microsoft Teams<br/>Meeting Audio Stream]
+    end
+
+    subgraph Processing Runtime
+        ACA[Container Apps<br/>Meeting Pipeline · WebSocket · Orchestrator]
+    end
+
+    subgraph AI Services
+        Speech[Azure AI Speech — STT<br/>Real-time Transcription · Speaker Diarization]
+        OpenAI[Azure OpenAI — GPT-4o<br/>Summarization · Action Items · Decisions · Topics]
+        Mini[Azure OpenAI — GPT-4o-mini<br/>Quick Summary · Follow-up Drafts]
+    end
+
+    subgraph Integration
+        Graph[Microsoft Graph API<br/>Calendar · Attendees · Tasks · Email]
+    end
+
+    subgraph Data Layer
+        CosmosDB[Cosmos DB<br/>Transcripts · Summaries · Action Items · Analytics]
+        Blob[Blob Storage<br/>Audio Recordings · Reports · Archives]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Client Secrets · Encryption Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Transcription Accuracy · Latency · Pipeline Metrics]
+    end
+
+    Teams -->|Audio Stream| ACA
+    User -->|Upload Recording| ACA
+    ACA -->|Audio Chunks| Speech
+    Speech -->|Diarized Transcript| ACA
+    ACA -->|Transcript + Context| OpenAI
+    ACA -->|Quick Tasks| Mini
+    OpenAI -->|Summary · Actions · Decisions| ACA
+    ACA -->|Meeting Metadata| Graph
+    Graph -->|Attendees · Calendar| ACA
+    ACA -->|Create Tasks / Send Email| Graph
+    ACA -->|Store Results| CosmosDB
+    ACA -->|Store Audio| Blob
+    ACA -->|Meeting Report| User
+    MI -->|Secrets| KV
+    ACA -->|Traces| AppInsights
+```
+
+📐 [Full architecture details](architecture.md)
+
 ## How It Differs from Related Plays
 
 | Aspect | Play 04 (Call Center Voice) | Play 33 (Voice Agent) | **Play 39 (Meeting Assistant)** |
@@ -72,6 +126,22 @@ Real-time meeting transcription, speaker diarization, action item extraction, su
 # 4. Evaluate transcription + extraction quality
 /evaluate
 ```
+
+## Cost
+
+| Service | Dev | Prod | Enterprise |
+|---------|-----|------|------------|
+| Azure AI Speech | $0 (Free) | $80 (Standard S0) | $300 (Standard S0) |
+| Azure OpenAI | $40 (PAYG) | $280 (PAYG) | $900 (PTU) |
+| Microsoft Graph API | $0 (Included) | $0 (Included) | $0 (Included) |
+| Container Apps | $10 (Consumption) | $120 (Dedicated) | $350 (Dedicated HA) |
+| Cosmos DB | $5 (Serverless) | $60 (800 RU/s) | $350 (4000 RU/s) |
+| Blob Storage | $2 (Hot LRS) | $20 (Hot LRS) | $60 (Hot GRS) |
+| Key Vault | $1 (Standard) | $3 (Standard) | $10 (Premium HSM) |
+| Application Insights | $0 (Free) | $20 (Pay-per-GB) | $80 (Pay-per-GB) |
+| **Total** | **$58/mo** | **$583/mo** | **$2,050/mo** |
+
+💰 [Full cost breakdown](cost.json)
 
 ## Key Metrics
 

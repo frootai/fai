@@ -1,0 +1,199 @@
+{
+  "play": "39",
+  "name": "AI Meeting Assistant",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure AI Speech",
+      "category": "AI Services",
+      "purpose": "Real-time and batch speech-to-text transcription with speaker diarization, language detection, and punctuation restoration",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5 hrs STT free/month, testing transcription"
+        },
+        "prod": {
+          "sku": "Standard S0",
+          "cost": 80,
+          "note": "~200 hrs STT/month, real-time diarization"
+        },
+        "enterprise": {
+          "sku": "Standard S0",
+          "cost": 300,
+          "note": "~1000 hrs STT/month, custom speech models, batch transcription"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for meeting summarization, action item extraction, decision logging, follow-up email drafting, and topic segmentation",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 40,
+          "note": "~60K tokens/day, summarization testing"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 280,
+          "note": "~2.5M tokens/day, production meeting pipelines"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 900,
+          "note": "Provisioned throughput for real-time meeting intelligence"
+        }
+      }
+    },
+    {
+      "name": "Microsoft Graph API",
+      "category": "Integration",
+      "purpose": "Calendar integration, Teams meeting metadata, attendee resolution, Outlook task/email creation for action items",
+      "tiers": {
+        "dev": {
+          "sku": "Included",
+          "cost": 0,
+          "note": "Included with M365 license, dev tenant"
+        },
+        "prod": {
+          "sku": "Included",
+          "cost": 0,
+          "note": "Included with M365 license, throttled per-tenant"
+        },
+        "enterprise": {
+          "sku": "Included",
+          "cost": 0,
+          "note": "Included with M365 license, metered connectors if needed"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Meeting assistant runtime — transcription orchestration, AI pipeline, real-time WebSocket handling, Graph API integration",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 120,
+          "note": "1 vCPU, 2GB, min 2 replicas for low-latency"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 350,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Meeting transcripts, summaries, action items, decision logs, attendee profiles, and meeting analytics",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~5K RUs, meeting data store"
+        },
+        "prod": {
+          "sku": "Provisioned 800 RU/s",
+          "cost": 60,
+          "note": "Multi-partition, 50GB, per-meeting indexing"
+        },
+        "enterprise": {
+          "sku": "Provisioned 4000 RU/s",
+          "cost": 350,
+          "note": "Multi-region, 500GB, cross-meeting search"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Meeting audio recordings, transcript archives, generated reports, and exported summaries",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~5GB audio/transcripts"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 20,
+          "note": "~200GB, lifecycle policies, CDN for playback"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 60,
+          "note": "~2TB, geo-redundant, legal hold for compliance"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "OpenAI API keys, Speech service credentials, Graph API client secrets, encryption keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~20K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Meeting pipeline metrics — transcription accuracy, summarization latency, action item extraction rates, API performance",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~40GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 80,
+          "note": "~160GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 58,
+    "prod": 583,
+    "enterprise": 2050
+  },
+  "optimization_tips": [
+    "Use batch transcription for recorded meetings instead of real-time STT — batch mode is 50% cheaper per audio hour and handles large files better",
+    "Use GPT-4o-mini for action item extraction and simple summaries — reserve GPT-4o for complex multi-topic segmentation and decision analysis",
+    "Implement transcript chunking by speaker turn — reduces token consumption by avoiding redundant context in long meetings",
+    "Cache attendee profile data from Microsoft Graph with a 24-hour TTL — avoids repeated API calls for recurring meeting participants",
+    "Move meeting audio recordings to Cool storage after 30 days — most recordings are only replayed within the first week",
+    "Use Azure AI Speech batch mode during off-peak hours for processing recorded meetings — saves on Container Apps compute by avoiding real-time processing"
+  ]
+}
