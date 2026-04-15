@@ -6,6 +6,7 @@
  *   init                Interactive project scaffolding
  *   scaffold <play>     Scaffold a specific solution play
  *   install <play>      Download a solution play from GitHub
+ *   info <play>         Show play details, cost, and architecture
  *   list [keyword]      List available plugins
  *   primitives [type]   Browse 830+ FAI primitives catalog
  *   protocol            View FAI Protocol overview
@@ -57,6 +58,56 @@ ${c.dim}  From the Roots to the Fruits${c.reset}
 `);
 }
 
+// ─── Shared Play Index ───
+const ALL_PLAYS = [
+  '01-enterprise-rag', '02-ai-landing-zone', '03-deterministic-agent',
+  '04-call-center-voice-ai', '05-it-ticket-resolution', '06-document-intelligence',
+  '07-multi-agent-service', '08-copilot-studio-bot', '09-ai-search-portal',
+  '10-content-moderation', '11-ai-landing-zone-advanced', '12-model-serving-aks',
+  '13-fine-tuning-workflow', '14-cost-optimized-ai-gateway', '15-multi-modal-docproc',
+  '16-copilot-teams-extension', '17-ai-observability', '18-prompt-management',
+  '19-edge-ai-phi4', '20-anomaly-detection', '21-agentic-rag',
+  '22-multi-agent-swarm', '23-browser-automation-agent', '24-ai-code-review-pipeline',
+  '25-conversation-memory-layer', '26-semantic-search-engine', '27-ai-data-pipeline',
+  '28-knowledge-graph-rag', '29-mcp-gateway', '30-ai-security-hardening',
+  '31-low-code-ai-builder', '32-ai-powered-testing', '33-voice-ai-agent',
+  '34-edge-ai-deployment', '35-ai-compliance-engine', '36-multimodal-agent',
+  '37-ai-powered-devops', '38-document-understanding-v2', '39-ai-meeting-assistant',
+  '40-copilot-studio-advanced', '41-ai-red-teaming', '42-computer-use-agent',
+  '43-ai-video-generation', '44-foundry-local-on-device', '45-realtime-event-ai',
+  '46-healthcare-clinical-ai', '47-synthetic-data-factory', '48-ai-model-governance',
+  '49-creative-ai-studio', '50-financial-risk-intelligence', '51-autonomous-coding-agent',
+  '52-ai-api-gateway-v2', '53-legal-document-ai', '54-ai-customer-support-v2',
+  '55-supply-chain-ai', '56-semantic-code-search', '57-ai-translation-engine',
+  '58-digital-twin-agent', '59-ai-recruiter-agent', '60-responsible-ai-dashboard',
+  '61-content-moderation-v2', '62-federated-learning-pipeline', '63-fraud-detection-agent',
+  '64-ai-sales-assistant', '65-ai-training-curriculum', '66-ai-infrastructure-optimizer',
+  '67-ai-knowledge-management', '68-predictive-maintenance-ai', '69-carbon-footprint-tracker',
+  '70-esg-compliance-agent', '71-smart-energy-grid-ai', '72-climate-risk-assessor',
+  '73-waste-recycling-optimizer', '74-ai-tutoring-agent', '75-exam-generation-engine',
+  '76-accessibility-learning-agent', '77-research-paper-ai', '78-precision-agriculture-agent',
+  '79-food-safety-inspector-ai', '80-biodiversity-monitor', '81-property-valuation-ai',
+  '82-construction-safety-ai', '83-building-energy-optimizer', '84-citizen-services-chatbot',
+  '85-policy-impact-analyzer', '86-public-safety-analytics', '87-dynamic-pricing-engine',
+  '88-visual-product-search', '89-retail-inventory-predictor', '90-network-optimization-agent',
+  '91-customer-churn-predictor', '92-telecom-fraud-shield', '93-continual-learning-agent',
+  '94-ai-podcast-generator', '95-multimodal-search-v2', '96-realtime-voice-agent-v2',
+  '97-ai-data-marketplace', '98-agent-evaluation-platform', '99-enterprise-ai-governance-hub',
+  '100-fai-meta-agent', '101-pester-test-development',
+];
+
+function resolvePlay(input) {
+  if (!input) return null;
+  const exact = ALL_PLAYS.find(p => p === input);
+  if (exact) return exact;
+  const num = input.replace(/^play-?/i, '').replace(/^0*(\d+)/, (_, d) => d);
+  const padded = num.padStart(2, '0');
+  const numMatch = ALL_PLAYS.find(p => p.startsWith(padded + '-'));
+  if (numMatch) return numMatch;
+  const slug = input.toLowerCase().replace(/\s+/g, '-');
+  return ALL_PLAYS.find(p => p.includes(slug)) || null;
+}
+
 // ─── Command Router ───
 switch (command) {
   case 'init':
@@ -76,6 +127,9 @@ switch (command) {
     break;
   case 'cost':
     cmdCost(args[1], args.includes('--scale') ? args[args.indexOf('--scale') + 1] : 'dev');
+    break;
+  case 'info':
+    await cmdInfo(args[1]);
     break;
   case 'validate':
     cmdValidate();
@@ -575,6 +629,111 @@ function cmdCost(play, scale) {
 }
 
 // ═══════════════════════════════════════════════════
+// INFO — Show detailed play information
+// ═══════════════════════════════════════════════════
+async function cmdInfo(playInput) {
+  banner();
+
+  if (!playInput) {
+    console.log(`${c.red}  Error: Play name or ID required.${c.reset}`);
+    console.log(`${c.dim}  Usage: frootai info <play-name|play-id>${c.reset}`);
+    console.log(`${c.dim}  Examples: frootai info 01  |  frootai info enterprise-rag${c.reset}\n`);
+    process.exit(1);
+  }
+
+  const playDir = resolvePlay(playInput);
+  if (!playDir) {
+    console.log(`${c.red}  Play not found: ${playInput}${c.reset}`);
+    console.log(`${c.dim}  Try: frootai info 01 or frootai info enterprise-rag${c.reset}\n`);
+    process.exit(1);
+  }
+
+  const playNum = playDir.split('-')[0];
+  const playName = playDir.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    .replace(/\bAi\b/g, 'AI').replace(/\bRag\b/g, 'RAG').replace(/\bAks\b/g, 'AKS')
+    .replace(/\bMcp\b/g, 'MCP').replace(/\bApi\b/g, 'API').replace(/\bIt\b/g, 'IT')
+    .replace(/\bEsg\b/g, 'ESG').replace(/\bIac\b/g, 'IaC').replace(/\bSdk\b/g, 'SDK')
+    .replace(/\bV2\b/g, 'v2').replace(/\bPhi4\b/g, 'Phi-4').replace(/\bFai\b/g, 'FAI');
+
+  const ghBase = `https://raw.githubusercontent.com/frootai/frootai/main/solution-plays/${playDir}`;
+  const ghPage = `https://github.com/frootai/frootai/tree/main/solution-plays/${playDir}`;
+  const webPage = `https://frootai.dev/solution-plays/${playDir}`;
+
+  // Header
+  console.log(`  ${c.bold}${c.cyan}Play ${playNum} — ${playName}${c.reset}`);
+  console.log(`  ${'─'.repeat(50)}`);
+
+  // Fetch README first line (description)
+  try {
+    const readmeRes = await fetch(`${ghBase}/README.md`, { headers: { 'User-Agent': 'FrootAI-CLI' } });
+    if (readmeRes.ok) {
+      const readme = await readmeRes.text();
+      const lines = readme.split('\n').filter(l => l.trim() && !l.startsWith('#'));
+      const desc = lines.find(l => l.startsWith('>'));
+      const detail = lines.find(l => !l.startsWith('>') && !l.startsWith('```') && l.length > 20);
+      if (desc) console.log(`\n  ${c.dim}${desc.replace(/^>\s*/, '')}${c.reset}`);
+      if (detail) console.log(`  ${detail.trim()}`);
+    }
+  } catch { /* offline fallback below */ }
+
+  // Fetch cost.json for real pricing
+  let costData = null;
+  try {
+    const costRes = await fetch(`${ghBase}/cost.json`, { headers: { 'User-Agent': 'FrootAI-CLI' } });
+    if (costRes.ok) costData = await costRes.json();
+  } catch { /* offline */ }
+
+  if (costData) {
+    console.log(`\n  ${c.bold}Cost Estimate${c.reset}  ${c.dim}(monthly, USD)${c.reset}\n`);
+    console.log(`  ${'Service'.padEnd(28)} | ${'Dev'.padEnd(12)} | ${'Prod'.padEnd(12)} | Enterprise`);
+    console.log(`  ${'─'.repeat(28)}─┼${'─'.repeat(13)}┼${'─'.repeat(13)}┼${'─'.repeat(13)}`);
+
+    let devTotal = 0, prodTotal = 0, entTotal = 0;
+    for (const svc of costData.services) {
+      const dev = svc.tiers?.dev?.cost ?? '—';
+      const prod = svc.tiers?.prod?.cost ?? '—';
+      const ent = svc.tiers?.enterprise?.cost ?? '—';
+      if (typeof dev === 'number') devTotal += dev;
+      if (typeof prod === 'number') prodTotal += prod;
+      if (typeof ent === 'number') entTotal += ent;
+      const fmtDev = typeof dev === 'number' ? `$${dev}` : dev;
+      const fmtProd = typeof prod === 'number' ? `$${prod}` : prod;
+      const fmtEnt = typeof ent === 'number' ? `$${ent}` : ent;
+      console.log(`  ${svc.name.padEnd(28)} | ${fmtDev.padEnd(12)} | ${fmtProd.padEnd(12)} | ${fmtEnt}`);
+    }
+    console.log(`  ${'─'.repeat(28)}─┼${'─'.repeat(13)}┼${'─'.repeat(13)}┼${'─'.repeat(13)}`);
+    console.log(`  ${c.bold}${'TOTAL'.padEnd(28)}${c.reset} | ${c.bold}${'$' + devTotal}${c.reset}${' '.repeat(Math.max(0, 12 - ('$' + devTotal).length))} | ${c.bold}${'$' + prodTotal}${c.reset}${' '.repeat(Math.max(0, 12 - ('$' + prodTotal).length))} | ${c.bold}${'$' + entTotal}${c.reset}`);
+
+    if (costData.optimization_tips?.length > 0) {
+      console.log(`\n  ${c.yellow}💡 Tips:${c.reset}`);
+      costData.optimization_tips.slice(0, 3).forEach(t => console.log(`  ${c.dim}  • ${t}${c.reset}`));
+    }
+  }
+
+  // Key services
+  if (costData?.services) {
+    const cats = [...new Set(costData.services.map(s => s.category))];
+    console.log(`\n  ${c.bold}Azure Services${c.reset}  ${c.dim}(${costData.services.length} total)${c.reset}`);
+    for (const cat of cats) {
+      const svcs = costData.services.filter(s => s.category === cat);
+      console.log(`  ${c.cyan}${cat}:${c.reset} ${svcs.map(s => s.name).join(', ')}`);
+    }
+  }
+
+  // Links
+  console.log(`\n  ${c.bold}Links${c.reset}`);
+  console.log(`  ${c.dim}GitHub:${c.reset}       ${ghPage}`);
+  console.log(`  ${c.dim}Architecture:${c.reset} ${ghPage}/architecture.md`);
+  console.log(`  ${c.dim}Web:${c.reset}          ${webPage}`);
+
+  // Quick actions
+  console.log(`\n  ${c.bold}Quick Start${c.reset}`);
+  console.log(`  ${c.green}npx frootai install ${playDir}${c.reset}           ${c.dim}# Download all files${c.reset}`);
+  console.log(`  ${c.green}npx frootai install ${playDir} --kit devkit${c.reset}  ${c.dim}# DevKit only${c.reset}`);
+  console.log(`  ${c.green}npx frootai cost ${playDir}${c.reset}              ${c.dim}# Detailed cost${c.reset}\n`);
+}
+
+// ═══════════════════════════════════════════════════
 // VALIDATE — Consistency + config check
 // ═══════════════════════════════════════════════════
 function cmdValidate() {
@@ -1000,67 +1159,11 @@ async function cmdInstall(playInput, dryRun = false) {
   }
 
   // Resolve play directory name
-  const allPlays = [
-    '01-enterprise-rag', '02-ai-landing-zone', '03-deterministic-agent',
-    '04-call-center-voice-ai', '05-it-ticket-resolution', '06-document-intelligence',
-    '07-multi-agent-service', '08-copilot-studio-bot', '09-ai-search-portal',
-    '10-content-moderation', '11-ai-landing-zone-advanced', '12-model-serving-aks',
-    '13-fine-tuning-workflow', '14-cost-optimized-ai-gateway', '15-multi-modal-docproc',
-    '16-copilot-teams-extension', '17-ai-observability', '18-prompt-management',
-    '19-edge-ai-phi4', '20-anomaly-detection', '21-agentic-rag',
-    '22-multi-agent-swarm', '23-browser-automation-agent', '24-ai-code-review-pipeline',
-    '25-conversation-memory-layer', '26-semantic-search-engine', '27-ai-data-pipeline',
-    '28-knowledge-graph-rag', '29-mcp-gateway', '30-ai-security-hardening',
-    '31-low-code-ai-builder', '32-ai-powered-testing', '33-voice-ai-agent',
-    '34-edge-ai-deployment', '35-ai-compliance-engine', '36-multimodal-agent',
-    '37-ai-powered-devops', '38-document-understanding-v2', '39-ai-meeting-assistant',
-    '40-copilot-studio-advanced', '41-ai-red-teaming', '42-computer-use-agent',
-    '43-ai-video-generation', '44-foundry-local-on-device', '45-realtime-event-ai',
-    '46-healthcare-clinical-ai', '47-synthetic-data-factory', '48-ai-model-governance',
-    '49-creative-ai-studio', '50-financial-risk-intelligence', '51-autonomous-coding-agent',
-    '52-ai-api-gateway-v2', '53-legal-document-ai', '54-ai-customer-support-v2',
-    '55-supply-chain-ai', '56-semantic-code-search', '57-ai-translation-engine',
-    '58-digital-twin-agent', '59-ai-recruiter-agent', '60-responsible-ai-dashboard',
-    '61-content-moderation-v2', '62-federated-learning-pipeline', '63-fraud-detection-agent',
-    '64-ai-sales-assistant', '65-ai-training-curriculum', '66-ai-infrastructure-optimizer',
-    '67-ai-knowledge-management', '68-predictive-maintenance-ai', '69-carbon-footprint-tracker',
-    '70-esg-compliance-agent', '71-smart-energy-grid-ai', '72-climate-risk-assessor',
-    '73-waste-recycling-optimizer', '74-ai-tutoring-agent', '75-exam-generation-engine',
-    '76-accessibility-learning-agent', '77-research-paper-ai', '78-precision-agriculture-agent',
-    '79-food-safety-inspector-ai', '80-biodiversity-monitor', '81-property-valuation-ai',
-    '82-construction-safety-ai', '83-building-energy-optimizer', '84-citizen-services-chatbot',
-    '85-policy-impact-analyzer', '86-public-safety-analytics', '87-dynamic-pricing-engine',
-    '88-visual-product-search', '89-retail-inventory-predictor', '90-network-optimization-agent',
-    '91-customer-churn-predictor', '92-telecom-fraud-shield', '93-continual-learning-agent',
-    '94-ai-podcast-generator', '95-multimodal-search-v2', '96-realtime-voice-agent-v2',
-    '97-ai-data-marketplace', '98-agent-evaluation-platform', '99-enterprise-ai-governance-hub',
-    '100-fai-meta-agent', '101-pester-test-development',
-  ];
-
-  let playDir = playInput;
-  // Resolve play: exact match, number prefix, or fuzzy name match
-  const exactMatch = allPlays.find(p => p === playDir);
-  if (exactMatch) {
-    playDir = exactMatch;
-  } else {
-    // Try matching by number prefix (e.g., "01" → "01-enterprise-rag")
-    const num = playInput.replace(/^play-?/i, '').replace(/^0*(\d+)/, (_, d) => d);
-    const padded = num.padStart(2, '0');
-    const numMatch = allPlays.find(p => p.startsWith(padded + '-'));
-    if (numMatch) {
-      playDir = numMatch;
-    } else {
-      // Try fuzzy match on name part (e.g., "enterprise-rag" → "01-enterprise-rag")
-      const slug = playInput.toLowerCase().replace(/\s+/g, '-');
-      const fuzzy = allPlays.find(p => p.includes(slug));
-      if (fuzzy) {
-        playDir = fuzzy;
-      } else {
-        console.log(`${c.red}  Play not found: ${playInput}${c.reset}`);
-        console.log(`${c.dim}  Try: frootai install 01 or frootai install enterprise-rag${c.reset}\n`);
-        process.exit(1);
-      }
-    }
+  const playDir = resolvePlay(playInput);
+  if (!playDir) {
+    console.log(`${c.red}  Play not found: ${playInput}${c.reset}`);
+    console.log(`${c.dim}  Try: frootai install 01 or frootai install enterprise-rag${c.reset}\n`);
+    process.exit(1);
   }
 
   // Determine which kit to install
@@ -1228,6 +1331,7 @@ function cmdHelp() {
   console.log(`    ${c.green}init${c.reset}              Interactive project scaffolding`);
   console.log(`    ${c.green}scaffold${c.reset} <play>    One-command play scaffold (e.g. play-01)`);
   console.log(`    ${c.green}install${c.reset} <play>     Download a solution play from GitHub`);
+  console.log(`    ${c.green}info${c.reset} <play>        Show play details, cost, services, links`);
   console.log(`    ${c.green}list${c.reset} [keyword]     Browse all 77 plugins in the FAI Marketplace`);
   console.log(`    ${c.green}search${c.reset} <query>     Search FrootAI knowledge base`);
   console.log(`    ${c.green}cost${c.reset} [play]        Cost estimate (--scale dev|prod)`);
@@ -1241,6 +1345,7 @@ function cmdHelp() {
   console.log(`    ${c.dim}npx frootai install 01-enterprise-rag${c.reset}`);
   console.log(`    ${c.dim}npx frootai install 01 --kit devkit${c.reset}`);
   console.log(`    ${c.dim}npx frootai install enterprise-rag --dry-run${c.reset}`);
+  console.log(`    ${c.dim}npx frootai info 01${c.reset}`);
   console.log(`    ${c.dim}npx frootai list azure${c.reset}`);
   console.log(`    ${c.dim}npx frootai scaffold 01-enterprise-rag${c.reset}`);
   console.log(`    ${c.dim}npx frootai search "RAG architecture"${c.reset}`);
