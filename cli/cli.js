@@ -146,6 +146,9 @@ switch (command) {
   case 'doctor':
     cmdDoctor();
     break;
+  case 'status':
+    cmdStatus();
+    break;
   case 'primitives':
   case 'catalog':
     cmdPrimitivesCatalog(args[1]);
@@ -816,7 +819,7 @@ async function cmdScaffold(playArg) {
   // MCP config (always golden standard)
   if (selectedKits === 'all' || selectedKits === 'devkit') {
     generateIfMissing('.vscode/mcp.json', JSON.stringify({
-      servers: { frootai: { type: 'stdio', command: 'npx', args: ['frootai-mcp@latest'] } }
+      servers: { frootai: { type: 'stdio', command: 'npx', args: ['-y', 'frootai-mcp@latest'] } }
     }, null, 2));
 
     generateIfMissing('.github/copilot-instructions.md', `# Play ${playNum}: ${playTitle}\n\n## Architecture\nThis project implements the ${playTitle} pattern.\nRefer to config/*.json for AI model settings and guardrails.\n\n## Agent Workflow\n1. **@builder** — Implement features following architecture patterns\n2. **@reviewer** — Review for security, WAF alignment, production readiness\n3. **@tuner** — Validate configs + evaluation thresholds\n`);
@@ -1018,7 +1021,7 @@ async function cmdInstall(playInput, dryRun = false) {
     const mcpPath = join(targetDir, '.vscode', 'mcp.json');
     const mcpDir = join(targetDir, '.vscode');
     if (!existsSync(mcpDir)) mkdirSync(mcpDir, { recursive: true });
-    writeFileSync(mcpPath, JSON.stringify({ servers: { frootai: { type: 'stdio', command: 'npx', args: ['frootai-mcp@latest'] } } }, null, 2), 'utf-8');
+    writeFileSync(mcpPath, JSON.stringify({ servers: { frootai: { type: 'stdio', command: 'npx', args: ['-y', 'frootai-mcp@latest'] } } }, null, 2), 'utf-8');
   }
 
   console.log(`\n  ${c.bold}${c.green}Downloaded: ${downloaded}${c.reset} | ${c.dim}Skipped: ${skipped} | Not found: ${failed}${c.reset}`);
@@ -1343,6 +1346,117 @@ async function cmdDeploy(playArg) {
 }
 
 // ═══════════════════════════════════════════════════
+// STATUS — Show current project context
+// ═══════════════════════════════════════════════════
+
+function cmdStatus() {
+  banner();
+
+  // Detect play from current directory
+  let detectedPlay = null;
+  let playNum = null;
+  let playTitle = null;
+
+  // Check fai-manifest.json
+  if (existsSync('spec/fai-manifest.json')) {
+    try {
+      const manifest = JSON.parse(readFileSync('spec/fai-manifest.json', 'utf8'));
+      detectedPlay = manifest.play || null;
+      if (detectedPlay) {
+        const match = detectedPlay.match(/^(\d+)/);
+        playNum = match ? match[1] : null;
+        playTitle = detectedPlay.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+    } catch { /* ignore */ }
+  }
+
+  // Fallback: check directory name
+  if (!detectedPlay) {
+    const dirName = resolve('.').split(/[\\/]/).pop();
+    const match = dirName.match(/^(\d{2,3})-(.+)/);
+    if (match) {
+      playNum = match[1];
+      playTitle = match[2].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      detectedPlay = dirName;
+    }
+  }
+
+  if (detectedPlay) {
+    console.log(`  ${c.bold}Play:${c.reset} ${playNum} — ${playTitle}`);
+    console.log(`  ${c.bold}Dir:${c.reset}  ${resolve('.')}\n`);
+  } else {
+    console.log(`  ${c.dim}No FrootAI play detected in current directory.${c.reset}`);
+    console.log(`  ${c.dim}Run ${c.cyan}frootai scaffold <play>${c.dim} to get started.${c.reset}\n`);
+    return;
+  }
+
+  // Check what's installed
+  const kits = {
+    DevKit: [
+      { path: '.github/agents', label: 'Agents' },
+      { path: '.github/copilot-instructions.md', label: 'Instructions' },
+      { path: '.vscode/mcp.json', label: 'MCP config' },
+      { path: 'agent.md', label: 'Root agent' },
+    ],
+    TuneKit: [
+      { path: 'config/openai.json', label: 'OpenAI config' },
+      { path: 'config/guardrails.json', label: 'Guardrails' },
+      { path: 'evaluation', label: 'Evaluation pipeline' },
+    ],
+    SpecKit: [
+      { path: 'spec/fai-manifest.json', label: 'FAI Manifest' },
+      { path: 'spec/architecture.md', label: 'Architecture spec' },
+    ],
+    Infra: [
+      { path: 'infra/main.bicep', label: 'Bicep template' },
+      { path: 'infra/parameters.json', label: 'Parameters' },
+    ],
+  };
+
+  console.log(`  ${c.bold}Installed Kits:${c.reset}`);
+  for (const [kitName, items] of Object.entries(kits)) {
+    const found = items.filter(i => existsSync(i.path));
+    const total = items.length;
+    const icon = found.length === total ? `${c.green}✅` : found.length > 0 ? `${c.yellow}⚠️` : `${c.dim}⬜`;
+    console.log(`    ${icon}${c.reset} ${kitName.padEnd(10)} ${found.length}/${total} — ${found.map(f => f.label).join(', ') || 'not installed'}`);
+  }
+
+  // Count total files in key dirs
+  const dirs = ['.github', 'config', 'evaluation', 'spec', 'infra', '.vscode'];
+  let totalFiles = 0;
+  for (const d of dirs) {
+    if (existsSync(d)) {
+      try {
+        const count = (function countDir(p) {
+          let n = 0;
+          for (const f of readdirSync(p)) {
+            const fp = join(p, f);
+            try { n += statSync(fp).isDirectory() ? countDir(fp) : 1; } catch { /* skip */ }
+          }
+          return n;
+        })(d);
+        totalFiles += count;
+      } catch { /* skip */ }
+    }
+  }
+
+  console.log(`\n  ${c.bold}Total project files:${c.reset} ${totalFiles}`);
+
+  // Quick actions
+  console.log(`\n  ${c.bold}Quick Actions:${c.reset}`);
+  if (!existsSync('infra/main.bicep')) {
+    console.log(`    ${c.dim}npx frootai install ${playNum} --kit infra${c.reset}   # Add infrastructure`);
+  } else {
+    console.log(`    ${c.dim}npx frootai deploy${c.reset}                        # Deploy to Azure`);
+  }
+  if (!existsSync('evaluation')) {
+    console.log(`    ${c.dim}npx frootai install ${playNum} --kit tunekit${c.reset} # Add evaluation`);
+  }
+  console.log(`    ${c.dim}npx frootai validate --waf${c.reset}                # WAF scorecard`);
+  console.log(`    ${c.dim}npx frootai info ${playNum}${c.reset}                      # Play details\n`);
+}
+
+// ═══════════════════════════════════════════════════
 // UPDATE — Self-update + check for latest versions
 // ═══════════════════════════════════════════════════
 
@@ -1413,6 +1527,7 @@ function cmdHelp() {
   console.log(`    ${c.green}validate${c.reset}           Check project structure + configs`);
   console.log(`    ${c.green}validate --waf${c.reset}     WAF alignment scorecard (6 pillars)`);
   console.log(`    ${c.green}doctor${c.reset}             Health check for your setup`);
+  console.log(`    ${c.green}status${c.reset}             Show current project context`);
   console.log(`    ${c.green}update${c.reset}             Check for latest versions`);
   console.log(`    ${c.green}version${c.reset}            Show version info`);
   console.log(`    ${c.green}help${c.reset}               Show this help\n`);
