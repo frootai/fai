@@ -1,0 +1,199 @@
+{
+  "play": "17",
+  "name": "AI Observability & Monitoring",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Distributed tracing, custom AI metrics, token usage tracking, latency percentiles",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 50,
+          "note": "~100GB/month ingestion, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 200,
+          "note": "~500GB/month, 90-day retention, sampling"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics Workspace",
+      "category": "Monitoring",
+      "purpose": "Centralized log aggregation — KQL queries, cross-service correlation, alerting",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 75,
+          "note": "~30GB/day ingestion, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier 100GB",
+          "cost": 200,
+          "note": "100GB/day, 90-day retention, dedicated cluster"
+        }
+      }
+    },
+    {
+      "name": "Azure Monitor",
+      "category": "Monitoring",
+      "purpose": "Metric collection, alert rules, action groups, autoscale triggers",
+      "tiers": {
+        "dev": {
+          "sku": "Basic metrics",
+          "cost": 0,
+          "note": "Platform metrics free, 5 alert rules"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 30,
+          "note": "Custom metrics, 20 alert rules, SMS/email"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 80,
+          "note": "50+ alert rules, PagerDuty/ServiceNow integration"
+        }
+      }
+    },
+    {
+      "name": "Azure Managed Grafana",
+      "category": "Monitoring",
+      "purpose": "Real-time dashboards — AI latency, token cost, model drift, error rates",
+      "tiers": {
+        "dev": {
+          "sku": "Essential",
+          "cost": 0,
+          "note": "Free tier, basic dashboards"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 15,
+          "note": "SSO, data source plugins, team sharing"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 30,
+          "note": "Multi-instance, RBAC, private link"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "LLM endpoint being monitored — token usage and latency telemetry source",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 30,
+          "note": "GPT-4o-mini, ~50K tokens/day"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 200,
+          "note": "GPT-4o, ~500K tokens/day"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 800,
+          "note": "Provisioned throughput, guaranteed SLA"
+        }
+      }
+    },
+    {
+      "name": "Cosmos DB",
+      "category": "Storage",
+      "purpose": "Trace and evaluation persistence — long-term storage for AI interaction audit trail",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 3,
+          "note": "~50K RU/month"
+        },
+        "prod": {
+          "sku": "Autoscale 400-4000 RU/s",
+          "cost": 50,
+          "note": "Multi-partition, TTL-based cleanup"
+        },
+        "enterprise": {
+          "sku": "Autoscale 4000-20000 RU/s",
+          "cost": 180,
+          "note": "Multi-region, 99.999% SLA"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Connection strings, API keys for OpenAI and monitoring backends",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Alert processors — enriches alerts with AI context, routes to Slack/Teams/PagerDuty",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M free executions/month"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "~3M executions/month"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 75,
+          "note": "Pre-warmed, VNet integration"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 34,
+    "prod": 433,
+    "enterprise": 1575
+  },
+  "optimization_tips": [
+    "Use Application Insights sampling (20-50%) in production — reduces ingestion cost without losing critical traces",
+    "Set Log Analytics retention to 30 days for dev, 90 days for production — archive older data to Blob Storage at $0.02/GB",
+    "Use Commitment tier for Log Analytics when ingesting >100GB/day — saves 30% vs pay-per-GB",
+    "Filter noisy health-check logs at ingestion — reduces 15-25% of log volume",
+    "Use Grafana Essential (free) tier for dev — Standard only needed for team sharing and SSO",
+    "Create alert suppression rules during maintenance windows to avoid noise"
+  ]
+}

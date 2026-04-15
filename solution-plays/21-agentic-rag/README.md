@@ -22,6 +22,69 @@ code .  # Use @builder for retrieval agent, @reviewer for citation audit, @tuner
 | Caching | No | Semantic cache (60% cost savings) |
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Client App]
+    end
+
+    subgraph Agent Orchestrator
+        API[Container Apps<br/>Agent Loop · State Machine]
+        Memory[Cosmos DB<br/>Conversation Memory · Reasoning Trace]
+    end
+
+    subgraph Reasoning Engine
+        OpenAI[Azure OpenAI — GPT-4o<br/>Planning · Synthesis · Self-Eval]
+    end
+
+    subgraph Retrieval Tools
+        Search[Azure AI Search<br/>Hybrid: BM25 + Vector + Semantic]
+        Blob[Blob Storage<br/>Document Corpus · Chunked Artifacts]
+    end
+
+    subgraph Safety
+        ContentSafety[Content Safety<br/>Per-Step Moderation]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Admin Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Agent Traces · Token Spend · Step Visibility]
+    end
+
+    User -->|Complex Question| API
+    API -->|Step 1: Plan| OpenAI
+    OpenAI -->|Tool Call: Search| API
+    API -->|Query| Search
+    Search -->|Results| API
+    API -->|Step 2: Evaluate| OpenAI
+    OpenAI -->|Reformulate or Synthesize| API
+    API -->|Step N: Final Answer| User
+    API <-->|State| Memory
+    Blob -->|Indexer| Search
+    API -->|Moderate| ContentSafety
+    API -->|Auth| MI
+    MI -->|Secrets| KV
+    API -->|Traces| AppInsights
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#06b6d4,color:#fff,stroke:#0891b2
+    style Memory fill:#f59e0b,color:#fff,stroke:#d97706
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Search fill:#10b981,color:#fff,stroke:#059669
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style ContentSafety fill:#10b981,color:#fff,stroke:#059669
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | Azure OpenAI (gpt-4o) | Agent with tool-calling for autonomous retrieval |
@@ -40,9 +103,20 @@ code .  # Use @builder for retrieval agent, @reviewer for citation audit, @tuner
 | 3 skills | Deploy (110 lines), Evaluate (104 lines), Tune (104 lines) |
 | 4 prompts | `/deploy`, `/test`, `/review`, `/evaluate` with agent routing |
 
-## Cost
-| Dev | Prod | With Caching |
-|-----|------|-------------|
-| $150–300/mo | $2K–8K/mo | 40-60% savings from semantic cache |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|--------:|-----------:|-----------:|
+| Azure OpenAI | $60/mo | $500/mo | $1,800/mo |
+| Azure AI Search | $75/mo | $250/mo | $750/mo |
+| Container Apps | $10/mo | $120/mo | $350/mo |
+| Cosmos DB | $5/mo | $60/mo | $200/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Blob Storage | $2/mo | $15/mo | $50/mo |
+| Application Insights | $0/mo | $30/mo | $100/mo |
+| Content Safety | $0/mo | $20/mo | $75/mo |
+| **Total** | **$153/mo** | **$998/mo** | **$3,335/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/21-agentic-rag](https://frootai.dev/solution-plays/21-agentic-rag)

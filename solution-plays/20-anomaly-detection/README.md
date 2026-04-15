@@ -12,6 +12,75 @@ code .  # Use @builder for detection pipeline, @reviewer for sensitivity audit, 
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Data Sources
+        Sensors[IoT Sensors<br/>Temperature · Pressure · Flow]
+        AppLogs[Application Logs<br/>Error Rates · Latency Spikes]
+        Transactions[Transaction Streams<br/>Payment · Fraud Signals]
+    end
+
+    subgraph Stream Ingestion
+        EventHub[Azure Event Hubs<br/>High-Throughput Ingestion]
+    end
+
+    subgraph Stream Processing
+        StreamAnalytics[Stream Analytics<br/>Windowed Aggregation · Pattern Detection]
+    end
+
+    subgraph AI Enrichment
+        OpenAI[Azure OpenAI<br/>GPT-4o · Root Cause Analysis]
+    end
+
+    subgraph Action Layer
+        Functions[Azure Functions<br/>Alert Routing · Auto-Remediation]
+        Notifications[Notification Hubs<br/>Push · Email · SMS]
+    end
+
+    subgraph Persistence
+        Cosmos[Cosmos DB<br/>Anomaly Store · Investigation History]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Connection Strings · API Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Pipeline Health · Detection Accuracy]
+    end
+
+    Sensors -->|Events| EventHub
+    AppLogs -->|Events| EventHub
+    Transactions -->|Events| EventHub
+    EventHub -->|Stream| StreamAnalytics
+    StreamAnalytics -->|Anomalies| Functions
+    Functions -->|Explain| OpenAI
+    OpenAI -->|Root Cause| Functions
+    Functions -->|Alert| Notifications
+    Functions -->|Store| Cosmos
+    Functions -->|Auth| MI
+    MI -->|Secrets| KV
+    StreamAnalytics -->|Telemetry| AppInsights
+    Functions -->|Telemetry| AppInsights
+
+    style Sensors fill:#3b82f6,color:#fff,stroke:#2563eb
+    style AppLogs fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Transactions fill:#3b82f6,color:#fff,stroke:#2563eb
+    style EventHub fill:#f59e0b,color:#fff,stroke:#d97706
+    style StreamAnalytics fill:#06b6d4,color:#fff,stroke:#0891b2
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Functions fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Notifications fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Cosmos fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | Azure Anomaly Detector | Multivariate time-series anomaly detection |
@@ -39,9 +108,20 @@ code .  # Use @builder for detection pipeline, @reviewer for sensitivity audit, 
 
 **Note:** This is an AIOps/anomaly detection play. TuneKit covers detection thresholds (σ levels per metric), time windows, suppression rules, seasonal baselines, and root cause prompt tuning — not AI model quality parameters.
 
-## Cost
-| Dev | Prod |
-|-----|------|
-| $50–150/mo | $500–2K/mo |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|--------:|-----------:|-----------:|
+| Azure Event Hubs | $11/mo | $90/mo | $500/mo |
+| Azure Stream Analytics | $80/mo | $480/mo | $960/mo |
+| Azure OpenAI | $20/mo | $150/mo | $600/mo |
+| Cosmos DB | $5/mo | $60/mo | $250/mo |
+| Azure Functions | $0/mo | $12/mo | $80/mo |
+| Application Insights | $0/mo | $30/mo | $100/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Azure Notification Hubs | $0/mo | $10/mo | $50/mo |
+| **Total** | **$117/mo** | **$835/mo** | **$2,550/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/20-anomaly-detection](https://frootai.dev/solution-plays/20-anomaly-detection)

@@ -16,6 +16,77 @@ code .  # Use @builder for K8s/GPU, @reviewer for security audit, @tuner for cos
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Client Layer
+        Client[Client Applications<br/>REST / gRPC / OpenAI-compatible]
+    end
+
+    subgraph Ingress
+        LB[Load Balancer<br/>Health Probes · Round Robin]
+        Ingress[NGINX Ingress<br/>TLS Termination · Rate Limiting]
+    end
+
+    subgraph AKS Cluster
+        subgraph GPU Node Pool
+            vLLM1[vLLM Pod 1<br/>Llama 3 · A100 GPU]
+            vLLM2[vLLM Pod 2<br/>Mistral · A100 GPU]
+        end
+        subgraph System Node Pool
+            KEDA[KEDA Autoscaler<br/>GPU % · Queue Depth]
+            Prometheus[Prometheus<br/>GPU Metrics · Latency]
+        end
+    end
+
+    subgraph Supporting Services
+        ACR[Container Registry<br/>Model Images · Artifacts]
+        Blob[Blob Storage<br/>Model Weights · Checkpoints]
+        OpenAI[Azure OpenAI<br/>Overflow Fallback]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · TLS Certs]
+        VNet[Virtual Network<br/>Private Endpoints]
+    end
+
+    subgraph Monitoring
+        Monitor[Azure Monitor<br/>GPU Utilization · Throughput]
+    end
+
+    Client -->|HTTPS| LB
+    LB --> Ingress
+    Ingress --> vLLM1
+    Ingress --> vLLM2
+    KEDA -->|Scale| vLLM1
+    KEDA -->|Scale| vLLM2
+    Prometheus -->|Metrics| KEDA
+    ACR -->|Pull Images| vLLM1
+    ACR -->|Pull Images| vLLM2
+    Blob -->|Load Weights| vLLM1
+    Blob -->|Load Weights| vLLM2
+    Ingress -->|Overflow| OpenAI
+    vLLM1 -->|Auth| KV
+    vLLM2 -->|Auth| KV
+    Prometheus -->|Telemetry| Monitor
+
+    style Client fill:#3b82f6,color:#fff,stroke:#2563eb
+    style LB fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Ingress fill:#3b82f6,color:#fff,stroke:#2563eb
+    style vLLM1 fill:#10b981,color:#fff,stroke:#059669
+    style vLLM2 fill:#10b981,color:#fff,stroke:#059669
+    style KEDA fill:#06b6d4,color:#fff,stroke:#0891b2
+    style Prometheus fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style ACR fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style VNet fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style Monitor fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | AKS (GPU nodes) | Kubernetes cluster with NVIDIA A100/V100 |
@@ -42,9 +113,20 @@ code .  # Use @builder for K8s/GPU, @reviewer for security audit, @tuner for cos
 
 **Note:** This is a GPU infrastructure + ML serving play. TuneKit covers quantization selection, vLLM config, K8s scaling rules, spot node pools, and cost per inference token — not AI quality metrics.
 
-## Cost
-| Dev | Prod |
-|-----|------|
-| $300–600/mo | $3K–20K+/mo |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|---------|------------|------------|
+| Azure Kubernetes Service | $550/mo | $3,200/mo | $9,500/mo |
+| Azure Container Registry | $5/mo | $20/mo | $50/mo |
+| Azure OpenAI | $30/mo | $200/mo | $800/mo |
+| Blob Storage | $5/mo | $30/mo | $100/mo |
+| Azure Monitor | $0/mo | $40/mo | $120/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Virtual Network | $0/mo | $35/mo | $80/mo |
+| Load Balancer | $0/mo | $25/mo | $60/mo |
+| **Total** | **$591/mo** | **$3,553/mo** | **$10,720/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/12-model-serving-aks](https://frootai.dev/solution-plays/12-model-serving-aks)

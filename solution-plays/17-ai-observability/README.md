@@ -12,6 +12,76 @@ code .  # Use @builder for instrumentation, @reviewer for telemetry audit, @tune
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph AI Workloads
+        App1[AI App 1<br/>RAG Pipeline]
+        App2[AI App 2<br/>Agent Service]
+        App3[AI App 3<br/>Chat Interface]
+    end
+
+    subgraph Telemetry Collection
+        AppInsights[Application Insights<br/>Distributed Tracing · Custom Metrics]
+        LogAnalytics[Log Analytics Workspace<br/>KQL Queries · Cross-service Correlation]
+        Monitor[Azure Monitor<br/>Alert Rules · Action Groups]
+    end
+
+    subgraph Visualization
+        Grafana[Managed Grafana<br/>Real-time Dashboards · AI KPIs]
+    end
+
+    subgraph AI Backend
+        OpenAI[Azure OpenAI<br/>GPT-4o · Token Usage Source]
+    end
+
+    subgraph Processing
+        Functions[Azure Functions<br/>Alert Enrichment · Routing]
+    end
+
+    subgraph Persistence
+        Cosmos[Cosmos DB<br/>Trace Archive · Eval History]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Connection Strings]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    App1 -->|OpenTelemetry| AppInsights
+    App2 -->|OpenTelemetry| AppInsights
+    App3 -->|OpenTelemetry| AppInsights
+    App1 -->|Structured Logs| LogAnalytics
+    App2 -->|Structured Logs| LogAnalytics
+    App3 -->|Structured Logs| LogAnalytics
+    AppInsights -->|Metrics Feed| Monitor
+    LogAnalytics -->|Log Alerts| Monitor
+    Monitor -->|Trigger| Functions
+    Functions -->|Enrich + Route| Cosmos
+    AppInsights -->|Data Source| Grafana
+    LogAnalytics -->|Data Source| Grafana
+    App1 -->|API Calls| OpenAI
+    App2 -->|API Calls| OpenAI
+    OpenAI -->|Usage Metrics| AppInsights
+    Functions -->|Auth| MI
+    MI -->|Secrets| KV
+
+    style App1 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style App2 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style App3 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style Monitor fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style Grafana fill:#f59e0b,color:#fff,stroke:#d97706
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Functions fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Cosmos fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | Application Insights | Telemetry collection, distributed tracing |
@@ -37,9 +107,20 @@ code .  # Use @builder for instrumentation, @reviewer for telemetry audit, @tune
 
 **Note:** This is an operational observability play. TuneKit covers sampling rates, alert thresholds, log retention tiers, KQL optimization, and Log Analytics cost — not AI model parameters.
 
-## Cost
-| Dev | Prod (10GB/day) | Optimized |
-|-----|-----------------|-----------|
-| $50–100/mo | ~$1,090/mo | ~$525/mo (52% savings from sampling + retention tiers) |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|--------:|-----------:|-----------:|
+| Application Insights | $0/mo | $50/mo | $200/mo |
+| Log Analytics Workspace | $0/mo | $75/mo | $200/mo |
+| Azure Monitor | $0/mo | $30/mo | $80/mo |
+| Azure Managed Grafana | $0/mo | $15/mo | $30/mo |
+| Azure OpenAI | $30/mo | $200/mo | $800/mo |
+| Cosmos DB | $3/mo | $50/mo | $180/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Azure Functions | $0/mo | $10/mo | $75/mo |
+| **Total** | **$34/mo** | **$433/mo** | **$1,575/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/17-ai-observability](https://frootai.dev/solution-plays/17-ai-observability)

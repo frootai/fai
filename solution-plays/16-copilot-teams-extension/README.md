@@ -14,6 +14,69 @@ code .  # Use @builder for Teams/Graph, @reviewer for SSO audit, @tuner for UX/p
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Teams Platform
+        Users[Teams Users<br/>Channels · Chat · 1:1]
+        Teams[Microsoft Teams<br/>Bot Framework Channel]
+    end
+
+    subgraph Bot Backend
+        AppSvc[App Service<br/>Bot Webhook · Message Handler]
+        BotSvc[Bot Service<br/>Channel Registration · Auth]
+    end
+
+    subgraph AI Layer
+        OpenAI[Azure OpenAI<br/>GPT-4o · Conversational AI]
+        Search[Azure AI Search<br/>Knowledge Base · Internal Docs]
+    end
+
+    subgraph Data Layer
+        Cosmos[Cosmos DB<br/>Conversation History · Preferences]
+        Graph[Microsoft Graph<br/>User Profile · Calendar · Files]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Bot Secrets · API Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+        Entra[Microsoft Entra ID<br/>SSO · User Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Conversation Metrics · Engagement]
+    end
+
+    Users -->|Message| Teams
+    Teams -->|Webhook| BotSvc
+    BotSvc -->|Route| AppSvc
+    AppSvc -->|Query| Search
+    Search -->|Context| OpenAI
+    OpenAI -->|Response| AppSvc
+    AppSvc -->|Adaptive Card| Teams
+    AppSvc -->|Save Turn| Cosmos
+    AppSvc -->|User Data| Graph
+    AppSvc -->|Auth| MI
+    MI -->|Secrets| KV
+    BotSvc -->|SSO| Entra
+    AppSvc -->|Telemetry| AppInsights
+
+    style Users fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Teams fill:#3b82f6,color:#fff,stroke:#2563eb
+    style AppSvc fill:#3b82f6,color:#fff,stroke:#2563eb
+    style BotSvc fill:#3b82f6,color:#fff,stroke:#2563eb
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Search fill:#10b981,color:#fff,stroke:#059669
+    style Cosmos fill:#f59e0b,color:#fff,stroke:#d97706
+    style Graph fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style Entra fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | Azure Bot Service | Teams bot registration and message routing |
@@ -34,9 +97,19 @@ code .  # Use @builder for Teams/Graph, @reviewer for SSO audit, @tuner for UX/p
 
 **Note:** This is a Teams/M365 platform play. TuneKit covers Adaptive Card design, Graph API batching/caching, SSO token management, and cost per interaction — not AI model parameters.
 
-## Cost
-| Dev | Prod (1000 users) |
-|-----|-------------------|
-| $30–80/mo | ~$75/mo (Bot Free tier + B1 + gpt-4o-mini) |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|---------|------------|------------|
+| Azure Bot Service | $0/mo | $50/mo | $50/mo |
+| Azure OpenAI | $30/mo | $250/mo | $900/mo |
+| Azure App Service | $0/mo | $70/mo | $180/mo |
+| Azure AI Search | $0/mo | $75/mo | $250/mo |
+| Cosmos DB | $3/mo | $50/mo | $200/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Application Insights | $0/mo | $20/mo | $70/mo |
+| **Total** | **$34/mo** | **$518/mo** | **$1,660/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/16-copilot-teams-extension](https://frootai.dev/solution-plays/16-copilot-teams-extension)

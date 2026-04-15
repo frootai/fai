@@ -1,0 +1,199 @@
+{
+  "play": "20",
+  "name": "Real-Time Anomaly Detection",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure Event Hubs",
+      "category": "Messaging",
+      "purpose": "High-throughput stream ingestion — sensor data, logs, transactions at millions of events/sec",
+      "tiers": {
+        "dev": {
+          "sku": "Basic 1 TU",
+          "cost": 11,
+          "note": "1 throughput unit, 1 consumer group"
+        },
+        "prod": {
+          "sku": "Standard 4 TU",
+          "cost": 90,
+          "note": "4 throughput units, 20 consumer groups"
+        },
+        "enterprise": {
+          "sku": "Premium 4 PU",
+          "cost": 500,
+          "note": "4 processing units, zone redundant"
+        }
+      }
+    },
+    {
+      "name": "Azure Stream Analytics",
+      "category": "Compute",
+      "purpose": "Real-time windowed aggregations — sliding windows, tumbling windows, pattern detection",
+      "tiers": {
+        "dev": {
+          "sku": "Standard 1 SU",
+          "cost": 80,
+          "note": "1 streaming unit"
+        },
+        "prod": {
+          "sku": "Standard 6 SU",
+          "cost": 480,
+          "note": "6 streaming units, reference data joins"
+        },
+        "enterprise": {
+          "sku": "Standard 12 SU",
+          "cost": 960,
+          "note": "12 streaming units, multi-input/output"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "Anomaly reasoning — LLM explains detected anomalies, generates root cause hypotheses",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 20,
+          "note": "GPT-4o-mini, ~50K tokens/day for anomaly summaries"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 150,
+          "note": "GPT-4o, ~500K tokens/day, detailed analysis"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 600,
+          "note": "Provisioned throughput, guaranteed latency"
+        }
+      }
+    },
+    {
+      "name": "Cosmos DB",
+      "category": "Storage",
+      "purpose": "Anomaly event store — detected anomalies, context snapshots, investigation history",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~100K RU/month"
+        },
+        "prod": {
+          "sku": "Autoscale 400-4000 RU/s",
+          "cost": 60,
+          "note": "Multi-partition, change feed for downstream"
+        },
+        "enterprise": {
+          "sku": "Autoscale 4000-40000 RU/s",
+          "cost": 250,
+          "note": "Multi-region writes, 99.999% SLA"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Anomaly action orchestrator — triggers alerts, escalations, auto-remediation workflows",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M free executions/month"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 12,
+          "note": "~3M executions/month"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 80,
+          "note": "Pre-warmed, VNet integration"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Pipeline observability — stream processing latency, anomaly detection accuracy, false positive rate",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 30,
+          "note": "~60GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Event Hub connection strings, OpenAI API keys, webhook secrets for alert routing",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Azure Notification Hubs",
+      "category": "Messaging",
+      "purpose": "Multi-channel alert delivery — push notifications, email, SMS for anomaly alerts",
+      "tiers": {
+        "dev": {
+          "sku": "Free",
+          "cost": 0,
+          "note": "1M pushes, 500 active devices"
+        },
+        "prod": {
+          "sku": "Basic",
+          "cost": 10,
+          "note": "10M pushes/month"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 50,
+          "note": "10M pushes, telemetry, scheduled sends"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 117,
+    "prod": 835,
+    "enterprise": 2550
+  },
+  "optimization_tips": [
+    "Use Stream Analytics auto-scaling — start with 1 SU and scale based on SU% utilization metric",
+    "Route only anomalies (not all events) to Azure OpenAI — reduces token costs by 95%+",
+    "Use Event Hubs capture to archive raw streams to Blob Storage at $0.02/GB for cold analysis",
+    "Use Cosmos DB TTL to auto-expire anomaly records after investigation window (7-30 days)",
+    "Batch anomaly summaries — call GPT-4o once per minute with grouped anomalies instead of per-event",
+    "Use Event Hubs Basic tier for dev — Standard only needed for multiple consumer groups"
+  ]
+}

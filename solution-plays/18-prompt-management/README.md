@@ -12,6 +12,63 @@ code .  # Use @builder for registry/A-B, @reviewer for injection audit, @tuner f
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Users
+        DevTeam[Prompt Engineers<br/>Author · Version · Test]
+        Apps[Consuming Applications<br/>Fetch Active Prompts]
+    end
+
+    subgraph Management API
+        API[Container Apps<br/>Prompt CRUD · Versioning · A/B Config]
+    end
+
+    subgraph Prompt Storage
+        Blob[Blob Storage<br/>Versioned Templates · Snapshots]
+        Cosmos[Cosmos DB<br/>Metadata · A/B Config · Eval Results]
+    end
+
+    subgraph Evaluation Pipeline
+        Functions[Azure Functions<br/>Eval Runner · A/B Splitter · Aggregation]
+        OpenAI[Azure OpenAI<br/>Prompt Testing · Golden Dataset Eval]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Signing Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Prompt Performance · A/B Outcomes]
+    end
+
+    DevTeam -->|Author Prompts| API
+    Apps -->|Fetch Active Version| API
+    API -->|Store Templates| Blob
+    API -->|Store Metadata| Cosmos
+    API -->|Trigger Eval| Functions
+    Functions -->|Run Test Suite| OpenAI
+    Functions -->|Store Results| Cosmos
+    Functions -->|A/B Metrics| AppInsights
+    API -->|Auth| MI
+    MI -->|Secrets| KV
+    API -->|Telemetry| AppInsights
+
+    style DevTeam fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Apps fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#06b6d4,color:#fff,stroke:#0891b2
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style Cosmos fill:#f59e0b,color:#fff,stroke:#d97706
+    style Functions fill:#3b82f6,color:#fff,stroke:#2563eb
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | Cosmos DB | Prompt registry (versioned storage, per-env containers) |
@@ -37,9 +94,19 @@ code .  # Use @builder for registry/A-B, @reviewer for injection audit, @tuner f
 
 **Note:** This is a prompt engineering/MLOps play. TuneKit covers token budgets, A/B test configuration, few-shot selection strategies, template compression, and prompt caching — not infrastructure sizing.
 
-## Cost
-| Dev | Prod |
-|-----|------|
-| $30–80/mo | $200–1K/mo |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|--------:|-----------:|-----------:|
+| Blob Storage | $1/mo | $5/mo | $15/mo |
+| Container Apps | $5/mo | $60/mo | $200/mo |
+| Cosmos DB | $3/mo | $50/mo | $180/mo |
+| Azure OpenAI | $20/mo | $100/mo | $350/mo |
+| Azure Functions | $0/mo | $8/mo | $75/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Application Insights | $0/mo | $15/mo | $50/mo |
+| **Total** | **$30/mo** | **$241/mo** | **$880/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/18-prompt-management](https://frootai.dev/solution-plays/18-prompt-management)

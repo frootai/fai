@@ -1,0 +1,199 @@
+{
+  "play": "21",
+  "name": "Agentic RAG — Autonomous Multi-Step Retrieval",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "Agent reasoning engine — GPT-4o plans retrieval steps, synthesizes multi-hop answers, self-evaluates",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 60,
+          "note": "GPT-4o-mini, ~200K tokens/day (multi-step = 3-5x single RAG)"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 500,
+          "note": "GPT-4o primary, ~2M tokens/day"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1800,
+          "note": "Provisioned throughput, guaranteed latency for multi-step"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Search",
+      "category": "AI Services",
+      "purpose": "Hybrid search index — iterative retrieval with query reformulation, semantic reranking",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 75,
+          "note": "1 index, 2GB storage, 15K docs"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 250,
+          "note": "50 indexes, 160GB, semantic ranker"
+        },
+        "enterprise": {
+          "sku": "Standard S2",
+          "cost": 750,
+          "note": "200 indexes, 1TB, replicas for HA"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Agent orchestrator — manages reasoning loop, tool execution, state transitions",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.5 vCPU, 1GB — longer-running agent sessions"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 120,
+          "note": "2 vCPU, 4GB, min 2 replicas for parallel agents"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 350,
+          "note": "4 vCPU, 8GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Cosmos DB",
+      "category": "Storage",
+      "purpose": "Agent state persistence — conversation memory, retrieval history, reasoning traces",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~100K RU/month"
+        },
+        "prod": {
+          "sku": "Autoscale 400-4000 RU/s",
+          "cost": 60,
+          "note": "Multi-partition, change feed enabled"
+        },
+        "enterprise": {
+          "sku": "Autoscale 4000-20000 RU/s",
+          "cost": 200,
+          "note": "Multi-region writes, 99.999% SLA"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "API keys for OpenAI, AI Search admin keys, agent signing secrets",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~2K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Document corpus — source documents, chunked artifacts, agent tool outputs",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~10GB documents"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 15,
+          "note": "~500GB documents"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 50,
+          "note": "~2TB, geo-redundant"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Agent tracing — step-by-step reasoning visibility, retrieval quality, token spend per query",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 30,
+          "note": "~60GB/month (agent traces are verbose)"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Content Safety",
+      "category": "AI Services",
+      "purpose": "Multi-step output moderation — validates each retrieval-synthesis cycle, not just final answer",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "1K transactions/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 20,
+          "note": "~150K transactions/month (3-5x single RAG)"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 75,
+          "note": "~1M transactions/month"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 153,
+    "prod": 998,
+    "enterprise": 3335
+  },
+  "optimization_tips": [
+    "Cap agent reasoning steps at 5 iterations max — prevents runaway token consumption on ambiguous queries",
+    "Use GPT-4o-mini for query reformulation steps, GPT-4o only for final synthesis — saves 70% on intermediate steps",
+    "Cache intermediate retrieval results — if agent re-queries similar context, reuse previous search results",
+    "Implement early termination — if retrieval confidence > 0.9 after step 2, skip remaining iterations",
+    "Use AI Search semantic ranker only on final retrieval step — keyword search sufficient for exploratory steps",
+    "Set per-query token budgets (e.g., 10K tokens max per agent session) to prevent cost spikes on complex queries"
+  ]
+}

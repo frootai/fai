@@ -1,0 +1,199 @@
+{
+  "play": "12",
+  "name": "Model Serving on AKS",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure Kubernetes Service",
+      "category": "Compute",
+      "purpose": "GPU-enabled cluster for hosting vLLM / TGI model serving containers",
+      "tiers": {
+        "dev": {
+          "sku": "Standard_NC4as_T4_v3",
+          "cost": 550,
+          "note": "1 node, T4 GPU, 4 vCPU, 28GB — single model"
+        },
+        "prod": {
+          "sku": "Standard_NC24ads_A100_v4",
+          "cost": 3200,
+          "note": "2 nodes, A100 80GB, autoscale 2-4"
+        },
+        "enterprise": {
+          "sku": "Standard_NC48ads_A100_v4",
+          "cost": 9500,
+          "note": "4+ nodes, multi-GPU, multi-model serving"
+        }
+      }
+    },
+    {
+      "name": "Azure Container Registry",
+      "category": "Compute",
+      "purpose": "Private registry for model serving Docker images and model artifacts",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 5,
+          "note": "10GB storage, 2 webhooks"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 20,
+          "note": "100GB storage, geo-replication optional"
+        },
+        "enterprise": {
+          "sku": "Premium",
+          "cost": 50,
+          "note": "500GB, geo-replication, private link"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "Fallback inference for overflow traffic and model comparison benchmarks",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 30,
+          "note": "GPT-4o-mini for testing, ~50K tokens/day"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 200,
+          "note": "GPT-4o fallback, ~500K tokens/day"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 800,
+          "note": "Provisioned throughput for guaranteed SLA"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Model weights storage — GGUF, SafeTensors, ONNX artifacts",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 5,
+          "note": "~50GB model weights"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 30,
+          "note": "~500GB, multiple model versions"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 100,
+          "note": "~2TB, geo-redundant, versioned"
+        }
+      }
+    },
+    {
+      "name": "Azure Monitor",
+      "category": "Monitoring",
+      "purpose": "GPU utilization, inference latency, throughput metrics, KEDA scaling triggers",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "Basic metrics, 5GB/month logs"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 40,
+          "note": "Prometheus metrics, 50GB/month logs"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 120,
+          "note": "Full Prometheus + Grafana, 200GB/month"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Model registry credentials, API keys, TLS certificates",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Virtual Network",
+      "category": "Security",
+      "purpose": "AKS VNet integration, private endpoints for ACR and storage",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 0,
+          "note": "Single subnet, no NAT gateway"
+        },
+        "prod": {
+          "sku": "Standard + NAT",
+          "cost": 35,
+          "note": "NAT gateway, private DNS zones"
+        },
+        "enterprise": {
+          "sku": "Hub-Spoke",
+          "cost": 80,
+          "note": "Hub-spoke topology, Azure Firewall egress"
+        }
+      }
+    },
+    {
+      "name": "Load Balancer",
+      "category": "Compute",
+      "purpose": "Distribute inference requests across GPU nodes with health probes",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 0,
+          "note": "AKS default load balancer"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 25,
+          "note": "Zone-redundant, health probes"
+        },
+        "enterprise": {
+          "sku": "Standard + WAF",
+          "cost": 60,
+          "note": "Application Gateway with WAF v2"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 591,
+    "prod": 3553,
+    "enterprise": 10720
+  },
+  "optimization_tips": [
+    "Use spot node pools for dev/test GPU workloads — saves 60-80% on compute costs",
+    "Schedule GPU node scale-down during off-hours with KEDA cron scaler",
+    "Use quantized models (GGUF Q4/Q8) to serve on smaller GPUs — T4 instead of A100",
+    "Cache frequent inference results in Redis to reduce GPU utilization by 20-40%",
+    "Use Azure OpenAI as overflow instead of scaling GPU nodes — cheaper for burst traffic",
+    "Consider Azure Reserved VM Instances for predictable production workloads — saves 30-40%"
+  ]
+}

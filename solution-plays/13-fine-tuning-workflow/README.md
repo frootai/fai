@@ -18,6 +18,71 @@ code .  # Use @builder for data prep/training, @reviewer for quality audit, @tun
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Data Preparation
+        Raw[Raw Data Sources<br/>Logs · Feedback · Documents]
+        Prep[Data Pipeline<br/>JSONL Format · Validation · Dedup]
+        Blob[Blob Storage<br/>Training · Validation · Test Sets]
+    end
+
+    subgraph Training
+        FT[Azure OpenAI Fine-Tuning<br/>GPT-4o / GPT-4o-mini]
+        AML[Azure ML Workspace<br/>Experiment Tracking · Hyperparams]
+    end
+
+    subgraph Evaluation
+        Eval[AI Foundry Evaluation<br/>Groundedness · Relevance · Coherence]
+        Baseline[Baseline Comparison<br/>Base vs Fine-tuned A/B]
+    end
+
+    subgraph Deployment
+        Deploy[Fine-Tuned Deployment<br/>Azure OpenAI Endpoint]
+        Gateway[API Gateway<br/>A/B Traffic Split]
+        App[Application Layer<br/>Production Consumers]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Credentials]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Accuracy Drift · Latency · Tokens]
+    end
+
+    Raw -->|Extract| Prep
+    Prep -->|Upload| Blob
+    Blob -->|Training Data| FT
+    FT -->|Metrics| AML
+    FT -->|Checkpoints| Blob
+    FT -->|Fine-tuned Model| Eval
+    Eval -->|Score| Baseline
+    Baseline -->|Approved| Deploy
+    Deploy --> Gateway
+    Gateway -->|Route| App
+    Deploy -->|Auth| MI
+    MI -->|Secrets| KV
+    Deploy -->|Telemetry| AppInsights
+
+    style Raw fill:#f59e0b,color:#fff,stroke:#d97706
+    style Prep fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style FT fill:#10b981,color:#fff,stroke:#059669
+    style AML fill:#10b981,color:#fff,stroke:#059669
+    style Eval fill:#10b981,color:#fff,stroke:#059669
+    style Baseline fill:#10b981,color:#fff,stroke:#059669
+    style Deploy fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Gateway fill:#3b82f6,color:#fff,stroke:#2563eb
+    style App fill:#3b82f6,color:#fff,stroke:#2563eb
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | Azure ML Workspace | Experiment tracking, compute management |
@@ -43,12 +108,19 @@ code .  # Use @builder for data prep/training, @reviewer for quality audit, @tun
 
 **Note:** This is an MLOps/training play. TuneKit covers LoRA hyperparameters, data quality optimization, compute selection (GPU sizing), and cost per training run — not inference-time parameters.
 
-## Cost
-| Component | Estimate |
-|-----------|----------|
-| gpt-4o-mini fine-tune (500 samples, 3 epochs) | ~$4.50 |
-| gpt-4o fine-tune (500 samples, 3 epochs) | ~$37.50 |
-| Azure ML LoRA on 7B (NC6s, 2 hrs) | ~$6.12 |
-| Azure ML LoRA on 70B (A100, 4 hrs) | ~$14.68 |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|---------|------------|------------|
+| Azure OpenAI Fine-Tuning | $80/mo | $400/mo | $1,500/mo |
+| Azure OpenAI Inference | $30/mo | $250/mo | $900/mo |
+| Azure Machine Learning | $0/mo | $100/mo | $300/mo |
+| Blob Storage | $3/mo | $20/mo | $60/mo |
+| Azure AI Foundry | $0/mo | $50/mo | $150/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Application Insights | $0/mo | $25/mo | $80/mo |
+| **Total** | **$114/mo** | **$848/mo** | **$3,000/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/13-fine-tuning-workflow](https://frootai.dev/solution-plays/13-fine-tuning-workflow)

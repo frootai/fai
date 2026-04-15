@@ -1,0 +1,177 @@
+{
+  "play": "18",
+  "name": "Prompt Management & Optimization",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Versioned prompt template storage — JSON/YAML files with Git-like versioning via blob snapshots",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 1,
+          "note": "~1GB templates + versions"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 5,
+          "note": "~20GB with full version history"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 15,
+          "note": "~50GB, geo-redundant, immutable"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Prompt management API — CRUD, versioning, A/B assignment, evaluation triggers",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 5,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 60,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 200,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Cosmos DB",
+      "category": "Storage",
+      "purpose": "Prompt metadata, A/B test configs, evaluation results, usage analytics per template",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 3,
+          "note": "~50K RU/month"
+        },
+        "prod": {
+          "sku": "Autoscale 400-4000 RU/s",
+          "cost": 50,
+          "note": "Multi-partition, change feed enabled"
+        },
+        "enterprise": {
+          "sku": "Autoscale 4000-20000 RU/s",
+          "cost": 180,
+          "note": "Multi-region writes, 99.999% SLA"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "Prompt evaluation and optimization — test prompts against golden datasets",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 20,
+          "note": "GPT-4o-mini, ~50K tokens/day eval runs"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 100,
+          "note": "GPT-4o for eval, ~200K tokens/day"
+        },
+        "enterprise": {
+          "sku": "Pay-As-You-Go",
+          "cost": 350,
+          "note": "GPT-4o + GPT-4o-mini, batch eval at scale"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Background jobs — prompt evaluation pipelines, A/B traffic splitting, metric aggregation",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M free executions/month"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 8,
+          "note": "~2M executions/month"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 75,
+          "note": "Pre-warmed, VNet integration"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "API keys for OpenAI, Cosmos DB connection strings, prompt signing keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Prompt performance tracking — latency, token usage, A/B test outcome metrics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~30GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 50,
+          "note": "~100GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 30,
+    "prod": 241,
+    "enterprise": 880
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for bulk prompt evaluations — 95% cheaper than GPT-4o with comparable ranking quality",
+    "Enable Blob Storage lifecycle management — move old prompt versions to Cool tier after 30 days",
+    "Use Cosmos DB serverless for dev — no idle cost, pay only for eval runs",
+    "Batch prompt evaluations during off-peak hours — lower token contention, faster throughput",
+    "Cache frequently-accessed prompts in Container Apps memory — reduces Blob Storage reads by 80%",
+    "Use Container Apps scale-to-zero for dev — eliminates compute cost when not actively developing prompts"
+  ]
+}

@@ -12,6 +12,62 @@ code .  # Use @builder for vision pipeline, @reviewer for accuracy audit, @tuner
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Ingestion
+        Upload[Document Upload<br/>PDF · Image · Scan · Form]
+        Blob[Blob Storage<br/>Raw Documents · Processing Queue]
+    end
+
+    subgraph Processing Pipeline
+        Orchestrator[Azure Functions<br/>Document Orchestrator]
+        Classifier[Document Classifier<br/>Invoice · Receipt · Report · Other]
+        DocIntel[Document Intelligence<br/>OCR · Tables · Forms · Handwriting]
+        Vision[GPT-4o Vision<br/>Charts · Diagrams · Complex Layouts]
+    end
+
+    subgraph Data Layer
+        Cosmos[Cosmos DB<br/>Extracted Fields · Metadata · Status]
+        Search[Azure AI Search<br/>Full-text + Vector Index]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · SAS Tokens]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Accuracy · Throughput · Errors]
+    end
+
+    Upload -->|Store| Blob
+    Blob -->|Event Trigger| Orchestrator
+    Orchestrator -->|Classify| Classifier
+    Classifier -->|Structured Doc| DocIntel
+    Classifier -->|Visual Doc| Vision
+    DocIntel -->|Extracted Data| Cosmos
+    Vision -->|Extracted Data| Cosmos
+    Cosmos -->|Change Feed| Search
+    Orchestrator -->|Auth| MI
+    MI -->|Secrets| KV
+    Orchestrator -->|Telemetry| AppInsights
+
+    style Upload fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style Orchestrator fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Classifier fill:#3b82f6,color:#fff,stroke:#2563eb
+    style DocIntel fill:#10b981,color:#fff,stroke:#059669
+    style Vision fill:#10b981,color:#fff,stroke:#059669
+    style Cosmos fill:#f59e0b,color:#fff,stroke:#d97706
+    style Search fill:#10b981,color:#fff,stroke:#059669
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | Azure OpenAI (gpt-4o vision) | Chart/graph/stamp/signature interpretation |
@@ -39,9 +95,20 @@ code .  # Use @builder for vision pipeline, @reviewer for accuracy audit, @tuner
 | 3 skills | Deploy (124 lines), Evaluate (100 lines), Tune (112 lines) |
 | 4 prompts | `/deploy` (GPT-4o vision + Doc Intel), `/test` (vision pipeline), `/review` (multi-modal quality), `/evaluate` (accuracy) |
 
-## Cost
-| Dev | Prod | With Routing Savings |
-|-----|------|---------------------|
-| $80–200/mo | $1.2K–3K/mo | 56% savings from intelligent OCR/vision routing |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|---------|------------|------------|
+| Azure Document Intelligence | $0/mo | $150/mo | $500/mo |
+| Azure OpenAI (GPT-4o) | $50/mo | $350/mo | $1,200/mo |
+| Blob Storage | $3/mo | $25/mo | $80/mo |
+| Azure Functions | $0/mo | $60/mo | $150/mo |
+| Cosmos DB | $5/mo | $60/mo | $250/mo |
+| Azure AI Search | $0/mo | $75/mo | $250/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Application Insights | $0/mo | $25/mo | $80/mo |
+| **Total** | **$59/mo** | **$748/mo** | **$2,520/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/15-multi-modal-docproc](https://frootai.dev/solution-plays/15-multi-modal-docproc)

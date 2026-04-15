@@ -1,0 +1,177 @@
+{
+  "play": "16",
+  "name": "Copilot Teams Extension",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure Bot Service",
+      "category": "AI Services",
+      "purpose": "Teams bot framework — message handling, adaptive cards, proactive messaging",
+      "tiers": {
+        "dev": {
+          "sku": "Free (S1)",
+          "cost": 0,
+          "note": "Standard channels, unlimited messages"
+        },
+        "prod": {
+          "sku": "Premium",
+          "cost": 50,
+          "note": "SLA, advanced telemetry, direct line"
+        },
+        "enterprise": {
+          "sku": "Premium",
+          "cost": 50,
+          "note": "Same SKU, cost scales with compute"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for conversational AI — context-aware responses, task completion, summarization",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 30,
+          "note": "GPT-4o-mini, ~50K tokens/day"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 250,
+          "note": "GPT-4o, ~800K tokens/day"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 900,
+          "note": "Provisioned throughput, guaranteed latency"
+        }
+      }
+    },
+    {
+      "name": "Azure App Service",
+      "category": "Compute",
+      "purpose": "Bot backend hosting — webhook endpoint, message processing, card rendering",
+      "tiers": {
+        "dev": {
+          "sku": "Free F1",
+          "cost": 0,
+          "note": "Shared compute, 60min/day CPU"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 70,
+          "note": "Dedicated, auto-scale, custom domain"
+        },
+        "enterprise": {
+          "sku": "Premium P1v3",
+          "cost": 180,
+          "note": "VNet integration, zone redundancy"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Search",
+      "category": "AI Services",
+      "purpose": "Knowledge base search — internal docs, FAQs, policies for grounded responses",
+      "tiers": {
+        "dev": {
+          "sku": "Free",
+          "cost": 0,
+          "note": "3 indexes, 50MB, 10K docs"
+        },
+        "prod": {
+          "sku": "Basic",
+          "cost": 75,
+          "note": "15 indexes, 2GB, semantic ranker"
+        },
+        "enterprise": {
+          "sku": "Standard S1",
+          "cost": 250,
+          "note": "50 indexes, 160GB, replicas for HA"
+        }
+      }
+    },
+    {
+      "name": "Cosmos DB",
+      "category": "Storage",
+      "purpose": "Conversation history — multi-turn context, user preferences, session state",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 3,
+          "note": "~50K RU/month"
+        },
+        "prod": {
+          "sku": "Autoscale 400-4000 RU/s",
+          "cost": 50,
+          "note": "Multi-partition, TTL for old sessions"
+        },
+        "enterprise": {
+          "sku": "Autoscale 4000-40000 RU/s",
+          "cost": 200,
+          "note": "Multi-region, analytical store"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Bot registration secrets, OpenAI keys, Microsoft Graph API credentials",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Bot analytics — conversation metrics, user engagement, AI quality tracking",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~40GB/month, custom dashboards"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 70,
+          "note": "~120GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 34,
+    "prod": 518,
+    "enterprise": 1660
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for simple Q&A and routine tasks; escalate to GPT-4o only for complex reasoning",
+    "Cache frequent knowledge base queries — 'What is our PTO policy?' doesn't need a fresh AI call each time",
+    "Use App Service Free tier for dev — no cost for webhook hosting during development",
+    "Implement conversation TTL in Cosmos DB — auto-delete sessions older than 30 days to save storage",
+    "Use adaptive cards for structured responses — reduces back-and-forth messages and token consumption",
+    "Batch proactive notifications to avoid per-message API costs during mass announcements"
+  ]
+}

@@ -12,6 +12,70 @@ code .  # Use @builder for APIM policies, @reviewer for security, @tuner for Fin
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Consumers
+        App1[App 1 — Internal]
+        App2[App 2 — Partner]
+        App3[App 3 — Customer]
+    end
+
+    subgraph Gateway Layer
+        APIM[API Management<br/>Rate Limiting · Token Budgets · Analytics]
+        Classifier[Azure Functions<br/>Query Complexity Classifier]
+        Cache[Redis Cache<br/>Semantic Response Cache]
+    end
+
+    subgraph AI Backends
+        Primary[Azure OpenAI — Primary<br/>GPT-4o · Complex Queries]
+        Secondary[Azure OpenAI — Secondary<br/>GPT-4o-mini · Simple Queries]
+    end
+
+    subgraph Usage Tracking
+        Cosmos[Cosmos DB<br/>Per-Tenant Usage · Quotas · Billing]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Endpoint Secrets]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Cost Analytics · Cache Hit Rate]
+    end
+
+    App1 -->|API Key| APIM
+    App2 -->|API Key| APIM
+    App3 -->|API Key| APIM
+    APIM -->|Check| Cache
+    Cache -->|Miss| Classifier
+    Classifier -->|Complex| Primary
+    Classifier -->|Simple| Secondary
+    Primary -->|Response| APIM
+    Secondary -->|Response| APIM
+    APIM -->|Log Usage| Cosmos
+    APIM -->|Cache Store| Cache
+    APIM -->|Auth| MI
+    MI -->|Secrets| KV
+    APIM -->|Telemetry| AppInsights
+
+    style App1 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style App2 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style App3 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style APIM fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Classifier fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Cache fill:#f59e0b,color:#fff,stroke:#d97706
+    style Primary fill:#10b981,color:#fff,stroke:#059669
+    style Secondary fill:#10b981,color:#fff,stroke:#059669
+    style Cosmos fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+> 📐 [Full architecture details](architecture.md)
+
 | Service | Purpose |
 |---------|---------|
 | API Management | AI gateway with policies, routing, rate limiting |
@@ -38,9 +102,20 @@ code .  # Use @builder for APIM policies, @reviewer for security, @tuner for Fin
 
 **Note:** This is a FinOps/gateway play. TuneKit covers semantic cache parameters, PTU vs pay-as-you-go decisions, routing weights, budget tiers, and cost per 1K tokens — not AI model quality.
 
-## Cost
-| Dev | Prod |
-|-----|------|
-| $80–200/mo | $1K–5K/mo (gateway infra, excludes OpenAI usage) |
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|---------|------------|------------|
+| Azure API Management | $5/mo | $280/mo | $700/mo |
+| Azure OpenAI (Primary) | $40/mo | $300/mo | $1,200/mo |
+| Azure OpenAI (Secondary) | $10/mo | $80/mo | $250/mo |
+| Azure Functions | $0/mo | $15/mo | $80/mo |
+| Azure Cache for Redis | $15/mo | $50/mo | $200/mo |
+| Cosmos DB | $5/mo | $60/mo | $250/mo |
+| Key Vault | $1/mo | $3/mo | $10/mo |
+| Application Insights | $0/mo | $25/mo | $80/mo |
+| **Total** | **$76/mo** | **$813/mo** | **$2,770/mo** |
+
+> 💰 [Full cost breakdown](cost.json)
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/14-cost-optimized-ai-gateway](https://frootai.dev/solution-plays/14-cost-optimized-ai-gateway)
