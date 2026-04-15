@@ -18,6 +18,19 @@
 // Full SDK client
 export { FrootAI, PlayManager, EvalRunner, ConfigManager } from './src/client.js';
 
+// A/B Testing
+export { PromptVariant, ExperimentResult, PromptExperiment } from './src/ab-testing.js';
+
+// Copilot SDK
+export {
+  CopilotSession, CopilotError, CopilotTimeoutError, CopilotRateLimitError,
+  CopilotContentFilterError, CopilotConnectionError,
+  RetryConfig, EventEmitter, CopilotEvent, SessionMessage,
+} from './src/copilot.js';
+
+// Agentic Loop
+export { AgenticLoop, Task, TaskStatus, LoopConfig, runPlan } from './src/agentic-loop.js';
+
 // Convenience re-exports (backward compatible)
 import { FrootAI } from './src/client.js';
 const _client = new FrootAI();
