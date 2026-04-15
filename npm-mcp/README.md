@@ -86,7 +86,7 @@ pip install frootai-mcp                      # Python
     "frootai": {
       "type": "stdio",
       "command": "npx",
-      "args": ["frootai-mcp@latest"]
+      "args": ["-y", "frootai-mcp@latest"]
     }
   }
 }
@@ -100,7 +100,7 @@ pip install frootai-mcp                      # Python
   "mcpServers": {
     "frootai": {
       "command": "npx",
-      "args": ["frootai-mcp@latest"]
+      "args": ["-y", "frootai-mcp@latest"]
     }
   }
 }
@@ -330,17 +330,26 @@ Step 3: install_plugin("enterprise-security", "01")       → Copies primitives,
 
 ---
 
-### CLI  `npx frootai`
+### CLI — `npx frootai`
+
+> **Note:** The CLI has moved to the standalone [`frootai`](https://www.npmjs.com/package/frootai) package (21 commands).
 
 ```bash
-npx frootai init                              # Interactive project scaffolding
-npx frootai search "RAG architecture"         # Search knowledge base
-npx frootai cost enterprise-rag --scale prod  # Azure cost estimate
-npx frootai validate                          # Check project structure
-npx frootai validate --waf                    # WAF alignment scorecard (6 pillars)
+npx frootai help                              # Show all 21 commands
+npx frootai info 01                           # Play details + cost estimate
+npx frootai list                              # Browse 100 solution plays
+npx frootai search "RAG architecture"         # BM25 ranked search
+npx frootai scaffold 01                       # Download play + generate templates
+npx frootai install 01 --kit devkit           # Install specific kit
+npx frootai deploy                            # Guided Azure deployment
+npx frootai status                            # Current project context
+npx frootai diff                              # Compare local vs GitHub
+npx frootai login                             # Check Azure + GitHub auth
 npx frootai doctor                            # Health check
-npx frootai help                              # All commands
+npx frootai validate --waf                    # WAF alignment scorecard
 ```
+
+Install: `npm i -g frootai` or use `npx frootai@latest`
 
 **`frootai init`** scaffolds a complete project:
 
@@ -537,6 +546,7 @@ Chat with Agent FAI  grounded in FrootAI knowledge: [frootai.dev/chatbot](https:
 | Resource | Link |
 |---|---|
 | **Website** | [frootai.dev](https://frootai.dev) |
+| **CLI & SDK (npm)** | [frootai on npm](https://www.npmjs.com/package/frootai) |
 | **Setup Guide** | [FAI Packages Setup](https://frootai.dev/setup-guide) |
 | **CLI Docs** | [CLI Reference](https://frootai.dev/cli) |
 | **REST API** | [Agent FAI REST API](https://frootai.dev/api-docs) |
