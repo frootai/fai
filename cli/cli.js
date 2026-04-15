@@ -161,6 +161,10 @@ switch (command) {
   case 'update':
     await cmdUpdate();
     break;
+  case 'login':
+  case 'auth':
+    cmdLogin();
+    break;
   case 'validate':
     cmdValidate();
     break;
@@ -231,31 +235,83 @@ function cmdSearch(query) {
   banner();
   console.log(`${c.cyan}  Searching: "${query}"${c.reset}\n`);
 
-  const results = [];
-  const queryLower = query.toLowerCase();
+  // Load BM25 search index for ranked search
+  let searchIndex;
+  try {
+    searchIndex = require('frootai-mcp/search-index.json');
+  } catch { searchIndex = null; }
 
-  // Search across modules
-  for (const [id, mod] of Object.entries(KNOWLEDGE.modules || {})) {
-    const text = JSON.stringify(mod).toLowerCase();
-    if (text.includes(queryLower)) {
-      const title = mod.title || mod.name || id;
-      const layer = KNOWLEDGE.layers?.[id[0]];
-      const layerName = typeof layer === 'object' ? (layer.name || layer.title || id[0]) : (layer || '');
-      results.push({ id, title, layer: layerName, type: 'module' });
+  const results = [];
+  const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+
+  if (searchIndex && searchIndex.docs) {
+    // BM25 ranked search using pre-built index
+    const { idf = {}, docs, params = {} } = searchIndex;
+    const { k1 = 1.5, b = 0.75, avgDocLen = 200 } = params;
+
+    for (const doc of Object.values(docs)) {
+      let score = 0;
+      const docTerms = doc.tf || doc.terms || {};
+      const docLen = doc.len || avgDocLen;
+
+      for (const term of queryTerms) {
+        const tf = docTerms[term] || 0;
+        const termIdf = idf[term] || 0;
+        if (tf > 0 && termIdf > 0) {
+          const tfNorm = (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * docLen / avgDocLen));
+          score += termIdf * tfNorm;
+        }
+      }
+
+      if (score > 0) {
+        results.push({
+          id: doc.id || '',
+          title: doc.title || doc.id || '',
+          type: doc.type || 'doc',
+          score: Math.round(score * 100) / 100,
+        });
+      }
+    }
+
+    results.sort((a, b) => b.score - a.score);
+  } else {
+    // Fallback: simple keyword search across modules
+    const queryLower = query.toLowerCase();
+    for (const [id, mod] of Object.entries(KNOWLEDGE.modules || {})) {
+      const text = JSON.stringify(mod).toLowerCase();
+      if (text.includes(queryLower)) {
+        const title = mod.title || mod.name || id;
+        results.push({ id, title, type: 'module', score: 1 });
+      }
     }
   }
 
-  if (results.length === 0) {
+  // Also search plays by name
+  const playResults = ALL_PLAYS.filter(p => {
+    const pLower = p.toLowerCase().replace(/-/g, ' ');
+    return queryTerms.some(t => pLower.includes(t));
+  }).map(p => ({
+    id: p,
+    title: p.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    type: 'play',
+    score: queryTerms.filter(t => p.toLowerCase().includes(t)).length,
+  }));
+
+  const allResults = [...results, ...playResults]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 20);
+
+  if (allResults.length === 0) {
     console.log(`${c.yellow}  No results found for "${query}"${c.reset}`);
     console.log(`${c.dim}  Try: "RAG", "agents", "cost optimization", "prompt engineering"${c.reset}`);
     return;
   }
 
-  console.log(`${c.green}  Found ${results.length} result(s):${c.reset}\n`);
-  for (const r of results) {
-    const icon = r.type === 'module' ? '📖' : '🎯';
-    console.log(`  ${icon} ${c.bold}${r.id}${c.reset} — ${r.title}`);
-    if (r.layer) console.log(`     ${c.dim}Layer: ${r.layer}${c.reset}`);
+  console.log(`${c.green}  Found ${allResults.length} result(s):${c.reset}\n`);
+  for (const r of allResults) {
+    const icon = r.type === 'play' ? '🎯' : r.type === 'module' ? '📖' : '📄';
+    const scoreStr = searchIndex ? ` ${c.dim}(${r.score})${c.reset}` : '';
+    console.log(`  ${icon} ${c.bold}${r.id}${c.reset} — ${r.title}${scoreStr}`);
   }
   console.log('');
 }
@@ -1592,6 +1648,54 @@ function cmdStatus() {
 }
 
 // ═══════════════════════════════════════════════════
+// LOGIN — Auth check (Azure + GitHub)
+// ═══════════════════════════════════════════════════
+
+function cmdLogin() {
+  banner();
+  console.log(`  ${c.bold}Authentication Status${c.reset}\n`);
+
+  // Check Azure CLI login
+  try {
+    const azAccount = execSync('az account show --query "{name:name, id:id, user:user.name}" -o json', { encoding: 'utf8', timeout: 10000 });
+    const acct = JSON.parse(azAccount);
+    console.log(`  ${c.green}✅${c.reset} Azure CLI — logged in`);
+    console.log(`     ${c.dim}Account: ${acct.name}${c.reset}`);
+    console.log(`     ${c.dim}User:    ${acct.user}${c.reset}`);
+    console.log(`     ${c.dim}Sub:     ${acct.id}${c.reset}`);
+  } catch {
+    console.log(`  ${c.yellow}⚠️${c.reset}  Azure CLI — not logged in`);
+    console.log(`     ${c.dim}Run: ${c.cyan}az login${c.dim} to authenticate${c.reset}`);
+  }
+
+  console.log('');
+
+  // Check GitHub CLI login
+  try {
+    const ghStatus = execSync('gh auth status 2>&1', { encoding: 'utf8', timeout: 10000 });
+    const userMatch = ghStatus.match(/Logged in to .+ as (.+?)[\s(]/);
+    console.log(`  ${c.green}✅${c.reset} GitHub CLI — logged in${userMatch ? ` as ${userMatch[1]}` : ''}`);
+  } catch {
+    try {
+      execSync('gh --version', { encoding: 'utf8', timeout: 5000 });
+      console.log(`  ${c.yellow}⚠️${c.reset}  GitHub CLI — installed but not logged in`);
+      console.log(`     ${c.dim}Run: ${c.cyan}gh auth login${c.dim} to authenticate${c.reset}`);
+    } catch {
+      console.log(`  ${c.dim}ℹ️${c.reset}  GitHub CLI — not installed (optional)`);
+      console.log(`     ${c.dim}Install: ${c.cyan}https://cli.github.com${c.reset}`);
+    }
+  }
+
+  console.log('');
+
+  // Show what auth enables
+  console.log(`  ${c.bold}What authentication enables:${c.reset}`);
+  console.log(`    ${c.dim}Azure:  ${c.cyan}frootai deploy${c.dim} — deploy infrastructure to Azure${c.reset}`);
+  console.log(`    ${c.dim}GitHub: ${c.cyan}frootai scaffold${c.dim} — access private repos (optional)${c.reset}`);
+  console.log('');
+}
+
+// ═══════════════════════════════════════════════════
 // UPDATE — Self-update + check for latest versions
 // ═══════════════════════════════════════════════════
 
@@ -1664,6 +1768,7 @@ function cmdHelp() {
   console.log(`    ${c.green}doctor${c.reset}             Health check for your setup`);
   console.log(`    ${c.green}status${c.reset}             Show current project context`);
   console.log(`    ${c.green}diff${c.reset}               Compare local vs GitHub (drift detection)`);
+  console.log(`    ${c.green}login${c.reset}              Check Azure + GitHub auth status`);
   console.log(`    ${c.green}update${c.reset}             Check for latest versions`);
   console.log(`    ${c.green}version${c.reset}            Show version info`);
   console.log(`    ${c.green}help${c.reset}               Show this help\n`);
