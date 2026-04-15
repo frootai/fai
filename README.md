@@ -43,9 +43,10 @@ FrootAI is an intelligent way of packaging skills, knowledge, and the essential 
 |------|----------|------|
 | **Solution Plays** | Infra & platform engineers | [Browse Plays](https://frootai.dev/solution-plays) |
 | **MCP Server** | AI agents (Copilot, Claude, Cursor) | [MCP Tooling](https://frootai.dev/mcp-tooling) |
+| **npm SDK** | Node.js / TypeScript developers | [npm](https://www.npmjs.com/package/frootai) |
+| **Python SDK** | Data scientists | [Python SDK](https://frootai.dev/python) |
 | **Knowledge Modules** | Cloud architects, CSAs | [Docs](https://frootai.dev/docs) |
 | **VS Code Extension** | Developers | [VS Code Extension](https://frootai.dev/vscode-extension) |
-| **Python SDK** | Data scientists | [Python SDK](https://frootai.dev/python) |
 | **CLI** | Everyone | [CLI Docs](https://frootai.dev/cli) |
 
 ---
@@ -53,11 +54,12 @@ FrootAI is an intelligent way of packaging skills, knowledge, and the essential 
 ### Get Started
 
 ```bash
-npx frootai-mcp@latest                          # MCP Server  add to any AI agent
-code --install-extension frootai.frootai-vscode     # VS Code Extension
+npx frootai-mcp@latest                          # MCP Server — add to any AI agent
+npx frootai init                                 # CLI — scaffold a project
+npm install frootai                              # npm SDK — import in Node.js/TS
 pip install frootai                              # Python SDK
-docker run -i ghcr.io/frootai/frootai-mcp        # Docker  zero install
-npx frootai init                                 # CLI  scaffold a project
+code --install-extension frootai.frootai-vscode  # VS Code Extension
+docker run -i ghcr.io/frootai/frootai-mcp        # Docker — zero install
 ```
 
 <details>
@@ -71,9 +73,46 @@ npx frootai init                                 # CLI  scaffold a project
 }
 ```
 
-Works with: **GitHub Copilot**  **Claude Desktop**  **Cursor**  **Windsurf**  **Azure AI Foundry**  any MCP client
+Works with: **GitHub Copilot** · **Claude Desktop** · **Cursor** · **Windsurf** · **Azure AI Foundry** · any MCP client
 
 </details>
+
+---
+
+### npm SDK — Full Programmatic API
+
+```bash
+npm install frootai
+```
+
+```javascript
+import { FrootAI, PromptExperiment, PromptVariant, CopilotSession, AgenticLoop, Task } from 'frootai';
+
+const fai = new FrootAI();
+
+// Search, plays, modules
+fai.search('RAG architecture');          // BM25-ranked results
+fai.plays.get('01');                     // Play details
+fai.listModules();                       // 16 FROOT modules
+
+// Evaluation quality gates
+fai.evaluation.run({ groundedness: 0.95, relevance: 0.88 });
+
+// A/B test prompts
+const exp = new PromptExperiment({
+  name: 'rag-v2',
+  variants: [
+    new PromptVariant('control', 'You are a helpful assistant.'),
+    new PromptVariant('expert', 'You are an Azure AI expert. Cite sources.'),
+  ],
+});
+
+// Agentic loop — builder → reviewer → tuner
+const loop = new AgenticLoop({ planFile: 'spec/plan.json' });
+loop.addTask(new Task('Create RAG pipeline', 'builder'))
+    .addTask(new Task('Review security', 'reviewer'));
+await loop.run();
+```
 
 ---
 
@@ -118,7 +157,7 @@ node engine/index.js <manifest> # Load a play with the FAI Engine
 
 ---
 
-### MCP Server — 25 Tools
+### MCP Server — 45 Tools
 
 | Category | # | Tools |
 |----------|:-:|-------|
@@ -133,7 +172,7 @@ node engine/index.js <manifest> # Load a play with the FAI Engine
 ### Solution Plays
 
 <details>
-<summary><strong>50 pre-tuned, deployable AI solutions</strong> — click to expand</summary>
+<summary><strong>100 pre-tuned, deployable AI solutions</strong> — click to expand</summary>
 <br>
 
 | # | Solution | What It Deploys |
@@ -201,14 +240,14 @@ Every play ships with: `fai-manifest.json` + `.github` Agentic OS (agents, instr
 
 | Channel | Install | Version | Links |
 |---------|---------|:-------:|-------|
-| **npm** | `npm install frootai-mcp` | 3.2.0 | [Website](https://frootai.dev/mcp-tooling)  [npmjs.com](https://www.npmjs.com/package/frootai-mcp) |
+| **npm MCP** | `npm install frootai-mcp` | 5.2.0 | [Website](https://frootai.dev/mcp-tooling) · [npmjs.com](https://www.npmjs.com/package/frootai-mcp) |
+| **npm SDK** | `npm install frootai` | 5.4.0 | [npmjs.com](https://www.npmjs.com/package/frootai) |
 | **PyPI SDK** | `pip install frootai` | 3.3.0 | [PyPI](https://pypi.org/project/frootai/) |
 | **PyPI MCP** | `pip install frootai-mcp` | 3.2.0 | [PyPI](https://pypi.org/project/frootai-mcp/) |
-| **Docker** | `docker run -i ghcr.io/frootai/frootai-mcp` | latest | [Website](https://frootai.dev/docker)  [GHCR](https://github.com/frootai/frootai/pkgs/container/frootai-mcp) |
-| **VS Code** | `code --install-extension frootai.frootai-vscode` | 1.4.0 | [Website](https://frootai.dev/vscode-extension)  [Marketplace](https://marketplace.visualstudio.com/items?itemName=frootai.frootai-vscode) |
-| **CLI** | `npx frootai <command>` | 3.2.0 | [Website](https://frootai.dev/cli) |
-| **REST API** |  | live | [API Docs](https://frootai.dev/api-docs) |
-| **GitHub** |  | latest | [github.com/frootai/frootai](https://github.com/frootai/frootai) |
+| **Docker** | `docker run -i ghcr.io/frootai/frootai-mcp` | latest | [Website](https://frootai.dev/docker) · [GHCR](https://github.com/frootai/frootai/pkgs/container/frootai-mcp) |
+| **VS Code** | `code --install-extension frootai.frootai-vscode` | 1.4.0 | [Website](https://frootai.dev/vscode-extension) · [Marketplace](https://marketplace.visualstudio.com/items?itemName=frootai.frootai-vscode) |
+| **CLI** | `npx frootai <command>` | 5.4.0 | [Website](https://frootai.dev/cli) |
+| **GitHub** | — | latest | [github.com/frootai/frootai](https://github.com/frootai/frootai) |
 
 </details>
 
@@ -229,11 +268,12 @@ frootai/frootai
 ├── cookbook/              16 step-by-step recipes
 ├── schemas/              7 JSON schemas validating all primitive types
 ├── engine/               FAI Engine v0.1 (7 modules — manifest reader → evaluator)
-├── solution-plays/       50 deployable plays with DevKit+TuneKit+SpecKit+Bicep
-├── npm-mcp/           MCP tools + knowledge.json (45 tools)
-├── vscode-extension/     VS Code extension (31 commands)
-├── python-sdk/           Python SDK — offline, zero deps
+├── solution-plays/       100 deployable plays with DevKit+TuneKit+SpecKit+Bicep
+├── npm-mcp/              MCP Server — 45 tools + knowledge.json
+├── npm-sdk/              npm SDK & CLI — FrootAI class, 21 commands, 7 modules
+├── python-sdk/           Python SDK — offline, zero deps, 7 modules
 ├── python-mcp/           Python MCP Server
+├── vscode-extension/     VS Code extension (31 commands)
 ├── functions/            REST API + Agent FAI chatbot
 ├── docs/                 FROOT knowledge modules (18 modules, 664 KB)
 ├── config/               Configurator data + spec templates
