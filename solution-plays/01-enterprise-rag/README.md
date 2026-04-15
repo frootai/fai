@@ -18,17 +18,92 @@ code .
 ```
 
 ## Architecture
-| Service | Purpose |
-|---------|---------|
-| Azure AI Search | Hybrid search (BM25 + vector + semantic reranking) |
-| Azure OpenAI (gpt-4o) | Grounded response generation with citations |
-| Container Apps | API hosting with auto-scaling |
-| Blob Storage | Document storage and indexing source |
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Client App]
+    end
+
+    subgraph Application Layer
+        API[Container Apps<br/>REST API + Streaming]
+        Auth[Managed Identity<br/>Zero-secret auth]
+    end
+
+    subgraph AI Layer
+        Search[Azure AI Search<br/>Hybrid: BM25 + Vector + Semantic]
+        OpenAI[Azure OpenAI<br/>GPT-4o — Answer Gen + Citations]
+        Safety[Content Safety<br/>Hate · Violence · Self-harm · Sexual]
+    end
+
+    subgraph Data Layer
+        Blob[Blob Storage<br/>PDFs · Word · HTML · Markdown]
+        KV[Key Vault<br/>API Keys · Connection Strings]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Latency · Token Usage · Errors]
+        LogAnalytics[Log Analytics<br/>KQL Queries · Alerts]
+    end
+
+    User -->|HTTPS| API
+    API -->|Query| Search
+    Search -->|Top-K Results| OpenAI
+    OpenAI -->|Grounded Answer| API
+    API -->|Response + Citations| User
+    API -->|Auth| Auth
+    Auth -->|Secrets| KV
+    Blob -->|Indexer| Search
+    OpenAI -->|Moderation| Safety
+    API -->|Telemetry| AppInsights
+    API -->|Logs| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#06b6d4,color:#fff,stroke:#0891b2
+    style Search fill:#10b981,color:#fff,stroke:#059669
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Safety fill:#10b981,color:#fff,stroke:#059669
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style Auth fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
+| Service | Layer | Role |
+|---------|-------|------|
+| Container Apps | Compute | API hosting, auto-scaling, HTTPS ingress |
+| Azure AI Search | AI | Hybrid search index, semantic reranking |
+| Azure OpenAI (GPT-4o) | AI | Answer generation with citation grounding |
+| Content Safety | AI | Response moderation, category filtering |
+| Blob Storage | Data | Document storage, indexing source |
+| Key Vault | Security | API keys, connection strings, managed identity |
+| Managed Identity | Security | Zero-secret service-to-service auth |
+| Application Insights | Monitoring | APM, distributed tracing, custom AI metrics |
+| Log Analytics | Monitoring | Centralized logging, KQL, alert rules |
+
+> 📐 [Full architecture details](architecture.md) — data flow, security architecture, scaling guide, WAF alignment
 
 ## Pre-Tuned Defaults
 - Temperature: 0.1 · Top-k: 5 · Hybrid weights: 60/40 (vector/keyword)
 - Chunking: 512 tokens, semantic strategy, 10% overlap
 - Guardrails: Groundedness ≥0.8, Relevance ≥0.7, Content Safety enabled
+
+## Cost Estimate
+
+| Service | Dev/PoC | Production | Enterprise |
+|---------|---------|-----------|------------|
+| Azure AI Search | $75 (Basic) | $250 (Standard S1) | $750 (Standard S2) |
+| Azure OpenAI | $50 (PAYG) | $300 (PAYG) | $1,200 (PTU Reserved) |
+| Container Apps | $10 (Consumption) | $80 (Dedicated) | $250 (Dedicated HA) |
+| Blob Storage | $2 (Hot LRS) | $15 (Hot LRS) | $50 (Hot GRS) |
+| Key Vault | $1 (Standard) | $3 (Standard) | $10 (Premium HSM) |
+| Application Insights | $0 (Free) | $25 (Pay-per-GB) | $100 (Pay-per-GB) |
+| Log Analytics | $0 (Free) | $15 (Pay-per-GB) | $50 (Commitment) |
+| Content Safety | $0 (Free) | $15 (Standard) | $50 (Standard) |
+| **Total** | **$138/mo** | **$703/mo** | **$2,460/mo** |
+
+> 💰 [Full cost breakdown](cost.json) — per-service SKUs, usage assumptions, optimization tips
 
 ## DevKit (AI-Assisted Development)
 | Primitive | What It Does |
@@ -39,10 +114,6 @@ code .
 | 3 skills | Deploy (106 lines), Evaluate (153 lines), Tune (167 lines) |
 | 4 prompts | `/deploy`, `/test`, `/review`, `/evaluate` |
 
-## Cost Estimate
-| Environment | Monthly |
-|-------------|---------|
-| Dev/Test | $150–300 |
-| Production | $2K–8K |
+---
 
 📖 [Full documentation](spec/README.md) · 🌐 [frootai.dev/solution-plays/01-enterprise-rag](https://frootai.dev/solution-plays/01-enterprise-rag) · 📦 [FAI Protocol](spec/fai-manifest.json)
