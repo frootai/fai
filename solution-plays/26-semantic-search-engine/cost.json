@@ -1,0 +1,199 @@
+{
+  "play": "26",
+  "name": "Semantic Search Engine",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure AI Search",
+      "category": "AI Services",
+      "purpose": "Hybrid search index — BM25 keyword + vector similarity + semantic reranking",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 75,
+          "note": "1 index, 2GB storage, vector search"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 250,
+          "note": "50 indexes, 160GB, semantic ranker, replicas"
+        },
+        "enterprise": {
+          "sku": "Standard S2",
+          "cost": 750,
+          "note": "200 indexes, 1TB, 3+ replicas for HA"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "Embedding generation (text-embedding-3-large) + optional query understanding (GPT-4o-mini)",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 30,
+          "note": "~50K tokens/day, embedding + sparse query rewriting"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 150,
+          "note": "~500K tokens/day, batch embedding + query expansion"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 600,
+          "note": "Provisioned throughput for high-volume embedding + search"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Source document storage — PDFs, Office docs, HTML, JSON, CSV for indexing",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~10GB documents"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 20,
+          "note": "~1TB documents"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 60,
+          "note": "~5TB, geo-redundant"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Search API gateway — query processing, result enrichment, faceted navigation",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 80,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 250,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Document processing pipeline — chunking, embedding generation, index updates on upload",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M free executions/month"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 15,
+          "note": "~5M executions/month, event-driven"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 75,
+          "note": "Always-warm, VNet integration, no cold starts"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "AI Search admin keys, OpenAI API keys, storage connection strings",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Search latency, query patterns, relevance feedback, embedding pipeline metrics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging — indexer runs, query diagnostics, pipeline errors",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~10GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 50,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 118,
+    "prod": 558,
+    "enterprise": 1895
+  },
+  "optimization_tips": [
+    "Use AI Search Basic tier for dev — saves $175/month vs Standard",
+    "Batch embedding generation during off-peak hours — reduces peak API costs",
+    "Use text-embedding-3-small for low-priority indexes — 5x cheaper than 3-large with good accuracy",
+    "Enable incremental indexing — only re-embed changed documents, not the full corpus",
+    "Use hybrid search (keyword + vector) — often better accuracy than vector-only, reduces reliance on expensive embeddings",
+    "Cache frequent search queries with 5-minute TTL — reduces AI Search RU consumption by 30%"
+  ]
+}

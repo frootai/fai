@@ -1,0 +1,221 @@
+{
+  "play": "27",
+  "name": "AI Data Pipeline",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o-mini for data classification, entity extraction, enrichment, and schema inference",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 40,
+          "note": "~100K tokens/day, small batch classification"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 250,
+          "note": "~2M tokens/day, continuous enrichment pipeline"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 900,
+          "note": "Provisioned throughput for high-volume batch processing"
+        }
+      }
+    },
+    {
+      "name": "Azure Data Factory",
+      "category": "Integration",
+      "purpose": "Pipeline orchestration — data extraction, transformation scheduling, LLM-enrichment stages",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 15,
+          "note": "~500 activity runs/month, 2 pipelines"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 120,
+          "note": "~10K activity runs/month, 10+ pipelines, data flows"
+        },
+        "enterprise": {
+          "sku": "Pay-As-You-Go + SHIR",
+          "cost": 400,
+          "note": "~100K activity runs/month, self-hosted IR, complex data flows"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Enriched data store — classified records, entity graphs, pipeline metadata",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~10K RUs, small dataset storage"
+        },
+        "prod": {
+          "sku": "Provisioned 1000 RU/s",
+          "cost": 80,
+          "note": "Multi-partition, 100GB, session consistency"
+        },
+        "enterprise": {
+          "sku": "Provisioned 5000 RU/s",
+          "cost": 400,
+          "note": "Multi-region writes, 1TB, strong consistency"
+        }
+      }
+    },
+    {
+      "name": "Azure Event Hubs",
+      "category": "Integration",
+      "purpose": "Real-time data ingestion — streaming records into classification pipeline",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 12,
+          "note": "1 TU, 1 consumer group, 1-day retention"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 75,
+          "note": "4 TUs, 20 consumer groups, 7-day retention"
+        },
+        "enterprise": {
+          "sku": "Premium",
+          "cost": 300,
+          "note": "16 PUs, zone-redundant, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Event-triggered processors — record classification, entity extraction, enrichment workers",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M free executions/month"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 25,
+          "note": "~10M executions/month, Event Hub triggers"
+        },
+        "enterprise": {
+          "sku": "Premium EP2",
+          "cost": 150,
+          "note": "Always-warm, VNet, high memory for batch LLM calls"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Raw data landing zone — CSV, JSON, Parquet files before and after enrichment",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~10GB raw + enriched data"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 25,
+          "note": "~1TB, lifecycle policies to Cool after 30 days"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 80,
+          "note": "~5TB, geo-redundant, lifecycle to Archive"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "OpenAI API keys, Data Factory connection secrets, Event Hubs SAS keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Pipeline latency, classification accuracy, token consumption, enrichment throughput",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging — pipeline run history, classification errors, Data Factory diagnostics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~10GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 50,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 75,
+    "prod": 618,
+    "enterprise": 2390
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for classification tasks — 15x cheaper than GPT-4o with comparable accuracy for structured extraction",
+    "Batch records in groups of 20-50 per LLM call — amortizes overhead and reduces total API calls by 90%",
+    "Implement a classification cache — identical record patterns reuse prior LLM results, saving 30-40% token cost",
+    "Use Data Factory mapping data flows only for complex transforms — activity-level orchestration is significantly cheaper",
+    "Move enriched data to Cool storage after 30 days — 60% savings on storage for historical records",
+    "Stream low-priority records through Event Hubs Basic tier — reserve Standard for production workloads"
+  ]
+}

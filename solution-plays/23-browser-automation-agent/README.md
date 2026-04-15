@@ -13,13 +13,68 @@ code .  # Use @builder for Playwright/vision, @reviewer for security audit, @tun
 ```
 
 ## Architecture
-| Service | Purpose |
-|---------|---------|
-| Playwright (headless Chromium) | Browser control, DOM interaction |
-| Azure OpenAI (gpt-4o vision) | Screenshot analysis, action planning |
-| Container Apps | Headless browser hosting |
-| Key Vault | Site credentials, API tokens |
-| Azure Storage | Screenshot archive for debugging |
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / API Client]
+    end
+
+    subgraph Agent Orchestrator
+        API[Container Apps<br/>Agent Loop · Action Planner]
+        TaskQ[Cosmos DB<br/>Task Queue · Action History]
+    end
+
+    subgraph Browser Runtime
+        Browser[Container Apps<br/>Headless Chromium · Playwright]
+        Screenshots[Blob Storage<br/>Screenshots · Page Snapshots]
+    end
+
+    subgraph Vision & Reasoning
+        Vision[Azure OpenAI — GPT-4o Vision<br/>Screenshot Analysis · DOM Reasoning]
+        Planner[Azure OpenAI — GPT-4o<br/>Action Planning · Error Recovery]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Site Credentials · API Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Action Traces · Vision Latency]
+        LogAnalytics[Log Analytics<br/>Browser Logs · Failure Diagnostics]
+    end
+
+    User -->|Task: "Fill form on site X"| API
+    API -->|Step 1: Navigate| Browser
+    Browser -->|Screenshot| Screenshots
+    Screenshots -->|Image| Vision
+    Vision -->|Page Understanding| API
+    API -->|Step 2: Plan Actions| Planner
+    Planner -->|Click / Type / Scroll| API
+    API -->|Execute Action| Browser
+    Browser -->|Updated Screenshot| Screenshots
+    API -->|Loop until complete| API
+    API -->|Result + Evidence| User
+    API <-->|State| TaskQ
+    MI -->|Secrets| KV
+    API -->|Traces| AppInsights
+    Browser -->|Logs| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#3b82f6,color:#fff,stroke:#2563eb
+    style TaskQ fill:#f59e0b,color:#fff,stroke:#d97706
+    style Browser fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Screenshots fill:#f59e0b,color:#fff,stroke:#d97706
+    style Vision fill:#10b981,color:#fff,stroke:#059669
+    style Planner fill:#10b981,color:#fff,stroke:#059669
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
 
 ## Agent Action Loop
 ```
@@ -39,8 +94,18 @@ Navigate → Screenshot → GPT-4o Vision → Decide Action → Execute → Veri
 **Note:** This is a browser automation/RPA play. TuneKit covers screenshot frequency strategies, wait strategies (never fixed delays), selector methods (accessible names > CSS), action planning prompts, and cost per automation — not AI model quality metrics.
 
 ## Cost
-| Dev | Prod (100 tasks/day) |
-|-----|---------------------|
-| $50–150/mo | ~$240/mo (optimize to ~$100 with DOM-only mode) |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| Azure OpenAI | GPT-4o Vision for screenshot analysis + action planning | $80 | $450 | $1,500 |
+| Container Apps | Headless browser runtime + agent orchestrator | $25 | $180 | $500 |
+| Blob Storage | Screenshot storage, session recordings | $3 | $20 | $60 |
+| Cosmos DB | Browser session state, task queue, action history | $5 | $45 | $180 |
+| Key Vault | Site credentials, authentication tokens | $1 | $3 | $10 |
+| App Insights | Action traces, vision API latency | $0 | $25 | $100 |
+| Log Analytics | Browser container logs, failure diagnostics | $0 | $15 | $50 |
+| **Total** | | **$114** | **$738** | **$2,400** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/23-browser-automation-agent](https://frootai.dev/solution-plays/23-browser-automation-agent)

@@ -1,0 +1,177 @@
+{
+  "play": "24",
+  "name": "AI Code Review",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for code review — bug detection, security analysis, refactoring suggestions",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 40,
+          "note": "~100K tokens/day, small PRs"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 200,
+          "note": "~1M tokens/day, full diff analysis per PR"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 800,
+          "note": "Provisioned throughput for high PR volume orgs"
+        }
+      }
+    },
+    {
+      "name": "GitHub Actions",
+      "category": "Compute",
+      "purpose": "CI/CD runner for CodeQL analysis and LLM review orchestration",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "2,000 minutes/month on public repos"
+        },
+        "prod": {
+          "sku": "Team plan",
+          "cost": 40,
+          "note": "3,000 minutes/month, private repos"
+        },
+        "enterprise": {
+          "sku": "Enterprise",
+          "cost": 150,
+          "note": "50,000 minutes/month, larger runners, GHES"
+        }
+      }
+    },
+    {
+      "name": "GitHub Advanced Security (CodeQL)",
+      "category": "Security",
+      "purpose": "Static analysis — vulnerability detection, dependency scanning, secret scanning",
+      "tiers": {
+        "dev": {
+          "sku": "Free (public repos)",
+          "cost": 0,
+          "note": "CodeQL free on public repos"
+        },
+        "prod": {
+          "sku": "GHAS per committer",
+          "cost": 50,
+          "note": "~$49/active committer/month, 1 committer"
+        },
+        "enterprise": {
+          "sku": "GHAS per committer",
+          "cost": 250,
+          "note": "~$49/active committer/month, 5 committers"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Review orchestration API — receives webhooks, coordinates CodeQL + LLM analysis",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 5,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 30,
+          "note": "0.5 vCPU, 1GB, event-driven scaling"
+        },
+        "enterprise": {
+          "sku": "Dedicated",
+          "cost": 100,
+          "note": "1 vCPU, 2GB, min 2 replicas, VNet"
+        }
+      }
+    },
+    {
+      "name": "Cosmos DB",
+      "category": "Data",
+      "purpose": "Review history, finding patterns, false-positive tracking, reviewer learning",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 3,
+          "note": "~5K RUs, minimal storage"
+        },
+        "prod": {
+          "sku": "Provisioned 400 RU/s",
+          "cost": 30,
+          "note": "Review history, 20GB"
+        },
+        "enterprise": {
+          "sku": "Provisioned 1000 RU/s",
+          "cost": 80,
+          "note": "Cross-repo analytics, 100GB"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "GitHub tokens, OpenAI API keys, webhook secrets",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~500 operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 2,
+          "note": "~20K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Review latency, token usage per PR, finding accuracy tracking",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~30GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 60,
+          "note": "~120GB/month, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 49,
+    "prod": 367,
+    "enterprise": 1450
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for initial diff triage, escalate only complex files to GPT-4o — saves 70%",
+    "Only analyze changed files in the PR diff, not the entire codebase — reduces token usage dramatically",
+    "Cache CodeQL results per commit SHA — avoid re-scanning unchanged files on PR updates",
+    "Use GitHub Actions concurrency groups to prevent duplicate review runs on force-pushes",
+    "Implement false-positive feedback loop — learn from dismissed findings to improve future accuracy",
+    "Run CodeQL and LLM review in parallel — reduces total PR review time by 40%"
+  ]
+}

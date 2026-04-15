@@ -12,13 +12,71 @@ code .  # Use @builder for pipeline designer, @reviewer for validation audit, @t
 ```
 
 ## Architecture
-| Service | Purpose |
-|---------|---------|
-| Static Web Apps | Visual pipeline designer (React) |
-| Cosmos DB | Pipeline definitions (versioned, per user) |
-| Container Apps | Pipeline execution engine |
-| Azure OpenAI | AI steps within pipelines |
-| Key Vault | Connector credentials |
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Builder Canvas]
+    end
+
+    subgraph Frontend
+        SWA[Azure Static Web Apps<br/>Drag-and-Drop Canvas · Node Library · Real-time Preview]
+    end
+
+    subgraph Pipeline Engine
+        Engine[Container Apps<br/>DAG Runner · Node Orchestrator · WebSocket Preview]
+        Deploy[Container Apps — Deployed Pipelines<br/>Serverless API Endpoints]
+    end
+
+    subgraph AI Engine
+        OpenAI[Azure OpenAI — GPT-4o<br/>LLM Nodes · Prompt Execution · Reasoning]
+        Mini[Azure OpenAI — GPT-4o-mini<br/>Classification · Extraction · Simple Transforms]
+    end
+
+    subgraph Data Layer
+        CosmosDB[Cosmos DB<br/>Pipeline Definitions · Run History · Templates]
+        Blob[Blob Storage<br/>Uploaded Documents · Generated Outputs]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · User Secrets]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Pipeline Metrics · Node Latency · Token Usage]
+        LogAnalytics[Log Analytics<br/>Pipeline Runs · Deployment Events]
+    end
+
+    User -->|Design Pipeline| SWA
+    SWA -->|Pipeline JSON| Engine
+    Engine -->|Execute LLM Nodes| OpenAI
+    Engine -->|Execute Simple Nodes| Mini
+    Engine -->|Load/Save Pipeline| CosmosDB
+    Engine -->|Read/Write Artifacts| Blob
+    Engine -->|Real-time Preview| SWA
+    SWA -->|One-Click Deploy| Engine
+    Engine -->|Deploy as API| Deploy
+    Deploy -->|Execute Pipelines| OpenAI
+    MI -->|Secrets| KV
+    Engine -->|Traces| AppInsights
+    Deploy -->|Logs| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style SWA fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Engine fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Deploy fill:#3b82f6,color:#fff,stroke:#2563eb
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Mini fill:#10b981,color:#fff,stroke:#059669
+    style CosmosDB fill:#f59e0b,color:#fff,stroke:#d97706
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
 
 ## Pre-Built Templates
 | Template | Use Case |
@@ -40,8 +98,19 @@ code .  # Use @builder for pipeline designer, @reviewer for validation audit, @t
 | 4 prompts | `/deploy` (builder platform), `/test` (pipeline execution), `/review` (validation), `/evaluate` (template quality) |
 
 ## Cost
-| Dev | Prod (1K runs/day) |
-|-----|--------------------|
-| $80–200/mo | ~$135/mo (SWA + Cosmos serverless + mini AI steps) |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| Azure OpenAI | Pipeline AI node execution (GPT-4o + mini) | $50 | $300 | $1,000 |
+| Container Apps | DAG engine, node orchestrator, deployed APIs | $10 | $100 | $300 |
+| Cosmos DB | Pipeline definitions, run history, templates | $5 | $65 | $300 |
+| Static Web Apps | Visual drag-and-drop builder UI | $0 | $9 | $9 |
+| Blob Storage | Pipeline artifacts, uploaded documents | $2 | $15 | $50 |
+| Key Vault | API keys, user secrets, pipeline encryption | $1 | $3 | $10 |
+| App Insights | Pipeline metrics, node latency, token usage | $0 | $25 | $100 |
+| Log Analytics | Pipeline runs, deployment events | $0 | $15 | $50 |
+| **Total** | | **$68** | **$532** | **$1,819** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/31-low-code-ai-builder](https://frootai.dev/solution-plays/31-low-code-ai-builder)

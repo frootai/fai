@@ -21,12 +21,76 @@ code .  # Use @builder for swarm topology, @reviewer for consensus audit, @tuner
 | Single point of failure | Yes (supervisor) | No |
 
 ## Architecture
-| Service | Purpose |
-|---------|---------|
-| Azure OpenAI (multi-deploy) | Per-agent model context |
-| Azure Service Bus | Agent-to-agent pub/sub messaging |
-| Redis Cache | Swarm state coordination (bids, votes) |
-| Container Apps | Per-agent container hosting |
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Client App]
+    end
+
+    subgraph Swarm Orchestrator
+        Supervisor[Container Apps<br/>Supervisor Agent · Task Decomposition]
+        TaskQ[Service Bus<br/>Task Queues · Dead-Letter · Sessions]
+    end
+
+    subgraph Specialist Agents
+        AgentA[Container Apps<br/>Research Agent]
+        AgentB[Container Apps<br/>Analysis Agent]
+        AgentC[Container Apps<br/>Synthesis Agent]
+    end
+
+    subgraph Reasoning Engine
+        OpenAI[Azure OpenAI — GPT-4o<br/>Routing · Reasoning · Conflict Resolution]
+    end
+
+    subgraph Data Layer
+        CosmosDB[Cosmos DB<br/>Swarm State · Task Ledger · Memory]
+    end
+
+    subgraph Safety & Security
+        Safety[Content Safety<br/>Per-Agent Moderation]
+        KV[Key Vault<br/>Agent Credentials]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Swarm Traces · Delegation Paths · Token Cost]
+        LogAnalytics[Log Analytics<br/>KQL · Conflict Audits]
+    end
+
+    User -->|Complex Task| Supervisor
+    Supervisor -->|Decompose + Route| TaskQ
+    TaskQ -->|Sub-task A| AgentA
+    TaskQ -->|Sub-task B| AgentB
+    TaskQ -->|Sub-task C| AgentC
+    AgentA -->|Result| TaskQ
+    AgentB -->|Result| TaskQ
+    AgentC -->|Result| TaskQ
+    TaskQ -->|Aggregate| Supervisor
+    Supervisor -->|Final Answer| User
+    Supervisor <-->|State| CosmosDB
+    AgentA & AgentB & AgentC -->|Reasoning| OpenAI
+    Supervisor -->|Moderate| Safety
+    MI -->|Secrets| KV
+    Supervisor -->|Traces| AppInsights
+    Supervisor -->|Logs| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Supervisor fill:#3b82f6,color:#fff,stroke:#2563eb
+    style TaskQ fill:#f59e0b,color:#fff,stroke:#d97706
+    style AgentA fill:#3b82f6,color:#fff,stroke:#2563eb
+    style AgentB fill:#3b82f6,color:#fff,stroke:#2563eb
+    style AgentC fill:#3b82f6,color:#fff,stroke:#2563eb
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style CosmosDB fill:#f59e0b,color:#fff,stroke:#d97706
+    style Safety fill:#10b981,color:#fff,stroke:#059669
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
 
 ## Key Metrics
 - Consensus: ≥80% · Bidding accuracy: ≥85% · Parallel speedup: ≥2x · Cost/task: <$0.15
@@ -39,8 +103,19 @@ code .  # Use @builder for swarm topology, @reviewer for consensus audit, @tuner
 | 4 prompts | `/deploy` (swarm infra), `/test` (parallel execution), `/review` (consensus audit), `/evaluate` (swarm efficiency) |
 
 ## Cost
-| Dev | Prod (5K tasks/day) |
-|-----|---------------------|
-| $150–350/mo | $4.5K–15K/mo (scales with swarm size) |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| Azure OpenAI | Swarm supervisor routing + specialist reasoning | $100 | $600 | $2,200 |
+| Container Apps | Supervisor + specialist agent containers | $20 | $200 | $600 |
+| Service Bus | Agent-to-agent async messaging + dead-letter | $10 | $50 | $200 |
+| Cosmos DB | Swarm state, task ledger, conversation memory | $8 | $80 | $400 |
+| Key Vault | Agent credentials, API keys | $1 | $3 | $10 |
+| App Insights | Distributed tracing across swarm | $0 | $35 | $140 |
+| Log Analytics | Centralized logging, conflict audits | $0 | $25 | $80 |
+| Content Safety | Per-agent output moderation | $0 | $25 | $80 |
+| **Total** | | **$139** | **$1,018** | **$3,710** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/22-multi-agent-swarm](https://frootai.dev/solution-plays/22-multi-agent-swarm)

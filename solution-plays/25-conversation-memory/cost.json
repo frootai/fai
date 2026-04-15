@@ -1,0 +1,199 @@
+{
+  "play": "25",
+  "name": "Conversation Memory",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for conversation with memory-augmented context, summarization, and entity extraction",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 60,
+          "note": "~150K tokens/day, session + memory retrieval"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 350,
+          "note": "~2M tokens/day, memory summarization + embedding generation"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1200,
+          "note": "Provisioned throughput, guaranteed latency for memory-heavy sessions"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Short-term session memory, conversation turns, user profiles, entity store",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~10K RUs, session data + entity cache"
+        },
+        "prod": {
+          "sku": "Provisioned 800 RU/s",
+          "cost": 65,
+          "note": "Multi-partition, 80GB, session consistency"
+        },
+        "enterprise": {
+          "sku": "Provisioned 4000 RU/s",
+          "cost": 300,
+          "note": "Multi-region writes, 500GB, strong consistency"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Search",
+      "category": "AI Services",
+      "purpose": "Long-term semantic memory retrieval — vector search over conversation summaries and facts",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 75,
+          "note": "1 index, 2GB storage, vector search"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 250,
+          "note": "50 indexes, 160GB, semantic ranker for memory relevance"
+        },
+        "enterprise": {
+          "sku": "Standard S2",
+          "cost": 750,
+          "note": "200 indexes, 1TB, replicas for HA"
+        }
+      }
+    },
+    {
+      "name": "Azure Cache for Redis",
+      "category": "Data",
+      "purpose": "Hot memory cache — recent conversation context, active user sessions, entity lookups",
+      "tiers": {
+        "dev": {
+          "sku": "Basic C0",
+          "cost": 15,
+          "note": "250MB cache, single node"
+        },
+        "prod": {
+          "sku": "Standard C1",
+          "cost": 80,
+          "note": "1GB cache, replicated, <1ms reads"
+        },
+        "enterprise": {
+          "sku": "Premium P1",
+          "cost": 225,
+          "note": "6GB cache, clustering, VNet, persistence"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Memory management API — tiered retrieval orchestration, summarization pipeline",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 80,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 250,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "API keys, encryption keys for memory at rest, session signing secrets",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Memory retrieval latency, cache hit rates, summarization quality metrics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging — memory tier operations, cache evictions, summarization runs",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~10GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 50,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 166,
+    "prod": 868,
+    "enterprise": 2885
+  },
+  "optimization_tips": [
+    "Use Redis for last-5-turn context — avoids Cosmos DB reads for active sessions, sub-ms latency",
+    "Summarize conversations after 10 turns — reduces token usage for long sessions by 60-70%",
+    "Use GPT-4o-mini for summarization tasks, reserve GPT-4o for user-facing responses — saves 70%",
+    "Implement memory TTL policies — auto-archive memories older than 90 days to Cold storage",
+    "Use AI Search Basic tier for dev — saves $175/month vs Standard",
+    "Batch entity extraction during off-peak hours to reduce compute costs"
+  ]
+}

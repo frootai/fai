@@ -1,0 +1,199 @@
+{
+  "play": "28",
+  "name": "Knowledge Graph RAG",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for graph-aware response generation, entity extraction, and relationship inference",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 60,
+          "note": "~150K tokens/day, graph traversal + generation"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 400,
+          "note": "~3M tokens/day, entity extraction + graph-augmented RAG"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1400,
+          "note": "Provisioned throughput for high-volume graph reasoning"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB (Gremlin API)",
+      "category": "Data",
+      "purpose": "Knowledge graph store — entities as vertices, relationships as edges, Gremlin traversal queries",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 8,
+          "note": "~15K RUs, small graph (1K vertices, 5K edges)"
+        },
+        "prod": {
+          "sku": "Provisioned 2000 RU/s",
+          "cost": 160,
+          "note": "Multi-partition, 200GB, 100K+ vertices"
+        },
+        "enterprise": {
+          "sku": "Provisioned 8000 RU/s",
+          "cost": 650,
+          "note": "Multi-region, 1TB, 1M+ vertices, strong consistency"
+        }
+      }
+    },
+    {
+      "name": "Azure AI Search",
+      "category": "AI Services",
+      "purpose": "Vector + keyword search over document chunks — initial retrieval before graph augmentation",
+      "tiers": {
+        "dev": {
+          "sku": "Basic",
+          "cost": 75,
+          "note": "1 index, 2GB, vector search"
+        },
+        "prod": {
+          "sku": "Standard S1",
+          "cost": 250,
+          "note": "50 indexes, 160GB, semantic ranker"
+        },
+        "enterprise": {
+          "sku": "Standard S2",
+          "cost": 750,
+          "note": "200 indexes, 1TB, 3+ replicas for HA"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "GraphRAG API — query routing, graph traversal orchestration, context assembly",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 100,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 300,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Functions",
+      "category": "Compute",
+      "purpose": "Graph ingestion pipeline — entity extraction, relationship mapping, index synchronization",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 0,
+          "note": "1M free executions/month"
+        },
+        "prod": {
+          "sku": "Consumption",
+          "cost": 20,
+          "note": "~5M executions/month, batch entity extraction"
+        },
+        "enterprise": {
+          "sku": "Premium EP1",
+          "cost": 75,
+          "note": "Always-warm, VNet, large graph updates"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Cosmos DB keys, AI Search admin keys, OpenAI API keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Graph traversal latency, retrieval quality, entity resolution accuracy, token usage",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging — graph operations, ingestion pipeline runs, query diagnostics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~10GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 50,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 154,
+    "prod": 973,
+    "enterprise": 3335
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for entity extraction and relationship inference — reserve GPT-4o for final response generation only",
+    "Cache frequent graph traversal patterns — common 2-hop queries can be precomputed and stored as materialized views",
+    "Batch entity extraction during document ingestion — process 10-20 documents per LLM call",
+    "Use Cosmos DB serverless for dev — saves $150+/month vs provisioned for low-throughput testing",
+    "Pre-filter with AI Search vector retrieval before graph traversal — avoids expensive full-graph scans",
+    "Set Gremlin query depth limits (max 3 hops) — deeper traversals are exponentially more expensive in RUs"
+  ]
+}

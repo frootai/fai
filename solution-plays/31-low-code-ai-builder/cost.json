@@ -1,0 +1,199 @@
+{
+  "play": "31",
+  "name": "Low-Code AI Builder",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for AI pipeline execution, prompt rendering, and intelligent node processing",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 50,
+          "note": "~120K tokens/day, pipeline testing and preview"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 300,
+          "note": "~2.5M tokens/day, multi-tenant pipeline execution"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1000,
+          "note": "Provisioned throughput for high-volume pipeline runs"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Pipeline execution engine — DAG runner, node orchestration, WebSocket preview server",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 100,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 300,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Pipeline definitions, execution history, user workspaces, node templates",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~10K RUs, pipeline metadata + run history"
+        },
+        "prod": {
+          "sku": "Provisioned 800 RU/s",
+          "cost": 65,
+          "note": "Multi-partition, 80GB, session consistency"
+        },
+        "enterprise": {
+          "sku": "Provisioned 4000 RU/s",
+          "cost": 300,
+          "note": "Multi-region, 500GB, strong consistency"
+        }
+      }
+    },
+    {
+      "name": "Azure Static Web Apps",
+      "category": "Compute",
+      "purpose": "Visual pipeline builder UI — drag-and-drop canvas, node library, real-time preview",
+      "tiers": {
+        "dev": {
+          "sku": "Free",
+          "cost": 0,
+          "note": "100GB bandwidth, 2 custom domains"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 9,
+          "note": "Custom auth, SLA, staging environments"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 9,
+          "note": "Enterprise auth, private endpoints, multiple environments"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Pipeline artifacts — uploaded documents, generated outputs, node snapshots",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 2,
+          "note": "~5GB artifacts"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 15,
+          "note": "~500GB, lifecycle policies"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 50,
+          "note": "~2TB, geo-redundant"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "OpenAI API keys, user connection secrets, pipeline encryption keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Pipeline execution metrics, node latency, token usage, error tracking",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging — pipeline runs, deployment events, user activity",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~10GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 50,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 68,
+    "prod": 532,
+    "enterprise": 1819
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for simple pipeline nodes (classification, extraction) — reserve GPT-4o for complex reasoning nodes",
+    "Cache node execution results for identical inputs — reuse outputs when users re-run pipelines without changes",
+    "Use Static Web Apps Free tier for dev — sufficient for builder UI with 100GB bandwidth",
+    "Implement pipeline-level token budgets — prevent runaway costs from loops or large document processing",
+    "Use Cosmos DB serverless for dev — saves $60/month vs provisioned for low-throughput testing",
+    "Auto-pause idle pipeline preview sessions after 10 minutes — reduces Container Apps consumption costs"
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "play": "30",
+  "name": "AI Security Hardening",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure AI Content Safety",
+      "category": "AI Services",
+      "purpose": "Multi-category content moderation — hate, violence, self-harm, sexual, prompt injection detection",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5K transactions/month, all severity levels"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 75,
+          "note": "~500K transactions/month, Prompt Shields, custom blocklists"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 300,
+          "note": "~2M transactions/month, multi-language, custom categories"
+        }
+      }
+    },
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for red team simulation, adversarial prompt generation, safety boundary testing",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 40,
+          "note": "~100K tokens/day, manual red team sessions"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 200,
+          "note": "~1M tokens/day, automated red team sweeps + guardrails"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 800,
+          "note": "Provisioned throughput for continuous security testing"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "Security proxy — content safety middleware, prompt shield enforcement, response filtering",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 100,
+          "note": "1 vCPU, 2GB, min 2 replicas, always-on"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 300,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Cosmos DB",
+      "category": "Data",
+      "purpose": "Security event store — blocked prompts, red team results, policy violations, audit log",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~5K RUs, event storage for testing"
+        },
+        "prod": {
+          "sku": "Provisioned 400 RU/s",
+          "cost": 30,
+          "note": "30-day retention, partitioned by tenant"
+        },
+        "enterprise": {
+          "sku": "Provisioned 2000 RU/s",
+          "cost": 160,
+          "note": "Multi-region, 90-day retention, compliance audit"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Content Safety keys, OpenAI API keys, mTLS certificates, encryption keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 5,
+          "note": "~100K operations/month, automatic rotation"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 15,
+          "note": "HSM-backed keys, FIPS 140-2 Level 3"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Security metrics — block rates, prompt injection attempts, red team coverage, false positives",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 30,
+          "note": "~60GB/month, security dashboards"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 120,
+          "note": "~250GB/month, 90-day retention, compliance reports"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Security audit logs — all content safety decisions, red team sessions, policy changes",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 20,
+          "note": "~15GB/day, 30-day retention, KQL security queries"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 75,
+          "note": "100GB/day, 1-year retention for compliance"
+        }
+      }
+    },
+    {
+      "name": "Microsoft Defender for Cloud",
+      "category": "Security",
+      "purpose": "Cloud security posture — AI workload protection, threat detection, compliance scoring",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "Basic security recommendations"
+        },
+        "prod": {
+          "sku": "Defender CSPM",
+          "cost": 15,
+          "note": "Attack path analysis, agentless scanning"
+        },
+        "enterprise": {
+          "sku": "Defender for Containers + CSPM",
+          "cost": 40,
+          "note": "Full workload protection, runtime threat detection"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 56,
+    "prod": 475,
+    "enterprise": 1810
+  },
+  "optimization_tips": [
+    "Use Content Safety free tier for dev — 5K transactions/month is sufficient for testing safety rules",
+    "Batch content safety checks — send prompt + response together in one API call instead of two separate calls",
+    "Use GPT-4o-mini for automated red team prompt generation — reserve GPT-4o for complex jailbreak analysis",
+    "Implement tiered moderation — fast keyword blocklist first, then Content Safety API only for non-blocked content",
+    "Cache safety decisions for identical prompts — reduces redundant API calls by 20-30%",
+    "Run red team sweeps on a schedule (nightly) rather than continuously — saves 60% on OpenAI costs"
+  ]
+}

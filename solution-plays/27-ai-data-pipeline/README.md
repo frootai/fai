@@ -12,12 +12,68 @@ code .  # Use @builder for ETL/enrichment, @reviewer for data quality audit, @tu
 ```
 
 ## Architecture
-| Service | Purpose |
-|---------|---------|
-| Azure Data Factory | Pipeline orchestration and scheduling |
-| Data Lake Storage Gen2 | Zone-based storage (raw/staging/enriched/serving) |
-| Azure OpenAI (gpt-4o-mini) | Batch LLM enrichment (classification, extraction) |
-| Azure SQL / Cosmos DB | Enriched data serving layer |
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
+```mermaid
+graph TB
+    subgraph Data Sources
+        Batch[Blob Storage<br/>CSV · JSON · Parquet — Raw Landing Zone]
+        Stream[Event Hubs<br/>Real-time Record Ingestion]
+    end
+
+    subgraph Orchestration
+        ADF[Azure Data Factory<br/>Pipeline Scheduling · Batch Orchestration]
+    end
+
+    subgraph Processing Layer
+        ClassifyFn[Azure Functions<br/>LLM Classification · Entity Extraction]
+        EnrichFn[Azure Functions<br/>Schema Inference · Data Enrichment]
+    end
+
+    subgraph AI Engine
+        OpenAI[Azure OpenAI — GPT-4o-mini<br/>Classification · NER · Schema Mapping]
+    end
+
+    subgraph Enriched Data Store
+        CosmosDB[Cosmos DB<br/>Classified Records · Entity Graph · Metadata]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>API Keys · Connection Strings]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Pipeline Latency · Classification Accuracy]
+        LogAnalytics[Log Analytics<br/>Pipeline Runs · Error Tracking]
+    end
+
+    Batch -->|Scheduled Trigger| ADF
+    Stream -->|Event Trigger| ClassifyFn
+    ADF -->|Orchestrate Batch| ClassifyFn
+    ClassifyFn -->|Classify + Extract| OpenAI
+    OpenAI -->|Structured Output| ClassifyFn
+    ClassifyFn -->|Classified Records| EnrichFn
+    EnrichFn -->|Enrich + Validate| OpenAI
+    EnrichFn -->|Store Enriched| CosmosDB
+    ADF -->|Post-process| CosmosDB
+    MI -->|Secrets| KV
+    ClassifyFn -->|Traces| AppInsights
+    ADF -->|Diagnostics| LogAnalytics
+
+    style Batch fill:#f59e0b,color:#fff,stroke:#d97706
+    style Stream fill:#f59e0b,color:#fff,stroke:#d97706
+    style ADF fill:#3b82f6,color:#fff,stroke:#2563eb
+    style ClassifyFn fill:#3b82f6,color:#fff,stroke:#2563eb
+    style EnrichFn fill:#3b82f6,color:#fff,stroke:#2563eb
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style CosmosDB fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
 
 ## Enrichment Types
 | Type | Model | Cost/1K Records |
@@ -38,8 +94,20 @@ code .  # Use @builder for ETL/enrichment, @reviewer for data quality audit, @tu
 | 4 prompts | `/deploy` (ETL pipeline), `/test` (execution), `/review` (data quality), `/evaluate` (enrichment accuracy) |
 
 ## Cost
-| Dev | Prod (1M records/day) |
-|-----|-----------------------|
-| $50–150/mo | ~$315/mo (gpt-4o-mini + batch API + caching = 96% savings vs gpt-4o) |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| Azure OpenAI | GPT-4o-mini for classification + entity extraction | $40 | $250 | $900 |
+| Data Factory | Pipeline orchestration and scheduling | $15 | $120 | $400 |
+| Cosmos DB | Enriched records, entity graphs, metadata | $5 | $80 | $400 |
+| Event Hubs | Real-time streaming ingestion | $12 | $75 | $300 |
+| Azure Functions | Event-triggered classification + enrichment | $0 | $25 | $150 |
+| Blob Storage | Raw data landing zone (CSV, JSON, Parquet) | $2 | $25 | $80 |
+| Key Vault | API keys, connection secrets | $1 | $3 | $10 |
+| App Insights | Pipeline latency, classification accuracy | $0 | $25 | $100 |
+| Log Analytics | Pipeline run history, error diagnostics | $0 | $15 | $50 |
+| **Total** | | **$75** | **$618** | **$2,390** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/27-ai-data-pipeline](https://frootai.dev/solution-plays/27-ai-data-pipeline)

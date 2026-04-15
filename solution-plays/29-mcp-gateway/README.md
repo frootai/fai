@@ -13,12 +13,72 @@ code .  # Use @builder for tools/transport, @reviewer for security audit, @tuner
 ```
 
 ## Architecture
-| Component | Purpose |
-|-----------|---------|
-| MCP Server (Node.js/Python) | Tool definitions + resource handlers |
-| Transport Layer | stdio (local) / HTTP (remote) / SSE |
-| Input Validation | JSON Schema per tool input |
-| Backend APIs | The services your tools wrap |
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
+```mermaid
+graph TB
+    subgraph AI Clients
+        Agent1[AI Agent / Copilot]
+        Agent2[Custom AI App]
+        Agent3[MCP Client SDK]
+    end
+
+    subgraph API Gateway
+        APIM[Azure API Management<br/>Tool Routing · Rate Limiting · Auth · Versioning]
+    end
+
+    subgraph MCP Server Runtime
+        MCP1[Container Apps — MCP Server A<br/>Search Tools · Data Tools]
+        MCP2[Container Apps — MCP Server B<br/>DevOps Tools · Code Tools]
+        MCP3[Container Apps — MCP Server C<br/>Custom Tools · Business Logic]
+    end
+
+    subgraph Caching Layer
+        Redis[Azure Cache for Redis<br/>Response Cache · Session State · Rate Counters]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Backend API Keys · mTLS Certs]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Observability
+        AppInsights[Application Insights<br/>Distributed Tracing · Tool Call Chains]
+        Monitor[Azure Monitor<br/>Dashboards · Alerts · Usage Analytics]
+        LogAnalytics[Log Analytics<br/>Gateway Logs · Tool Errors]
+    end
+
+    Agent1 -->|MCP Protocol| APIM
+    Agent2 -->|MCP Protocol| APIM
+    Agent3 -->|MCP Protocol| APIM
+    APIM -->|Route to Server| MCP1
+    APIM -->|Route to Server| MCP2
+    APIM -->|Route to Server| MCP3
+    APIM -->|Cache Check| Redis
+    Redis -->|Cache Hit| APIM
+    MCP1 -->|Tool Response| APIM
+    MCP2 -->|Tool Response| APIM
+    MCP3 -->|Tool Response| APIM
+    MI -->|Secrets| KV
+    APIM -->|Traces| AppInsights
+    MCP1 -->|Metrics| Monitor
+    APIM -->|Diagnostics| LogAnalytics
+
+    style Agent1 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Agent2 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Agent3 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style APIM fill:#10b981,color:#fff,stroke:#059669
+    style MCP1 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style MCP2 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style MCP3 fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Redis fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style Monitor fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
 
 ## MCP Capabilities
 | Capability | What It Provides |
@@ -40,8 +100,18 @@ code .  # Use @builder for tools/transport, @reviewer for security audit, @tuner
 **Note:** This is a developer tooling/protocol play. TuneKit covers tool description optimization for LLM invocation accuracy, response schema design, transport configuration, caching strategy, and rate limiting — not AI model parameters.
 
 ## Cost
-| Dev | Prod |
-|-----|------|
-| $0 (local stdio) | $30–100/mo (Container Apps hosting) |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| API Management | MCP gateway — routing, rate limiting, auth | $5 | $175 | $700 |
+| Container Apps | MCP server runtime, tool registration | $10 | $80 | $250 |
+| Azure Monitor | Centralized observability, dashboards | $0 | $40 | $150 |
+| Redis Cache | Tool response cache, rate limit counters | $15 | $80 | $225 |
+| Key Vault | Backend API keys, mTLS certificates | $1 | $3 | $10 |
+| App Insights | Distributed tracing, tool call chains | $0 | $25 | $100 |
+| Log Analytics | Gateway diagnostics, tool errors | $0 | $15 | $50 |
+| **Total** | | **$31** | **$418** | **$1,485** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/29-mcp-gateway](https://frootai.dev/solution-plays/29-mcp-gateway)

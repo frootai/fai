@@ -20,12 +20,74 @@ code .  # Use @builder for graph construction, @reviewer for entity audit, @tune
 | Multi-hop | No | Limited | Native (2-3 hops) |
 
 ## Architecture
-| Service | Purpose |
-|---------|---------|
-| Cosmos DB (Gremlin API) | Knowledge graph storage (vertices + edges) |
-| Azure OpenAI (gpt-4o) | Entity extraction + relationship mapping |
-| Azure AI Search | Vector component for hybrid retrieval |
-| Container Apps | Graph RAG API hosting |
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Chat UI]
+    end
+
+    subgraph GraphRAG API
+        API[Container Apps<br/>Query Router · Graph Traversal · Context Assembly]
+    end
+
+    subgraph Knowledge Graph
+        Gremlin[Cosmos DB — Gremlin API<br/>Entities · Relationships · Traversal Queries]
+    end
+
+    subgraph Vector Search
+        AISearch[Azure AI Search<br/>Hybrid: BM25 + Vector + Semantic Ranker]
+    end
+
+    subgraph AI Engine
+        GPT4o[Azure OpenAI — GPT-4o<br/>Graph-Aware Response Generation]
+        Extractor[Azure OpenAI — GPT-4o-mini<br/>Entity Extraction · Relationship Mapping]
+    end
+
+    subgraph Ingestion Pipeline
+        Functions[Azure Functions<br/>Document Processing · Graph Builder]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>DB Keys · API Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Traversal Latency · Retrieval Quality]
+        LogAnalytics[Log Analytics<br/>Graph Operations · Pipeline Logs]
+    end
+
+    User -->|Natural Language Query| API
+    API -->|Vector + Keyword Search| AISearch
+    AISearch -->|Top-K Chunks| API
+    API -->|Extract Entities from Query| Extractor
+    API -->|Traverse Relationships| Gremlin
+    Gremlin -->|Related Entities + Context| API
+    API -->|Chunks + Graph Context| GPT4o
+    GPT4o -->|Graph-Augmented Response| API
+    API -->|Response + Citations| User
+    Functions -->|Extract Entities| Extractor
+    Functions -->|Build Graph| Gremlin
+    Functions -->|Index Chunks| AISearch
+    MI -->|Secrets| KV
+    API -->|Traces| AppInsights
+    Functions -->|Logs| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Gremlin fill:#f59e0b,color:#fff,stroke:#d97706
+    style AISearch fill:#10b981,color:#fff,stroke:#059669
+    style GPT4o fill:#10b981,color:#fff,stroke:#059669
+    style Extractor fill:#10b981,color:#fff,stroke:#059669
+    style Functions fill:#3b82f6,color:#fff,stroke:#2563eb
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
 
 ## Key Metrics
 - Entity F1: ≥0.85 · Relationship precision: ≥0.80 · Multi-hop: ≥75% · Graph vs vector lift: ≥15%
@@ -38,8 +100,19 @@ code .  # Use @builder for graph construction, @reviewer for entity audit, @tune
 | 4 prompts | `/deploy` (graph + extraction), `/test` (traversal), `/review` (entity accuracy), `/evaluate` (multi-hop quality) |
 
 ## Cost
-| Dev | Prod (50K docs) |
-|-----|-----------------|
-| $100–250/mo | ~$330/mo (ongoing) + $250 one-time extraction |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| Azure OpenAI | Entity extraction, graph-aware response generation | $60 | $400 | $1,400 |
+| Cosmos DB (Gremlin) | Knowledge graph — entities + relationships | $8 | $160 | $650 |
+| Azure AI Search | Vector + keyword search over document chunks | $75 | $250 | $750 |
+| Container Apps | GraphRAG API, query routing, traversal | $10 | $100 | $300 |
+| Azure Functions | Graph ingestion, entity extraction pipeline | $0 | $20 | $75 |
+| Key Vault | Cosmos DB keys, API keys | $1 | $3 | $10 |
+| App Insights | Traversal latency, retrieval quality | $0 | $25 | $100 |
+| Log Analytics | Graph operations, pipeline diagnostics | $0 | $15 | $50 |
+| **Total** | | **$154** | **$973** | **$3,335** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/28-knowledge-graph-rag](https://frootai.dev/solution-plays/28-knowledge-graph-rag)

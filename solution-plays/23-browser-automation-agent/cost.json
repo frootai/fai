@@ -1,0 +1,177 @@
+{
+  "play": "23",
+  "name": "Browser Automation Agent",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o Vision for screenshot analysis, action planning, and DOM reasoning",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 80,
+          "note": "~200K tokens/day, vision input ~$15/M tokens"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 450,
+          "note": "~2M tokens/day, GPT-4o vision + GPT-4o-mini for planning"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 1500,
+          "note": "Provisioned throughput for low-latency browser interactions"
+        }
+      }
+    },
+    {
+      "name": "Azure Container Apps",
+      "category": "Compute",
+      "purpose": "Headless browser runtime with Playwright, agent orchestrator, and API gateway",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 25,
+          "note": "1 vCPU, 2GB (Playwright needs more RAM), scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 180,
+          "note": "2 vCPU, 4GB per instance, min 2 replicas for browser pool"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 500,
+          "note": "4 vCPU, 8GB, browser pool with 5+ instances, multi-region"
+        }
+      }
+    },
+    {
+      "name": "Blob Storage",
+      "category": "Storage",
+      "purpose": "Screenshot storage, page snapshots, session recordings for audit",
+      "tiers": {
+        "dev": {
+          "sku": "Hot LRS",
+          "cost": 3,
+          "note": "~20GB screenshots + recordings"
+        },
+        "prod": {
+          "sku": "Hot LRS",
+          "cost": 20,
+          "note": "~500GB, lifecycle policy moves old screenshots to Cool"
+        },
+        "enterprise": {
+          "sku": "Hot GRS",
+          "cost": 60,
+          "note": "~2TB, geo-redundant, compliance retention"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Browser session state, task queue, action history, and agent memory",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 5,
+          "note": "~10K RUs, session + action logs"
+        },
+        "prod": {
+          "sku": "Provisioned 400 RU/s",
+          "cost": 45,
+          "note": "Multi-partition, 50GB, bounded staleness"
+        },
+        "enterprise": {
+          "sku": "Provisioned 2000 RU/s",
+          "cost": 180,
+          "note": "Multi-region, 200GB, strong consistency"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Browser authentication credentials, target site API keys, session tokens",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~30K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, credential rotation"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Browser action traces, vision API latency, agent decision logging",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Browser container logs, Playwright traces, failure diagnostics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~10GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 50,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 114,
+    "prod": 738,
+    "enterprise": 2400
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for simple action planning, reserve GPT-4o Vision only for screenshot analysis — saves 60%",
+    "Compress screenshots to 512px before sending to Vision API — reduces image token cost by 75%",
+    "Pool headless browser instances across requests — avoids cold-start latency and container churn",
+    "Move old screenshots to Cool storage tier after 7 days — saves 50% on storage",
+    "Cache DOM structures for frequently visited pages — reduces Vision API calls by 30-40%",
+    "Use Container Apps scale rules based on browser session queue depth, not CPU"
+  ]
+}

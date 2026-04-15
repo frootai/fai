@@ -12,8 +12,79 @@ code .  # Use @builder for defense layers, @reviewer for red-teaming, @tuner for
 ```
 
 ## Defense Architecture (8 Layers)
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
 ```
 Input → L1:Sanitize → L2:Injection → L3:ContentSafety → L4:PII → LLM → L5:Grounding → L6:Exfiltration → L7:Safety → L8:Audit → Output
+```
+
+```mermaid
+graph TB
+    subgraph Client Layer
+        User[User / AI Application]
+    end
+
+    subgraph Security Proxy
+        Proxy[Container Apps<br/>Content Safety Middleware · Prompt Shields · Response Filter]
+    end
+
+    subgraph Content Moderation
+        Safety[Azure AI Content Safety<br/>Hate · Violence · Self-Harm · Sexual · Prompt Injection]
+    end
+
+    subgraph AI Engine
+        OpenAI[Azure OpenAI — GPT-4o<br/>Protected AI Endpoint · Content Filters]
+    end
+
+    subgraph Red Team Pipeline
+        RedTeam[Container Apps — Red Team Runner<br/>Adversarial Prompt Generation · Jailbreak Simulation]
+        RedTeamAI[Azure OpenAI — GPT-4o<br/>Attack Prompt Generation · Boundary Testing]
+    end
+
+    subgraph Security Event Store
+        CosmosDB[Cosmos DB<br/>Blocked Prompts · Red Team Results · Policy Violations]
+    end
+
+    subgraph Security Infrastructure
+        KV[Key Vault<br/>API Keys · mTLS Certs · Encryption Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+        Defender[Microsoft Defender<br/>Cloud Posture · Threat Detection]
+    end
+
+    subgraph Observability
+        AppInsights[Application Insights<br/>Block Rates · False Positives · Injection Attempts]
+        LogAnalytics[Log Analytics<br/>Security Audit · Compliance Reports]
+    end
+
+    User -->|Prompt| Proxy
+    Proxy -->|Content Check| Safety
+    Safety -->|Pass/Block Decision| Proxy
+    Proxy -->|Safe Prompt| OpenAI
+    OpenAI -->|Response| Proxy
+    Proxy -->|Output Safety Check| Safety
+    Proxy -->|Filtered Response| User
+    Proxy -->|Blocked Events| CosmosDB
+    RedTeam -->|Adversarial Prompts| Proxy
+    RedTeam -->|Generate Attacks| RedTeamAI
+    RedTeam -->|Results| CosmosDB
+    MI -->|Secrets| KV
+    Defender -->|Posture Alerts| LogAnalytics
+    Proxy -->|Security Traces| AppInsights
+    Proxy -->|Audit Trail| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Proxy fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style Safety fill:#ef4444,color:#fff,stroke:#dc2626
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style RedTeam fill:#ef4444,color:#fff,stroke:#dc2626
+    style RedTeamAI fill:#10b981,color:#fff,stroke:#059669
+    style CosmosDB fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style Defender fill:#ef4444,color:#fff,stroke:#dc2626
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
 ```
 
 ## OWASP LLM Top 10 Coverage
@@ -42,8 +113,19 @@ Works as middleware for **any** FrootAI play:
 | 4 prompts | `/deploy` (defense layers), `/test` (attack vectors), `/review` (red-team), `/evaluate` (injection resilience) |
 
 ## Cost
-| Dev | Prod |
-|-----|------|
-| $30–80/mo | $200–800/mo (Content Safety + classifier) |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| Content Safety | Multi-category moderation + Prompt Shields | $0 | $75 | $300 |
+| Azure OpenAI | Red team simulation, adversarial testing | $40 | $200 | $800 |
+| Container Apps | Security proxy + red team runner | $10 | $100 | $300 |
+| Cosmos DB | Security event store, audit log | $5 | $30 | $160 |
+| Key Vault | API keys, mTLS certs, encryption keys | $1 | $5 | $15 |
+| App Insights | Block rates, injection attempts, false positives | $0 | $30 | $120 |
+| Log Analytics | Security audit logs, compliance reports | $0 | $20 | $75 |
+| Defender for Cloud | Cloud security posture, threat detection | $0 | $15 | $40 |
+| **Total** | | **$56** | **$475** | **$1,810** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/30-ai-security-hardening](https://frootai.dev/solution-plays/30-ai-security-hardening)

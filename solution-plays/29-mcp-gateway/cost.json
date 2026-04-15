@@ -1,0 +1,177 @@
+{
+  "play": "29",
+  "name": "MCP Gateway",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure API Management",
+      "category": "Integration",
+      "purpose": "MCP gateway — tool routing, rate limiting, API key management, request transformation",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 5,
+          "note": "1M free calls/month, pay per additional call"
+        },
+        "prod": {
+          "sku": "Standard v2",
+          "cost": 175,
+          "note": "Dedicated capacity, custom domains, caching"
+        },
+        "enterprise": {
+          "sku": "Premium v2",
+          "cost": 700,
+          "note": "Multi-region, VNet, mutual TLS, 99.99% SLA"
+        }
+      }
+    },
+    {
+      "name": "Container Apps",
+      "category": "Compute",
+      "purpose": "MCP server runtime — tool registration, protocol handling, server-sent events",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 10,
+          "note": "0.25 vCPU, 0.5GB, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 80,
+          "note": "1 vCPU, 2GB, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 250,
+          "note": "2 vCPU, 4GB, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Monitor",
+      "category": "Monitoring",
+      "purpose": "Centralized observability — tool call tracing, latency dashboards, usage analytics",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "Basic metrics, 5GB log ingestion"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 40,
+          "note": "~50GB/month, custom dashboards, alerts"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 150,
+          "note": "~200GB/month, 90-day retention, workbooks"
+        }
+      }
+    },
+    {
+      "name": "Azure Cache for Redis",
+      "category": "Data",
+      "purpose": "Tool response caching — frequently called tools, session state, rate limit counters",
+      "tiers": {
+        "dev": {
+          "sku": "Basic C0",
+          "cost": 15,
+          "note": "250MB cache, single node"
+        },
+        "prod": {
+          "sku": "Standard C1",
+          "cost": 80,
+          "note": "1GB cache, replicated, <1ms reads"
+        },
+        "enterprise": {
+          "sku": "Premium P1",
+          "cost": 225,
+          "note": "6GB cache, clustering, VNet, persistence"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Backend API keys, MCP server secrets, mTLS certificates, APIM subscription keys",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~1K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~50K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Distributed tracing — tool call chains, error rates, dependency maps",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~50GB/month ingestion"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 100,
+          "note": "~200GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging — APIM diagnostics, gateway errors, tool registration events",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 15,
+          "note": "~10GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 50,
+          "note": "100GB/day, 90-day retention"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 31,
+    "prod": 418,
+    "enterprise": 1485
+  },
+  "optimization_tips": [
+    "Use APIM Consumption tier for dev — $0 base cost, only pay per API call, saves $170/month vs Standard",
+    "Cache idempotent tool responses in Redis with 5-minute TTL — reduces backend calls by 40-60%",
+    "Use APIM rate limiting to prevent runaway tool calls — protects backend costs from LLM retry loops",
+    "Consolidate monitoring — use a single Log Analytics workspace for APIM, Container Apps, and Redis diagnostics",
+    "Use Container Apps scale-to-zero for rarely called MCP servers — no cost when idle",
+    "Implement APIM response caching policies for deterministic tools — avoids hitting backend entirely"
+  ]
+}

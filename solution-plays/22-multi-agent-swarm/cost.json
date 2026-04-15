@@ -1,0 +1,199 @@
+{
+  "play": "22",
+  "name": "Multi-Agent Swarm Orchestration",
+  "currency": "USD",
+  "updated": "2026-04-15",
+  "note": "Estimates based on Azure retail pricing. Actual costs depend on usage, region, reserved instances, and enterprise agreements.",
+  "calculator": "https://azure.microsoft.com/pricing/calculator/",
+  "services": [
+    {
+      "name": "Azure OpenAI",
+      "category": "AI Services",
+      "purpose": "GPT-4o for swarm supervisor routing, specialist agent reasoning, and dynamic delegation",
+      "tiers": {
+        "dev": {
+          "sku": "Pay-As-You-Go",
+          "cost": 100,
+          "note": "~300K tokens/day, multi-agent chain conversations"
+        },
+        "prod": {
+          "sku": "Pay-As-You-Go",
+          "cost": 600,
+          "note": "~3M tokens/day, GPT-4o for specialists + GPT-4o-mini for routing"
+        },
+        "enterprise": {
+          "sku": "PTU Reserved",
+          "cost": 2200,
+          "note": "Provisioned throughput, guaranteed latency across swarm agents"
+        }
+      }
+    },
+    {
+      "name": "Azure Container Apps",
+      "category": "Compute",
+      "purpose": "Swarm supervisor + dynamic specialist agent containers with Dapr sidecars",
+      "tiers": {
+        "dev": {
+          "sku": "Consumption",
+          "cost": 20,
+          "note": "0.5 vCPU, 1GB per agent, 3 agents, scale-to-zero"
+        },
+        "prod": {
+          "sku": "Dedicated",
+          "cost": 200,
+          "note": "1 vCPU, 2GB per agent, 5-8 agent containers, min 2 replicas"
+        },
+        "enterprise": {
+          "sku": "Dedicated HA",
+          "cost": 600,
+          "note": "2 vCPU, 4GB per agent, 10+ agents, multi-region, 3+ replicas"
+        }
+      }
+    },
+    {
+      "name": "Azure Service Bus",
+      "category": "Messaging",
+      "purpose": "Reliable async messaging for agent delegation, task queues, and dead-letter handling",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 10,
+          "note": "Topics + subscriptions, ~20K messages/day"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 50,
+          "note": "~1M messages/day, session-aware queues"
+        },
+        "enterprise": {
+          "sku": "Premium",
+          "cost": 200,
+          "note": "Dedicated capacity, VNet integration, ~10M messages/day"
+        }
+      }
+    },
+    {
+      "name": "Azure Cosmos DB",
+      "category": "Data",
+      "purpose": "Swarm state coordination, agent task ledger, conversation memory, conflict resolution logs",
+      "tiers": {
+        "dev": {
+          "sku": "Serverless",
+          "cost": 8,
+          "note": "~15K RUs, auto-scale, session + task state"
+        },
+        "prod": {
+          "sku": "Provisioned 1000 RU/s",
+          "cost": 80,
+          "note": "Multi-partition, 100GB, session consistency"
+        },
+        "enterprise": {
+          "sku": "Provisioned 8000 RU/s",
+          "cost": 400,
+          "note": "Multi-region writes, 1TB, strong consistency"
+        }
+      }
+    },
+    {
+      "name": "Key Vault",
+      "category": "Security",
+      "purpose": "Agent credentials, API keys, tool-access tokens per specialist",
+      "tiers": {
+        "dev": {
+          "sku": "Standard",
+          "cost": 1,
+          "note": "~2K operations/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 3,
+          "note": "~80K operations/month"
+        },
+        "enterprise": {
+          "sku": "Premium HSM",
+          "cost": 10,
+          "note": "HSM-backed keys, compliance"
+        }
+      }
+    },
+    {
+      "name": "Application Insights",
+      "category": "Monitoring",
+      "purpose": "Distributed tracing across swarm agents, delegation paths, token spend per agent",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "5GB/month data cap"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 35,
+          "note": "~70GB/month, cross-agent correlation"
+        },
+        "enterprise": {
+          "sku": "Pay-per-GB",
+          "cost": 140,
+          "note": "~300GB/month, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Log Analytics",
+      "category": "Monitoring",
+      "purpose": "Centralized logging for swarm containers — KQL queries, conflict resolution audits",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "500MB/day, 7-day retention"
+        },
+        "prod": {
+          "sku": "Pay-per-GB",
+          "cost": 25,
+          "note": "~20GB/day, 30-day retention"
+        },
+        "enterprise": {
+          "sku": "Commitment tier",
+          "cost": 80,
+          "note": "150GB/day, 90-day retention"
+        }
+      }
+    },
+    {
+      "name": "Content Safety",
+      "category": "AI Services",
+      "purpose": "Per-agent output moderation — validates each specialist's response before delegation chain continues",
+      "tiers": {
+        "dev": {
+          "sku": "Free tier",
+          "cost": 0,
+          "note": "1K transactions/month"
+        },
+        "prod": {
+          "sku": "Standard",
+          "cost": 25,
+          "note": "~200K transactions/month, per-agent validation"
+        },
+        "enterprise": {
+          "sku": "Standard",
+          "cost": 80,
+          "note": "~2M transactions/month"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "dev": 139,
+    "prod": 1018,
+    "enterprise": 3710
+  },
+  "optimization_tips": [
+    "Use GPT-4o-mini for the supervisor routing layer — saves 80% on delegation decisions",
+    "Implement agent result caching in Cosmos DB to avoid redundant specialist invocations",
+    "Scale idle specialist agents to zero via Container Apps Consumption plan",
+    "Use Service Bus sessions for ordered task processing — avoids duplicate work",
+    "Set per-agent token budgets to cap runaway multi-turn costs",
+    "Batch low-priority agent tasks into off-peak queues for reduced compute spend"
+  ]
+}

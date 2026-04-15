@@ -21,12 +21,68 @@ code .  # Use @builder for index/embeddings, @reviewer for relevance audit, @tun
 | Multi-tenant | No | Tenant-isolated indices |
 
 ## Architecture
-| Service | Purpose |
-|---------|---------|
-| Azure AI Search | Hybrid index (vector + keyword + semantic) |
-| Azure OpenAI (embeddings) | Document + query embedding pipeline |
-| Container Apps | Search-as-a-service API hosting |
-| Redis Cache | User profile and query caching |
+
+> 📐 See [architecture.md](architecture.md) for full data flow, service roles, security architecture, and scaling tables.
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Search UI]
+    end
+
+    subgraph Search API
+        API[Container Apps<br/>Query Processing · Facets · Filters]
+    end
+
+    subgraph Search Engine
+        AISearch[Azure AI Search<br/>Hybrid: BM25 + Vector + Semantic Ranker]
+    end
+
+    subgraph AI Layer
+        Embedding[Azure OpenAI<br/>text-embedding-3-large · Query Expansion]
+        QueryAI[Azure OpenAI — GPT-4o-mini<br/>Query Understanding · Spell Correction]
+    end
+
+    subgraph Ingestion Pipeline
+        Functions[Azure Functions<br/>Chunking · Embedding · Index Updates]
+        Blob[Blob Storage<br/>Source Documents · PDFs · Office · HTML]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Admin Keys · API Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Search Latency · Relevance · Query Patterns]
+        LogAnalytics[Log Analytics<br/>Indexer Runs · Pipeline Errors]
+    end
+
+    User -->|Natural Language Query| API
+    API -->|Embed Query| Embedding
+    API -->|Query Understanding| QueryAI
+    API -->|Hybrid Search| AISearch
+    AISearch -->|Ranked Results| API
+    API -->|Results + Facets| User
+    Blob -->|New Document Event| Functions
+    Functions -->|Chunk + Embed| Embedding
+    Functions -->|Index Update| AISearch
+    MI -->|Secrets| KV
+    API -->|Traces| AppInsights
+    Functions -->|Logs| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#3b82f6,color:#fff,stroke:#2563eb
+    style AISearch fill:#10b981,color:#fff,stroke:#059669
+    style Embedding fill:#10b981,color:#fff,stroke:#059669
+    style QueryAI fill:#10b981,color:#fff,stroke:#059669
+    style Functions fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Blob fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
 
 ## Key Metrics
 - NDCG@10: ≥0.75 · Zero-result: <3% · Latency p95: <400ms · Personalization lift: ≥10%
@@ -39,8 +95,19 @@ code .  # Use @builder for index/embeddings, @reviewer for relevance audit, @tun
 | 4 prompts | `/deploy` (index + pipeline), `/test` (query quality), `/review` (relevance), `/evaluate` (NDCG/MRR) |
 
 ## Cost
-| Dev | Prod (1M queries/day) |
-|-----|-----------------------|
-| $100–250/mo | ~$3.6K/mo (no expansion) to ~$5.1K/mo (with smart expansion) |
+
+> 💰 See [cost.json](cost.json) for full pricing breakdown with SKUs, notes, and optimization tips.
+
+| Service | Purpose | Dev | Prod | Enterprise |
+|---------|---------|-----|------|------------|
+| Azure AI Search | Hybrid index (BM25 + vector + semantic ranker) | $75 | $250 | $750 |
+| Azure OpenAI | Embedding generation + query understanding | $30 | $150 | $600 |
+| Blob Storage | Source documents (PDFs, Office, HTML) | $2 | $20 | $60 |
+| Container Apps | Search API gateway, query processing | $10 | $80 | $250 |
+| Azure Functions | Document processing pipeline, index updates | $0 | $15 | $75 |
+| Key Vault | AI Search admin keys, OpenAI API keys | $1 | $3 | $10 |
+| App Insights | Search latency, relevance, query patterns | $0 | $25 | $100 |
+| Log Analytics | Indexer runs, pipeline errors | $0 | $15 | $50 |
+| **Total** | | **$118** | **$558** | **$1,895** |
 
 📖 [Full docs](spec/README.md) · 🌐 [frootai.dev/solution-plays/26-semantic-search-engine](https://frootai.dev/solution-plays/26-semantic-search-engine)
