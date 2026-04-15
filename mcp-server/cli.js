@@ -6,6 +6,7 @@
  *   init                Interactive project scaffolding (alias for scaffold -i)
  *   scaffold <play>     Scaffold a play — downloads from GitHub + generates templates
  *   install <play>      Download play files into current directory
+ *   deploy              Deploy infra/main.bicep to Azure (guided wizard)
  *   info <play>         Show play details, cost, and architecture
  *   list [keyword]      List available plugins
  *   primitives [type]   Browse 830+ FAI primitives catalog
@@ -130,6 +131,9 @@ switch (command) {
     break;
   case 'info':
     await cmdInfo(args[1]);
+    break;
+  case 'deploy':
+    await cmdDeploy(args[1]);
     break;
   case 'validate':
     cmdValidate();
@@ -1062,6 +1066,258 @@ function cmdListPlugins(category) {
   console.log(`  ${c.bold}Filter:${c.reset}  frootai list <keyword>\n`);
 }
 
+// ═══════════════════════════════════════════════════
+// DEPLOY — Guided Azure deployment from infra/ Bicep
+// ═══════════════════════════════════════════════════
+async function cmdDeploy(playArg) {
+  banner();
+  const dryRun = args.includes('--dry-run');
+  const skipConfirm = args.includes('--yes') || args.includes('-y');
+
+  // ── Step 1: Detect infra files ────────────────────────────────
+  const cwd = process.cwd();
+  let infraDir = join(cwd, 'infra');
+  let bicepFile = join(infraDir, 'main.bicep');
+  let paramsFile = join(infraDir, 'parameters.json');
+
+  // If user provided a play argument, try to find it in solution-plays
+  if (playArg && playArg !== '--dry-run' && playArg !== '--yes' && playArg !== '-y') {
+    const playDir = resolvePlay(playArg);
+    if (playDir) {
+      // Check if play files exist locally (user did install/scaffold first)
+      if (!existsSync(bicepFile)) {
+        console.log(`  ${c.yellow}⚠${c.reset}  No infra/ folder found in current directory.`);
+        console.log(`  ${c.dim}Run ${c.cyan}frootai install ${playDir} --kit devkit${c.reset}${c.dim} first, or cd into your project.${c.reset}\n`);
+        process.exit(1);
+      }
+    } else {
+      console.log(`  ${c.red}✗${c.reset}  Play "${playArg}" not found.\n`);
+      process.exit(1);
+    }
+  }
+
+  if (!existsSync(bicepFile)) {
+    console.log(`  ${c.red}✗${c.reset}  No ${c.cyan}infra/main.bicep${c.reset} found in current directory.`);
+    console.log(`  ${c.dim}Make sure you're in a FrootAI project directory with an infra/ folder.${c.reset}`);
+    console.log(`  ${c.dim}Or run: ${c.cyan}frootai scaffold <play>${c.reset}${c.dim} to create one.${c.reset}\n`);
+    process.exit(1);
+  }
+
+  console.log(`  ${c.green}✓${c.reset}  Found ${c.cyan}infra/main.bicep${c.reset}`);
+  if (existsSync(paramsFile)) {
+    console.log(`  ${c.green}✓${c.reset}  Found ${c.cyan}infra/parameters.json${c.reset}`);
+  } else {
+    console.log(`  ${c.yellow}⚠${c.reset}  No parameters.json — deploying with defaults`);
+    paramsFile = null;
+  }
+
+  // ── Step 2: Check Azure CLI ───────────────────────────────────
+  let azVersion;
+  try {
+    azVersion = execSync('az version --output tsv 2>&1', { encoding: 'utf8', timeout: 15000 }).trim().split('\n')[0];
+    console.log(`  ${c.green}✓${c.reset}  Azure CLI found (${c.dim}${azVersion.substring(0, 30)}${c.reset})`);
+  } catch {
+    console.log(`\n  ${c.red}✗${c.reset}  Azure CLI (${c.cyan}az${c.reset}) not found.`);
+    console.log(`  ${c.dim}Install: https://aka.ms/installazurecli${c.reset}\n`);
+    process.exit(1);
+  }
+
+  // Check login status
+  let account;
+  try {
+    account = JSON.parse(execSync('az account show --output json 2>&1', { encoding: 'utf8', timeout: 15000 }));
+    console.log(`  ${c.green}✓${c.reset}  Logged in as ${c.cyan}${account.user?.name || 'unknown'}${c.reset}`);
+    console.log(`  ${c.dim}   Subscription: ${account.name} (${account.id})${c.reset}`);
+  } catch {
+    console.log(`\n  ${c.yellow}⚠${c.reset}  Not logged in to Azure.`);
+    console.log(`  ${c.dim}Run: ${c.cyan}az login${c.reset}\n`);
+    process.exit(1);
+  }
+
+  // ── Step 3: Parse Bicep parameters for display ────────────────
+  let existingParams = {};
+  if (paramsFile) {
+    try {
+      const p = JSON.parse(readFileSync(paramsFile, 'utf8'));
+      existingParams = p.parameters || {};
+    } catch { /* ignore parse errors */ }
+  }
+
+  const envParam = existingParams.environment?.value || 'dev';
+  const locationParam = existingParams.location?.value || 'eastus2';
+  const projectParam = existingParams.projectName?.value || existingParams.prefix?.value || 'frootai';
+
+  // ── Step 4: Interactive prompts ───────────────────────────────
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (q) => new Promise(r => rl.question(q, r));
+
+  let resourceGroup, location, environment;
+
+  console.log(`\n${c.bold}  Deployment Configuration${c.reset}\n`);
+
+  // Resource group
+  const defaultRg = `rg-${projectParam}-${envParam}`;
+  if (skipConfirm || dryRun) {
+    resourceGroup = args.includes('--resource-group') ? args[args.indexOf('--resource-group') + 1] : defaultRg;
+    location = args.includes('--location') ? args[args.indexOf('--location') + 1] : locationParam;
+    environment = args.includes('--env') ? args[args.indexOf('--env') + 1] : envParam;
+  } else {
+    resourceGroup = await ask(`  ${c.cyan}Resource group${c.reset} [${c.dim}${defaultRg}${c.reset}]: `);
+    resourceGroup = resourceGroup.trim() || defaultRg;
+
+    location = await ask(`  ${c.cyan}Location${c.reset} [${c.dim}${locationParam}${c.reset}]: `);
+    location = location.trim() || locationParam;
+
+    environment = await ask(`  ${c.cyan}Environment${c.reset} (dev/staging/prod) [${c.dim}${envParam}${c.reset}]: `);
+    environment = environment.trim() || envParam;
+  }
+
+  // ── Step 5: Show deployment plan ──────────────────────────────
+  console.log(`\n${c.bold}  Deployment Plan${c.reset}`);
+  console.log(`  ─────────────────────────────────────────`);
+  console.log(`  ${c.cyan}Subscription:${c.reset}   ${account.name}`);
+  console.log(`  ${c.cyan}Resource Group:${c.reset} ${resourceGroup}`);
+  console.log(`  ${c.cyan}Location:${c.reset}       ${location}`);
+  console.log(`  ${c.cyan}Environment:${c.reset}    ${environment}`);
+  console.log(`  ${c.cyan}Bicep:${c.reset}          infra/main.bicep`);
+  if (paramsFile) {
+    console.log(`  ${c.cyan}Parameters:${c.reset}     infra/parameters.json`);
+  }
+  console.log(`  ─────────────────────────────────────────`);
+
+  if (dryRun) {
+    console.log(`\n  ${c.yellow}DRY RUN${c.reset} — no deployment will be executed.\n`);
+    rl.close();
+    return;
+  }
+
+  // ── Step 6: Confirm ───────────────────────────────────────────
+  if (!skipConfirm) {
+    const confirm = await ask(`\n  ${c.yellow}Deploy to Azure?${c.reset} (y/N): `);
+    if (!confirm.trim().toLowerCase().startsWith('y')) {
+      console.log(`  ${c.dim}Deployment cancelled.${c.reset}\n`);
+      rl.close();
+      return;
+    }
+  }
+  rl.close();
+
+  // ── Step 7: Create resource group if needed ───────────────────
+  console.log(`\n  ${c.cyan}▸${c.reset} Ensuring resource group ${c.bold}${resourceGroup}${c.reset} exists...`);
+  try {
+    execSync(`az group create --name "${resourceGroup}" --location "${location}" --output none 2>&1`, {
+      encoding: 'utf8', timeout: 30000
+    });
+    console.log(`  ${c.green}✓${c.reset} Resource group ready`);
+  } catch (e) {
+    console.log(`  ${c.red}✗${c.reset} Failed to create resource group: ${e.message?.split('\n')[0] || 'Unknown error'}`);
+    console.log(`  ${c.dim}Check your subscription permissions.${c.reset}\n`);
+    process.exit(1);
+  }
+
+  // ── Step 8: Run Bicep deployment ──────────────────────────────
+  const deployName = `frootai-${Date.now()}`;
+  let azCmd = `az deployment group create --name "${deployName}" --resource-group "${resourceGroup}" --template-file "${bicepFile}"`;
+  if (paramsFile) {
+    azCmd += ` --parameters "@${paramsFile}"`;
+  }
+  // Override environment and location if user changed them
+  azCmd += ` --parameters environment="${environment}" location="${location}"`;
+  azCmd += ' --output json';
+
+  console.log(`  ${c.cyan}▸${c.reset} Deploying Bicep template...\n`);
+  console.log(`  ${c.dim}$ ${azCmd.replace(bicepFile, 'infra/main.bicep').replace(paramsFile || '', 'infra/parameters.json')}${c.reset}\n`);
+
+  const startTime = Date.now();
+
+  // Use spawn for live output streaming
+  const { spawn } = await import('child_process');
+
+  const proc = spawn('az', [
+    'deployment', 'group', 'create',
+    '--name', deployName,
+    '--resource-group', resourceGroup,
+    '--template-file', bicepFile,
+    ...(paramsFile ? ['--parameters', `@${paramsFile}`] : []),
+    '--parameters', `environment=${environment}`, `location=${location}`,
+    '--output', 'json',
+    '--no-prompt'
+  ], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    shell: process.platform === 'win32'
+  });
+
+  let stdout = '';
+  let stderr = '';
+  proc.stdout.on('data', d => { stdout += d.toString(); });
+  proc.stderr.on('data', d => {
+    const line = d.toString().trim();
+    stderr += line + '\n';
+    // Stream progress lines to user (az CLI outputs progress to stderr)
+    if (line && !line.startsWith('{') && !line.startsWith('"')) {
+      console.log(`  ${c.dim}${line}${c.reset}`);
+    }
+  });
+
+  const exitCode = await new Promise(r => proc.on('close', r));
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  // ── Step 9: Show results ──────────────────────────────────────
+  if (exitCode === 0) {
+    console.log(`\n  ${c.green}✓${c.reset}  ${c.bold}Deployment succeeded${c.reset} (${elapsed}s)\n`);
+
+    // Parse deployment outputs
+    try {
+      const result = JSON.parse(stdout);
+      const outputs = result.properties?.outputs;
+      if (outputs && Object.keys(outputs).length > 0) {
+        console.log(`  ${c.bold}Outputs:${c.reset}`);
+        for (const [key, val] of Object.entries(outputs)) {
+          const display = typeof val.value === 'object' ? JSON.stringify(val.value) : val.value;
+          console.log(`    ${c.cyan}${key}${c.reset}: ${display}`);
+        }
+        console.log();
+      }
+
+      // Show provisioned resources
+      const resources = result.properties?.outputResources;
+      if (resources?.length > 0) {
+        console.log(`  ${c.bold}Provisioned Resources (${resources.length}):${c.reset}`);
+        for (const res of resources) {
+          const parts = res.id.split('/');
+          const type = parts.slice(-2, -1)[0] || '';
+          const name = parts.slice(-1)[0] || '';
+          console.log(`    ${c.green}✓${c.reset} ${c.dim}${type}/${c.reset}${c.cyan}${name}${c.reset}`);
+        }
+        console.log();
+      }
+    } catch { /* stdout wasn't valid JSON — that's okay */ }
+
+    console.log(`  ${c.bold}Next Steps:${c.reset}`);
+    console.log(`    ${c.dim}1.${c.reset} View in portal:  ${c.cyan}https://portal.azure.com/#@/resource/subscriptions/${account.id}/resourceGroups/${resourceGroup}${c.reset}`);
+    console.log(`    ${c.dim}2.${c.reset} Check status:    ${c.dim}az deployment group show -n ${deployName} -g ${resourceGroup} --query properties.provisioningState${c.reset}`);
+    console.log(`    ${c.dim}3.${c.reset} Delete later:    ${c.dim}az group delete -n ${resourceGroup} --yes --no-wait${c.reset}\n`);
+  } else {
+    console.log(`\n  ${c.red}✗${c.reset}  ${c.bold}Deployment failed${c.reset} (${elapsed}s)\n`);
+
+    // Extract meaningful error from stderr
+    const errorLines = stderr.split('\n').filter(l => l.includes('ERROR') || l.includes('error') || l.includes('Code:') || l.includes('Message:'));
+    if (errorLines.length > 0) {
+      console.log(`  ${c.bold}Error Details:${c.reset}`);
+      for (const line of errorLines.slice(0, 8)) {
+        console.log(`    ${c.red}${line.trim()}${c.reset}`);
+      }
+      console.log();
+    }
+
+    console.log(`  ${c.bold}Troubleshooting:${c.reset}`);
+    console.log(`    ${c.dim}1.${c.reset} Check quotas:    ${c.dim}az deployment group show -n ${deployName} -g ${resourceGroup}${c.reset}`);
+    console.log(`    ${c.dim}2.${c.reset} View full error: ${c.dim}az deployment operation list -n ${deployName} -g ${resourceGroup}${c.reset}`);
+    console.log(`    ${c.dim}3.${c.reset} Validate first:  ${c.dim}az deployment group validate -g ${resourceGroup} -f infra/main.bicep${c.reset}\n`);
+    process.exit(1);
+  }
+}
+
 function cmdHelp() {
   banner();
   console.log(`${c.bold}  Usage:${c.reset} frootai <command> [options]\n`);
@@ -1069,6 +1325,7 @@ function cmdHelp() {
   console.log(`    ${c.green}init${c.reset}              Interactive project scaffolding wizard`);
   console.log(`    ${c.green}scaffold${c.reset} <play>    New project — GitHub download + template generation`);
   console.log(`    ${c.green}install${c.reset} <play>     Download play files into current directory`);
+  console.log(`    ${c.green}deploy${c.reset}             Deploy infra/main.bicep to Azure (guided wizard)`);
   console.log(`    ${c.green}info${c.reset} <play>        Show play details, cost, services, links`);
   console.log(`    ${c.green}list${c.reset} [keyword]     Browse all 77 plugins in the FAI Marketplace`);
   console.log(`    ${c.green}search${c.reset} <query>     Search FrootAI knowledge base`);
@@ -1084,6 +1341,9 @@ function cmdHelp() {
   console.log(`    ${c.dim}npx frootai-mcp scaffold 01 --kit devkit${c.reset}`);
   console.log(`    ${c.dim}npx frootai-mcp scaffold -i${c.reset}                    ${c.dim}# interactive${c.reset}`);
   console.log(`    ${c.dim}npx frootai-mcp install 01 --kit tunekit${c.reset}`);
+  console.log(`    ${c.dim}npx frootai-mcp deploy${c.reset}                         ${c.dim}# guided Azure deploy${c.reset}`);
+  console.log(`    ${c.dim}npx frootai-mcp deploy --dry-run${c.reset}               ${c.dim}# preview only${c.reset}`);
+  console.log(`    ${c.dim}npx frootai-mcp deploy -y --resource-group myRG${c.reset}`);
   console.log(`    ${c.dim}npx frootai-mcp info 01${c.reset}`);
   console.log(`    ${c.dim}npx frootai-mcp search "RAG architecture"${c.reset}`);
   console.log(`    ${c.dim}npx frootai-mcp cost enterprise-rag --scale prod${c.reset}`);
