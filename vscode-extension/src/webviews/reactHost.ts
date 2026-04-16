@@ -40,7 +40,7 @@ export function createReactPanel(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src ${panel.webview.cspSource}; font-src ${panel.webview.cspSource};">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src ${panel.webview.cspSource}; font-src ${panel.webview.cspSource}; connect-src https://frootai-chatbot-api.azurewebsites.net https://raw.githubusercontent.com;">
   <link rel="stylesheet" href="${mainCss}">
   <title>${title}</title>
 </head>
