@@ -594,7 +594,7 @@ ${bodyHtml}
           instructions: { destDir: ".github/instructions", repoPath: "instructions", ext: ".instructions.md" },
           skills:       { destDir: ".github/skills",       repoPath: "skills",       ext: "" },
           hooks:        { destDir: ".github/hooks",        repoPath: "hooks",        ext: "" },
-          plugins:      { destDir: "community-plugins",    repoPath: "community-plugins", ext: "" },
+          plugins:      { destDir: ".github/plugins",       repoPath: "plugins",           ext: "" },
         };
         const cfg = typeConfig[msg.primitiveType];
         if (!cfg) return;
@@ -625,7 +625,9 @@ ${bodyHtml}
                 };
                 const primaryFile = primaryFiles[msg.primitiveType] || "README.md";
                 const folderName = msg.folder ? path.basename(msg.folder) : msg.primitiveId;
-                const repoFile = `${cfg.repoPath}/${folderName}/${primaryFile}`;
+                // Use folder field as repo path if available (handles plugins/ vs community-plugins/)
+                const repoFolder = msg.folder ? msg.folder.replace(/\/+$/, "") : `${cfg.repoPath}/${folderName}`;
+                const repoFile = `${repoFolder}/${primaryFile}`;
                 const url = `https://raw.githubusercontent.com/frootai/frootai/main/${repoFile}`;
                 const resp = await fetch(url, { headers: { "User-Agent": "FrootAI-VSCode" } });
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
