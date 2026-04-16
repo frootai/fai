@@ -3,7 +3,7 @@ import type { SolutionPlay } from "../types";
 import PlayCard from "../components/PlayCard";
 import SearchInput from "../components/SearchInput";
 import { vscode } from "../vscode";
-import { FolderPlus, FileText, CheckCircle } from "lucide-react";
+import { FolderPlus, FileText, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 const DEVKIT_FILES = [
   ".github/copilot-instructions.md",
@@ -15,6 +15,8 @@ const DEVKIT_FILES = [
   "spec/fai-manifest.json",
 ];
 
+const PLAYS_PER_PAGE = 20;
+
 interface Props { plays: SolutionPlay[]; initialPlay?: SolutionPlay | null; }
 
 export default function ScaffoldWizard({ plays, initialPlay }: Props) {
@@ -22,6 +24,9 @@ export default function ScaffoldWizard({ plays, initialPlay }: Props) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<SolutionPlay | null>(initialPlay || null);
   const [projectName, setProjectName] = useState("");
+  const [page, setPage] = useState(1);
+
+  const logoUri = (window as any).panelData?.logoUri;
 
   const filtered = useMemo(() => {
     if (!search) return plays;
@@ -29,13 +34,18 @@ export default function ScaffoldWizard({ plays, initialPlay }: Props) {
     return plays.filter((p) => p.name.toLowerCase().includes(q) || p.id.includes(q) || p.dir.includes(q));
   }, [plays, search]);
 
+  const totalPages = Math.ceil(filtered.length / PLAYS_PER_PAGE);
+  const paged = filtered.slice((page - 1) * PLAYS_PER_PAGE, page * PLAYS_PER_PAGE);
+
   const name = projectName || selected?.dir || "my-ai-project";
+
+  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
 
   return (
     <div className="container">
       <div className="hero">
-        <span className="hero-icon"><FolderPlus size={48} /></span>
-        <h1>Scaffold Wizard</h1>
+        {logoUri && <img src={logoUri} alt="FrootAI" style={{ width: 48, height: 48, marginBottom: 8 }} />}
+        <h1>FAI Scaffold Wizard</h1>
         <p style={{ opacity: 0.7 }}>Bootstrap a new AI project in 4 steps</p>
       </div>
 
@@ -48,13 +58,34 @@ export default function ScaffoldWizard({ plays, initialPlay }: Props) {
       {step === 1 && (
         <div className="section">
           <div className="section-title">Step 1 — Select a Solution Play</div>
-          <SearchInput value={search} onChange={setSearch} placeholder="Search plays..." resultCount={filtered.length} />
+          <SearchInput value={search} onChange={handleSearch} placeholder="Search plays..." resultCount={filtered.length} />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "8px 0", fontSize: 12, opacity: 0.6 }}>
+            <span>Showing {(page - 1) * PLAYS_PER_PAGE + 1}–{Math.min(page * PLAYS_PER_PAGE, filtered.length)} of {filtered.length}</span>
+            {totalPages > 1 && <span>Page {page} of {totalPages}</span>}
+          </div>
           <div className="grid grid-2">
-            {filtered.slice(0, 20).map((p) => (
+            {paged.map((p) => (
               <PlayCard key={p.id} play={p} selected={selected?.id === p.id} onClick={() => setSelected(p)} />
             ))}
           </div>
-          {filtered.length > 20 && <p className="text-center" style={{ marginTop: 12, opacity: 0.6 }}>+ {filtered.length - 20} more</p>}
+          {totalPages > 1 && (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 20, marginBottom: 12 }}>
+              <button className="btn btn-secondary btn-sm" disabled={page <= 1} onClick={() => setPage(page - 1)} style={{ opacity: page <= 1 ? 0.3 : 1 }}>
+                <ChevronLeft size={14} /> Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                .map((p, idx, arr) => (
+                  <span key={p}>
+                    {idx > 0 && arr[idx - 1] !== p - 1 && <span style={{ opacity: 0.3 }}>…</span>}
+                    <button className={`btn btn-sm ${p === page ? "" : "btn-secondary"}`} onClick={() => setPage(p)} style={{ minWidth: 32 }}>{p}</button>
+                  </span>
+                ))}
+              <button className="btn btn-secondary btn-sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)} style={{ opacity: page >= totalPages ? 0.3 : 1 }}>
+                Next <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
           <div className="flex justify-between" style={{ marginTop: 16 }}>
             <div />
             <button className="btn" disabled={!selected} onClick={() => setStep(2)}>Next →</button>

@@ -1181,16 +1181,24 @@ function activate(context) {
   // ── Command: Open Setup Guide (native webview) ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.openSetupGuide", () => {
-      const panel = vscode.window.createWebviewPanel("frootai.setupGuide", "FrootAI Setup Guide", vscode.ViewColumn.One, { enableScripts: false });
+      const panel = vscode.window.createWebviewPanel("frootai.setupGuide", "FrootAI Setup Guide", vscode.ViewColumn.One, { enableScripts: false, localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, "media")] });
+      const logoUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "media", "frootai-mark.png"));
       panel.webview.html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
         body { font-family: var(--vscode-font-family); padding: 24px; color: var(--vscode-foreground); background: var(--vscode-editor-background); line-height: 1.7; max-width: 720px; margin: 0 auto; }
-        h1 { font-size: 22px; margin-bottom: 8px; } h2 { font-size: 16px; margin-top: 24px; color: #10b981; }
+        .hero { text-align: center; padding: 32px 16px 24px; }
+        .hero img { width: 48px; height: 48px; margin-bottom: 8px; }
+        .hero h1 { font-size: 22px; margin: 0 0 6px; }
+        .hero p { opacity: 0.7; margin: 0; font-size: 14px; }
+        h2 { font-size: 16px; margin-top: 24px; color: #10b981; }
         code { background: var(--vscode-textCodeBlock-background); padding: 2px 6px; border-radius: 3px; font-size: 13px; }
         pre { background: var(--vscode-textCodeBlock-background); padding: 12px; border-radius: 6px; overflow-x: auto; }
         .step { margin: 16px 0; padding: 12px; border-left: 3px solid #10b981; background: #10b98108; border-radius: 4px; }
       </style></head><body>
-        <h1>⚡ FrootAI Setup Guide</h1>
-        <p>Get started with the FrootAI ecosystem in 3 steps.</p>
+        <div class="hero">
+          <img src="${logoUri}" alt="FrootAI" />
+          <h1>FAI Setup Guide</h1>
+          <p>Get started with the FrootAI ecosystem in 3 steps</p>
+        </div>
         <div class="step"><h2>Step 1: Install MCP Server</h2>
         <p>Choose one method:</p>
         <pre>npx frootai-mcp@latest          # Node.js (recommended)
