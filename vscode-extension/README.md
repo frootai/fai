@@ -63,6 +63,9 @@ The VS Code extension brings this entire ecosystem directly into your editor —
 | **Getting Started** | 5-step walkthrough with rich guides, auto-completion tracking |
 | **File Decorations** | Badges on fai-manifest.json, .agent.md, .instructions.md, SKILL.md in Explorer |
 | **CodeLens** | Inline wiring summary + validate action on fai-manifest.json |
+| **Workspace Detection** | Auto-detects fai-manifest.json → status bar shows active play with click-to-detail |
+| **Manifest Diagnostics** | Real-time validation — errors/warnings for missing fields, invalid WAF, bad references |
+| **Context Menus** | Right-click fai-manifest.json → Validate / Open Play Detail |
 | **Scaffold in One Click** | Init DevKit, TuneKit, SpecKit (WAF alignment) |
 | **Estimate Azure Costs** | Pick a play + scale = monthly cost breakdown |
 | **Run Evaluations** | Auto-runs eval.py and shows quality dashboard |
@@ -262,6 +265,9 @@ solution-play/
 | `FrootAI: Run Evaluation` | Auto-run eval.py + dashboard |
 | `FrootAI: Auto-Chain Agents` | Build → Review → Tune workflow |
 | `FrootAI: Validate Config` | Check config/*.json |
+| `FrootAI: Validate Manifest` | Schema-validate fai-manifest.json with diagnostics |
+| `FrootAI: Open Play from Manifest` | Detect play ID in fai-manifest.json → open detail |
+| `FrootAI: Open Detected Play` | Open detail for workspace-detected play |
 | `FrootAI: Look Up AI Term` | AI glossary search |
 | `FrootAI: Search Knowledge Base` | Full-text search across modules |
 | `FrootAI: Architecture Patterns` | Decision guides |

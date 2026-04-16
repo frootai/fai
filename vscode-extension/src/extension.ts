@@ -399,7 +399,7 @@ ${bodyHtml}
   });
 
   // ─── First Install: Show Welcome panel ───
-  const CURRENT_VERSION = "9.0.0";
+  const CURRENT_VERSION = "9.1.0";
   const lastVersion = context.globalState.get<string>("frootai.lastVersion");
 
   if (!lastVersion) {
@@ -410,11 +410,10 @@ ${bodyHtml}
     // Version update — show What's New
     context.globalState.update("frootai.lastVersion", CURRENT_VERSION);
     const CHANGELOG: string[] = [
-      "🧪 MCP Tool Explorer with Try It — test tools inline with schema-aware forms",
-      "📊 Evaluation trends with sparklines and delta badges",
-      "⏱️ Recently Used section in Solution Plays tree",
-      "📋 Enhanced walkthrough guides with tables and tips",
-      "🎉 Welcome panel for new users",
+      "🔍 Workspace Intelligence — auto-detects fai-manifest.json, shows active play in status bar",
+      "🔎 Manifest Diagnostics — real-time validation with errors/warnings in Problems panel",
+      "📂 Explorer Context Menus — right-click fai-manifest.json → Validate / Open Play Detail",
+      "⚡ Validate Manifest command — full schema check with detailed output",
     ];
     vscode.window.showInformationMessage(
       `FrootAI updated to v${CURRENT_VERSION}! ${CHANGELOG[0]}`,
@@ -439,6 +438,236 @@ ${bodyHtml}
       new FaiManifestCodeLensProvider()
     )
   );
+
+  // ─── Workspace Play Detection — Status Bar ───
+  const statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
+  statusItem.command = "frootai.openDetectedPlay";
+  context.subscriptions.push(statusItem);
+
+  async function detectWorkspacePlay() {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders) { statusItem.hide(); return; }
+    for (const folder of folders) {
+      const manifestUri = vscode.Uri.joinPath(folder.uri, "fai-manifest.json");
+      try {
+        const raw = await vscode.workspace.fs.readFile(manifestUri);
+        const manifest = JSON.parse(Buffer.from(raw).toString("utf-8"));
+        const playId = manifest.play?.replace(/^(\d+).*/, "$1") || "";
+        const play = SOLUTION_PLAYS.find(p => p.id === playId);
+        statusItem.text = `$(zap) FAI Play ${playId}${play ? `: ${play.name}` : ""}`;
+        statusItem.tooltip = play
+          ? `${play.name} — ${play.desc}\nClick to open play detail`
+          : `Play ${manifest.play} detected\nClick to open play detail`;
+        statusItem.show();
+        return;
+      } catch { /* no manifest */ }
+    }
+    statusItem.hide();
+  }
+
+  detectWorkspacePlay();
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeWorkspaceFolders(() => detectWorkspacePlay()),
+    vscode.workspace.onDidSaveTextDocument(doc => {
+      if (doc.fileName.endsWith("fai-manifest.json")) detectWorkspacePlay();
+    })
+  );
+
+  safeRegister("frootai.openDetectedPlay", async () => {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders) return;
+    for (const folder of folders) {
+      const manifestUri = vscode.Uri.joinPath(folder.uri, "fai-manifest.json");
+      try {
+        const raw = await vscode.workspace.fs.readFile(manifestUri);
+        const manifest = JSON.parse(Buffer.from(raw).toString("utf-8"));
+        const playId = manifest.play?.replace(/^(\d+).*/, "$1") || "";
+        const play = SOLUTION_PLAYS.find(p => p.id === playId);
+        if (play) vscode.commands.executeCommand("frootai.openPlayDetail", play);
+        else vscode.window.showInformationMessage(`Play ${manifest.play} detected but no detail available.`);
+        return;
+      } catch { /* no manifest */ }
+    }
+    vscode.window.showInformationMessage("No fai-manifest.json found in workspace.");
+  });
+
+  // ─── Diagnostics Provider for fai-manifest.json ───
+  const diagCollection = vscode.languages.createDiagnosticCollection("frootai");
+  context.subscriptions.push(diagCollection);
+
+  const VALID_WAF_PILLARS = ["reliability", "security", "cost-optimization", "operational-excellence", "performance-efficiency", "responsible-ai"];
+
+  function validateManifestDocument(doc: vscode.TextDocument) {
+    if (!doc.fileName.endsWith("fai-manifest.json")) return;
+    const diagnostics: vscode.Diagnostic[] = [];
+    const text = doc.getText();
+
+    let json: any;
+    try {
+      json = JSON.parse(text);
+    } catch (e: any) {
+      diagnostics.push(new vscode.Diagnostic(
+        new vscode.Range(0, 0, 0, 1),
+        `Invalid JSON: ${e.message}`,
+        vscode.DiagnosticSeverity.Error
+      ));
+      diagCollection.set(doc.uri, diagnostics);
+      return;
+    }
+
+    // Helper to find line of a key
+    const findKeyLine = (key: string): number => {
+      for (let i = 0; i < doc.lineCount; i++) {
+        if (doc.lineAt(i).text.includes(`"${key}"`)) return i;
+      }
+      return 0;
+    };
+
+    // Required top-level fields
+    for (const field of ["play", "version", "context", "primitives"]) {
+      if (json[field] === undefined) {
+        diagnostics.push(new vscode.Diagnostic(
+          new vscode.Range(0, 0, 0, 1),
+          `Missing required field: "${field}"`,
+          vscode.DiagnosticSeverity.Error
+        ));
+      }
+    }
+
+    // Validate play format (NN-kebab-case)
+    if (json.play && !/^\d{2}-[a-z0-9-]+$/.test(json.play)) {
+      const line = findKeyLine("play");
+      diagnostics.push(new vscode.Diagnostic(
+        new vscode.Range(line, 0, line, doc.lineAt(line).text.length),
+        `Play ID should be NN-kebab-case (e.g., "01-enterprise-rag"), got "${json.play}"`,
+        vscode.DiagnosticSeverity.Warning
+      ));
+    }
+
+    // Validate version (semver)
+    if (json.version && !/^\d+\.\d+\.\d+/.test(json.version)) {
+      const line = findKeyLine("version");
+      diagnostics.push(new vscode.Diagnostic(
+        new vscode.Range(line, 0, line, doc.lineAt(line).text.length),
+        `Version should be semver (e.g., "1.0.0"), got "${json.version}"`,
+        vscode.DiagnosticSeverity.Warning
+      ));
+    }
+
+    // Validate WAF pillars
+    const wafValues: string[] = json.context?.waf || [];
+    const wafLine = findKeyLine("waf");
+    for (const w of wafValues) {
+      if (!VALID_WAF_PILLARS.includes(w)) {
+        diagnostics.push(new vscode.Diagnostic(
+          new vscode.Range(wafLine, 0, wafLine, doc.lineAt(wafLine).text.length),
+          `Invalid WAF pillar: "${w}". Valid: ${VALID_WAF_PILLARS.join(", ")}`,
+          vscode.DiagnosticSeverity.Warning
+        ));
+      }
+    }
+
+    // Validate guardrails thresholds (0-1)
+    const guardrails = json.guardrails || {};
+    const guardLine = findKeyLine("guardrails");
+    for (const [key, val] of Object.entries(guardrails)) {
+      if (typeof val === "number" && (val < 0 || val > 1)) {
+        diagnostics.push(new vscode.Diagnostic(
+          new vscode.Range(guardLine, 0, guardLine, doc.lineAt(guardLine).text.length),
+          `Guardrail "${key}" threshold must be 0-1, got ${val}`,
+          vscode.DiagnosticSeverity.Error
+        ));
+      }
+    }
+
+    // Validate primitives file references exist
+    if (json.primitives && vscode.workspace.workspaceFolders?.[0]) {
+      const wsRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+      const primLine = findKeyLine("primitives");
+      for (const [primType, refs] of Object.entries(json.primitives)) {
+        if (Array.isArray(refs)) {
+          for (const ref of refs) {
+            if (typeof ref === "string" && ref.startsWith("./")) {
+              const fs = require("fs");
+              const path = require("path");
+              const fullPath = path.resolve(path.dirname(doc.fileName), ref);
+              if (!fs.existsSync(fullPath)) {
+                diagnostics.push(new vscode.Diagnostic(
+                  new vscode.Range(primLine, 0, primLine, doc.lineAt(primLine).text.length),
+                  `${primType}: referenced file not found — ${ref}`,
+                  vscode.DiagnosticSeverity.Warning
+                ));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    diagCollection.set(doc.uri, diagnostics);
+  }
+
+  // Run on open + save + change
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument(validateManifestDocument),
+    vscode.workspace.onDidSaveTextDocument(validateManifestDocument),
+    vscode.workspace.onDidChangeTextDocument(e => validateManifestDocument(e.document))
+  );
+  // Validate already-open documents
+  vscode.workspace.textDocuments.forEach(validateManifestDocument);
+
+  // ─── Validate Manifest Command ───
+  safeRegister("frootai.validateManifest", async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || !editor.document.fileName.endsWith("fai-manifest.json")) {
+      const uris = await vscode.workspace.findFiles("**/fai-manifest.json", "**/node_modules/**", 5);
+      if (uris.length === 0) {
+        vscode.window.showWarningMessage("No fai-manifest.json found in workspace.");
+        return;
+      }
+      const pick = uris.length === 1 ? uris[0] : await vscode.window.showQuickPick(
+        uris.map(u => ({ label: vscode.workspace.asRelativePath(u), uri: u })),
+        { placeHolder: "Select manifest to validate" }
+      ).then(p => p ? (p as any).uri : undefined);
+      if (pick) {
+        const doc = await vscode.workspace.openTextDocument(pick);
+        await vscode.window.showTextDocument(doc);
+        validateManifestDocument(doc);
+      }
+      return;
+    }
+    validateManifestDocument(editor.document);
+    const diags = diagCollection.get(editor.document.uri);
+    if (!diags || diags.length === 0) {
+      vscode.window.showInformationMessage("✅ fai-manifest.json is valid — no issues found.");
+    } else {
+      const errors = diags.filter(d => d.severity === vscode.DiagnosticSeverity.Error).length;
+      const warnings = diags.filter(d => d.severity === vscode.DiagnosticSeverity.Warning).length;
+      vscode.window.showWarningMessage(`fai-manifest.json: ${errors} error(s), ${warnings} warning(s). Check Problems panel.`);
+    }
+  });
+
+  // ─── Context Menu: Open Play from fai-manifest.json ───
+  safeRegister("frootai.openPlayFromManifest", async (fileUri?: vscode.Uri) => {
+    const uri = fileUri || vscode.window.activeTextEditor?.document.uri;
+    if (!uri) return;
+    try {
+      const raw = await vscode.workspace.fs.readFile(uri);
+      const manifest = JSON.parse(Buffer.from(raw).toString("utf-8"));
+      const playId = manifest.play?.replace(/^(\d+).*/, "$1") || "";
+      const play = SOLUTION_PLAYS.find(p => p.id === playId);
+      if (play) vscode.commands.executeCommand("frootai.openPlayDetail", play);
+      else vscode.window.showInformationMessage(`Play "${manifest.play}" not found in catalog.`);
+    } catch { vscode.window.showErrorMessage("Failed to parse fai-manifest.json"); }
+  });
+
+  // ─── Context Menu: Peek Agent/Skill definition ───
+  safeRegister("frootai.peekFaiFile", async (fileUri?: vscode.Uri) => {
+    const uri = fileUri || vscode.window.activeTextEditor?.document.uri;
+    if (!uri) return;
+    const doc = await vscode.workspace.openTextDocument(uri);
+    await vscode.window.showTextDocument(doc, { preview: true });
+  });
 }
 
 // ─── File Decoration Provider ───

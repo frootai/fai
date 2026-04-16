@@ -1,5 +1,18 @@
 # Changelog
 
+## [9.1.0] — 2026-04-16
+
+### Phase 6: Workspace Intelligence & Distribution
+
+- **Workspace play detection** — auto-detects fai-manifest.json in workspace, shows active play in status bar with click-to-open
+- **Manifest diagnostics** — real-time DiagnosticCollection validates fai-manifest.json: missing required fields, invalid play ID format, bad semver, invalid WAF pillars, guardrail thresholds out of range, broken file references
+- **Validate Manifest command** — schema validation with detailed output in Problems panel; auto-finds manifests if none open
+- **Explorer context menus** — right-click fai-manifest.json → Validate Manifest / Open Play Detail; right-click .agent.md, SKILL.md → Open FAI File
+- **4 new commands** — validateManifest, openPlayFromManifest, peekFaiFile, openDetectedPlay
+- **.vscodeignore optimized** — excludes test/, webview-ui/src/, docs from VSIX for smaller package
+- **Test suite expanded** — 34 tests (was 27), now covers context menus, new commands
+- **README updated** — 18 features (was 15), 24 commands (was 21)
+
 ## [9.0.0] — 2026-04-16
 
 ### Phase 5: Polish & Production Hardening

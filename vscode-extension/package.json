@@ -2,7 +2,7 @@
   "name": "frootai-vscode",
   "displayName": "FrootAI — AI Architecture Knowledge Engine",
   "description": "45 MCP tools · 104 solution plays · 830+ primitives · FAI Engine. The open glue for GenAI on Azure. Scaffold DevKit, TuneKit, SpecKit in one click.",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "publisher": "frootai",
   "engines": {
     "vscode": "^1.95.0"
@@ -247,6 +247,25 @@
         "command": "frootai.togglePlayView",
         "title": "FrootAI: Toggle Play View",
         "icon": "$(list-tree)"
+      },
+      {
+        "command": "frootai.validateManifest",
+        "title": "FrootAI: Validate Manifest",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "frootai.openPlayFromManifest",
+        "title": "FrootAI: Open Play from Manifest",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "frootai.peekFaiFile",
+        "title": "FrootAI: Open FAI File",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "frootai.openDetectedPlay",
+        "title": "FrootAI: Open Detected Play"
       }
     ],
     "menus": {
@@ -317,6 +336,23 @@
           "command": "frootai.initPrompts",
           "when": "view == frootai.solutionPlays",
           "group": "1_init@4"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "frootai.validateManifest",
+          "when": "resourceFilename == fai-manifest.json",
+          "group": "frootai@1"
+        },
+        {
+          "command": "frootai.openPlayFromManifest",
+          "when": "resourceFilename == fai-manifest.json",
+          "group": "frootai@2"
+        },
+        {
+          "command": "frootai.peekFaiFile",
+          "when": "resourceFilename =~ /\\.(agent|instructions)\\.md$|^SKILL\\.md$|^fai-context\\.json$|^hooks\\.json$/",
+          "group": "frootai@1"
         }
       ]
     },

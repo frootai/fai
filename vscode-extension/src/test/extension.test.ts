@@ -96,6 +96,22 @@ test("has openConfigurator command", () => {
   assert.ok(commands.find(c => c.command === "frootai.openConfigurator"));
 });
 
+test("has validateManifest command", () => {
+  assert.ok(commands.find(c => c.command === "frootai.validateManifest"));
+});
+
+test("has openPlayFromManifest command", () => {
+  assert.ok(commands.find(c => c.command === "frootai.openPlayFromManifest"));
+});
+
+test("has peekFaiFile command", () => {
+  assert.ok(commands.find(c => c.command === "frootai.peekFaiFile"));
+});
+
+test("has openDetectedPlay command", () => {
+  assert.ok(commands.find(c => c.command === "frootai.openDetectedPlay"));
+});
+
 // ─── Keybindings ───
 console.log("\n🔗 Keybindings");
 
@@ -132,6 +148,26 @@ test("has solutionPlays view", () => {
 
 test("has mcpTools view", () => {
   assert.ok(views.find((v: any) => v.id === "frootai.mcpTools"));
+});
+
+// ─── Explorer Context Menus ───
+console.log("\n📂 Context Menus");
+
+const explorerMenus = pkg.contributes.menus?.["explorer/context"] || [];
+
+test("has explorer context menus", () => {
+  assert.ok(explorerMenus.length >= 2, `Only ${explorerMenus.length} context menus`);
+});
+
+test("has validateManifest context menu for fai-manifest.json", () => {
+  const item = explorerMenus.find((m: any) => m.command === "frootai.validateManifest");
+  assert.ok(item, "Missing validateManifest context menu");
+  assert.ok(item.when.includes("fai-manifest.json"), "Wrong when clause");
+});
+
+test("has openPlayFromManifest context menu", () => {
+  const item = explorerMenus.find((m: any) => m.command === "frootai.openPlayFromManifest");
+  assert.ok(item, "Missing openPlayFromManifest context menu");
 });
 
 // ─── Walkthroughs ───
