@@ -708,12 +708,16 @@ class PrimitivesCatalogProvider {
   getTreeItem(element) { return element; }
   getChildren(element) {
     if (!element) {
-      // Top-level: Open Full Catalog + 5 categories
-      const openCatalog = new vscode.TreeItem("$(extensions) Open Full Catalog", vscode.TreeItemCollapsibleState.None);
+      // Top-level: Open Full Catalog + Marketplace + categories
+      const openCatalog = new vscode.TreeItem("Open Primitives Catalog", vscode.TreeItemCollapsibleState.None);
       openCatalog.command = { command: "frootai.openPrimitivesCatalog", title: "Open Primitives Catalog" };
       openCatalog.description = "Search, filter, install";
-      openCatalog.tooltip = "Open the rich Primitives Catalog with search, WAF filters, sub-categories, and one-click install";
-      openCatalog.iconPath = new vscode.ThemeIcon("extensions");
+      openCatalog.iconPath = new vscode.ThemeIcon("extensions", new vscode.ThemeColor("charts.blue"));
+
+      const openMarketplace = new vscode.TreeItem("Plugin Marketplace", vscode.TreeItemCollapsibleState.None);
+      openMarketplace.command = { command: "frootai.openMarketplace", title: "Open Marketplace" };
+      openMarketplace.description = "77 composable plugins";
+      openMarketplace.iconPath = new vscode.ThemeIcon("package", new vscode.ThemeColor("charts.red"));
 
       const categories = [
         { label: "Agents (238)", icon: "hubot", color: "#10b981", children: [
@@ -758,7 +762,7 @@ class PrimitivesCatalogProvider {
         item._children = cat.children;
         return item;
       });
-      return [openCatalog, ...items];
+      return [openCatalog, openMarketplace, ...items];
     }
     if (element._children) {
       return element._children.map(child => {

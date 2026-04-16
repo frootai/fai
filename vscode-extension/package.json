@@ -272,6 +272,11 @@
         "command": "frootai.openPrimitivesCatalog",
         "title": "FrootAI: Open Primitives Catalog",
         "icon": "$(extensions)"
+      },
+      {
+        "command": "frootai.openMarketplace",
+        "title": "FrootAI: Open Plugin Marketplace",
+        "icon": "$(package)"
       }
     ],
     "menus": {

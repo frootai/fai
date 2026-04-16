@@ -434,6 +434,18 @@ ${bodyHtml}
     });
   });
 
+  // ─── Marketplace Panel ───
+  safeRegister("frootai.openMarketplace", () => {
+    const dataDir = path.join(context.extensionPath, "data");
+    let plugins: any[] = [];
+    try { plugins = JSON.parse(fs.readFileSync(path.join(dataDir, "plugins.json"), "utf-8")); } catch {}
+    const panel = createReactPanel(context.extensionUri, "frootai.marketplace", `FAI Marketplace (${plugins.length} plugins)`, { panel: "marketplace" as any, plugins });
+    panel.webview.onDidReceiveMessage((msg: any) => {
+      if (msg.command === "openUrl" && msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url));
+      if (msg.command === "installPlugin" && msg.pluginId) vscode.commands.executeCommand("frootai.installPlugin");
+    });
+  });
+
   // ─── First Install: Show Welcome panel ───
   const CURRENT_VERSION = "9.2.0";
   const lastVersion = context.globalState.get<string>("frootai.lastVersion");
