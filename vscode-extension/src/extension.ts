@@ -3,6 +3,8 @@
 // This TS entry point adds React webview panel commands on top.
 
 import * as vscode from "vscode";
+import * as path from "path";
+import * as fs from "fs";
 import { searchAll } from "./commands/search";
 import { createReactPanel } from "./webviews/reactHost";
 import { SOLUTION_PLAYS } from "./data/plays";
@@ -393,13 +395,37 @@ ${bodyHtml}
         case "evaluation": vscode.commands.executeCommand("frootai.openEvaluationDashboard"); break;
         case "scaffold": vscode.commands.executeCommand("frootai.openScaffoldWizard"); break;
         case "configurator": vscode.commands.executeCommand("frootai.openConfigurator"); break;
+        case "primitivesCatalog": vscode.commands.executeCommand("frootai.openPrimitivesCatalog"); break;
         case "openUrl": if (msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url)); break;
       }
     });
   });
 
+  // ─── Primitives Catalog Panel ───
+  safeRegister("frootai.openPrimitivesCatalog", () => {
+    const dataDir = path.join(context.extensionPath, "data");
+    const loadJSON = (name: string) => {
+      try { return JSON.parse(fs.readFileSync(path.join(dataDir, name), "utf-8")); }
+      catch { return []; }
+    };
+    const primitives = {
+      agents: loadJSON("agents.json"),
+      skills: loadJSON("skills.json"),
+      instructions: loadJSON("instructions.json"),
+      hooks: loadJSON("hooks.json"),
+      plugins: loadJSON("plugins.json"),
+    };
+    const total = Object.values(primitives).reduce((s: number, a: any[]) => s + a.length, 0);
+    const panel = createReactPanel(context.extensionUri, "frootai.primitivesCatalog", `FAI Primitives (${total})`, { panel: "primitivesCatalog" as any, primitives });
+    panel.webview.onDidReceiveMessage((msg: any) => {
+      if (msg.command === "openUrl" && msg.url) {
+        vscode.env.openExternal(vscode.Uri.parse(msg.url));
+      }
+    });
+  });
+
   // ─── First Install: Show Welcome panel ───
-  const CURRENT_VERSION = "9.1.0";
+  const CURRENT_VERSION = "9.2.0";
   const lastVersion = context.globalState.get<string>("frootai.lastVersion");
 
   if (!lastVersion) {
@@ -410,10 +436,10 @@ ${bodyHtml}
     // Version update — show What's New
     context.globalState.update("frootai.lastVersion", CURRENT_VERSION);
     const CHANGELOG: string[] = [
-      "🔍 Workspace Intelligence — auto-detects fai-manifest.json, shows active play in status bar",
-      "🔎 Manifest Diagnostics — real-time validation with errors/warnings in Problems panel",
-      "📂 Explorer Context Menus — right-click fai-manifest.json → Validate / Open Play Detail",
-      "⚡ Validate Manifest command — full schema check with detailed output",
+      "🧩 Primitives Catalog — 823 primitives in a rich searchable webview with WAF & domain filters",
+      "🔍 Domain filtering — 10 sub-categories (RAG, Azure, Security, Agent, DevOps, ...)",
+      "⚡ One-click agent install — agents install directly into VS Code via protocol link",
+      "📂 Detail view — full metadata, CLI command, GitHub link for every primitive",
     ];
     vscode.window.showInformationMessage(
       `FrootAI updated to v${CURRENT_VERSION}! ${CHANGELOG[0]}`,

@@ -112,6 +112,10 @@ test("has openDetectedPlay command", () => {
   assert.ok(commands.find(c => c.command === "frootai.openDetectedPlay"));
 });
 
+test("has openPrimitivesCatalog command", () => {
+  assert.ok(commands.find(c => c.command === "frootai.openPrimitivesCatalog"));
+});
+
 // ─── Keybindings ───
 console.log("\n🔗 Keybindings");
 
@@ -214,6 +218,32 @@ if (fs.existsSync(knowledgePath)) {
   });
 } else {
   console.log("  ⚠️  knowledge.json not found — skipping knowledge tests");
+}
+
+// ─── Primitives Data ───
+console.log("\n🧩 Primitives Data");
+
+const primitivesDir = require("path").join(__dirname, "../../data");
+const primitivesFiles = ["agents.json", "skills.json", "instructions.json", "hooks.json", "plugins.json"];
+
+for (const file of primitivesFiles) {
+  const filePath = require("path").join(primitivesDir, file);
+  if (fs.existsSync(filePath)) {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    const type = file.replace(".json", "");
+    test(`${file} is valid array`, () => {
+      assert.ok(Array.isArray(data), `${file} should be an array`);
+    });
+    test(`${file} has items (${data.length})`, () => {
+      assert.ok(data.length > 0, `${file} should have items`);
+    });
+    test(`${file} items have id field`, () => {
+      const bad = data.filter((d: any) => !d.id);
+      assert.strictEqual(bad.length, 0, `${bad.length} items missing 'id'`);
+    });
+  } else {
+    console.log(`  ⚠️  ${file} not found — skipping`);
+  }
 }
 
 // ─── Summary ───

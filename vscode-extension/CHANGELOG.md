@@ -1,5 +1,20 @@
 # Changelog
 
+## [9.2.0] — 2026-04-16
+
+### Phase 7: Primitives Catalog
+- **Primitives Catalog webview** — rich React panel with 823 primitives across 5 tabs (Agents 238, Skills 322, Instructions 176, Hooks 10, Plugins 77)
+- **Search** — real-time full-text search across id, name, description, keywords
+- **Domain filters** — 10 sub-categories (RAG & Search, Azure Cloud, Security, Multi-Agent, DevOps, Data & ML, Web & Code, Platform & MCP, Infrastructure, All)
+- **WAF pillar filters** — filter agents/plugins by 6 WAF pillars (Reliability, Security, Cost, Ops, Perf, RAI)
+- **Detail view** — full metadata: description, WAF tags, file path, size, install command, GitHub link, website link
+- **One-click install** — agents install via `vscode://github.copilot-chat/createAgent` protocol
+- **Pagination** — 30 items per page with prev/next
+- **Tree upgrade** — "Open Full Catalog" button at top of Primitives sidebar tree
+- **Data bundle** — 275KB of JSON data (agents, skills, instructions, hooks, plugins) bundled with extension
+- **Test suite** — 50 tests (was 34), new tests validate all 5 primitives JSON files
+- **README** — 19 features (was 18), 25 commands (was 24)
+
 ## [9.1.0] — 2026-04-16
 
 ### Phase 6: Workspace Intelligence & Distribution

@@ -60,7 +60,23 @@ export interface WafPillar {
   color: string;
 }
 
-export type PanelType = "playDetail" | "evaluation" | "scaffold" | "mcpExplorer" | "playBrowser" | "configurator" | "welcome";
+export type PanelType = "playDetail" | "evaluation" | "scaffold" | "mcpExplorer" | "playBrowser" | "configurator" | "welcome" | "primitivesCatalog";
+
+export interface PrimitiveItem {
+  id: string;
+  name?: string;
+  description?: string;
+  file?: string;
+  folder?: string;
+  waf?: string[];
+  applyTo?: string;
+  events?: string[];
+  size?: number;
+  version?: string;
+  keywords?: string[];
+  plays?: string[];
+  items?: number;
+}
 
 export interface PanelData {
   panel: PanelType;
@@ -68,4 +84,5 @@ export interface PanelData {
   scores?: Record<string, number>;
   tools?: McpTool[];
   plays?: SolutionPlay[];
+  primitives?: Record<string, PrimitiveItem[]>;
 }

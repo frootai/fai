@@ -687,30 +687,31 @@ function getModuleDescription(moduleId) {
 class PrimitivesCatalogProvider {
   getTreeItem(element) { return element; }
   getChildren(element) {
-    const categories = [
-      {
-        label: "Agents (238)", icon: "hubot", children: [
+    if (!element) {
+      // Top-level: Open Full Catalog + 5 categories
+      const openCatalog = new vscode.TreeItem("$(extensions) Open Full Catalog", vscode.TreeItemCollapsibleState.None);
+      openCatalog.command = { command: "frootai.openPrimitivesCatalog", title: "Open Primitives Catalog" };
+      openCatalog.description = "Search, filter, install";
+      openCatalog.tooltip = "Open the rich Primitives Catalog with search, WAF filters, sub-categories, and one-click install";
+      openCatalog.iconPath = new vscode.ThemeIcon("extensions");
+
+      const categories = [
+        { label: "Agents (238)", icon: "hubot", color: "#10b981", children: [
           { label: "Browse all agents", desc: "View 238 agents on frootai.dev", icon: "globe", url: "https://frootai.dev/primitives/agents" },
           { label: "Install agent in VS Code", desc: "One-click agent install via VS Code protocol", icon: "cloud-download", url: "https://frootai.dev/primitives/agents" },
           { label: "WAF-aligned AI personas", desc: "Each agent has expertise + tools + WAF alignment", icon: "info" },
-        ]
-      },
-      {
-        label: "Instructions (176)", icon: "file-text", children: [
+        ]},
+        { label: "Instructions (176)", icon: "file-text", children: [
           { label: "Browse all instructions", desc: "View 176 instructions on frootai.dev", icon: "globe", url: "https://frootai.dev/primitives/instructions" },
           { label: "Auto-apply via applyTo globs", desc: "Match file patterns like **/*.tsx", icon: "regex" },
           { label: "Scoped behavioral directives", desc: "Coding standards, security rules, best practices", icon: "info" },
-        ]
-      },
-      {
-        label: "Skills (322)", icon: "tools", children: [
+        ]},
+        { label: "Skills (322)", icon: "tools", children: [
           { label: "Browse all skills", desc: "View 322 skills on frootai.dev", icon: "globe", url: "https://frootai.dev/primitives/skills" },
           { label: "SKILL.md folder structure", desc: "Parameters, steps, bundled assets", icon: "folder" },
           { label: "Reusable LEGO blocks", desc: "Auto-wire inside solution plays", icon: "info" },
-        ]
-      },
-      {
-        label: "Hooks (10)", icon: "shield", children: [
+        ]},
+        { label: "Hooks (10)", icon: "shield", children: [
           { label: "Browse all hooks", desc: "View 10 hooks on frootai.dev", icon: "globe", url: "https://frootai.dev/primitives/hooks" },
           { label: "secrets-scanner", desc: "40+ secret patterns, entropy detection", icon: "lock" },
           { label: "tool-guardian", desc: "Allowlist/blocklist, rate limiting", icon: "shield" },
@@ -722,37 +723,22 @@ class PrimitivesCatalogProvider {
           { label: "token-budget-enforcer", desc: "Per-model budgets, sliding window", icon: "dashboard" },
           { label: "session-logger", desc: "JSON Lines audit trail", icon: "output" },
           { label: "license-checker", desc: "SPDX compliance, 4 ecosystems", icon: "file-certificate" },
-        ]
-      },
-      {
-        label: "Plugins (77)", icon: "package", children: [
+        ]},
+        { label: "Plugins (77)", icon: "package", children: [
           { label: "Browse marketplace", desc: "View 77 plugins on frootai.dev", icon: "globe", url: "https://frootai.dev/marketplace" },
           { label: "npx frootai install <plugin>", desc: "One-command installation", icon: "terminal" },
           { label: "1,008 bundled items", desc: "Agents + instructions + skills + hooks per plugin", icon: "info" },
-        ]
-      },
-      {
-        label: "Workflows (12)", icon: "git-branch", children: [
-          { label: "Browse workflows", desc: "View 12 workflows on frootai.dev", icon: "globe", url: "https://frootai.dev/primitives" },
-          { label: "Agentic workflows with safe-outputs", desc: "GitHub Copilot engine", icon: "github-action" },
-        ]
-      },
-      {
-        label: "Cookbook (16)", icon: "book", children: [
-          { label: "Browse cookbook", desc: "View 16 recipes on frootai.dev", icon: "globe", url: "https://frootai.dev/primitives" },
-          { label: "Step-by-step recipes", desc: "From play init to production deployment", icon: "list-ordered" },
-        ]
-      },
-    ];
+        ]},
+      ];
 
-    if (!element) {
-      return categories.map(cat => {
+      const items = categories.map(cat => {
         const item = new vscode.TreeItem(cat.label, vscode.TreeItemCollapsibleState.Collapsed);
         item.iconPath = new vscode.ThemeIcon(cat.icon);
         item.contextValue = "primitiveCategory";
         item._children = cat.children;
         return item;
       });
+      return [openCatalog, ...items];
     }
     if (element._children) {
       return element._children.map(child => {

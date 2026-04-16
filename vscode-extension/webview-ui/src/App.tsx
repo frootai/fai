@@ -7,6 +7,7 @@ import Evaluation from "./panels/Evaluation";
 import ScaffoldWizard from "./panels/ScaffoldWizard";
 import McpExplorer from "./panels/McpExplorer";
 import Welcome from "./panels/Welcome";
+import PrimitivesCatalog from "./panels/PrimitivesCatalog";
 
 declare global {
   interface Window {
@@ -45,6 +46,8 @@ export default function App() {
       return <McpExplorer tools={data.tools ?? []} />;
     case "welcome":
       return <Welcome />;
+    case "primitivesCatalog":
+      return <PrimitivesCatalog primitives={data.primitives ?? { agents: [], skills: [], instructions: [], hooks: [], plugins: [] }} />;
     default:
       return <div className="container"><p>Unknown panel: {data.panel}</p></div>;
   }
