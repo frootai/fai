@@ -6,6 +6,7 @@ import Configurator from "./panels/Configurator";
 import Evaluation from "./panels/Evaluation";
 import ScaffoldWizard from "./panels/ScaffoldWizard";
 import McpExplorer from "./panels/McpExplorer";
+import Welcome from "./panels/Welcome";
 
 declare global {
   interface Window {
@@ -42,6 +43,8 @@ export default function App() {
       return <ScaffoldWizard plays={data.plays ?? []} />;
     case "mcpExplorer":
       return <McpExplorer tools={data.tools ?? []} />;
+    case "welcome":
+      return <Welcome />;
     default:
       return <div className="container"><p>Unknown panel: {data.panel}</p></div>;
   }

@@ -578,17 +578,23 @@ class SolutionPlayProvider {
     const themeColor = cxColors[p.cx] ? new vscode.ThemeColor(cxColors[p.cx]) : undefined;
     item.iconPath = new vscode.ThemeIcon(p.codicon || statusIcon, themeColor);
 
-    // Rich tooltip
+    // Rich tooltip with WAF pillars, Azure services, category
     const statusEmoji = p.status === "Ready" ? "✅ Ready" : "⬜ Skeleton";
+    const wafPillars = p.waf && p.waf.length > 0 ? p.waf.map((w) => `\`${w}\``).join("  ") : "";
+    const azServices = p.azure && p.azure.length > 0 ? p.azure.slice(0, 5).join(", ") : (p.infra || "N/A");
+    const catLine = p.category ? `**Category:** ${p.category}  \n` : "";
     item.tooltip = new vscode.MarkdownString(
       `**${p.name}** ${statusEmoji}\n\n` +
       `${p.desc || ""}\n\n---\n\n` +
       `**Complexity:** ${p.cx || "N/A"}  \n` +
-      `**Infra:** ${p.infra || "N/A"}  \n` +
+      catLine +
+      `**Azure:** ${azServices}  \n` +
       `**Layer:** ${layerNames[p.layer] || p.layer}  \n` +
+      (wafPillars ? `**WAF:** ${wafPillars}  \n` : "") +
       `**Dir:** \`${p.dir}\`\n\n` +
-      `*Click to open Play Detail*`
+      `*Click to open Play Detail panel*`
     );
+    item.tooltip.supportThemeIcons = true;
 
     item.contextValue = "solutionPlay";
     item.command = { command: "frootai.openSolutionPlay", title: "Open", arguments: [p] };
@@ -612,7 +618,12 @@ class FrootModuleProvider {
         const item = new vscode.TreeItem(layer.layer, vscode.TreeItemCollapsibleState.Expanded);
         item.contextValue = "layer";
         item.description = `${layer.modules.length} modules`;
-        item.tooltip = `${layer.layer}\n${LAYER_DESCRIPTIONS[layer.layer] || ""}\n\nColor: ${layer.color}\nModules: ${layer.modules.map(m => m.id + " " + m.name).join(", ")}`;
+        item.tooltip = new vscode.MarkdownString(
+          `**${layer.layer}**\n\n${LAYER_DESCRIPTIONS[layer.layer] || ""}\n\n---\n\n` +
+          `**Modules:** ${layer.modules.length}  \n` +
+          layer.modules.map(m => `- \`${m.id}\` ${m.name}`).join("\n")
+        );
+        item.tooltip.supportThemeIcons = true;
         item.iconPath = new vscode.ThemeIcon("symbol-folder", new vscode.ThemeColor(getLayerThemeColor(layer.color)));
         return item;
       });
@@ -621,8 +632,13 @@ class FrootModuleProvider {
     if (layerData) {
       return layerData.modules.map((m) => {
         const item = new vscode.TreeItem(`${m.id}: ${m.name}`, vscode.TreeItemCollapsibleState.None);
-        item.description = getModuleDescription(m.id);
-        item.tooltip = `${m.id}: ${m.name}\n${getModuleDescription(m.id)}\n\nClick to read in a rich panel`;
+        const modDesc = getModuleDescription(m.id);
+        item.description = modDesc;
+        const modTooltip = new vscode.MarkdownString(
+          `**${m.id}: ${m.name}**\n\n${modDesc}\n\n---\n\n*Click to read in a rich panel*`
+        );
+        modTooltip.supportThemeIcons = true;
+        item.tooltip = modTooltip;
         item.iconPath = new vscode.ThemeIcon("book", new vscode.ThemeColor(getLayerThemeColor(layerData.color)));
         item.command = { command: "frootai.openModule", title: "Open", arguments: [m] };
         return item;
@@ -854,7 +870,14 @@ class McpToolProvider {
       return MCP_TOOLS.filter(t => t.type === groupType).map(t => {
         const item = new vscode.TreeItem(t.name, vscode.TreeItemCollapsibleState.None);
         item.description = t.desc;
-        item.tooltip = `${t.name}\n${t.desc}\n\nType: ${t.type}\n\nClick to view documentation`;
+        const toolTooltip = new vscode.MarkdownString(
+          `**\`${t.name}\`**\n\n${t.desc}\n\n---\n\n` +
+          `**Category:** ${t.type}  \n` +
+          `**Read-only:** ${t.readOnly !== false ? "Yes" : "No"}  \n\n` +
+          `*Click to view documentation*`
+        );
+        toolTooltip.supportThemeIcons = true;
+        item.tooltip = toolTooltip;
         item.iconPath = new vscode.ThemeIcon(typeIcons[t.type] || "symbol-method");
         item.contextValue = "mcpTool";
         item.command = { command: "frootai.viewToolDocs", title: "View Docs", arguments: [t] };
@@ -871,7 +894,11 @@ class GlossaryProvider {
     const terms = Object.entries(GLOSSARY).slice(0, 50).map(([key, val]) => {
       const item = new vscode.TreeItem(val.term, vscode.TreeItemCollapsibleState.None);
       item.description = val.definition.substring(0, 60) + "...";
-      item.tooltip = `${val.term}\n\n${val.definition.substring(0, 200)}`;
+      const glossTooltip = new vscode.MarkdownString(
+        `**${val.term}**\n\n${val.definition.substring(0, 300)}${val.definition.length > 300 ? "..." : ""}\n\n---\n\n*Click to view full definition*`
+      );
+      glossTooltip.supportThemeIcons = true;
+      item.tooltip = glossTooltip;
       item.command = { command: "frootai.lookupTerm", title: "Lookup", arguments: [val.term] };
       return item;
     });

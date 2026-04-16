@@ -381,6 +381,52 @@ ${bodyHtml}
     const panel = createReactPanel(context.extensionUri, "frootai.configurator", "Solution Configurator", { panel: "configurator", plays: SOLUTION_PLAYS });
     setupNavigationHandler(panel, context);
   });
+
+  // ─── Welcome Panel ───
+  safeRegister("frootai.openWelcome", () => {
+    const panel = createReactPanel(context.extensionUri, "frootai.welcome", "Welcome to FrootAI", { panel: "welcome" });
+    panel.webview.onDidReceiveMessage((msg: any) => {
+      switch (msg.command) {
+        case "browsePlays": vscode.commands.executeCommand("frootai.browsePlays"); break;
+        case "searchAll": vscode.commands.executeCommand("frootai.searchAll"); break;
+        case "mcpExplorer": vscode.commands.executeCommand("frootai.openMcpExplorer"); break;
+        case "evaluation": vscode.commands.executeCommand("frootai.openEvaluationDashboard"); break;
+        case "scaffold": vscode.commands.executeCommand("frootai.openScaffoldWizard"); break;
+        case "configurator": vscode.commands.executeCommand("frootai.openConfigurator"); break;
+        case "openUrl": if (msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url)); break;
+      }
+    });
+  });
+
+  // ─── First Install: Show Welcome panel ───
+  const CURRENT_VERSION = "8.5.3";
+  const lastVersion = context.globalState.get<string>("frootai.lastVersion");
+
+  if (!lastVersion) {
+    // First install — show Welcome panel
+    vscode.commands.executeCommand("frootai.openWelcome");
+    context.globalState.update("frootai.lastVersion", CURRENT_VERSION);
+  } else if (lastVersion !== CURRENT_VERSION) {
+    // Version update — show What's New
+    context.globalState.update("frootai.lastVersion", CURRENT_VERSION);
+    const CHANGELOG: string[] = [
+      "🧪 MCP Tool Explorer with Try It — test tools inline with schema-aware forms",
+      "📊 Evaluation trends with sparklines and delta badges",
+      "⏱️ Recently Used section in Solution Plays tree",
+      "📋 Enhanced walkthrough guides with tables and tips",
+      "🎉 Welcome panel for new users",
+    ];
+    vscode.window.showInformationMessage(
+      `FrootAI updated to v${CURRENT_VERSION}! ${CHANGELOG[0]}`,
+      "View All Changes", "Open Welcome"
+    ).then(choice => {
+      if (choice === "View All Changes") {
+        vscode.window.showInformationMessage(CHANGELOG.join("\n"), { modal: true });
+      } else if (choice === "Open Welcome") {
+        vscode.commands.executeCommand("frootai.openWelcome");
+      }
+    });
+  }
 }
 
 /** Shared message handler for panels that support navigation between views */

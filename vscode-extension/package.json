@@ -229,6 +229,11 @@
         "icon": "$(settings-gear)"
       },
       {
+        "command": "frootai.openWelcome",
+        "title": "FrootAI: Welcome",
+        "icon": "$(home)"
+      },
+      {
         "command": "frootai.filterPlays",
         "title": "FrootAI: Filter Solution Plays",
         "icon": "$(search)"

@@ -57,7 +57,7 @@ export interface WafPillar {
   color: string;
 }
 
-export type PanelType = "playDetail" | "evaluation" | "scaffold" | "mcpExplorer" | "playBrowser" | "configurator";
+export type PanelType = "playDetail" | "evaluation" | "scaffold" | "mcpExplorer" | "playBrowser" | "configurator" | "welcome";
 
 export interface PanelData {
   panel: PanelType;
