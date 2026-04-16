@@ -715,77 +715,19 @@ class PrimitivesCatalogProvider {
   }
 }
 
-// ─── FAI Protocol & Layer Provider ────────────────────────────────
+// ─── FAI Learning Hub Provider ────────────────────────────────
 
 class FaiProtocolProvider {
   getTreeItem(element) { return element; }
   getChildren(element) {
-    const layers = [
-      {
-        label: "FAI Protocol", icon: "symbol-namespace", desc: "fai-manifest.json — the specification", children: [
-          { label: "fai-manifest.json", desc: "Full play wiring: context + primitives + infra + toolkit", icon: "file-code", cmd: "frootai.openProtocolExplainer" },
-          { label: "fai-context.json", desc: "Lightweight LEGO block context reference", icon: "file", cmd: "frootai.openProtocolExplainer" },
-          { label: "7 JSON schemas", desc: "agent, instruction, skill, hook, plugin, manifest, context", icon: "symbol-structure", cmd: "frootai.openProtocolExplainer" },
-          { label: "Auto-wiring", desc: "Shared context propagates to all primitives in a play", icon: "link" },
-        ]
-      },
-      {
-        label: "FAI Layer", icon: "symbol-class", desc: "The conceptual binding glue", children: [
-          { label: "Context Wiring", desc: "Knowledge modules + WAF pillars + compatible plays", icon: "git-merge", cmd: "frootai.openProtocolExplainer" },
-          { label: "WAF Alignment", desc: "6 pillars: security, reliability, cost, ops, perf, RAI", icon: "shield", cmd: "frootai.openProtocolExplainer" },
-          { label: "Standalone → Wired", desc: "LEGO blocks auto-wire when placed in a play", icon: "plug" },
-        ]
-      },
-      {
-        label: "FAI Engine", icon: "server-process", desc: "The runtime — 7 modules, 42 tests", children: [
-          { label: "manifest-reader", desc: "Loads and validates fai-manifest.json", icon: "file-code", cmd: "frootai.openProtocolExplainer" },
-          { label: "context-resolver", desc: "Resolves shared context chain", icon: "search", cmd: "frootai.openProtocolExplainer" },
-          { label: "primitive-wirer", desc: "Connects agents, instructions, skills, hooks", icon: "link", cmd: "frootai.openProtocolExplainer" },
-          { label: "hook-runner", desc: "Executes hooks at lifecycle events", icon: "play", cmd: "frootai.openProtocolExplainer" },
-          { label: "evaluator", desc: "Runs quality metrics (groundedness, coherence)", icon: "graph", cmd: "frootai.openProtocolExplainer" },
-          { label: "mcp-bridge", desc: "Bridges to MCP protocol", icon: "cloud", cmd: "frootai.openProtocolExplainer" },
-        ]
-      },
-      {
-        label: "FAI Factory", icon: "rocket", desc: "CI/CD — build, test, publish", children: [
-          { label: "validate-primitives.js", desc: "2,800+ checks across all primitives", icon: "check-all", cmd: "frootai.openProtocolExplainer" },
-          { label: "GitHub Actions (15)", desc: "Automated CI/CD workflows", icon: "github-action", url: "https://github.com/frootai/frootai/actions" },
-          { label: "npm publish", desc: "frootai-mcp on npm registry", icon: "package", url: "https://www.npmjs.com/package/frootai-mcp" },
-        ]
-      },
-      {
-        label: "FAI Marketplace", icon: "extensions", desc: "77 plugins, 1,008 items", children: [
-          { label: "Browse marketplace", desc: "View plugins natively", icon: "extensions", cmd: "frootai.openMarketplace" },
-          { label: "npx frootai install", desc: "One-command plugin installation", icon: "terminal" },
-          { label: "npx frootai list", desc: "Browse all 77 plugins", icon: "list-flat" },
-        ]
-      },
-    ];
+    if (element) return [];
 
-    if (!element) {
-      return layers.map(layer => {
-        const item = new vscode.TreeItem(layer.label, vscode.TreeItemCollapsibleState.Collapsed);
-        item.description = layer.desc;
-        item.iconPath = new vscode.ThemeIcon(layer.icon);
-        item._children = layer.children;
-        return item;
-      });
-    }
-    if (element._children) {
-      return element._children.map(child => {
-        const item = new vscode.TreeItem(child.label, vscode.TreeItemCollapsibleState.None);
-        item.description = child.desc;
-        item.iconPath = new vscode.ThemeIcon(child.icon);
-        item.tooltip = child.desc;
-        if (child.cmd) {
-          item.command = { command: child.cmd, title: child.label };
-        } else if (child.url) {
-          item.command = { command: "vscode.open", title: "Open", arguments: [vscode.Uri.parse(child.url)] };
-        }
-        return item;
-      });
-    }
-    return [];
+    const protocol = new vscode.TreeItem("FAI Protocol & Architecture", vscode.TreeItemCollapsibleState.None);
+    protocol.command = { command: "frootai.openProtocolExplainer", title: "FAI Protocol & Architecture" };
+    protocol.description = "Protocol · Engine · Factory";
+    protocol.iconPath = new vscode.ThemeIcon("symbol-namespace", new vscode.ThemeColor("charts.green"));
+
+    return [protocol];
   }
 }
 
