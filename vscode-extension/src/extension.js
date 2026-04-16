@@ -986,15 +986,15 @@ function activate(context) {
           return;
         }
       }
-      // Fallback: website
-      vscode.env.openExternal(vscode.Uri.parse(`https://frootai.dev/docs/${mod.file.replace('.md', '')}`));
+      // Fallback: show info message
+      vscode.window.showInformationMessage(`Module ${mod.id} content not available offline. Bundled knowledge may need rebuilding.`);
     })
   );
 
-  // ── Command: Browse Solution Plays (website) ──
+  // ── Command: Browse Solution Plays → Native PlayBrowser panel ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.browseSolutionPlays", () => {
-      vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/solution-plays"));
+      vscode.commands.executeCommand("frootai.browsePlays");
     })
   );
 
@@ -1098,10 +1098,36 @@ function activate(context) {
     })
   );
 
-  // ── Command: Open Setup Guide ──
+  // ── Command: Open Setup Guide (native webview) ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.openSetupGuide", () => {
-      vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/setup-guide"));
+      const panel = vscode.window.createWebviewPanel("frootai.setupGuide", "FrootAI Setup Guide", vscode.ViewColumn.One, { enableScripts: false });
+      panel.webview.html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+        body { font-family: var(--vscode-font-family); padding: 24px; color: var(--vscode-foreground); background: var(--vscode-editor-background); line-height: 1.7; max-width: 720px; margin: 0 auto; }
+        h1 { font-size: 22px; margin-bottom: 8px; } h2 { font-size: 16px; margin-top: 24px; color: #10b981; }
+        code { background: var(--vscode-textCodeBlock-background); padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+        pre { background: var(--vscode-textCodeBlock-background); padding: 12px; border-radius: 6px; overflow-x: auto; }
+        .step { margin: 16px 0; padding: 12px; border-left: 3px solid #10b981; background: #10b98108; border-radius: 4px; }
+      </style></head><body>
+        <h1>⚡ FrootAI Setup Guide</h1>
+        <p>Get started with the FrootAI ecosystem in 3 steps.</p>
+        <div class="step"><h2>Step 1: Install MCP Server</h2>
+        <p>Choose one method:</p>
+        <pre>npx frootai-mcp@latest          # Node.js (recommended)
+pip install frootai-mcp          # Python
+docker run -i ghcr.io/frootai/frootai-mcp  # Docker</pre>
+        <p>Or use the <strong>Ctrl+Shift+P → FrootAI: Setup MCP Server</strong> command.</p></div>
+        <div class="step"><h2>Step 2: Scaffold a Play</h2>
+        <p>Use <strong>Ctrl+Shift+P → FrootAI: Open Scaffold Wizard</strong> to pick a play and create your project.</p>
+        <p>Or via CLI:</p><pre>npx frootai scaffold 01 my-rag-project</pre></div>
+        <div class="step"><h2>Step 3: Configure & Deploy</h2>
+        <p>Use the <strong>Solution Configurator</strong> (Ctrl+Shift+P → FrootAI: Solution Configurator) to find the right play for your needs.</p>
+        <p>Then use <strong>Init DevKit</strong> / <strong>Init TuneKit</strong> from any play detail to scaffold the full project structure.</p></div>
+        <h2>📋 Key Commands</h2>
+        <pre>Ctrl+Shift+F9   → Search Everything
+Ctrl+Shift+F10  → Browse All Plays
+Ctrl+Shift+F11  → Welcome Panel</pre>
+      </body></html>`;
     })
   );
 
@@ -1124,7 +1150,7 @@ function activate(context) {
       if (KNOWLEDGE?.modules?.T3) {
         createModuleWebview(context, "T3-pattern", `🏗️ ${pick.label}`, KNOWLEDGE.modules.T3.content);
       } else {
-        vscode.env.openExternal(vscode.Uri.parse("https://frootai.dev/docs/T3-Production-Patterns"));
+        vscode.window.showInformationMessage("Architecture patterns require bundled knowledge (T3 module). Rebuild knowledge.json to enable.");
       }
     })
   );
