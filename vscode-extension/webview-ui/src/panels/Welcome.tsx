@@ -22,16 +22,16 @@ const QUICK_LINKS = [
 ];
 
 export default function Welcome() {
+  const logoUri = (window as any).panelData?.logoUri;
   const cmd = (action: string) => vscode.postMessage({ command: action });
   const openUrl = (url: string) => vscode.postMessage({ command: "openUrl", url });
 
   return (
     <div className="container" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 20px" }}>
-      {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <h1 style={{ fontSize: 26, margin: 0, fontWeight: 800, letterSpacing: -0.5 }}>
-          Welcome to <span style={{ color: "#fff" }}>Froot</span><span style={{ color: "#10b981" }}>AI</span>
-        </h1>
+      {/* Hero */}
+      <div className="hero">
+        {logoUri && <img src={logoUri} alt="FrootAI" style={{ width: 56, height: 56, marginBottom: 10 }} />}
+        <h1>Welcome to <span style={{ color: "#fff" }}>Froot</span><span style={{ color: "#10b981" }}>AI</span></h1>
         <p style={{ color: "#94a3b8", fontSize: 12, marginTop: 6 }}>
           <em>From the Roots to the Fruits. It's connected, it's simply Frootful.</em>
         </p>

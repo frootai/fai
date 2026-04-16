@@ -171,12 +171,20 @@ export default function McpExplorer({ tools }: Props) {
     });
   }, [allTools, search, category]);
 
+  const logoUri = (window as any).panelData?.logoUri;
+
   return (
     <div className="container">
+      {/* Hero */}
       <div className="hero">
-        <span className="hero-icon"><Wrench size={48} /></span>
-        <h1>MCP Tool Explorer</h1>
-        <p style={{ opacity: 0.7 }}>{allTools.length} tools across {categories.length - 1} categories</p>
+        {logoUri && <img src={logoUri} alt="FrootAI" style={{ width: 48, height: 48, marginBottom: 8 }} />}
+        <h1 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <Wrench size={24} />
+          FAI MCP Tools
+        </h1>
+        <p style={{ fontSize: 13, opacity: 0.7, marginTop: 8 }}>
+          45 tools for AI architecture — knowledge, scaffolding, evaluation, and more
+        </p>
       </div>
 
       {/* Quick Actions Bar */}

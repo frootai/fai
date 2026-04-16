@@ -67,11 +67,18 @@ export default function Marketplace({ plugins }: { plugins: Plugin[] }) {
     );
   }
 
+  const logoUri = (window as any).panelData?.logoUri;
+
   return (
     <div className="container" style={{ padding: "16px 20px" }}>
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>FAI Plugin Marketplace</h2>
-        <p style={{ margin: "4px 0 0", opacity: 0.6, fontSize: 13 }}>
+      {/* Hero */}
+      <div className="hero">
+        {logoUri && <img src={logoUri} alt="FrootAI" style={{ width: 48, height: 48, marginBottom: 8 }} />}
+        <h1 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <Plug size={24} />
+          FAI Plugin Marketplace
+        </h1>
+        <p style={{ fontSize: 13, opacity: 0.7, marginTop: 8 }}>
           {plugins.length} composable plugins — each bundles agents, skills, instructions, hooks
         </p>
       </div>
