@@ -745,71 +745,113 @@ ${bodyHtml}
 
     const participant = vscode.chat.createChatParticipant("frootai.fai", async (request, chatContext, stream, token) => {
       const query = request.prompt.toLowerCase();
-      const stopWords = new Set(["how", "to", "the", "a", "an", "is", "in", "on", "for", "of", "and", "or", "my", "can", "do", "i", "we", "it", "with", "what", "which", "should", "use", "about", "this", "that", "from", "have", "need", "want", "please", "me", "be"]);
+      const stopWords = new Set(["how", "to", "the", "a", "an", "is", "in", "on", "for", "of", "and", "or", "my", "can", "do", "i", "we", "it", "with", "what", "which", "should", "use", "about", "this", "that", "from", "have", "need", "want", "please", "me", "be", "get", "let", "make", "just", "some"]);
       const queryWords = query.split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w));
 
-      stream.markdown("*Searching FrootAI knowledge base...*\n\n");
+      stream.progress("Searching FrootAI knowledge base...");
 
       if (queryWords.length === 0) {
-        stream.markdown("I couldn't parse your query. Try asking about a specific topic:\n\n");
-        stream.markdown("- **Solution Plays**: *Which play for RAG?* or *IoT edge AI*\n");
-        stream.markdown("- **Architecture**: *agent hosting patterns* or *cost optimization*\n");
-        stream.markdown("- **Getting Started**: *how to scaffold a project*\n\n");
-        stream.markdown("\n---\n*Powered by FrootAI Knowledge Engine — 18 modules, 101 plays, 200+ glossary terms*");
+        stream.markdown("I couldn't find specific search terms. Try asking about a topic:\n\n");
+        stream.markdown("- *Which play for enterprise RAG?*\n- *IoT edge AI solution*\n- *What is retrieval augmented generation?*\n- *Agent hosting patterns*\n\n");
+        stream.markdown("---\n*Agent FAI — FrootAI Knowledge Engine*");
         return;
       }
 
-      // Search plays — score by how many query words match
+      // ── Search plays with rich fields ──
       const scoredPlays = SOLUTION_PLAYS.map(p => {
-        const text = `${p.id} ${p.name} ${p.desc || ""} ${p.infra || ""} ${p.cat || ""}`.toLowerCase();
-        const matchCount = queryWords.filter(w => text.includes(w)).length;
+        const fields = [
+          p.id, p.name, p.desc || "", p.infra || "", p.cat || "",
+          p.tagline || "", p.pattern || "",
+          ...(p.devkit || []), ...(p.tunekit || []),
+        ].join(" ").toLowerCase();
+        const matchCount = queryWords.filter(w => fields.includes(w)).length;
         return { play: p, score: matchCount, ratio: matchCount / queryWords.length };
-      }).filter(s => s.score > 0 && s.ratio >= 0.3)
-        .sort((a, b) => b.score - a.score || b.ratio - a.ratio)
+      }).filter(s => s.score > 0 && s.ratio >= 0.25)
+        .sort((a, b) => b.ratio - a.ratio || b.score - a.score)
         .slice(0, 5);
 
-      // Search modules — score by word matches
+      // ── Search knowledge modules (deep: up to 3000 chars) ──
       const scoredModules: { id: string; name: string; snippet: string; score: number }[] = [];
       if (knowledge.modules) {
         for (const [id, mod] of Object.entries(knowledge.modules) as [string, any][]) {
-          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 1000)}`.toLowerCase();
+          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 3000)}`.toLowerCase();
           const matchCount = queryWords.filter((w: string) => text.includes(w)).length;
-          if (matchCount > 0 && matchCount / queryWords.length >= 0.3) {
-            scoredModules.push({ id, name: mod.title || id, snippet: (mod.content || "").substring(0, 200), score: matchCount });
+          if (matchCount > 0 && matchCount / queryWords.length >= 0.25) {
+            // Extract best matching paragraph as snippet
+            const paras = (mod.content || "").split(/\n\n/).filter((p: string) => p.length > 30);
+            const bestPara = paras.find((p: string) => {
+              const pLower = p.toLowerCase();
+              return queryWords.filter((w: string) => pLower.includes(w)).length >= Math.max(1, matchCount - 1);
+            }) || paras[0] || (mod.content || "").substring(0, 300);
+            scoredModules.push({ id, name: mod.title || id, snippet: bestPara.substring(0, 400), score: matchCount });
           }
         }
         scoredModules.sort((a, b) => b.score - a.score);
       }
 
-      // Build response
+      // ── Search glossary ──
+      const glossaryData = knowledge.modules?.F3?.content || "";
+      const glossaryMatches: { term: string; definition: string }[] = [];
+      if (glossaryData) {
+        const termRegex = /^##\s+(.+)$/gm;
+        let match;
+        const termPositions: { term: string; start: number }[] = [];
+        while ((match = termRegex.exec(glossaryData)) !== null) {
+          termPositions.push({ term: match[1], start: match.index });
+        }
+        for (let i = 0; i < termPositions.length; i++) {
+          const { term, start } = termPositions[i];
+          const end = i + 1 < termPositions.length ? termPositions[i + 1].start : glossaryData.length;
+          const defText = glossaryData.substring(start, end);
+          const termLower = term.toLowerCase();
+          const defLower = defText.toLowerCase();
+          if (queryWords.some(w => termLower.includes(w) || defLower.includes(w))) {
+            const defLines = defText.split("\n").filter((l: string) => l.trim() && !l.startsWith("##")).slice(0, 3).join(" ");
+            glossaryMatches.push({ term, definition: defLines.substring(0, 250) });
+          }
+        }
+      }
+
+      // ── Build rich response ──
+      let hasContent = false;
+
       if (scoredPlays.length > 0) {
-        stream.markdown("## 🎯 Matching Solution Plays\n\n");
-        for (const { play: p, score } of scoredPlays) {
-          const relevance = score >= queryWords.length ? "🟢" : score >= queryWords.length * 0.6 ? "🟡" : "🟠";
-          stream.markdown(`${relevance} **${p.id} — ${p.name}** (${p.cx || "N/A"} complexity)\n`);
-          stream.markdown(`> ${p.desc || ""}\n`);
-          stream.markdown(`> Infrastructure: ${p.infra || "N/A"}\n\n`);
+        hasContent = true;
+        stream.markdown("## 🎯 Recommended Solution Plays\n\n");
+        for (const { play: p, ratio } of scoredPlays) {
+          const relevance = ratio >= 0.8 ? "🟢" : ratio >= 0.5 ? "🟡" : "🟠";
+          stream.markdown(`${relevance} **Play ${p.id} — ${p.name}** · ${p.cx || ""} complexity\n\n`);
+          stream.markdown(`> ${p.tagline || p.desc || ""}\n\n`);
+          if (p.pattern) stream.markdown(`> **Pattern:** ${p.pattern}\n\n`);
+          stream.markdown(`> **Infrastructure:** ${p.infra || "N/A"}\n\n`);
+          if (p.costDev) stream.markdown(`> **Cost:** Dev ${p.costDev} · Prod ${p.costProd || "varies"}\n\n`);
         }
       }
 
       if (scoredModules.length > 0) {
-        stream.markdown("## 📚 Knowledge Modules\n\n");
+        hasContent = true;
+        stream.markdown("## 📚 Relevant Knowledge\n\n");
         for (const m of scoredModules.slice(0, 3)) {
-          stream.markdown(`**${m.id} — ${m.name}**\n`);
-          stream.markdown(`> ${m.snippet.replace(/\n/g, " ")}...\n\n`);
+          stream.markdown(`### ${m.id} — ${m.name}\n\n`);
+          const cleaned = m.snippet.replace(/^#+\s.+$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
+          stream.markdown(`${cleaned}\n\n`);
         }
       }
 
-      if (scoredPlays.length === 0 && scoredModules.length === 0) {
-        stream.markdown(`No direct matches for "${queryWords.join(" ")}". Here are some things I can help with:\n\n`);
-        stream.markdown("- **Solution Plays**: Ask about RAG, agents, voice AI, security, IoT, edge AI\n");
-        stream.markdown("- **Architecture**: Ask about patterns, cost optimization, model selection\n");
-        stream.markdown("- **Getting Started**: Ask how to scaffold, deploy, or evaluate\n");
-        stream.markdown("- **MCP Tools**: Ask about the 45 available tools\n\n");
-        stream.markdown("Try: *Which play for enterprise RAG?* or *edge AI on IoT*\n");
+      if (glossaryMatches.length > 0 && glossaryMatches.length <= 8) {
+        hasContent = true;
+        stream.markdown("## 📖 Glossary\n\n");
+        for (const g of glossaryMatches.slice(0, 5)) {
+          stream.markdown(`**${g.term}** — ${g.definition.trim()}\n\n`);
+        }
       }
 
-      stream.markdown("\n---\n*Powered by FrootAI Knowledge Engine — 18 modules, 101 plays, 200+ glossary terms*");
+      if (!hasContent) {
+        stream.markdown(`No matches for "${queryWords.join(" ")}". Try:\n\n`);
+        stream.markdown("- *enterprise RAG pipeline*\n- *multi-agent orchestration*\n- *IoT edge AI*\n- *what is retrieval augmented generation*\n- *cost optimization for AI*\n\n");
+      }
+
+      stream.markdown("\n---\n*Agent FAI — 101 plays · 16 modules · 200+ terms · [frootai.dev](https://frootai.dev)*");
     });
 
     participant.iconPath = vscode.Uri.joinPath(context.extensionUri, "media", "frootai-mark.png");
