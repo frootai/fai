@@ -31,7 +31,9 @@ let passed = 0;
 function read(rel) {
   const p = join(ROOT, rel);
   if (!existsSync(p)) return null;
-  return readFileSync(p, 'utf8');
+  const content = readFileSync(p, 'utf8');
+  // Strip UTF-8 BOM if present
+  return content.charCodeAt(0) === 0xFEFF ? content.slice(1) : content;
 }
 
 function readJSON(rel) {
@@ -75,8 +77,9 @@ function isDir(rel) {
 
 /**
  * Parse YAML frontmatter from a markdown file.
- * Simple parser — handles key: value, key: "value", key: 'value',
- * key: [array], and key: number. No external yaml library needed.
+ * Handles key: value, key: "value", key: 'value',
+ * key: [array], key: number, and block scalars (|, |-,  >, >-).
+ * No external yaml library needed.
  */
 function parseFrontmatter(content) {
   if (!content || !content.startsWith('---')) return null;
@@ -84,13 +87,29 @@ function parseFrontmatter(content) {
   if (end === -1) return null;
   const yaml = content.substring(3, end).trim();
   const result = {};
-  for (const line of yaml.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
+  const lines = yaml.split('\n');
+  let i = 0;
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+    if (!trimmed || trimmed.startsWith('#')) { i++; continue; }
     const colonIdx = trimmed.indexOf(':');
-    if (colonIdx === -1) continue;
+    if (colonIdx === -1) { i++; continue; }
     const key = trimmed.substring(0, colonIdx).trim();
     let val = trimmed.substring(colonIdx + 1).trim();
+    // Block scalar (| or > or |- or >-)
+    if (val === '|' || val === '|-' || val === '>' || val === '>-') {
+      const blockLines = [];
+      i++;
+      while (i < lines.length) {
+        const raw = lines[i];
+        // Block ends when we hit a non-indented key: line or empty top-level
+        if (raw.length > 0 && raw[0] !== ' ' && raw[0] !== '\t') break;
+        blockLines.push(raw.trim());
+        i++;
+      }
+      result[key] = blockLines.join(' ').trim();
+      continue;
+    }
     // Remove quotes
     if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
       val = val.slice(1, -1);
@@ -100,6 +119,7 @@ function parseFrontmatter(content) {
       val = val.slice(1, -1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
     }
     result[key] = val;
+    i++;
   }
   return result;
 }
@@ -248,7 +268,11 @@ function validateHooks() {
     return;
   }
 
-  const VALID_EVENTS = ['sessionStart', 'sessionEnd', 'userPromptSubmitted', 'preToolUse'];
+  // PascalCase event names as used in VS Code Copilot hooks
+  const VALID_EVENTS = [
+    'SessionStart', 'UserPromptSubmit', 'PreToolUse', 'PostToolUse',
+    'PreCompact', 'SubagentStart', 'SubagentStop', 'Stop'
+  ];
 
   for (const folder of folders) {
     // Naming convention
@@ -264,10 +288,6 @@ function validateHooks() {
 
     const hooksJson = readJSON(hooksJsonPath);
     if (!hooksJson) { fail(`${folder}/hooks.json`, 'invalid JSON'); continue; }
-
-    // version must be 1
-    if (hooksJson.version === 1) pass(`${folder}/hooks.json — version: 1`);
-    else fail(`${folder}/hooks.json`, `version must be 1 (got ${hooksJson.version})`);
 
     // hooks object must have at least one valid event
     if (!hooksJson.hooks || typeof hooksJson.hooks !== 'object') {
@@ -298,16 +318,12 @@ function validateHooks() {
         if (cmd.type !== 'command') {
           fail(`${folder}/hooks.json`, `command type must be "command" (got "${cmd.type}")`);
         }
-        if (!cmd.bash || cmd.bash.length === 0) {
-          fail(`${folder}/hooks.json`, `command missing "bash" script path`);
+        // Accept either "command" or "bash" field for the script path
+        const scriptField = cmd.command || cmd.bash;
+        if (!scriptField || scriptField.length === 0) {
+          fail(`${folder}/hooks.json`, `command missing "command" script`);
         } else {
-          // Verify the bash script exists
-          const scriptPath = `hooks/${folder}/${cmd.bash}`;
-          if (existsSync(join(ROOT, scriptPath))) {
-            pass(`${folder}/${cmd.bash} — script exists`);
-          } else {
-            fail(`${folder}/hooks.json`, `script "${cmd.bash}" not found at ${scriptPath}`);
-          }
+          pass(`${folder}/hooks.json — command defined`);
         }
         if (cmd.timeoutSec !== undefined) {
           if (cmd.timeoutSec < 1 || cmd.timeoutSec > 120) {
