@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { SOLUTION_PLAYS, SolutionPlay } from "../data/plays";
+import { SOLUTION_PLAYS } from "../data/plays";
+import type { SolutionPlay } from "../types";
 
 const LAYER_COLORS: Record<string, string> = {
   F: "charts.yellow",

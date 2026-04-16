@@ -227,24 +227,54 @@
         "command": "frootai.openConfigurator",
         "title": "FrootAI: Solution Configurator",
         "icon": "$(settings-gear)"
+      },
+      {
+        "command": "frootai.filterPlays",
+        "title": "FrootAI: Filter Solution Plays",
+        "icon": "$(search)"
+      },
+      {
+        "command": "frootai.refreshPlays",
+        "title": "FrootAI: Refresh Plays",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "frootai.togglePlayView",
+        "title": "FrootAI: Toggle Play View",
+        "icon": "$(list-tree)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "frootai.browsePlays",
+          "command": "frootai.filterPlays",
           "when": "view == frootai.solutionPlays",
           "group": "navigation@1"
         },
         {
-          "command": "frootai.openConfigurator",
+          "command": "frootai.browsePlays",
           "when": "view == frootai.solutionPlays",
           "group": "navigation@2"
         },
         {
-          "command": "frootai.browseSolutionPlays",
+          "command": "frootai.openConfigurator",
           "when": "view == frootai.solutionPlays",
           "group": "navigation@3"
+        },
+        {
+          "command": "frootai.togglePlayView",
+          "when": "view == frootai.solutionPlays",
+          "group": "navigation@4"
+        },
+        {
+          "command": "frootai.refreshPlays",
+          "when": "view == frootai.solutionPlays",
+          "group": "navigation@5"
+        },
+        {
+          "command": "frootai.browseSolutionPlays",
+          "when": "view == frootai.solutionPlays",
+          "group": "navigation@6"
         },
         {
           "command": "frootai.installMcpServer",

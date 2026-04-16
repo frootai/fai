@@ -1,13 +1,5 @@
 import * as vscode from "vscode";
-
-/** Panel data passed to the React webview app. */
-export interface PanelData {
-  panel: "playDetail" | "evaluation" | "scaffold" | "mcpExplorer";
-  play?: { id: string; name: string; icon?: string; codicon?: string; status: string; dir: string; layer: string; desc?: string; cx?: string; infra?: string };
-  scores?: Record<string, number>;
-  tools?: Array<{ name: string; description: string; category: string; readOnly: boolean }>;
-  plays?: Array<{ id: string; name: string; icon?: string; codicon?: string; status: string; dir: string; layer: string; desc?: string; cx?: string; infra?: string }>;
-}
+import type { PanelData } from "../types";
 
 /**
  * Creates a webview panel that loads the React app from out/webview/.

@@ -465,22 +465,110 @@ function downloadFromGitHub(repoPath) {
 // ─── Tree Data Providers ───────────────────────────────────────────
 
 class SolutionPlayProvider {
-  constructor() { this._onDidChange = new vscode.EventEmitter(); this.onDidChangeTreeData = this._onDidChange.event; }
+  constructor() {
+    this._onDidChange = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this._onDidChange.event;
+    this._filter = "";
+    this._viewMode = "category"; // "category" | "flat" | "complexity"
+  }
+
+  setFilter(filter) { this._filter = filter.toLowerCase(); this._onDidChange.fire(); }
+  setViewMode(mode) { this._viewMode = mode; this._onDidChange.fire(); }
+  refresh() { this._onDidChange.fire(); }
+
   getTreeItem(element) { return element; }
+
   getChildren(element) {
-    if (!element) {
-      const layerNames = { F: "Foundations", R: "Reasoning", O: "Orchestration", T: "Transformation" };
-      return SOLUTION_PLAYS.map((p) => {
-        const item = new vscode.TreeItem(`${p.id} ${p.name}`, vscode.TreeItemCollapsibleState.None);
-        item.description = `${layerNames[p.layer] || p.layer} · ${p.cx || ""}`;
-        item.tooltip = new vscode.MarkdownString(`**${p.name}**\n\n${p.desc || ""}\n\n---\n\n**Complexity:** ${p.cx || "N/A"}  \n**Infra:** ${p.infra || "N/A"}  \n**Layer:** ${layerNames[p.layer] || p.layer}  \n**Status:** ${p.status}\n\n*Click to open Control Center*`);
-        item.contextValue = "solutionPlay";
-        item.iconPath = new vscode.ThemeIcon(p.codicon || "symbol-method");
-        item.command = { command: "frootai.openSolutionPlay", title: "Open", arguments: [p] };
-        return item;
+    const layerNames = { F: "Foundations", R: "Reasoning", O: "Orchestration", T: "Transformation" };
+
+    // Apply filter
+    let plays = SOLUTION_PLAYS;
+    if (this._filter) {
+      plays = plays.filter(p => {
+        const haystack = [p.id, p.name, p.desc, p.infra, p.layer, p.cx, p.status].filter(Boolean).join(" ").toLowerCase();
+        return this._filter.split(/\s+/).every(w => haystack.includes(w));
       });
     }
+
+    // Category view (grouped)
+    if (!element && this._viewMode === "category") {
+      const catMap = {};
+      const catMeta = {
+        R: { label: "🧩 Reasoning", color: "charts.green", order: 1 },
+        O: { label: "🤖 Orchestration", color: "charts.blue", order: 2 },
+        F: { label: "🏗️ Foundations", color: "charts.yellow", order: 3 },
+        T: { label: "🔧 Transformation", color: "charts.purple", order: 4 },
+      };
+      for (const p of plays) {
+        if (!catMap[p.layer]) catMap[p.layer] = [];
+        catMap[p.layer].push(p);
+      }
+      const groups = Object.entries(catMap)
+        .sort((a, b) => (catMeta[a[0]]?.order || 9) - (catMeta[b[0]]?.order || 9))
+        .map(([layer, layerPlays]) => {
+          const meta = catMeta[layer] || { label: layer, color: "foreground" };
+          const item = new vscode.TreeItem(meta.label, vscode.TreeItemCollapsibleState.Expanded);
+          item.description = `${layerPlays.length} plays`;
+          item.iconPath = new vscode.ThemeIcon("symbol-folder", new vscode.ThemeColor(meta.color));
+          item.contextValue = "playCategory";
+          item._plays = layerPlays;
+          return item;
+        });
+
+      // Prepend search results count if filtering
+      if (this._filter) {
+        const header = new vscode.TreeItem(`🔍 "${this._filter}" — ${plays.length} results`, vscode.TreeItemCollapsibleState.None);
+        header.contextValue = "searchHeader";
+        header.command = { command: "frootai.filterPlays", title: "Clear Filter" };
+        return [header, ...groups];
+      }
+      return groups;
+    }
+
+    // Children of a category group
+    if (element?._plays) {
+      return element._plays.map(p => this._buildPlayItem(p, layerNames));
+    }
+
+    // Flat view (no grouping)
+    if (!element && this._viewMode === "flat") {
+      return plays.map(p => this._buildPlayItem(p, layerNames));
+    }
+
     return [];
+  }
+
+  _buildPlayItem(p, layerNames) {
+    const item = new vscode.TreeItem(`${p.id} ${p.name}`, vscode.TreeItemCollapsibleState.None);
+
+    // Description: complexity + layer
+    const cxTag = p.cx || "";
+    item.description = `${cxTag} · ${layerNames[p.layer] || p.layer}`;
+
+    // Status-aware icon
+    const statusIcon = p.status === "Ready" ? "pass-filled" : "circle-outline";
+    const cxColors = {
+      Foundation: "charts.blue", Low: "charts.green", Medium: "charts.yellow",
+      High: "charts.orange", "Very High": "charts.red",
+    };
+    const themeColor = cxColors[p.cx] ? new vscode.ThemeColor(cxColors[p.cx]) : undefined;
+    item.iconPath = new vscode.ThemeIcon(p.codicon || statusIcon, themeColor);
+
+    // Rich tooltip
+    const statusEmoji = p.status === "Ready" ? "✅ Ready" : "⬜ Skeleton";
+    item.tooltip = new vscode.MarkdownString(
+      `**${p.name}** ${statusEmoji}\n\n` +
+      `${p.desc || ""}\n\n---\n\n` +
+      `**Complexity:** ${p.cx || "N/A"}  \n` +
+      `**Infra:** ${p.infra || "N/A"}  \n` +
+      `**Layer:** ${layerNames[p.layer] || p.layer}  \n` +
+      `**Dir:** \`${p.dir}\`\n\n` +
+      `*Click to open Play Detail*`
+    );
+
+    item.contextValue = "solutionPlay";
+    item.command = { command: "frootai.openSolutionPlay", title: "Open", arguments: [p] };
+    return item;
   }
 }
 
@@ -797,10 +885,41 @@ function activate(context) {
   const root = findFrootAIRoot();
 
   // Register tree views (4 panels)
-  vscode.window.registerTreeDataProvider("frootai.solutionPlays", new SolutionPlayProvider());
+  const playProvider = new SolutionPlayProvider();
+  vscode.window.registerTreeDataProvider("frootai.solutionPlays", playProvider);
   vscode.window.registerTreeDataProvider("frootai.primitivesCatalog", new PrimitivesCatalogProvider());
   vscode.window.registerTreeDataProvider("frootai.faiProtocol", new FaiProtocolProvider());
   vscode.window.registerTreeDataProvider("frootai.mcpTools", new McpToolProvider());
+
+  // ── Filter/Search Plays command ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.filterPlays", async () => {
+      const current = playProvider._filter;
+      const value = await vscode.window.showInputBox({
+        prompt: "Filter Solution Plays (search by name, service, complexity, layer)",
+        placeHolder: "e.g. rag, voice, high, openai, container...",
+        value: current,
+      });
+      if (value !== undefined) playProvider.setFilter(value);
+    })
+  );
+
+  // ── Refresh plays tree ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.refreshPlays", () => playProvider.refresh())
+  );
+
+  // ── Toggle view mode (category / flat) ──
+  context.subscriptions.push(
+    vscode.commands.registerCommand("frootai.togglePlayView", async () => {
+      const modes = [
+        { label: "$(symbol-folder) Category View", description: "Group by FROOT layer", value: "category" },
+        { label: "$(list-flat) Flat View", description: "All plays in one list", value: "flat" },
+      ];
+      const pick = await vscode.window.showQuickPick(modes, { placeHolder: "Choose view layout" });
+      if (pick) playProvider.setViewMode(pick.value);
+    })
+  );
 
   // ── Command: Open Solution Play → Direct React Panel ──
   context.subscriptions.push(

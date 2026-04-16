@@ -1,4 +1,4 @@
-import type { SolutionPlay } from "../../webview-ui/src/types";
+import type { SolutionPlay } from "../types";
 
 export const SOLUTION_PLAYS: SolutionPlay[] = [
   {

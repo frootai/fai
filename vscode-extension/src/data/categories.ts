@@ -1,4 +1,4 @@
-import type { PlayCategory, ConfigQuestion, ConfigRecommendation } from "../../webview-ui/src/types";
+import type { PlayCategory, ConfigQuestion, ConfigRecommendation } from "../types";
 
 export const CATEGORIES: PlayCategory[] = [
   { id: "rag", label: "RAG & Search", icon: "search", color: "#10b981" },
