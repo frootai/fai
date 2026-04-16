@@ -14,6 +14,86 @@ const legacy = require("./legacy.js");
 
 let _activated = false;
 
+/** E2: Scan workspace for evaluation data files */
+function scanWorkspaceEvalData(): {
+  hasRealData: boolean;
+  scores: Record<string, number>;
+  thresholds: Record<string, number>;
+  history: Array<{ label: string; date?: string; scores: Record<string, number> }>;
+  configPath?: string;
+  hasEvalPy?: boolean;
+  hasTestSet?: boolean;
+  resultFiles?: string[];
+} {
+  const ws = vscode.workspace.workspaceFolders?.[0];
+  if (!ws) return { hasRealData: false, scores: {}, thresholds: {}, history: [] };
+
+  const wsRoot = ws.uri.fsPath;
+  const evalDir = path.join(wsRoot, "evaluation");
+  const configPath = path.join(evalDir, "eval-config.json");
+  const resultsPath = path.join(evalDir, "eval-results.json");
+  const evalPy = path.join(evalDir, "eval.py");
+  const testSet = path.join(evalDir, "test-set.jsonl");
+  const resultsDir = path.join(evalDir, "results");
+
+  // Load config
+  let thresholds: Record<string, number> = { groundedness: 4.0, relevance: 4.0, coherence: 4.0, fluency: 4.0, safety: 4.0 };
+  let hasConfig = false;
+  if (fs.existsSync(configPath)) {
+    try {
+      const cfg = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+      if (cfg.thresholds) thresholds = cfg.thresholds;
+      hasConfig = true;
+    } catch {}
+  }
+
+  // Collect result files
+  const resultFiles: string[] = [];
+  const allResults: Array<{ label: string; date?: string; scores: Record<string, number> }> = [];
+
+  // Check eval-results.json (latest)
+  if (fs.existsSync(resultsPath)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(resultsPath, "utf-8"));
+      if (data.scores && typeof data.scores === "object") {
+        resultFiles.push("eval-results.json");
+        allResults.push({ label: "Latest", date: data.timestamp, scores: data.scores });
+      }
+    } catch {}
+  }
+
+  // Check results/ subdirectory for historical runs
+  if (fs.existsSync(resultsDir)) {
+    try {
+      const files = fs.readdirSync(resultsDir).filter((f: string) => f.endsWith(".json")).sort().reverse();
+      for (const f of files.slice(0, 20)) {
+        try {
+          const data = JSON.parse(fs.readFileSync(path.join(resultsDir, f), "utf-8"));
+          if (data.scores && typeof data.scores === "object") {
+            resultFiles.push(`results/${f}`);
+            const label = f.replace(".json", "").replace(/^run-/, "Run ");
+            allResults.push({ label, date: data.timestamp, scores: data.scores });
+          }
+        } catch {}
+      }
+    } catch {}
+  }
+
+  const hasRealData = allResults.length > 0;
+  const latestScores = hasRealData ? allResults[0].scores : {};
+
+  return {
+    hasRealData,
+    scores: latestScores,
+    thresholds,
+    history: allResults,
+    configPath: hasConfig ? "evaluation/eval-config.json" : undefined,
+    hasEvalPy: fs.existsSync(evalPy),
+    hasTestSet: fs.existsSync(testSet),
+    resultFiles,
+  };
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   if (_activated) return;
   _activated = true;
@@ -344,14 +424,75 @@ ${bodyHtml}
   });
 
   safeRegister("frootai.openEvaluationDashboard", () => {
-    const panel = createReactPanel(context.extensionUri, "frootai.evaluation", "Evaluation Dashboard", { panel: "evaluation" });
+    // E2: Scan workspace for real evaluation data
+    const evalData = scanWorkspaceEvalData();
+    const panel = createReactPanel(context.extensionUri, "frootai.evaluation", "Evaluation Dashboard", { panel: "evaluation", evalData } as any);
     panel.webview.onDidReceiveMessage((msg: any) => {
-      if (msg.command === "runEvaluation") vscode.commands.executeCommand("frootai.runEvaluation");
-      if (msg.command === "exportJson") vscode.env.clipboard.writeText(JSON.stringify(msg.scores, null, 2)).then(() => vscode.window.showInformationMessage("Scores copied to clipboard as JSON"));
-      if (msg.command === "exportCsv") {
-        const header = "metric,score,threshold,status\n";
-        const rows = Object.entries(msg.scores as Record<string, number>).map(([k, v]) => `${k},${v},4.0,${v >= 4.0 ? "PASS" : "FAIL"}`).join("\n");
-        vscode.env.clipboard.writeText(header + rows).then(() => vscode.window.showInformationMessage("Scores copied to clipboard as CSV"));
+      switch (msg.command) {
+        case "runEvaluation":
+          vscode.commands.executeCommand("frootai.runEvaluation");
+          break;
+        case "scanWorkspace": {
+          const refreshed = scanWorkspaceEvalData();
+          panel.webview.postMessage({ type: "update", data: { panel: "evaluation", evalData: refreshed } });
+          vscode.window.showInformationMessage(refreshed.hasRealData
+            ? `Found evaluation data: ${refreshed.resultFiles?.length ?? 0} result file(s)`
+            : "No evaluation data found. Create evaluation/eval-config.json to get started.");
+          break;
+        }
+        case "viewDemo": {
+          panel.webview.postMessage({ type: "update", data: { panel: "evaluation", evalData: undefined } });
+          break;
+        }
+        case "createEvalConfig": {
+          const ws = vscode.workspace.workspaceFolders?.[0];
+          if (!ws) { vscode.window.showWarningMessage("Open a workspace first."); break; }
+          const evalDir = path.join(ws.uri.fsPath, "evaluation");
+          if (!fs.existsSync(evalDir)) fs.mkdirSync(evalDir, { recursive: true });
+          const configFile = path.join(evalDir, "eval-config.json");
+          if (!fs.existsSync(configFile)) {
+            fs.writeFileSync(configFile, JSON.stringify({
+              metrics: ["groundedness", "relevance", "coherence", "fluency", "safety"],
+              thresholds: { groundedness: 4.0, relevance: 4.0, coherence: 4.0, fluency: 4.0, safety: 4.0 },
+              dataset: "evaluation/test-data.jsonl"
+            }, null, 2));
+          }
+          vscode.window.showTextDocument(vscode.Uri.file(configFile));
+          // Refresh panel
+          const r = scanWorkspaceEvalData();
+          panel.webview.postMessage({ type: "update", data: { panel: "evaluation", evalData: r } });
+          break;
+        }
+        case "createEvalResults": {
+          const ws = vscode.workspace.workspaceFolders?.[0];
+          if (!ws) { vscode.window.showWarningMessage("Open a workspace first."); break; }
+          const evalDir = path.join(ws.uri.fsPath, "evaluation");
+          if (!fs.existsSync(evalDir)) fs.mkdirSync(evalDir, { recursive: true });
+          const resultsFile = path.join(evalDir, "eval-results.json");
+          if (!fs.existsSync(resultsFile)) {
+            fs.writeFileSync(resultsFile, JSON.stringify({
+              timestamp: new Date().toISOString(),
+              scores: { groundedness: 4.5, relevance: 4.2, coherence: 4.3, fluency: 4.6, safety: 4.9 }
+            }, null, 2));
+          }
+          vscode.window.showTextDocument(vscode.Uri.file(resultsFile));
+          const r2 = scanWorkspaceEvalData();
+          panel.webview.postMessage({ type: "update", data: { panel: "evaluation", evalData: r2 } });
+          break;
+        }
+        case "exportJson":
+          if (msg.scores) vscode.env.clipboard.writeText(JSON.stringify(msg.scores, null, 2)).then(() =>
+            vscode.window.showInformationMessage("Scores copied to clipboard as JSON"));
+          break;
+        case "exportCsv":
+          if (msg.scores) {
+            const header = "metric,score,threshold,status\n";
+            const rows = Object.entries(msg.scores as Record<string, number>).map(([k, v]) =>
+              `${k},${v},4.0,${v >= 4.0 ? "PASS" : "FAIL"}`).join("\n");
+            vscode.env.clipboard.writeText(header + rows).then(() =>
+              vscode.window.showInformationMessage("Scores copied to clipboard as CSV"));
+          }
+          break;
       }
     });
   });

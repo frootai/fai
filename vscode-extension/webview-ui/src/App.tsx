@@ -42,7 +42,7 @@ export default function App() {
     case "configurator":
       return <Configurator plays={data.plays ?? []} />;
     case "evaluation":
-      return <Evaluation scores={data.scores} />;
+      return <Evaluation evalData={data.evalData} />;
     case "scaffold":
       return <ScaffoldWizard plays={data.plays ?? []} />;
     case "mcpExplorer":

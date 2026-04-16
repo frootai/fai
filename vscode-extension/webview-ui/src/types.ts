@@ -84,4 +84,16 @@ export interface PanelData {
   primitives?: Record<string, PrimitiveItem[]>;
   plugins?: any[];
   logoUri?: string;
+  evalData?: EvalData;
+}
+
+export interface EvalData {
+  hasRealData: boolean;
+  scores: Record<string, number>;
+  thresholds: Record<string, number>;
+  history: Array<{ label: string; date?: string; scores: Record<string, number> }>;
+  configPath?: string;
+  hasEvalPy?: boolean;
+  hasTestSet?: boolean;
+  resultFiles?: string[];
 }
