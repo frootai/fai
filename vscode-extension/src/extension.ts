@@ -335,7 +335,12 @@ ${bodyHtml}
     const panel = createReactPanel(context.extensionUri, "frootai.evaluation", "Evaluation Dashboard", { panel: "evaluation" });
     panel.webview.onDidReceiveMessage((msg: any) => {
       if (msg.command === "runEvaluation") vscode.commands.executeCommand("frootai.runEvaluation");
-      if (msg.command === "exportJson") vscode.env.clipboard.writeText(JSON.stringify(msg.scores, null, 2)).then(() => vscode.window.showInformationMessage("Scores copied to clipboard"));
+      if (msg.command === "exportJson") vscode.env.clipboard.writeText(JSON.stringify(msg.scores, null, 2)).then(() => vscode.window.showInformationMessage("Scores copied to clipboard as JSON"));
+      if (msg.command === "exportCsv") {
+        const header = "metric,score,threshold,status\n";
+        const rows = Object.entries(msg.scores as Record<string, number>).map(([k, v]) => `${k},${v},4.0,${v >= 4.0 ? "PASS" : "FAIL"}`).join("\n");
+        vscode.env.clipboard.writeText(header + rows).then(() => vscode.window.showInformationMessage("Scores copied to clipboard as CSV"));
+      }
     });
   });
 
@@ -348,7 +353,21 @@ ${bodyHtml}
   });
 
   safeRegister("frootai.openMcpExplorer", () => {
-    createReactPanel(context.extensionUri, "frootai.mcpExplorer", "MCP Tool Explorer", { panel: "mcpExplorer" });
+    const panel = createReactPanel(context.extensionUri, "frootai.mcpExplorer", "MCP Tool Explorer", { panel: "mcpExplorer" });
+    panel.webview.onDidReceiveMessage((msg: any) => {
+      switch (msg.command) {
+        case "copyToClipboard":
+          vscode.env.clipboard.writeText(msg.text).then(() =>
+            vscode.window.showInformationMessage("Copied to clipboard!"));
+          break;
+        case "tryTool":
+          vscode.window.showInformationMessage(`MCP Tool "${msg.toolName}" — connect an MCP server to execute live. Params: ${JSON.stringify(msg.params)}`);
+          break;
+        case "openUrl":
+          if (msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url));
+          break;
+      }
+    });
   });
 
   // ─── Play Browser: browse all plays with search, categories, pagination ───

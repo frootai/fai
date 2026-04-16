@@ -465,11 +465,20 @@ function downloadFromGitHub(repoPath) {
 // ─── Tree Data Providers ───────────────────────────────────────────
 
 class SolutionPlayProvider {
-  constructor() {
+  constructor(context) {
     this._onDidChange = new vscode.EventEmitter();
     this.onDidChangeTreeData = this._onDidChange.event;
     this._filter = "";
     this._viewMode = "category"; // "category" | "flat" | "complexity"
+    this._context = context;
+    this._recentIds = context?.workspaceState?.get("frootai.recentPlays") || [];
+  }
+
+  trackRecent(playId) {
+    if (!this._context) return;
+    this._recentIds = [playId, ...this._recentIds.filter(id => id !== playId)].slice(0, 5);
+    this._context.workspaceState.update("frootai.recentPlays", this._recentIds);
+    this._onDidChange.fire();
   }
 
   setFilter(filter) { this._filter = filter.toLowerCase(); this._onDidChange.fire(); }
@@ -521,6 +530,21 @@ class SolutionPlayProvider {
         header.contextValue = "searchHeader";
         header.command = { command: "frootai.filterPlays", title: "Clear Filter" };
         return [header, ...groups];
+      }
+
+      // Prepend "Recently Used" group if we have history and no active filter
+      if (this._recentIds.length > 0) {
+        const recentPlays = this._recentIds
+          .map(id => SOLUTION_PLAYS.find(p => p.id === id))
+          .filter(Boolean);
+        if (recentPlays.length > 0) {
+          const recentGroup = new vscode.TreeItem("⏱️ Recently Used", vscode.TreeItemCollapsibleState.Expanded);
+          recentGroup.description = `${recentPlays.length} plays`;
+          recentGroup.iconPath = new vscode.ThemeIcon("history", new vscode.ThemeColor("charts.orange"));
+          recentGroup.contextValue = "recentPlays";
+          recentGroup._plays = recentPlays;
+          return [recentGroup, ...groups];
+        }
       }
       return groups;
     }
@@ -885,7 +909,7 @@ function activate(context) {
   const root = findFrootAIRoot();
 
   // Register tree views (4 panels)
-  const playProvider = new SolutionPlayProvider();
+  const playProvider = new SolutionPlayProvider(context);
   vscode.window.registerTreeDataProvider("frootai.solutionPlays", playProvider);
   vscode.window.registerTreeDataProvider("frootai.primitivesCatalog", new PrimitivesCatalogProvider());
   vscode.window.registerTreeDataProvider("frootai.faiProtocol", new FaiProtocolProvider());
@@ -924,7 +948,7 @@ function activate(context) {
   // ── Command: Open Solution Play → Direct React Panel ──
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.openSolutionPlay", async (play) => {
-      // Directly open the React Play Detail panel — no dropdown
+      if (play?.id) playProvider.trackRecent(play.id);
       vscode.commands.executeCommand("frootai.openPlayDetail", play);
     })
   );
