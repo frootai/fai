@@ -45,6 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const fs = require("fs");
       const path = require("path");
 
+      try {
       switch (msg.command) {
         case "initDevKit": vscode.commands.executeCommand("frootai.initDevKit", play); break;
         case "initTuneKit": vscode.commands.executeCommand("frootai.initTuneKit", play); break;
@@ -334,6 +335,10 @@ ${bodyHtml}
 
         // Evaluation: use legacy command
         case "runEvaluation": vscode.commands.executeCommand("frootai.runEvaluation"); break;
+      }
+      } catch (e: any) {
+        console.error(`FrootAI PlayDetail error: ${e.message}`);
+        vscode.window.showErrorMessage(`FrootAI: ${msg.command} failed — ${e.message}`);
       }
     });
   });
