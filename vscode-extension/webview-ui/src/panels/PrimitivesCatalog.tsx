@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
+import type { ComponentType } from "react";
 import SearchInput from "../components/SearchInput";
 import { vscode } from "../vscode";
+import { Bot, Puzzle, FileText, Shield, Plug, Package, Search, Cloud, Lock, Brain, Settings, BarChart3, Globe, Zap, Building, ExternalLink, Paperclip, Target } from "lucide-react";
 
 // ─── Types ───
 interface PrimitiveItem {
@@ -23,7 +25,7 @@ type CategoryId = "agents" | "skills" | "instructions" | "hooks" | "plugins";
 
 interface CategoryMeta {
   label: string;
-  icon: string;
+  Icon: ComponentType<{ size?: number }>;
   color: string;
   desc: string;
   ext: string;
@@ -33,7 +35,7 @@ interface CategoryMeta {
 interface SubCategory {
   id: string;
   label: string;
-  icon: string;
+  Icon: ComponentType<{ size?: number }>;
   color: string;
   keywords: string[];
 }
@@ -44,24 +46,24 @@ const GITHUB_BASE = "https://github.com/frootai/frootai/tree/main/";
 const GITHUB_RAW = "https://raw.githubusercontent.com/frootai/frootai/main/";
 
 const CATEGORY_META: Record<CategoryId, CategoryMeta> = {
-  agents: { label: "Agents", icon: "🤖", color: "#10b981", desc: "Autonomous AI personas with WAF alignment and play compatibility", ext: ".agent.md", githubPath: "agents" },
-  skills: { label: "Skills", icon: "🧩", color: "#8b5cf6", desc: "Reusable capability modules — LEGO blocks that auto-wire in plays", ext: "SKILL.md", githubPath: "skills" },
-  instructions: { label: "Instructions", icon: "📋", color: "#06b6d4", desc: "Scoped behavioral directives with glob patterns", ext: ".instructions.md", githubPath: "instructions" },
-  hooks: { label: "Hooks", icon: "🔒", color: "#f59e0b", desc: "Event-driven security gates — run on SessionStart, Stop, etc.", ext: "hooks.json", githubPath: "hooks" },
-  plugins: { label: "Plugins", icon: "🔌", color: "#ec4899", desc: "Composable integration packages with marketplace listing", ext: "plugin.json", githubPath: "plugins" },
+  agents: { label: "Agents", Icon: Bot, color: "#10b981", desc: "Autonomous AI personas with WAF alignment and play compatibility", ext: ".agent.md", githubPath: "agents" },
+  skills: { label: "Skills", Icon: Puzzle, color: "#8b5cf6", desc: "Reusable capability modules — LEGO blocks that auto-wire in plays", ext: "SKILL.md", githubPath: "skills" },
+  instructions: { label: "Instructions", Icon: FileText, color: "#06b6d4", desc: "Scoped behavioral directives with glob patterns", ext: ".instructions.md", githubPath: "instructions" },
+  hooks: { label: "Hooks", Icon: Lock, color: "#f59e0b", desc: "Event-driven security gates — run on SessionStart, Stop, etc.", ext: "hooks.json", githubPath: "hooks" },
+  plugins: { label: "Plugins", Icon: Plug, color: "#ec4899", desc: "Composable integration packages with marketplace listing", ext: "plugin.json", githubPath: "plugins" },
 };
 
 const SUB_CATEGORIES: SubCategory[] = [
-  { id: "all", label: "All", icon: "📦", color: "#94a3b8", keywords: [] },
-  { id: "rag", label: "RAG & Search", icon: "🔍", color: "#7c3aed", keywords: ["rag", "search", "retrieval", "embedding", "vector", "knowledge-graph", "indexing"] },
-  { id: "azure", label: "Azure Cloud", icon: "☁️", color: "#0ea5e9", keywords: ["azure", "cosmos", "storage", "functions", "key-vault", "openai", "monitor", "service-bus", "event-hub", "container", "bicep"] },
-  { id: "security", label: "Security", icon: "🛡️", color: "#ef4444", keywords: ["security", "compliance", "red-team", "content-safety", "pii", "secrets", "owasp", "license"] },
-  { id: "agent", label: "Multi-Agent", icon: "🧠", color: "#f59e0b", keywords: ["multi-agent", "swarm", "orchestrat", "autogen", "crewai", "langchain", "agentic"] },
-  { id: "devops", label: "DevOps", icon: "⚙️", color: "#f97316", keywords: ["devops", "github", "docker", "kubernetes", "ci-cd", "pipeline", "deploy", "test"] },
-  { id: "data", label: "Data & ML", icon: "📊", color: "#06b6d4", keywords: ["data", "fine-tun", "mlflow", "evaluat", "batch", "training", "model"] },
-  { id: "web", label: "Web & Code", icon: "🌐", color: "#8b5cf6", keywords: ["typescript", "python", "rust", "java", "go", "api", "react", "angular", "blazor", "nextjs", "web"] },
-  { id: "platform", label: "Platform & MCP", icon: "⚡", color: "#ec4899", keywords: ["mcp", "semantic-kernel", "copilot", "temporal", "foundry", "a2a", "ag-ui"] },
-  { id: "infra", label: "Infrastructure", icon: "🏗️", color: "#3b82f6", keywords: ["infra", "bicep", "terraform", "landing-zone", "network", "aks", "container-app"] },
+  { id: "all", label: "All", Icon: Package, color: "#94a3b8", keywords: [] },
+  { id: "rag", label: "RAG & Search", Icon: Search, color: "#7c3aed", keywords: ["rag", "search", "retrieval", "embedding", "vector", "knowledge-graph", "indexing"] },
+  { id: "azure", label: "Azure Cloud", Icon: Cloud, color: "#0ea5e9", keywords: ["azure", "cosmos", "storage", "functions", "key-vault", "openai", "monitor", "service-bus", "event-hub", "container", "bicep"] },
+  { id: "security", label: "Security", Icon: Shield, color: "#ef4444", keywords: ["security", "compliance", "red-team", "content-safety", "pii", "secrets", "owasp", "license"] },
+  { id: "agent", label: "Multi-Agent", Icon: Brain, color: "#f59e0b", keywords: ["multi-agent", "swarm", "orchestrat", "autogen", "crewai", "langchain", "agentic"] },
+  { id: "devops", label: "DevOps", Icon: Settings, color: "#f97316", keywords: ["devops", "github", "docker", "kubernetes", "ci-cd", "pipeline", "deploy", "test"] },
+  { id: "data", label: "Data & ML", Icon: BarChart3, color: "#06b6d4", keywords: ["data", "fine-tun", "mlflow", "evaluat", "batch", "training", "model"] },
+  { id: "web", label: "Web & Code", Icon: Globe, color: "#8b5cf6", keywords: ["typescript", "python", "rust", "java", "go", "api", "react", "angular", "blazor", "nextjs", "web"] },
+  { id: "platform", label: "Platform & MCP", Icon: Zap, color: "#ec4899", keywords: ["mcp", "semantic-kernel", "copilot", "temporal", "foundry", "a2a", "ag-ui"] },
+  { id: "infra", label: "Infrastructure", Icon: Building, color: "#3b82f6", keywords: ["infra", "bicep", "terraform", "landing-zone", "network", "aks", "container-app"] },
 ];
 
 const WAF_COLORS: Record<string, string> = {
@@ -176,7 +178,7 @@ export default function PrimitivesCatalog({ primitives }: { primitives: Record<C
                 fontWeight: active ? 700 : 400,
               }}
             >
-              {cm.icon} {cm.label} <span style={{ opacity: 0.6, fontSize: 11, marginLeft: 4 }}>({count})</span>
+              <cm.Icon size={14} /> {cm.label} <span style={{ opacity: 0.6, fontSize: 11, marginLeft: 4 }}>({count})</span>
             </button>
           );
         })}
@@ -212,7 +214,7 @@ export default function PrimitivesCatalog({ primitives }: { primitives: Record<C
                 color: active ? sc.color : undefined,
               }}
             >
-              {sc.icon} {sc.label} <span style={{ opacity: 0.5 }}>({count})</span>
+              <sc.Icon size={12} /> {sc.label} <span style={{ opacity: 0.5 }}>({count})</span>
             </button>
           );
         })}
@@ -254,7 +256,7 @@ export default function PrimitivesCatalog({ primitives }: { primitives: Record<C
 
       {paged.length === 0 && (
         <div style={{ textAlign: "center", padding: "40px 0", opacity: 0.5 }}>
-          <p style={{ fontSize: 32 }}>🔍</p>
+          <p style={{ fontSize: 32 }}><Search size={32} /></p>
           <p>No {meta.label.toLowerCase()} match your search</p>
         </div>
       )}
@@ -288,7 +290,7 @@ function PrimitiveCard({ item, category, meta, onClick, onGithub, onInstall }: {
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--vscode-panel-border)")}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-        <span style={{ fontWeight: 600, fontSize: 13, color: meta.color }}>{meta.icon} {displayName}</span>
+        <span style={{ fontWeight: 600, fontSize: 13, color: meta.color }}><meta.Icon size={14} /> {displayName}</span>
         {sizeKb && <span style={{ fontSize: 10, opacity: 0.4 }}>{sizeKb}</span>}
       </div>
 
@@ -312,7 +314,7 @@ function PrimitiveCard({ item, category, meta, onClick, onGithub, onInstall }: {
       {/* applyTo (instructions) */}
       {item.applyTo && (
         <div style={{ fontSize: 10, opacity: 0.5, fontFamily: "monospace", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          📎 {item.applyTo}
+          <Paperclip size={10} style={{ verticalAlign: -1, marginRight: 2 }} />{item.applyTo}
         </div>
       )}
 
@@ -328,18 +330,18 @@ function PrimitiveCard({ item, category, meta, onClick, onGithub, onInstall }: {
       {/* plays (plugins) */}
       {item.plays && item.plays.length > 0 && (
         <div style={{ fontSize: 10, opacity: 0.5, marginBottom: 4 }}>
-          🎯 Plays: {item.plays.join(", ")}
+          <Target size={10} style={{ verticalAlign: -1, marginRight: 2 }} />Plays: {item.plays.join(", ")}
         </div>
       )}
 
       {/* Actions */}
       <div style={{ display: "flex", gap: 4, marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
         <button className="btn btn-sm btn-ghost" onClick={onGithub} title="View on GitHub" style={{ fontSize: 10, padding: "2px 6px" }}>
-          🔗 GitHub
+          <ExternalLink size={10} style={{ verticalAlign: -1, marginRight: 2 }} /> GitHub
         </button>
         {category === "agents" && (
           <button className="btn btn-sm" onClick={onInstall} title="Install in VS Code" style={{ fontSize: 10, padding: "2px 6px", background: `${meta.color}25`, color: meta.color, borderColor: meta.color }}>
-            ⚡ Install
+            <Zap size={10} style={{ verticalAlign: -1, marginRight: 2 }} /> Install
           </button>
         )}
       </div>
@@ -360,7 +362,7 @@ function DetailView({ item, category, meta, onGithub, onInstall }: {
       {/* Header */}
       <div style={{ padding: "16px 0", borderBottom: "1px solid var(--vscode-panel-border)", marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>
-          <span style={{ color: meta.color }}>{meta.icon}</span> {displayName}
+          <span style={{ color: meta.color }}><meta.Icon size={18} /></span> {displayName}
         </h2>
         <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center", flexWrap: "wrap" }}>
           <span className="pill" style={{ background: `${meta.color}18`, color: meta.color, borderColor: `${meta.color}40` }}>
@@ -425,15 +427,15 @@ function DetailView({ item, category, meta, onGithub, onInstall }: {
       {/* Action Buttons */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button className="btn" onClick={onGithub} style={{ background: `${meta.color}20`, color: meta.color, borderColor: meta.color }}>
-          🔗 View on GitHub
+          <ExternalLink size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> View on GitHub
         </button>
         {category === "agents" && (
           <button className="btn" onClick={onInstall} style={{ background: "#10b98120", color: "#10b981", borderColor: "#10b981" }}>
-            ⚡ Install in VS Code
+            <Zap size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Install in VS Code
           </button>
         )}
         <button className="btn btn-ghost" onClick={() => vscode.postMessage({ command: "openUrl", url: `https://frootai.dev/primitives/${category}#${item.id}` })}>
-          🌐 View on Website
+          <Globe size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> View on Website
         </button>
       </div>
     </div>

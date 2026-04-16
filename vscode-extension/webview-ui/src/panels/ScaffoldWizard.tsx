@@ -3,6 +3,7 @@ import type { SolutionPlay } from "../types";
 import PlayCard from "../components/PlayCard";
 import SearchInput from "../components/SearchInput";
 import { vscode } from "../vscode";
+import { FolderPlus, FileText, CheckCircle } from "lucide-react";
 
 const DEVKIT_FILES = [
   ".github/copilot-instructions.md",
@@ -33,7 +34,7 @@ export default function ScaffoldWizard({ plays }: Props) {
   return (
     <div className="container">
       <div className="hero">
-        <span className="hero-icon">🏗️</span>
+        <span className="hero-icon"><FolderPlus size={48} /></span>
         <h1>Scaffold Wizard</h1>
         <p style={{ opacity: 0.7 }}>Bootstrap a new AI project in 4 steps</p>
       </div>
@@ -83,7 +84,7 @@ export default function ScaffoldWizard({ plays }: Props) {
           <div className="section-title" style={{ fontSize: 14 }}>Files to create:</div>
           {DEVKIT_FILES.map((f) => (
             <div key={f} className="info-row">
-              <span>📄</span><span style={{ fontFamily: "monospace", fontSize: 12 }}>{name}/{f}</span>
+              <span><FileText size={14} style={{ verticalAlign: -2, marginRight: 4 }} /></span><span style={{ fontFamily: "monospace", fontSize: 12 }}>{name}/{f}</span>
             </div>
           ))}
           <div className="flex justify-between" style={{ marginTop: 16 }}>
@@ -97,7 +98,7 @@ export default function ScaffoldWizard({ plays }: Props) {
 
       {step === 4 && (
         <div className="section text-center" style={{ padding: 40 }}>
-          <span style={{ fontSize: 64 }}>🎉</span>
+          <span style={{ fontSize: 64 }}><CheckCircle size={48} color="#10b981" /></span>
           <h2 style={{ marginTop: 16 }}>Project Scaffolded!</h2>
           <p style={{ opacity: 0.7, marginTop: 8 }}>Open the folder and start coding with Copilot.</p>
           <div className="flex gap-2" style={{ justifyContent: "center", marginTop: 20 }}>

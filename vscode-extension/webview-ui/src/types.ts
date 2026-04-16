@@ -23,7 +23,7 @@ export interface SolutionPlay {
 export interface PlayCategory {
   id: string;
   label: string;
-  icon: string;
+  Icon: React.ComponentType<{ size?: number }>;
   color: string;
 }
 

@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
+
 interface MetricCardProps {
   name: string;
-  icon: string;
+  icon: ReactNode;
   score: number;
   threshold: number;
 }

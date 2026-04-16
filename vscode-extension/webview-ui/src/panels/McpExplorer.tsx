@@ -3,6 +3,7 @@ import type { McpTool } from "../types";
 import ToolCard from "../components/ToolCard";
 import SearchInput from "../components/SearchInput";
 import { vscode } from "../vscode";
+import { Wrench, Play, Copy, BookOpen, Package, FlaskConical, ExternalLink } from "lucide-react";
 
 const DEFAULT_TOOLS: McpTool[] = [
   { name: "list_modules", description: "Browse 18 FROOT knowledge modules by layer", category: "Knowledge", readOnly: true },
@@ -94,7 +95,7 @@ function TryItModal({ tool, onClose }: { tool: McpTool; onClose: () => void }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div style={{ background: "var(--vscode-editor-background, #1e1e1e)", border: "1px solid var(--vscode-widget-border, #444)", borderRadius: 8, padding: 24, width: "90%", maxWidth: 520, maxHeight: "80vh", overflow: "auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>🧪 Try: <code>{tool.name}</code></h2>
+          <h2 style={{ margin: 0, fontSize: 16 }}><FlaskConical size={14} style={{ verticalAlign: -2, marginRight: 4 }} /> Try: <code>{tool.name}</code></h2>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
         <p style={{ fontSize: 12, opacity: 0.7, marginBottom: 16 }}>{tool.description}</p>
@@ -127,13 +128,13 @@ function TryItModal({ tool, onClose }: { tool: McpTool; onClose: () => void }) {
 
         <div style={{ display: "flex", gap: 8, marginBottom: result ? 16 : 0 }}>
           <button className="btn" onClick={handleRun} disabled={loading} style={{ flex: 1 }}>
-            {loading ? "⏳ Running..." : "▶ Run Tool"}
+            {loading ? "Running..." : <><Play size={12} style={{ verticalAlign: -2, marginRight: 4 }} />Run Tool</>}
           </button>
           <button className="btn btn-secondary" onClick={() => {
             const snippet = JSON.stringify({ name: tool.name, arguments: values }, null, 2);
             vscode.postMessage({ command: "copyToClipboard", text: snippet });
           }} style={{ flex: 1 }}>
-            📋 Copy Call
+            <Copy size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Copy Call
           </button>
         </div>
 
@@ -173,7 +174,7 @@ export default function McpExplorer({ tools }: Props) {
   return (
     <div className="container">
       <div className="hero">
-        <span className="hero-icon">🔧</span>
+        <span className="hero-icon"><Wrench size={48} /></span>
         <h1>MCP Tool Explorer</h1>
         <p style={{ opacity: 0.7 }}>{allTools.length} tools across {categories.length - 1} categories</p>
       </div>
@@ -183,20 +184,20 @@ export default function McpExplorer({ tools }: Props) {
         <button className="btn" onClick={() => {
           vscode.postMessage({ command: "copyToClipboard", text: MCP_CONFIG_SNIPPET });
         }}>
-          📋 Copy MCP Config
+          <Copy size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Copy MCP Config
         </button>
         <button className="btn btn-secondary" onClick={() => setShowConfig(!showConfig)}>
           {showConfig ? "Hide" : "Show"} Install Config
         </button>
         <button className="btn btn-secondary" onClick={() => vscode.postMessage({ command: "openUrl", url: "https://frootai.dev/mcp-server" })}>
-          📖 Docs
+          <BookOpen size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Docs
         </button>
       </div>
 
       {/* MCP config snippet */}
       {showConfig && (
         <div className="card" style={{ marginBottom: 16, padding: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>📦 Add to VS Code settings.json or .vscode/mcp.json:</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}><Package size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Add to VS Code settings.json or .vscode/mcp.json:</div>
           <pre style={{ background: "var(--vscode-textCodeBlock-background, #2d2d2d)", padding: 12, borderRadius: 6, fontSize: 12, margin: 0, overflow: "auto" }}>
             {MCP_CONFIG_SNIPPET}
           </pre>

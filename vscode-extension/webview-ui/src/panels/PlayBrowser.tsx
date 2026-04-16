@@ -3,7 +3,7 @@ import type { SolutionPlay, PlayCategory } from "../types";
 import Badge from "../components/Badge";
 import SearchInput from "../components/SearchInput";
 import { vscode } from "../vscode";
-import { Search, LayoutGrid, ChevronLeft, ChevronRight, Settings, ExternalLink } from "lucide-react";
+import { Search, LayoutGrid, ChevronLeft, ChevronRight, Settings, ExternalLink, Bot, Mic, Shield, Cloud, FileText, MessageSquare, Database, Wrench, Palette, Heart, BarChart3, BookOpen, Globe, Radio, ShoppingCart, Scale, Building, Wifi, Zap, Wallet } from "lucide-react";
 
 const PLAYS_PER_PAGE = 20;
 
@@ -12,27 +12,27 @@ const CX_COLORS: Record<string, string> = {
 };
 
 const CATEGORIES: PlayCategory[] = [
-  { id: "rag", label: "RAG & Search", icon: "🔍", color: "#10b981" },
-  { id: "agent", label: "Agents", icon: "🤖", color: "#6366f1" },
-  { id: "voice", label: "Voice & Speech", icon: "🎙️", color: "#06b6d4" },
-  { id: "security", label: "Security", icon: "🔒", color: "#ec4899" },
-  { id: "infra", label: "Infrastructure", icon: "☁️", color: "#7c3aed" },
-  { id: "doc", label: "Documents", icon: "📄", color: "#f59e0b" },
-  { id: "devops", label: "DevOps", icon: "⚙️", color: "#0ea5e9" },
-  { id: "customer", label: "Customer & Sales", icon: "💬", color: "#14b8a6" },
-  { id: "data", label: "Data & Pipeline", icon: "🗄️", color: "#8b5cf6" },
-  { id: "ml", label: "MLOps", icon: "🔧", color: "#f97316" },
-  { id: "creative", label: "Creative & Media", icon: "🎨", color: "#d946ef" },
-  { id: "health", label: "Healthcare", icon: "❤️", color: "#ef4444" },
-  { id: "finance", label: "Finance & Risk", icon: "📊", color: "#22c55e" },
-  { id: "education", label: "Education", icon: "📚", color: "#3b82f6" },
-  { id: "energy", label: "Energy & Climate", icon: "🌍", color: "#16a34a" },
-  { id: "iot", label: "IoT & Edge", icon: "📡", color: "#f43f5e" },
-  { id: "retail", label: "Retail & Commerce", icon: "🛒", color: "#a855f7" },
-  { id: "legal", label: "Legal & Compliance", icon: "⚖️", color: "#a855f7" },
-  { id: "gov", label: "Government", icon: "🏛️", color: "#64748b" },
-  { id: "telecom", label: "Telecom", icon: "📶", color: "#0891b2" },
-  { id: "special", label: "Specialized", icon: "⚡", color: "#eab308" },
+  { id: "rag", label: "RAG & Search", Icon: Search, color: "#10b981" },
+  { id: "agent", label: "Agents", Icon: Bot, color: "#6366f1" },
+  { id: "voice", label: "Voice & Speech", Icon: Mic, color: "#06b6d4" },
+  { id: "security", label: "Security", Icon: Shield, color: "#ec4899" },
+  { id: "infra", label: "Infrastructure", Icon: Cloud, color: "#7c3aed" },
+  { id: "doc", label: "Documents", Icon: FileText, color: "#f59e0b" },
+  { id: "devops", label: "DevOps", Icon: Settings, color: "#0ea5e9" },
+  { id: "customer", label: "Customer & Sales", Icon: MessageSquare, color: "#14b8a6" },
+  { id: "data", label: "Data & Pipeline", Icon: Database, color: "#8b5cf6" },
+  { id: "ml", label: "MLOps", Icon: Wrench, color: "#f97316" },
+  { id: "creative", label: "Creative & Media", Icon: Palette, color: "#d946ef" },
+  { id: "health", label: "Healthcare", Icon: Heart, color: "#ef4444" },
+  { id: "finance", label: "Finance & Risk", Icon: BarChart3, color: "#22c55e" },
+  { id: "education", label: "Education", Icon: BookOpen, color: "#3b82f6" },
+  { id: "energy", label: "Energy & Climate", Icon: Globe, color: "#16a34a" },
+  { id: "iot", label: "IoT & Edge", Icon: Radio, color: "#f43f5e" },
+  { id: "retail", label: "Retail & Commerce", Icon: ShoppingCart, color: "#a855f7" },
+  { id: "legal", label: "Legal & Compliance", Icon: Scale, color: "#a855f7" },
+  { id: "gov", label: "Government", Icon: Building, color: "#64748b" },
+  { id: "telecom", label: "Telecom", Icon: Wifi, color: "#0891b2" },
+  { id: "special", label: "Specialized", Icon: Zap, color: "#eab308" },
 ];
 
 interface Props {
@@ -148,7 +148,7 @@ export default function PlayBrowser({ plays }: Props) {
                 : undefined
             }
           >
-            {cat.icon} {cat.label} ({catCounts[cat.id]})
+            <cat.Icon size={14} /> {cat.label} ({catCounts[cat.id]})
           </button>
         ))}
       </div>
@@ -287,7 +287,7 @@ function BrowserPlayCard({ play, onView, onInit }: { play: SolutionPlay; onView:
       {/* Cost estimate (compact) */}
       {play.costDev && (
         <div style={{ fontSize: 10, opacity: 0.5 }}>
-          💰 Dev: {play.costDev} · Prod: {play.costProd}
+          <Wallet size={12} style={{ verticalAlign: -2, marginRight: 4 }} />Dev: {play.costDev} · Prod: {play.costProd}
         </div>
       )}
 

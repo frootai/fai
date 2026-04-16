@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import SearchInput from "../components/SearchInput";
 import { vscode } from "../vscode";
+import { Plug, Package, ExternalLink, Zap, Target, Globe } from "lucide-react";
 
 interface Plugin {
   id: string;
@@ -96,7 +97,7 @@ export default function Marketplace({ plugins }: { plugins: Plugin[] }) {
             onMouseEnter={e => (e.currentTarget.style.borderColor = "#ec4899")}
             onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--vscode-panel-border)")}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-              <span style={{ fontWeight: 600, fontSize: 13, color: "#ec4899" }}>🔌 {plugin.id}</span>
+              <span style={{ fontWeight: 600, fontSize: 13, color: "#ec4899" }}><Plug size={14} style={{ verticalAlign: -2, marginRight: 4 }} />{plugin.id}</span>
               {plugin.version && <span style={{ fontSize: 10, opacity: 0.4 }}>v{plugin.version}</span>}
             </div>
             {plugin.description && (
@@ -105,16 +106,16 @@ export default function Marketplace({ plugins }: { plugins: Plugin[] }) {
               </p>
             )}
             <div style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 11, opacity: 0.5 }}>
-              {plugin.items !== undefined && <span>📦 {plugin.items} items</span>}
-              {plugin.plays && plugin.plays.length > 0 && <span>🎯 {plugin.plays.join(", ")}</span>}
+              {plugin.items !== undefined && <span><Package size={12} style={{ verticalAlign: -2, marginRight: 2 }} />{plugin.items} items</span>}
+              {plugin.plays && plugin.plays.length > 0 && <span><Target size={12} style={{ verticalAlign: -2, marginRight: 2 }} />{plugin.plays.join(", ")}</span>}
             </div>
             <div style={{ display: "flex", gap: 4, marginTop: 8 }} onClick={e => e.stopPropagation()}>
               <button className="btn btn-sm btn-ghost" onClick={() => vscode.postMessage({ command: "openUrl", url: GITHUB_BASE + (plugin.folder || `plugins/${plugin.id}`) })} style={{ fontSize: 10, padding: "2px 6px" }}>
-                🔗 GitHub
+                <ExternalLink size={12} style={{ verticalAlign: -2, marginRight: 2 }} /> GitHub
               </button>
               <button className="btn btn-sm" onClick={() => vscode.postMessage({ command: "installPlugin", pluginId: plugin.id })}
                 style={{ fontSize: 10, padding: "2px 6px", background: "#ec489925", color: "#ec4899", borderColor: "#ec4899" }}>
-                ⚡ Install
+                <Zap size={12} style={{ verticalAlign: -2, marginRight: 2 }} /> Install
               </button>
             </div>
           </div>
@@ -123,7 +124,7 @@ export default function Marketplace({ plugins }: { plugins: Plugin[] }) {
 
       {paged.length === 0 && (
         <div style={{ textAlign: "center", padding: "40px 0", opacity: 0.5 }}>
-          <p style={{ fontSize: 32 }}>🔌</p>
+          <p style={{ fontSize: 32 }}><Plug size={32} /></p>
           <p>No plugins match your search</p>
         </div>
       )}
@@ -145,12 +146,12 @@ function PluginDetail({ plugin }: { plugin: Plugin }) {
     <div>
       <div style={{ padding: "16px 0", borderBottom: "1px solid var(--vscode-panel-border)", marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>
-          <span style={{ color: "#ec4899" }}>🔌</span> {displayName}
+          <span style={{ color: "#ec4899" }}><Plug size={18} /></span> {displayName}
         </h2>
         <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
           <span className="pill" style={{ background: "#ec489918", color: "#ec4899", borderColor: "#ec489940" }}>Plugin</span>
           {plugin.version && <span style={{ fontSize: 11, opacity: 0.5 }}>v{plugin.version}</span>}
-          {plugin.items !== undefined && <span style={{ fontSize: 11, opacity: 0.5 }}>📦 {plugin.items} bundled items</span>}
+          {plugin.items !== undefined && <span style={{ fontSize: 11, opacity: 0.5 }}><Package size={12} style={{ verticalAlign: -2, marginRight: 2 }} />{plugin.items} bundled items</span>}
         </div>
       </div>
 
@@ -183,13 +184,13 @@ function PluginDetail({ plugin }: { plugin: Plugin }) {
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button className="btn" onClick={() => vscode.postMessage({ command: "installPlugin", pluginId: plugin.id })}
           style={{ background: "#ec489920", color: "#ec4899", borderColor: "#ec4899" }}>
-          ⚡ Install Plugin
+          <Zap size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Install Plugin
         </button>
         <button className="btn btn-ghost" onClick={() => vscode.postMessage({ command: "openUrl", url: GITHUB_BASE + (plugin.folder || `plugins/${plugin.id}`) })}>
-          🔗 View on GitHub
+          <ExternalLink size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> View on GitHub
         </button>
         <button className="btn btn-ghost" onClick={() => vscode.postMessage({ command: "openUrl", url: `https://frootai.dev/marketplace` })}>
-          🌐 View on Website
+          <Globe size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> View on Website
         </button>
       </div>
     </div>

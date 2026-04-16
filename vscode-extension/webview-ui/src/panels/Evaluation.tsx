@@ -1,13 +1,15 @@
 import { useState } from "react";
 import MetricCard from "../components/MetricCard";
 import { vscode } from "../vscode";
+import { Target, Search, Link2, MessageSquare, Shield, CheckCircle, AlertTriangle, TrendingUp, FileJson, FileSpreadsheet, Play } from "lucide-react";
+import type { ComponentType } from "react";
 
-const METRICS = [
-  { key: "groundedness", icon: "🎯", threshold: 4.0 },
-  { key: "relevance", icon: "🔍", threshold: 4.0 },
-  { key: "coherence", icon: "🔗", threshold: 4.0 },
-  { key: "fluency", icon: "💬", threshold: 4.0 },
-  { key: "safety", icon: "🛡️", threshold: 4.0 },
+const METRICS: Array<{ key: string; Icon: ComponentType<{ size?: number }>; threshold: number }> = [
+  { key: "groundedness", Icon: Target, threshold: 4.0 },
+  { key: "relevance", Icon: Search, threshold: 4.0 },
+  { key: "coherence", Icon: Link2, threshold: 4.0 },
+  { key: "fluency", Icon: MessageSquare, threshold: 4.0 },
+  { key: "safety", Icon: Shield, threshold: 4.0 },
 ];
 
 const DEFAULT_SCORES: Record<string, number> = {
@@ -82,7 +84,7 @@ export default function Evaluation({ scores, history }: Props) {
   return (
     <div className="container">
       <div className="hero">
-        <span className="hero-icon">{allPass ? "✅" : "⚠️"}</span>
+        <span className="hero-icon">{allPass ? <CheckCircle size={48} color="#10b981" /> : <AlertTriangle size={48} color="#ef4444" />}</span>
         <h1>Evaluation Dashboard</h1>
         <span className="badge" style={{ background: allPass ? "#10b981" : "#ef4444", fontSize: 14, padding: "6px 16px" }}>
           {allPass ? "ALL METRICS PASS" : `${passCount}/${METRICS.length} METRICS PASS`}
@@ -109,7 +111,7 @@ export default function Evaluation({ scores, history }: Props) {
       {/* Metric cards */}
       <div className="grid grid-3" style={{ marginBottom: 24 }}>
         {METRICS.map((m) => (
-          <MetricCard key={m.key} name={m.key} icon={m.icon} score={s[m.key] ?? 0} threshold={m.threshold} />
+          <MetricCard key={m.key} name={m.key} icon={<m.Icon size={24} />} score={s[m.key] ?? 0} threshold={m.threshold} />
         ))}
       </div>
 
@@ -117,7 +119,7 @@ export default function Evaluation({ scores, history }: Props) {
       {hist.length > 1 && (
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h2 style={{ fontSize: 16, margin: 0 }}>📈 Metric Trends</h2>
+            <h2 style={{ fontSize: 16, margin: 0 }}><TrendingUp size={16} style={{ verticalAlign: -3, marginRight: 6 }} />Metric Trends</h2>
             <button className="btn btn-secondary" style={{ fontSize: 11, padding: "4px 10px" }}
               onClick={() => setShowTrends(!showTrends)}>
               {showTrends ? "Hide" : "Show"} Trends
@@ -135,7 +137,7 @@ export default function Evaluation({ scores, history }: Props) {
                   const scoreColor = (s[m.key] ?? 0) >= 4 ? "#10b981" : (s[m.key] ?? 0) >= 3 ? "#f59e0b" : "#ef4444";
                   return (
                     <div key={m.key} style={{ display: "contents" }}>
-                      <div style={{ fontSize: 13, textTransform: "capitalize" }}>{m.icon} {m.key}</div>
+                      <div style={{ fontSize: 13, textTransform: "capitalize" }}><m.Icon size={14} /> {m.key}</div>
                       <div style={{ position: "relative" }}>
                         <TrendBar values={trendValues} threshold={m.threshold} color={scoreColor} />
                       </div>
@@ -155,13 +157,13 @@ export default function Evaluation({ scores, history }: Props) {
       {/* Actions */}
       <div className="flex gap-2">
         <button className="btn" onClick={() => vscode.postMessage({ command: "runEvaluation" })}>
-          ▶ Run Evaluation
+          <Play size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Run Evaluation
         </button>
         <button className="btn btn-secondary" onClick={() => vscode.postMessage({ command: "exportJson", scores: s })}>
-          📋 Export JSON
+          <FileJson size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Export JSON
         </button>
         <button className="btn btn-secondary" onClick={() => vscode.postMessage({ command: "exportCsv", scores: s })}>
-          📊 Export CSV
+          <FileSpreadsheet size={12} style={{ verticalAlign: -2, marginRight: 4 }} /> Export CSV
         </button>
       </div>
     </div>
