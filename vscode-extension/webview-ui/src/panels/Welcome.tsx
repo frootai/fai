@@ -1,21 +1,23 @@
 import { vscode } from "../vscode";
+import { Rocket, Search, Wrench, BarChart3, Zap, Target, BookOpen, ExternalLink, Package, Bot } from "lucide-react";
 
-const VERSION = "9.0.0";
+const VERSION = "9.2.0";
 
 const FEATURES = [
-  { icon: "🏗️", title: "101 Solution Plays", desc: "Pre-architected AI solutions from Enterprise RAG to Swarm Orchestration", action: "browsePlays" },
-  { icon: "🔍", title: "Unified Search", desc: "Search across plays, MCP tools, glossary terms, and modules — instantly", action: "searchAll" },
-  { icon: "🧪", title: "45 MCP Tools", desc: "Architecture tools for any MCP-compatible AI assistant", action: "mcpExplorer" },
-  { icon: "📊", title: "Evaluation Dashboard", desc: "Track AI quality with trend sparklines and threshold-based pass/fail", action: "evaluation" },
-  { icon: "⚡", title: "One-Click Scaffolding", desc: "Init DevKit, TuneKit, SpecKit — agents, config, and manifests", action: "scaffold" },
-  { icon: "🎯", title: "Solution Configurator", desc: "Answer 5 questions, get a personalized play recommendation", action: "configurator" },
+  { Icon: Target, title: "Solution Configurator", desc: "Answer questions, get the right play for your needs", action: "configurator", color: "#f59e0b" },
+  { Icon: Rocket, title: "101 Solution Plays", desc: "Pre-architected AI solutions from RAG to Swarm", action: "browsePlays", color: "#10b981" },
+  { Icon: Bot, title: "Agent FAI", desc: "AI assistant — ask about plays, architecture, costs", action: "openAgentFai", color: "#06b6d4" },
+  { Icon: Search, title: "Primitives Catalog", desc: "238 agents, 322 skills, 176 instructions, 10 hooks", action: "openPrimitives", color: "#3b82f6" },
+  { Icon: Wrench, title: "45 MCP Tools", desc: "Architecture tools for AI agents and Copilot", action: "mcpExplorer", color: "#7c3aed" },
+  { Icon: BarChart3, title: "Evaluation & Cost", desc: "Quality scoring, Azure cost estimates", action: "evaluation", color: "#ec4899" },
+  { Icon: Zap, title: "One-Click Scaffold", desc: "DevKit, TuneKit, SpecKit — agents, config, IaC", action: "scaffold", color: "#f97316" },
+  { Icon: Package, title: "Plugin Marketplace", desc: "77 composable plugin packages", action: "openMarketplace", color: "#6366f1" },
 ];
 
 const QUICK_LINKS = [
-  { label: "📖 Documentation", url: "https://frootai.dev" },
-  { label: "⭐ GitHub", url: "https://github.com/frootai/frootai" },
-  { label: "📦 npm MCP", url: "https://www.npmjs.com/package/frootai-mcp" },
-  { label: "🐍 PyPI MCP", url: "https://pypi.org/project/frootai-mcp" },
+  { label: "Documentation", url: "https://frootai.dev", Icon: BookOpen },
+  { label: "GitHub", url: "https://github.com/frootai/frootai", Icon: ExternalLink },
+  { label: "npm", url: "https://www.npmjs.com/package/frootai-mcp", Icon: Package },
 ];
 
 export default function Welcome() {
@@ -23,69 +25,66 @@ export default function Welcome() {
   const openUrl = (url: string) => vscode.postMessage({ command: "openUrl", url });
 
   return (
-    <div className="container" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px" }}>
+    <div className="container" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 20px" }}>
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, margin: 0 }}>
+        <h1 style={{ fontSize: 26, margin: 0, fontWeight: 800, letterSpacing: -0.5 }}>
           Welcome to <span style={{ color: "#fff" }}>Froot</span><span style={{ color: "#10b981" }}>AI</span>
         </h1>
-        <p style={{ opacity: 0.6, fontSize: 13, marginTop: 4 }}>v{VERSION} — The Open Glue for GenAI on Azure</p>
-        <p style={{ fontSize: 14, marginTop: 12, opacity: 0.85 }}>
+        <p style={{ opacity: 0.4, fontSize: 12, marginTop: 4 }}>v{VERSION} — The Open Glue for GenAI on Azure</p>
+        <p style={{ fontSize: 13, marginTop: 10, opacity: 0.6, lineHeight: 1.5 }}>
           45 MCP tools · 101 solution plays · 830+ primitives · FAI Protocol
         </p>
       </div>
 
       {/* Feature Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
         {FEATURES.map(f => (
           <button
             key={f.action}
             onClick={() => cmd(f.action)}
             className="card"
-            style={{
-              cursor: "pointer", border: "1px solid rgba(255,255,255,0.08)",
-              background: "rgba(255,255,255,0.03)", padding: "16px",
-              textAlign: "left", borderRadius: 8, transition: "border-color 0.2s",
-            }}
+            style={{ cursor: "pointer", textAlign: "left", padding: "14px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = `${f.color}40`; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = ""; }}
           >
-            <div style={{ fontSize: 24, marginBottom: 8 }}>{f.icon}</div>
-            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{f.title}</div>
-            <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>{f.desc}</div>
+            <div className="icon-box icon-box-sm" style={{ background: `${f.color}12`, border: `1px solid ${f.color}20` }}>
+              <f.Icon size={16} color={f.color} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 3, color: "#e2e8f0" }}>{f.title}</div>
+              <div style={{ fontSize: 11, opacity: 0.5, lineHeight: 1.4 }}>{f.desc}</div>
+            </div>
           </button>
         ))}
       </div>
 
       {/* Quick Start */}
-      <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: 15 }}>🚀 Quick Start</h3>
-        <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13, lineHeight: 2 }}>
-          <li>Browse <strong>Solution Plays</strong> in the sidebar (🌳 icon)</li>
-          <li>Click a play → <strong>Init DevKit</strong> to scaffold your project</li>
-          <li>Connect the <strong>MCP Server</strong> for 45 AI architecture tools</li>
-          <li>Run <strong>Evaluations</strong> to validate AI quality</li>
-        </ol>
+      <div style={{ padding: "14px 16px", background: "#10b98108", border: "1px solid #10b98115", borderRadius: 12, marginBottom: 16 }}>
+        <h3 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#10b981" }}>
+          <Rocket size={14} style={{ marginRight: 6, verticalAlign: -2 }} />Quick Start
+        </h3>
+        <div style={{ fontSize: 12, lineHeight: 2, opacity: 0.75 }}>
+          <div><span style={{ color: "#10b981", fontWeight: 600, marginRight: 6 }}>1.</span>Open <strong>Solution Configurator</strong> to find the right play</div>
+          <div><span style={{ color: "#10b981", fontWeight: 600, marginRight: 6 }}>2.</span>Click a play → <strong>Init DevKit</strong> to scaffold your project</div>
+          <div><span style={{ color: "#10b981", fontWeight: 600, marginRight: 6 }}>3.</span>Connect the <strong>MCP Server</strong> for 45 AI architecture tools</div>
+          <div><span style={{ color: "#10b981", fontWeight: 600, marginRight: 6 }}>4.</span>Run <strong>Evaluations</strong> to validate AI quality</div>
+        </div>
       </div>
 
       {/* Links */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
         {QUICK_LINKS.map(l => (
-          <button
-            key={l.url}
-            onClick={() => openUrl(l.url)}
-            style={{
-              background: "none", border: "1px solid rgba(255,255,255,0.12)",
-              color: "inherit", padding: "6px 14px", borderRadius: 16,
-              cursor: "pointer", fontSize: 12, opacity: 0.8,
-            }}
-          >
-            {l.label}
+          <button key={l.url} onClick={() => openUrl(l.url)}
+            style={{ background: "none", border: "1px solid var(--border)", color: "inherit", padding: "6px 14px", borderRadius: 8, cursor: "pointer", fontSize: 11, opacity: 0.6, display: "flex", alignItems: "center", gap: 5 }}>
+            <l.Icon size={12} /> {l.label} ↗
           </button>
         ))}
       </div>
 
       {/* Footer */}
-      <p style={{ textAlign: "center", fontSize: 11, opacity: 0.4, marginTop: 24 }}>
-        From the Roots to the Fruits 🌳 — The industry standard for AI primitive unification
+      <p style={{ textAlign: "center", fontSize: 10, opacity: 0.3, marginTop: 24, letterSpacing: 0.3 }}>
+        From the Roots to the Fruits — The industry standard for AI primitive unification
       </p>
     </div>
   );

@@ -406,6 +406,9 @@ ${bodyHtml}
         case "scaffold": vscode.commands.executeCommand("frootai.openScaffoldWizard"); break;
         case "configurator": vscode.commands.executeCommand("frootai.openConfigurator"); break;
         case "primitivesCatalog": vscode.commands.executeCommand("frootai.openPrimitivesCatalog"); break;
+        case "openPrimitives": vscode.commands.executeCommand("frootai.openPrimitivesCatalog"); break;
+        case "openAgentFai": vscode.commands.executeCommand("frootai.openAgentFai"); break;
+        case "openMarketplace": vscode.commands.executeCommand("frootai.openMarketplace"); break;
         case "openUrl": if (msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url)); break;
       }
     });
