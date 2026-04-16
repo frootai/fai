@@ -19,12 +19,17 @@ export function activate(context: vscode.ExtensionContext): void {
   _activated = true;
 
   // Legacy handles tree views + existing commands
-  legacy.activate(context);
+  try {
+    legacy.activate(context);
+  } catch (e: any) {
+    console.error(`FrootAI: legacy activation error — ${e.message}`);
+    vscode.window.showWarningMessage(`FrootAI: Partial activation — ${e.message}`);
+  }
 
   // New React panel commands — safe registration (skip if already exists)
   const safeRegister = (id: string, fn: (...args: any[]) => any) => {
     try { context.subscriptions.push(vscode.commands.registerCommand(id, fn)); }
-    catch { /* already registered by legacy — OK */ }
+    catch (e: any) { console.warn(`FrootAI: skipped ${id} — ${e.message}`); }
   };
 
   safeRegister("frootai.searchAll", () => searchAll());

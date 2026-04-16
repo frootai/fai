@@ -157,10 +157,6 @@
         "shortTitle": "Browse"
       },
       {
-        "command": "frootai.openSetupGuide",
-        "title": "FrootAI: Setup Guide"
-      },
-      {
         "command": "frootai.startMcpServer",
         "title": "FrootAI: Start MCP Server"
       },
@@ -276,34 +272,34 @@
     "menus": {
       "view/title": [
         {
-          "command": "frootai.filterPlays",
-          "when": "view == frootai.solutionPlays",
-          "group": "navigation@1"
-        },
-        {
           "command": "frootai.browsePlays",
           "when": "view == frootai.solutionPlays",
-          "group": "navigation@2"
-        },
-        {
-          "command": "frootai.openConfigurator",
-          "when": "view == frootai.solutionPlays",
-          "group": "navigation@3"
-        },
-        {
-          "command": "frootai.togglePlayView",
-          "when": "view == frootai.solutionPlays",
-          "group": "navigation@4"
+          "group": "navigation"
         },
         {
           "command": "frootai.refreshPlays",
           "when": "view == frootai.solutionPlays",
-          "group": "navigation@5"
+          "group": "navigation"
+        },
+        {
+          "command": "frootai.filterPlays",
+          "when": "view == frootai.solutionPlays",
+          "group": "navigation"
+        },
+        {
+          "command": "frootai.openConfigurator",
+          "when": "view == frootai.solutionPlays",
+          "group": "2_more"
+        },
+        {
+          "command": "frootai.togglePlayView",
+          "when": "view == frootai.solutionPlays",
+          "group": "2_more"
         },
         {
           "command": "frootai.browseSolutionPlays",
           "when": "view == frootai.solutionPlays",
-          "group": "navigation@6"
+          "group": "2_more"
         },
         {
           "command": "frootai.installMcpServer",
