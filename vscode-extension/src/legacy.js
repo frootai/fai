@@ -500,54 +500,9 @@ class SolutionPlayProvider {
 
     // ── Root level ──
     const launchers = this._buildLaunchers();
+    const items = [...launchers];
 
-    // Apply filter
-    let plays = SOLUTION_PLAYS;
-    if (this._filter) {
-      plays = plays.filter(p => {
-        const haystack = [p.id, p.name, p.desc, p.infra, p.layer, p.cx, p.status].filter(Boolean).join(" ").toLowerCase();
-        return this._filter.split(/\s+/).every(w => haystack.includes(w));
-      });
-    }
-
-    // Flat view
-    if (this._viewMode === "flat") {
-      return [...launchers, ...plays.map(p => this._buildPlayItem(p, layerNames))];
-    }
-
-    // Category view (grouped)
-    const catMap = {};
-    const catMeta = {
-      R: { label: "🧩 Reasoning", color: "charts.green", order: 1 },
-      O: { label: "🤖 Orchestration", color: "charts.blue", order: 2 },
-      F: { label: "🏗️ Foundations", color: "charts.yellow", order: 3 },
-      T: { label: "🔧 Transformation", color: "charts.purple", order: 4 },
-    };
-    for (const p of plays) {
-      if (!catMap[p.layer]) catMap[p.layer] = [];
-      catMap[p.layer].push(p);
-    }
-    const groups = Object.entries(catMap)
-      .sort((a, b) => (catMeta[a[0]]?.order || 9) - (catMeta[b[0]]?.order || 9))
-      .map(([layer, layerPlays]) => {
-        const meta = catMeta[layer] || { label: layer, color: "foreground" };
-        const item = new vscode.TreeItem(meta.label, vscode.TreeItemCollapsibleState.Expanded);
-        item.description = `${layerPlays.length} plays`;
-        item.iconPath = new vscode.ThemeIcon("symbol-folder", new vscode.ThemeColor(meta.color));
-        item.contextValue = "playCategory";
-        item._plays = layerPlays;
-        return item;
-      });
-
-    // Prepend search results count if filtering
-    if (this._filter) {
-      const header = new vscode.TreeItem(`🔍 "${this._filter}" — ${plays.length} results`, vscode.TreeItemCollapsibleState.None);
-      header.contextValue = "searchHeader";
-      header.command = { command: "frootai.filterPlays", title: "Clear Filter" };
-      return [...launchers, header, ...groups];
-    }
-
-    // Prepend "Recently Used" group
+    // "Recently Used" group
     if (this._recentIds.length > 0) {
       const recentPlays = this._recentIds
         .map(id => SOLUTION_PLAYS.find(p => p.id === id))
@@ -558,10 +513,10 @@ class SolutionPlayProvider {
         recentGroup.iconPath = new vscode.ThemeIcon("history", new vscode.ThemeColor("charts.orange"));
         recentGroup.contextValue = "recentPlays";
         recentGroup._plays = recentPlays;
-        return [...launchers, recentGroup, ...groups];
+        items.push(recentGroup);
       }
     }
-    return [...launchers, ...groups];
+    return items;
   }
 
   _buildLaunchers() {
