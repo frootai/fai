@@ -757,57 +757,61 @@ ${bodyHtml}
         return;
       }
 
-      // ── Search plays with rich fields ──
+      // Helper: whole-word match check
+      const wordMatch = (text: string, word: string) => {
+        const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+        return regex.test(text);
+      };
+
+      // ── Search plays with rich fields (whole-word matching) ──
       const scoredPlays = SOLUTION_PLAYS.map(p => {
         const fields = [
           p.id, p.name, p.desc || "", p.infra || "", p.cat || "",
           p.tagline || "", p.pattern || "",
-          ...(p.devkit || []), ...(p.tunekit || []),
-        ].join(" ").toLowerCase();
-        const matchCount = queryWords.filter(w => fields.includes(w)).length;
+        ].join(" ");
+        const matchCount = queryWords.filter(w => wordMatch(fields, w)).length;
         return { play: p, score: matchCount, ratio: matchCount / queryWords.length };
-      }).filter(s => s.score > 0 && s.ratio >= 0.25)
+      }).filter(s => s.score > 0 && s.ratio >= 0.4)
         .sort((a, b) => b.ratio - a.ratio || b.score - a.score)
         .slice(0, 5);
 
-      // ── Search knowledge modules (deep: up to 3000 chars) ──
+      // ── Search knowledge modules (whole-word, deeper content) ──
       const scoredModules: { id: string; name: string; snippet: string; score: number }[] = [];
       if (knowledge.modules) {
         for (const [id, mod] of Object.entries(knowledge.modules) as [string, any][]) {
-          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 3000)}`.toLowerCase();
-          const matchCount = queryWords.filter((w: string) => text.includes(w)).length;
-          if (matchCount > 0 && matchCount / queryWords.length >= 0.25) {
-            // Extract best matching paragraph as snippet
-            const paras = (mod.content || "").split(/\n\n/).filter((p: string) => p.length > 30);
-            const bestPara = paras.find((p: string) => {
-              const pLower = p.toLowerCase();
-              return queryWords.filter((w: string) => pLower.includes(w)).length >= Math.max(1, matchCount - 1);
-            }) || paras[0] || (mod.content || "").substring(0, 300);
+          if (id === "F3") continue; // Glossary searched separately
+          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 3000)}`;
+          const matchCount = queryWords.filter((w: string) => wordMatch(text, w)).length;
+          if (matchCount > 0 && matchCount / queryWords.length >= 0.4) {
+            const paras = (mod.content || "").split(/\n\n/).filter((p: string) => p.length > 40);
+            const bestPara = paras.find((p: string) =>
+              queryWords.filter((w: string) => wordMatch(p, w)).length >= Math.max(1, matchCount - 1)
+            ) || paras[0] || (mod.content || "").substring(0, 300);
             scoredModules.push({ id, name: mod.title || id, snippet: bestPara.substring(0, 400), score: matchCount });
           }
         }
         scoredModules.sort((a, b) => b.score - a.score);
       }
 
-      // ── Search glossary ──
+      // ── Search glossary (only terms with 3+ chars, whole-word) ──
       const glossaryData = knowledge.modules?.F3?.content || "";
       const glossaryMatches: { term: string; definition: string }[] = [];
       if (glossaryData) {
-        const termRegex = /^##\s+(.+)$/gm;
+        const termRegex = /^##\s+(.{3,})$/gm;
         let match;
         const termPositions: { term: string; start: number }[] = [];
         while ((match = termRegex.exec(glossaryData)) !== null) {
-          termPositions.push({ term: match[1], start: match.index });
+          termPositions.push({ term: match[1].trim(), start: match.index });
         }
         for (let i = 0; i < termPositions.length; i++) {
           const { term, start } = termPositions[i];
           const end = i + 1 < termPositions.length ? termPositions[i + 1].start : glossaryData.length;
-          const defText = glossaryData.substring(start, end);
+          const defText = glossaryData.substring(start, Math.min(end, start + 500));
           const termLower = term.toLowerCase();
-          const defLower = defText.toLowerCase();
-          if (queryWords.some(w => termLower.includes(w) || defLower.includes(w))) {
-            const defLines = defText.split("\n").filter((l: string) => l.trim() && !l.startsWith("##")).slice(0, 3).join(" ");
-            glossaryMatches.push({ term, definition: defLines.substring(0, 250) });
+          // Only match if a query word matches the term name (not deep definition)
+          if (queryWords.some(w => wordMatch(termLower, w) || termLower.includes(w))) {
+            const defLines = defText.split("\n").filter((l: string) => l.trim() && !l.startsWith("#")).slice(0, 3).join(" ");
+            glossaryMatches.push({ term, definition: defLines.substring(0, 200) });
           }
         }
       }
