@@ -291,6 +291,11 @@
         "command": "frootai.openAgentFai",
         "title": "FrootAI: Ask Agent FAI",
         "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "frootai.openProtocolExplainer",
+        "title": "FrootAI: FAI Protocol & Architecture",
+        "icon": "$(symbol-namespace)"
       }
     ],
     "menus": {

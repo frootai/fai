@@ -57,7 +57,7 @@ export interface WafPillar {
   color: string;
 }
 
-export type PanelType = "playDetail" | "evaluation" | "scaffold" | "mcpExplorer" | "playBrowser" | "configurator" | "welcome" | "primitivesCatalog" | "marketplace" | "agentFai";
+export type PanelType = "playDetail" | "evaluation" | "scaffold" | "mcpExplorer" | "playBrowser" | "configurator" | "welcome" | "primitivesCatalog" | "marketplace" | "agentFai" | "protocolExplainer";
 
 export interface PrimitiveItem {
   id: string;
@@ -83,4 +83,5 @@ export interface PanelData {
   plays?: SolutionPlay[];
   primitives?: Record<string, PrimitiveItem[]>;
   plugins?: any[];
+  logoUri?: string;
 }

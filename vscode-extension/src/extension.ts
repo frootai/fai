@@ -414,6 +414,7 @@ ${bodyHtml}
         case "openPrimitives": vscode.commands.executeCommand("frootai.openPrimitivesCatalog"); break;
         case "openAgentFai": vscode.commands.executeCommand("frootai.openAgentFai"); break;
         case "openMarketplace": vscode.commands.executeCommand("frootai.openMarketplace"); break;
+        case "openProtocol": vscode.commands.executeCommand("frootai.openProtocolExplainer"); break;
         case "openUrl": if (msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url)); break;
       }
     });
@@ -506,6 +507,35 @@ ${bodyHtml}
     panel.webview.onDidReceiveMessage((msg: any) => {
       if (msg.command === "openUrl" && msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url));
       if (msg.command === "installPlugin" && msg.pluginId) vscode.commands.executeCommand("frootai.installPlugin");
+    });
+  });
+
+  // ─── FAI Protocol & Architecture Panel (D1-D3) ───
+  safeRegister("frootai.openProtocolExplainer", () => {
+    const panel = createReactPanel(context.extensionUri, "frootai.protocolExplainer", "FAI Protocol & Architecture", { panel: "protocolExplainer" as any });
+    panel.webview.onDidReceiveMessage((msg: any) => {
+      switch (msg.command) {
+        case "openUrl":
+          if (msg.url) vscode.env.openExternal(vscode.Uri.parse(msg.url));
+          break;
+        case "openSchema": {
+          const schemaPath = path.join(context.extensionPath, "..", "..", "..", "schemas", `${msg.schema}.schema.json`);
+          // Try workspace first, then fallback to GitHub
+          const ws = vscode.workspace.workspaceFolders?.[0];
+          const localSchema = ws ? path.join(ws.uri.fsPath, "schemas", `${msg.schema}.schema.json`) : "";
+          if (localSchema && fs.existsSync(localSchema)) {
+            vscode.window.showTextDocument(vscode.Uri.file(localSchema));
+          } else {
+            vscode.env.openExternal(vscode.Uri.parse(`https://github.com/frootai/frootai/blob/main/schemas/${msg.schema}.schema.json`));
+          }
+          break;
+        }
+        case "openModule": {
+          // Open knowledge module via Agent FAI
+          vscode.commands.executeCommand("frootai.openAgentFai");
+          break;
+        }
+      }
     });
   });
 

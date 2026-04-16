@@ -10,6 +10,7 @@ import Welcome from "./panels/Welcome";
 import PrimitivesCatalog from "./panels/PrimitivesCatalog";
 import Marketplace from "./panels/Marketplace";
 import AgentFai from "./panels/AgentFai";
+import ProtocolExplainer from "./panels/ProtocolExplainer";
 
 declare global {
   interface Window {
@@ -54,6 +55,8 @@ export default function App() {
       return <Marketplace plugins={data.plugins ?? []} />;
     case "agentFai":
       return <AgentFai />;
+    case "protocolExplainer":
+      return <ProtocolExplainer logoUri={data.logoUri} />;
     default:
       return <div className="container"><p>Unknown panel: {data.panel}</p></div>;
   }
