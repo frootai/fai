@@ -88,6 +88,15 @@
         }
       ]
     },
+    "chatParticipants": [
+      {
+        "id": "frootai.fai",
+        "name": "fai",
+        "fullName": "Agent FAI",
+        "description": "Ask about solution plays, architecture patterns, MCP tools, AI glossary, and getting started with FrootAI",
+        "isSticky": true
+      }
+    ],
     "commands": [
       {
         "command": "frootai.openSolutionPlay",

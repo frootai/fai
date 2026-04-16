@@ -446,6 +446,70 @@ ${bodyHtml}
     });
   });
 
+  // ─── Agent FAI Chat Participant ───
+  try {
+    const knowledgePath = path.join(context.extensionPath, "knowledge.json");
+    let knowledge: any = {};
+    try { knowledge = JSON.parse(fs.readFileSync(knowledgePath, "utf-8")); } catch {}
+
+    const participant = vscode.chat.createChatParticipant("frootai.fai", async (request, chatContext, stream, token) => {
+      const query = request.prompt.toLowerCase();
+
+      stream.markdown("*Searching FrootAI knowledge base...*\n\n");
+
+      // Search plays
+      const matchedPlays = SOLUTION_PLAYS.filter(p => {
+        const text = `${p.id} ${p.name} ${p.desc || ""} ${p.infra || ""} ${p.cat || ""}`.toLowerCase();
+        return query.split(/\s+/).filter(w => w.length >= 2).some(w => text.includes(w));
+      }).slice(0, 5);
+
+      // Search modules
+      const matchedModules: { id: string; name: string; snippet: string }[] = [];
+      if (knowledge.modules) {
+        for (const [id, mod] of Object.entries(knowledge.modules) as [string, any][]) {
+          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 500)}`.toLowerCase();
+          if (query.split(/\s+/).filter((w: string) => w.length >= 2).some((w: string) => text.includes(w))) {
+            matchedModules.push({ id, name: mod.title || id, snippet: (mod.content || "").substring(0, 200) });
+          }
+        }
+      }
+
+      // Build response
+      if (matchedPlays.length > 0) {
+        stream.markdown("## 🎯 Matching Solution Plays\n\n");
+        for (const p of matchedPlays) {
+          stream.markdown(`**${p.id} — ${p.name}** (${p.cx || "N/A"} complexity)\n`);
+          stream.markdown(`> ${p.desc || p.tagline || ""}\n`);
+          stream.markdown(`> Infrastructure: ${p.infra || "N/A"}\n\n`);
+        }
+      }
+
+      if (matchedModules.length > 0) {
+        stream.markdown("## 📚 Knowledge Modules\n\n");
+        for (const m of matchedModules.slice(0, 3)) {
+          stream.markdown(`**${m.id} — ${m.name}**\n`);
+          stream.markdown(`> ${m.snippet.replace(/\n/g, " ")}...\n\n`);
+        }
+      }
+
+      if (matchedPlays.length === 0 && matchedModules.length === 0) {
+        stream.markdown("I couldn't find specific matches. Here are some things I can help with:\n\n");
+        stream.markdown("- **Solution Plays**: Ask about RAG, agents, voice AI, security, infrastructure\n");
+        stream.markdown("- **Architecture**: Ask about patterns, cost optimization, model selection\n");
+        stream.markdown("- **Getting Started**: Ask how to scaffold, deploy, or evaluate\n");
+        stream.markdown("- **MCP Tools**: Ask about the 45 available tools\n\n");
+        stream.markdown("Try: *Which play should I use for a RAG pipeline?*\n");
+      }
+
+      stream.markdown("\n---\n*Powered by FrootAI Knowledge Engine — 18 modules, 101 plays, 200+ glossary terms*");
+    });
+
+    participant.iconPath = vscode.Uri.joinPath(context.extensionUri, "media", "frootai-mark.png");
+    context.subscriptions.push(participant);
+  } catch (e: any) {
+    console.warn(`FrootAI: Chat participant not available — ${e.message}`);
+  }
+
   // ─── First Install: Show Welcome panel ───
   const CURRENT_VERSION = "9.2.0";
   const lastVersion = context.globalState.get<string>("frootai.lastVersion");
