@@ -10,7 +10,7 @@ import { createReactPanel } from "./webviews/reactHost";
 import { SOLUTION_PLAYS } from "./data/plays";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const legacy = require("./extension.js");
+const legacy = require("./legacy.js");
 
 let _activated = false;
 

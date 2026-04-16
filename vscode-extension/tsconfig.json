@@ -11,7 +11,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true
+    "declaration": true,
+    "allowJs": true,
+    "checkJs": false
   },
-  "exclude": ["node_modules", ".vscode-test", "out", "webview-ui"]
+  "exclude": ["node_modules", ".vscode-test", "out", "webview-ui", "esbuild.config.mjs"]
 }
