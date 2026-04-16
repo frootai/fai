@@ -745,51 +745,68 @@ ${bodyHtml}
 
     const participant = vscode.chat.createChatParticipant("frootai.fai", async (request, chatContext, stream, token) => {
       const query = request.prompt.toLowerCase();
+      const stopWords = new Set(["how", "to", "the", "a", "an", "is", "in", "on", "for", "of", "and", "or", "my", "can", "do", "i", "we", "it", "with", "what", "which", "should", "use", "about", "this", "that", "from", "have", "need", "want", "please", "me", "be"]);
+      const queryWords = query.split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w));
 
       stream.markdown("*Searching FrootAI knowledge base...*\n\n");
 
-      // Search plays
-      const matchedPlays = SOLUTION_PLAYS.filter(p => {
-        const text = `${p.id} ${p.name} ${p.desc || ""} ${p.infra || ""} ${p.cat || ""}`.toLowerCase();
-        return query.split(/\s+/).filter(w => w.length >= 2).some(w => text.includes(w));
-      }).slice(0, 5);
+      if (queryWords.length === 0) {
+        stream.markdown("I couldn't parse your query. Try asking about a specific topic:\n\n");
+        stream.markdown("- **Solution Plays**: *Which play for RAG?* or *IoT edge AI*\n");
+        stream.markdown("- **Architecture**: *agent hosting patterns* or *cost optimization*\n");
+        stream.markdown("- **Getting Started**: *how to scaffold a project*\n\n");
+        stream.markdown("\n---\n*Powered by FrootAI Knowledge Engine — 18 modules, 101 plays, 200+ glossary terms*");
+        return;
+      }
 
-      // Search modules
-      const matchedModules: { id: string; name: string; snippet: string }[] = [];
+      // Search plays — score by how many query words match
+      const scoredPlays = SOLUTION_PLAYS.map(p => {
+        const text = `${p.id} ${p.name} ${p.desc || ""} ${p.infra || ""} ${p.cat || ""}`.toLowerCase();
+        const matchCount = queryWords.filter(w => text.includes(w)).length;
+        return { play: p, score: matchCount, ratio: matchCount / queryWords.length };
+      }).filter(s => s.score > 0 && s.ratio >= 0.3)
+        .sort((a, b) => b.score - a.score || b.ratio - a.ratio)
+        .slice(0, 5);
+
+      // Search modules — score by word matches
+      const scoredModules: { id: string; name: string; snippet: string; score: number }[] = [];
       if (knowledge.modules) {
         for (const [id, mod] of Object.entries(knowledge.modules) as [string, any][]) {
-          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 500)}`.toLowerCase();
-          if (query.split(/\s+/).filter((w: string) => w.length >= 2).some((w: string) => text.includes(w))) {
-            matchedModules.push({ id, name: mod.title || id, snippet: (mod.content || "").substring(0, 200) });
+          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 1000)}`.toLowerCase();
+          const matchCount = queryWords.filter((w: string) => text.includes(w)).length;
+          if (matchCount > 0 && matchCount / queryWords.length >= 0.3) {
+            scoredModules.push({ id, name: mod.title || id, snippet: (mod.content || "").substring(0, 200), score: matchCount });
           }
         }
+        scoredModules.sort((a, b) => b.score - a.score);
       }
 
       // Build response
-      if (matchedPlays.length > 0) {
+      if (scoredPlays.length > 0) {
         stream.markdown("## 🎯 Matching Solution Plays\n\n");
-        for (const p of matchedPlays) {
-          stream.markdown(`**${p.id} — ${p.name}** (${p.cx || "N/A"} complexity)\n`);
-          stream.markdown(`> ${p.desc || p.tagline || ""}\n`);
+        for (const { play: p, score } of scoredPlays) {
+          const relevance = score >= queryWords.length ? "🟢" : score >= queryWords.length * 0.6 ? "🟡" : "🟠";
+          stream.markdown(`${relevance} **${p.id} — ${p.name}** (${p.cx || "N/A"} complexity)\n`);
+          stream.markdown(`> ${p.desc || ""}\n`);
           stream.markdown(`> Infrastructure: ${p.infra || "N/A"}\n\n`);
         }
       }
 
-      if (matchedModules.length > 0) {
+      if (scoredModules.length > 0) {
         stream.markdown("## 📚 Knowledge Modules\n\n");
-        for (const m of matchedModules.slice(0, 3)) {
+        for (const m of scoredModules.slice(0, 3)) {
           stream.markdown(`**${m.id} — ${m.name}**\n`);
           stream.markdown(`> ${m.snippet.replace(/\n/g, " ")}...\n\n`);
         }
       }
 
-      if (matchedPlays.length === 0 && matchedModules.length === 0) {
-        stream.markdown("I couldn't find specific matches. Here are some things I can help with:\n\n");
-        stream.markdown("- **Solution Plays**: Ask about RAG, agents, voice AI, security, infrastructure\n");
+      if (scoredPlays.length === 0 && scoredModules.length === 0) {
+        stream.markdown(`No direct matches for "${queryWords.join(" ")}". Here are some things I can help with:\n\n`);
+        stream.markdown("- **Solution Plays**: Ask about RAG, agents, voice AI, security, IoT, edge AI\n");
         stream.markdown("- **Architecture**: Ask about patterns, cost optimization, model selection\n");
         stream.markdown("- **Getting Started**: Ask how to scaffold, deploy, or evaluate\n");
         stream.markdown("- **MCP Tools**: Ask about the 45 available tools\n\n");
-        stream.markdown("Try: *Which play should I use for a RAG pipeline?*\n");
+        stream.markdown("Try: *Which play for enterprise RAG?* or *edge AI on IoT*\n");
       }
 
       stream.markdown("\n---\n*Powered by FrootAI Knowledge Engine — 18 modules, 101 plays, 200+ glossary terms*");
