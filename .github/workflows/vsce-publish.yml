@@ -23,6 +23,12 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: |
+          npm ci --ignore-scripts
+          cd webview-ui && npm ci --ignore-scripts
+
       - name: Install vsce
         run: npm install -g @vscode/vsce
 
