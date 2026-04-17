@@ -117,7 +117,7 @@ export default function PlayBrowser({ plays }: Props) {
           Solution Plays
         </h1>
         <p style={{ fontSize: 13, opacity: 0.7, marginTop: 8 }}>
-          {plays.length} pre-architected AI solutions — browse, search, and initialize
+          {plays.length} intelligent engines — pre-built with agents, skills, instructions & hooks — ready to deploy
         </p>
       </div>
 

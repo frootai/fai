@@ -1,17 +1,17 @@
 import { vscode } from "../vscode";
-import { Rocket, Search, Wrench, BarChart3, Zap, Target, BookOpen, ExternalLink, Package, Bot } from "lucide-react";
+import { Rocket, Search, BarChart3, Zap, Target, BookOpen, ExternalLink, Package, Bot } from "lucide-react";
 
 const VERSION = "9.2.0";
 
 const FEATURES = [
-  { Icon: Target, title: "Solution Configurator", desc: "Answer questions, get the right play for your needs", action: "configurator", color: "#f59e0b" },
-  { Icon: Rocket, title: "101 Solution Plays", desc: "Pre-architected AI solutions from RAG to Swarm", action: "browsePlays", color: "#10b981" },
   { Icon: Bot, title: "Agent FAI", desc: "AI assistant — ask about plays, architecture, costs", action: "openAgentFai", color: "#06b6d4" },
-  { Icon: Search, title: "Primitives Catalog", desc: "238 agents, 322 skills, 176 instructions, 10 hooks", action: "openPrimitives", color: "#3b82f6" },
-  { Icon: Wrench, title: "45 MCP Tools", desc: "Architecture tools for AI agents and Copilot", action: "mcpExplorer", color: "#7c3aed" },
+  { Icon: Target, title: "Solution Configurator", desc: "Answer questions, get the right play for your needs", action: "configurator", color: "#f59e0b" },
+  { Icon: Rocket, title: "101 Solution Plays", desc: "Intelligent engines built from primitives — ready to deploy", action: "browsePlays", color: "#10b981" },
+  { Icon: Search, title: "Primitives Catalog", desc: "Standalone LEGO blocks — agents, skills, instructions, hooks", action: "openPrimitives", color: "#3b82f6" },
   { Icon: BarChart3, title: "Evaluation & Cost", desc: "Quality scoring, Azure cost estimates", action: "evaluation", color: "#ec4899" },
   { Icon: Zap, title: "One-Click Scaffold", desc: "DevKit, TuneKit, SpecKit — agents, config, IaC", action: "scaffold", color: "#f97316" },
   { Icon: Package, title: "FAI Ecosystem", desc: "Factory · Packages · Toolkit · Engine · Protocol · Layer", action: "openProtocol", color: "#6366f1" },
+  { Icon: BookOpen, title: "Setup Guide", desc: "Install MCP, configure your IDE, start building", action: "openSetup", color: "#7c3aed" },
 ];
 
 const QUICK_LINKS = [

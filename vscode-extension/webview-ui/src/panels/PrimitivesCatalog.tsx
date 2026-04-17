@@ -165,7 +165,7 @@ export default function PrimitivesCatalog({ primitives }: { primitives: Record<C
           FAI Primitives Catalog
         </h1>
         <p style={{ fontSize: 13, opacity: 0.7, marginTop: 8 }}>
-          {items.length.toLocaleString()} primitives across 5 categories — the building blocks of every solution play
+          {items.length.toLocaleString()} standalone LEGO blocks — pick what you need for any specific purpose
         </p>
       </div>
 

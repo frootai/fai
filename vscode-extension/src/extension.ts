@@ -548,6 +548,7 @@ ${bodyHtml}
         case "browsePlays": vscode.commands.executeCommand("frootai.browsePlays"); break;
         case "searchAll": vscode.commands.executeCommand("frootai.searchAll"); break;
         case "mcpExplorer": vscode.commands.executeCommand("frootai.openMcpExplorer"); break;
+        case "openSetup": vscode.commands.executeCommand("frootai.openSetupGuide"); break;
         case "evaluation": vscode.commands.executeCommand("frootai.openEvaluationDashboard"); break;
         case "scaffold": vscode.commands.executeCommand("frootai.openScaffoldWizard"); break;
         case "configurator": vscode.commands.executeCommand("frootai.openConfigurator"); break;
