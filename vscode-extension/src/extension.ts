@@ -80,6 +80,102 @@ function getGlossaryIndex(glossaryData: string): Map<string, string> {
   return _glossaryIndex;
 }
 
+/**
+ * Pre-built inverted index for knowledge modules (built once at activation).
+ * Maps each significant word → list of { moduleId, title, snippet, frequency }.
+ * Enables O(1) word-level lookup instead of O(n) linear scan per query.
+ */
+interface KnowledgeIndexEntry {
+  moduleId: string;
+  title: string;
+  snippet: string;
+  freq: number;
+}
+let _knowledgeInvertedIndex: Map<string, KnowledgeIndexEntry[]> | null = null;
+let _knowledgeModuleMeta: Map<string, { title: string; contentLen: number }> | null = null;
+
+const KNOWLEDGE_STOP_WORDS = new Set([
+  "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for", "of",
+  "with", "by", "from", "is", "was", "are", "were", "be", "been", "have", "has",
+  "had", "do", "does", "did", "will", "would", "could", "should", "may", "might",
+  "that", "this", "it", "its", "not", "also", "if", "then", "when", "where",
+  "which", "how", "what", "all", "each", "more", "most", "other", "some", "such",
+  "than", "too", "very", "just", "about", "can", "so", "only", "into", "through",
+]);
+
+function buildKnowledgeIndex(modules: KnowledgeData): void {
+  if (_knowledgeInvertedIndex) return;
+  _knowledgeInvertedIndex = new Map();
+  _knowledgeModuleMeta = new Map();
+
+  if (!modules.modules) return;
+
+  for (const [id, mod] of Object.entries(modules.modules) as [string, { title?: string; content?: string }][]) {
+    if (id === "F3") continue; // Glossary indexed separately
+    const title = mod.title || id;
+    const content = (mod.content || "").substring(0, 5000);
+    _knowledgeModuleMeta.set(id, { title, contentLen: (mod.content || "").length });
+
+    // Extract best paragraph for this module (first non-heading paragraph > 40 chars)
+    const paras = content.split(/\n\n/).filter(p => p.length > 40 && !p.startsWith("#"));
+    const bestSnippet = (paras[0] || content.substring(0, 300)).substring(0, 400);
+
+    // Tokenize title + content
+    const text = `${title} ${title} ${content}`.toLowerCase(); // title weighted 2x
+    const words = text.replace(/[^\w\s]/g, " ").split(/\s+/).filter(w => w.length >= 3 && !KNOWLEDGE_STOP_WORDS.has(w));
+
+    // Count word frequencies
+    const wordFreq = new Map<string, number>();
+    for (const w of words) {
+      wordFreq.set(w, (wordFreq.get(w) || 0) + 1);
+    }
+
+    // Index each word → this module entry
+    for (const [word, freq] of wordFreq) {
+      if (!_knowledgeInvertedIndex.has(word)) {
+        _knowledgeInvertedIndex.set(word, []);
+      }
+      _knowledgeInvertedIndex.get(word)!.push({ moduleId: id, title, snippet: bestSnippet, freq });
+    }
+  }
+}
+
+/**
+ * Search knowledge modules using the pre-built inverted index.
+ * Returns modules ranked by aggregate word-hit frequency.
+ */
+function searchKnowledgeIndex(queryWords: string[]): { id: string; name: string; snippet: string; score: number }[] {
+  if (!_knowledgeInvertedIndex || !_knowledgeModuleMeta) return [];
+
+  const moduleScores = new Map<string, { score: number; hits: number; snippet: string }>();
+
+  for (const word of queryWords) {
+    const entries = _knowledgeInvertedIndex.get(word);
+    if (!entries) continue;
+    for (const entry of entries) {
+      const existing = moduleScores.get(entry.moduleId);
+      if (existing) {
+        existing.score += entry.freq;
+        existing.hits += 1;
+      } else {
+        moduleScores.set(entry.moduleId, { score: entry.freq, hits: 1, snippet: entry.snippet });
+      }
+    }
+  }
+
+  // Require at least 40% of query words to match
+  const threshold = Math.max(1, Math.floor(queryWords.length * 0.4));
+  return Array.from(moduleScores.entries())
+    .filter(([, v]) => v.hits >= threshold)
+    .map(([id, v]) => ({
+      id,
+      name: _knowledgeModuleMeta!.get(id)?.title || id,
+      snippet: v.snippet,
+      score: v.score,
+    }))
+    .sort((a, b) => b.score - a.score);
+}
+
 /** E2: Scan workspace for evaluation data files */
 function scanWorkspaceEvalData(): {
   hasRealData: boolean;
@@ -824,6 +920,9 @@ ${bodyHtml}
     // Load BM25 search index for @fai chat participant (more accurate than keyword matching)
     const bm25Index: BM25Index | null = loadBM25Index(path.join(context.extensionPath, "search-index.json"));
 
+    // Pre-build inverted index for knowledge modules (O(1) lookup vs O(n) per query)
+    buildKnowledgeIndex(knowledge);
+
     const participant = vscode.chat.createChatParticipant("frootai.fai", async (request, chatContext, stream, token) => {
       const query = request.prompt.toLowerCase();
       const stopWords = new Set(["how", "to", "the", "a", "an", "is", "in", "on", "for", "of", "and", "or", "my", "can", "do", "i", "we", "it", "with", "what", "which", "should", "use", "about", "this", "that", "from", "have", "need", "want", "please", "me", "be", "get", "let", "make", "just", "some"]);
@@ -882,23 +981,8 @@ ${bodyHtml}
             .slice(0, 5);
         }
 
-        // ── Search knowledge modules (whole-word, deeper content) ──
-        scoredModules = [];
-        if (knowledge.modules) {
-          for (const [id, mod] of Object.entries(knowledge.modules) as [string, { title?: string; content?: string }][]) {
-            if (id === "F3") continue; // Glossary searched separately
-            const text = `${mod.title || ""} ${(mod.content || "").substring(0, 3000)}`;
-            const matchCount = queryWords.filter((w: string) => wordMatch(text, w)).length;
-            if (matchCount > 0 && matchCount / queryWords.length >= 0.4) {
-              const paras = (mod.content || "").split(/\n\n/).filter((p: string) => p.length > 40);
-              const bestPara = paras.find((p: string) =>
-                queryWords.filter((w: string) => wordMatch(p, w)).length >= Math.max(1, matchCount - 1)
-              ) || paras[0] || (mod.content || "").substring(0, 300);
-              scoredModules.push({ id, name: mod.title || id, snippet: bestPara.substring(0, 400), score: matchCount });
-            }
-          }
-          scoredModules.sort((a, b) => b.score - a.score);
-        }
+        // ── Search knowledge modules via pre-built inverted index (O(1) per word) ──
+        scoredModules = searchKnowledgeIndex(queryWords);
 
         // ── Search glossary via pre-built index ──
         const glossaryData = (knowledge.modules as Record<string, { content?: string }> | undefined)?.F3?.content || "";
@@ -922,6 +1006,7 @@ ${bodyHtml}
 
       if (scoredPlays.length > 0) {
         hasContent = true;
+        stream.progress(`Found ${scoredPlays.length} matching plays...`);
         stream.markdown("## 🎯 Recommended Solution Plays\n\n");
         for (const { play: p, ratio } of scoredPlays) {
           const relevance = ratio >= 0.8 ? "🟢" : ratio >= 0.5 ? "🟡" : "🟠";
@@ -935,6 +1020,7 @@ ${bodyHtml}
 
       if (scoredModules.length > 0) {
         hasContent = true;
+        stream.progress("Loading knowledge modules...");
         stream.markdown("## 📚 Relevant Knowledge\n\n");
         for (const m of scoredModules.slice(0, 3)) {
           stream.markdown(`### ${m.id} — ${m.name}\n\n`);
@@ -945,6 +1031,7 @@ ${bodyHtml}
 
       if (glossaryMatches.length > 0 && glossaryMatches.length <= 8) {
         hasContent = true;
+        stream.progress("Checking glossary...");
         stream.markdown("## 📖 Glossary\n\n");
         for (const g of glossaryMatches.slice(0, 5)) {
           stream.markdown(`**${g.term}** — ${g.definition.trim()}\n\n`);
