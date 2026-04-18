@@ -44,7 +44,10 @@
     "factory:docs": "node scripts/factory/adapters/docs.js",
     "factory:docs:learning": "node scripts/factory/adapters/docs.js --section=learning",
     "factory:docs:plays": "node scripts/factory/adapters/docs.js --section=solution-plays",
-    "factory:docs:api": "node scripts/factory/adapters/docs.js --section=api-reference"
+    "factory:docs:api": "node scripts/factory/adapters/docs.js --section=api-reference",
+    "factory:repo-split": "node scripts/factory/repo-split.js",
+    "factory:repo-split:classify": "node scripts/factory/repo-split.js --classify",
+    "factory:repo-split:dry-run": "node scripts/factory/repo-split.js --dry-run"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
