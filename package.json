@@ -47,7 +47,8 @@
     "factory:docs:api": "node scripts/factory/adapters/docs.js --section=api-reference",
     "factory:repo-split": "node scripts/factory/repo-split.js",
     "factory:repo-split:classify": "node scripts/factory/repo-split.js --classify",
-    "factory:repo-split:dry-run": "node scripts/factory/repo-split.js --dry-run"
+    "factory:repo-split:dry-run": "node scripts/factory/repo-split.js --dry-run",
+    "moonshot:test": "node engine/moonshot/index.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
