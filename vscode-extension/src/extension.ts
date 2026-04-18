@@ -14,6 +14,70 @@ const legacy = require("./legacy.js");
 
 let _activated = false;
 
+/** Shape of a parsed fai-manifest.json */
+interface FaiManifest {
+  play?: string;
+  version?: string;
+  context?: { waf?: string[]; knowledge?: string[]; [key: string]: unknown };
+  primitives?: Record<string, string[]>;
+  guardrails?: Record<string, number>;
+  [key: string]: unknown;
+}
+
+/** Shape of knowledge.json modules */
+interface KnowledgeData {
+  modules?: Record<string, { title?: string; content?: string }>;
+  [key: string]: unknown;
+}
+
+// Simple LRU cache for @fai search results
+interface FaiSearchResult {
+  scoredPlays: { play: typeof SOLUTION_PLAYS[number]; score: number; ratio: number }[];
+  scoredModules: { id: string; name: string; snippet: string; score: number }[];
+  glossaryMatches: { term: string; definition: string }[];
+}
+
+const faiSearchCache = new Map<string, { result: FaiSearchResult; timestamp: number }>();
+const FAI_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const FAI_CACHE_MAX = 50;
+
+function getCachedFaiResult(query: string): FaiSearchResult | null {
+  const entry = faiSearchCache.get(query);
+  if (entry && Date.now() - entry.timestamp < FAI_CACHE_TTL) return entry.result;
+  if (entry) faiSearchCache.delete(query);
+  return null;
+}
+
+function setCachedFaiResult(query: string, result: FaiSearchResult): void {
+  if (faiSearchCache.size >= FAI_CACHE_MAX) {
+    const oldest = faiSearchCache.keys().next().value;
+    if (oldest) faiSearchCache.delete(oldest);
+  }
+  faiSearchCache.set(query, { result, timestamp: Date.now() });
+}
+
+// Pre-built glossary index (lazy-initialized)
+let _glossaryIndex: Map<string, string> | null = null;
+
+function getGlossaryIndex(glossaryData: string): Map<string, string> {
+  if (_glossaryIndex) return _glossaryIndex;
+  _glossaryIndex = new Map();
+  const termRegex = /^##\s+(.{3,})$/gm;
+  let match;
+  const termPositions: { term: string; start: number }[] = [];
+  while ((match = termRegex.exec(glossaryData)) !== null) {
+    termPositions.push({ term: match[1].trim(), start: match.index });
+  }
+  for (let i = 0; i < termPositions.length; i++) {
+    const { term, start } = termPositions[i];
+    const end = i + 1 < termPositions.length ? termPositions[i + 1].start : glossaryData.length;
+    const defText = glossaryData.substring(start, Math.min(end, start + 500));
+    const defLines = defText.split("\n").filter(l => l.trim() && !l.startsWith("#")).slice(0, 3).join(" ");
+    _glossaryIndex.set(term.toLowerCase(), defLines.substring(0, 200));
+  }
+  return _glossaryIndex;
+}
+
 /** E2: Scan workspace for evaluation data files */
 function scanWorkspaceEvalData(): {
   hasRealData: boolean;
@@ -101,21 +165,23 @@ export function activate(context: vscode.ExtensionContext): void {
   // Legacy handles tree views + existing commands
   try {
     legacy.activate(context);
-  } catch (e: any) {
-    console.error(`FrootAI: legacy activation error — ${e.message}`);
-    vscode.window.showWarningMessage(`FrootAI: Partial activation — ${e.message}`);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`FrootAI: legacy activation error — ${msg}`);
+    vscode.window.showWarningMessage(`FrootAI: Partial activation — ${msg}`);
   }
 
   // New React panel commands — safe registration (skip if already exists)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const safeRegister = (id: string, fn: (...args: any[]) => any) => {
     try { context.subscriptions.push(vscode.commands.registerCommand(id, fn)); }
-    catch (e: any) { console.warn(`FrootAI: skipped ${id} — ${e.message}`); }
+    catch (e: unknown) { const msg = e instanceof Error ? e.message : String(e); console.warn(`FrootAI: skipped ${id} — ${msg}`); }
   };
 
   safeRegister("frootai.searchAll", () => searchAll());
 
-  safeRegister("frootai.openPlayDetail", (playOrId?: any) => {
-    let play = playOrId;
+  safeRegister("frootai.openPlayDetail", (playOrId?: unknown) => {
+    let play = playOrId as typeof SOLUTION_PLAYS[number] | undefined;
     if (typeof playOrId === "string") {
       play = SOLUTION_PLAYS.find(p => p.id === playOrId) ?? SOLUTION_PLAYS[0];
     }
@@ -167,7 +233,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
         // F2: Estimate Cost — loads from cost.json (local → GitHub download → fallback)
         case "cost": {
-          let costData: any = null;
+          interface CostTier { cost: number; sku?: string }
+          interface CostService { name: string; category?: string; purpose?: string; tiers?: { dev?: CostTier; prod?: CostTier; enterprise?: CostTier } }
+          interface CostData { services: CostService[]; totals?: { dev: number; prod: number; ent: number }; optimization_tips?: string[] }
+          let costData: CostData | null = null;
 
           // Try 1: Local workspace
           const wsFolders = vscode.workspace.workspaceFolders;
@@ -193,7 +262,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
           if (costData?.services) {
             // Group by category
-            const groups: Record<string, any[]> = {};
+            const groups: Record<string, CostService[]> = {};
             for (const svc of costData.services) {
               const cat = svc.category || "Other";
               if (!groups[cat]) groups[cat] = [];
@@ -201,12 +270,12 @@ export function activate(context: vscode.ExtensionContext): void {
             }
             totals = costData.totals || { dev: 0, prod: 0, ent: 0 };
             tips = costData.optimization_tips || [];
-            const maxProd = Math.max(...costData.services.map((s: any) => s.tiers?.prod?.cost || 0), 1);
+            const maxProd = Math.max(...costData.services.map((s: CostService) => s.tiers?.prod?.cost || 0), 1);
 
             for (const [catName, svcs] of Object.entries(groups)) {
               const color = catColors[catName] || "#6b7280";
-              const catTotal = (svcs as any[]).reduce((a: number, s: any) => a + (s.tiers?.prod?.cost || 0), 0);
-              const rows = (svcs as any[]).map((s: any) => {
+              const catTotal = svcs.reduce((a: number, s: CostService) => a + (s.tiers?.prod?.cost || 0), 0);
+              const rows = svcs.map((s: CostService) => {
                 const d = s.tiers?.dev?.cost || 0, p = s.tiers?.prod?.cost || 0, e = s.tiers?.enterprise?.cost || 0;
                 const barW = Math.max(Math.round((p / maxProd) * 100), 4);
                 return `<tr>
@@ -416,9 +485,10 @@ ${bodyHtml}
         // Evaluation: use legacy command
         case "runEvaluation": vscode.commands.executeCommand("frootai.runEvaluation"); break;
       }
-      } catch (e: any) {
-        console.error(`FrootAI PlayDetail error: ${e.message}`);
-        vscode.window.showErrorMessage(`FrootAI: ${msg.command} failed — ${e.message}`);
+      } catch (e: unknown) {
+        const errMsg = e instanceof Error ? e.message : String(e);
+        console.error(`FrootAI PlayDetail error: ${errMsg}`);
+        vscode.window.showErrorMessage(`FrootAI: ${msg.command} failed — ${errMsg}`);
       }
     });
   });
@@ -497,8 +567,8 @@ ${bodyHtml}
     });
   });
 
-  safeRegister("frootai.openScaffoldWizard", (initialPlay?: any) => {
-    const panel = createReactPanel(context.extensionUri, "frootai.scaffold", "Scaffold Wizard", { panel: "scaffold", plays: SOLUTION_PLAYS, initialPlay: initialPlay || null });
+  safeRegister("frootai.openScaffoldWizard", (initialPlay?: unknown) => {
+    const panel = createReactPanel(context.extensionUri, "frootai.scaffold", "Scaffold Wizard", { panel: "scaffold", plays: SOLUTION_PLAYS, initialPlay: (initialPlay as typeof SOLUTION_PLAYS[number]) ?? null });
     panel.webview.onDidReceiveMessage((msg: any) => {
       if (msg.command === "scaffold") vscode.commands.executeCommand("frootai.initDevKit");
       if (msg.command === "openFolder") vscode.commands.executeCommand("vscode.openFolder");
@@ -576,7 +646,7 @@ ${bodyHtml}
       hooks: loadJSON("hooks.json"),
       plugins: loadJSON("plugins.json"),
     };
-    const total = Object.values(primitives).reduce((s: number, a: any[]) => s + a.length, 0);
+    const total = Object.values(primitives).reduce((s: number, a: unknown[]) => s + a.length, 0);
     const panel = createReactPanel(context.extensionUri, "frootai.primitivesCatalog", `FAI Primitives (${total})`, { panel: "primitivesCatalog" as any, primitives });
     panel.webview.onDidReceiveMessage(async (msg: any) => {
       if (msg.command === "openUrl" && msg.url) {
@@ -640,8 +710,9 @@ ${bodyHtml}
                 vscode.window.showInformationMessage(`✅ Installed ${folderName}/${primaryFile} → ${cfg.destDir}/${folderName}/`);
                 vscode.commands.executeCommand("frootai.trackRecentPrimitive", msg.primitiveType, msg.primitiveId, folderName);
               }
-            } catch (err: any) {
-              vscode.window.showErrorMessage(`Failed to install ${msg.primitiveId}: ${err.message}`);
+            } catch (err: unknown) {
+              const errMsg = err instanceof Error ? err.message : String(err);
+              vscode.window.showErrorMessage(`Failed to install ${msg.primitiveId}: ${errMsg}`);
             }
           }
         );
@@ -654,15 +725,17 @@ ${bodyHtml}
 
   // ─── Install Agent via vscode:// protocol ───
   safeRegister("frootai.installAgent", async () => {
-    const agents = (() => {
+    interface PrimitiveEntry { name?: string; id: string; description?: string; file?: string }
+    const agents: PrimitiveEntry[] = (() => {
       try { return JSON.parse(fs.readFileSync(path.join(context.extensionPath, "data", "agents.json"), "utf-8")); } catch { return []; }
     })();
     const picked = await vscode.window.showQuickPick(
-      agents.map((a: any) => ({ label: a.name || a.id, description: a.description, id: a.id, file: a.file })),
+      agents.map(a => ({ label: a.name || a.id, description: a.description, id: a.id, file: a.file })),
       { placeHolder: "Select an agent to install in VS Code Copilot Chat", matchOnDescription: true }
     );
     if (picked) {
-      const rawUrl = `https://raw.githubusercontent.com/frootai/frootai/main/${(picked as any).file || `agents/${(picked as any).id}.agent.md`}`;
+      const p = picked as typeof picked & { file?: string; id: string };
+      const rawUrl = `https://raw.githubusercontent.com/frootai/frootai/main/${p.file || `agents/${p.id}.agent.md`}`;
       const uri = `vscode://github.copilot-chat/createAgent?url=${encodeURIComponent(rawUrl)}`;
       vscode.env.openExternal(vscode.Uri.parse(uri));
     }
@@ -670,15 +743,17 @@ ${bodyHtml}
 
   // ─── Install Instruction via vscode:// protocol ───
   safeRegister("frootai.installInstruction", async () => {
-    const instructions = (() => {
+    interface PrimitiveEntry { name?: string; id: string; description?: string; file?: string }
+    const instructions: PrimitiveEntry[] = (() => {
       try { return JSON.parse(fs.readFileSync(path.join(context.extensionPath, "data", "instructions.json"), "utf-8")); } catch { return []; }
     })();
     const picked = await vscode.window.showQuickPick(
-      instructions.map((i: any) => ({ label: i.name || i.id, description: i.description, id: i.id, file: i.file })),
+      instructions.map(i => ({ label: i.name || i.id, description: i.description, id: i.id, file: i.file })),
       { placeHolder: "Select an instruction to install", matchOnDescription: true }
     );
     if (picked) {
-      const rawUrl = `https://raw.githubusercontent.com/frootai/frootai/main/${(picked as any).file || `instructions/${(picked as any).id}.instructions.md`}`;
+      const p = picked as typeof picked & { file?: string; id: string };
+      const rawUrl = `https://raw.githubusercontent.com/frootai/frootai/main/${p.file || `instructions/${p.id}.instructions.md`}`;
       const uri = `vscode://github.copilot-chat/createAgent?url=${encodeURIComponent(rawUrl)}`;
       vscode.env.openExternal(vscode.Uri.parse(uri));
     }
@@ -741,7 +816,7 @@ ${bodyHtml}
   // ─── Agent FAI Chat Participant ───
   try {
     const knowledgePath = path.join(context.extensionPath, "knowledge.json");
-    let knowledge: any = {};
+    let knowledge: KnowledgeData = {};
     try { knowledge = JSON.parse(fs.readFileSync(knowledgePath, "utf-8")); } catch {}
 
     const participant = vscode.chat.createChatParticipant("frootai.fai", async (request, chatContext, stream, token) => {
@@ -764,57 +839,64 @@ ${bodyHtml}
         return regex.test(text);
       };
 
-      // ── Search plays with rich fields (whole-word matching) ──
-      const scoredPlays = SOLUTION_PLAYS.map(p => {
-        const fields = [
-          p.id, p.name, p.desc || "", p.infra || "", p.cat || "",
-          p.tagline || "", p.pattern || "",
-        ].join(" ");
-        const matchCount = queryWords.filter(w => wordMatch(fields, w)).length;
-        return { play: p, score: matchCount, ratio: matchCount / queryWords.length };
-      }).filter(s => s.score > 0 && s.ratio >= 0.4)
-        .sort((a, b) => b.ratio - a.ratio || b.score - a.score)
-        .slice(0, 5);
+      // ── Check LRU cache before doing full search ──
+      const cacheKey = [...queryWords].sort().join(" ");
+      const cached = getCachedFaiResult(cacheKey);
 
-      // ── Search knowledge modules (whole-word, deeper content) ──
-      const scoredModules: { id: string; name: string; snippet: string; score: number }[] = [];
-      if (knowledge.modules) {
-        for (const [id, mod] of Object.entries(knowledge.modules) as [string, any][]) {
-          if (id === "F3") continue; // Glossary searched separately
-          const text = `${mod.title || ""} ${(mod.content || "").substring(0, 3000)}`;
-          const matchCount = queryWords.filter((w: string) => wordMatch(text, w)).length;
-          if (matchCount > 0 && matchCount / queryWords.length >= 0.4) {
-            const paras = (mod.content || "").split(/\n\n/).filter((p: string) => p.length > 40);
-            const bestPara = paras.find((p: string) =>
-              queryWords.filter((w: string) => wordMatch(p, w)).length >= Math.max(1, matchCount - 1)
-            ) || paras[0] || (mod.content || "").substring(0, 300);
-            scoredModules.push({ id, name: mod.title || id, snippet: bestPara.substring(0, 400), score: matchCount });
+      let scoredPlays: FaiSearchResult["scoredPlays"];
+      let scoredModules: FaiSearchResult["scoredModules"];
+      let glossaryMatches: FaiSearchResult["glossaryMatches"];
+
+      if (cached) {
+        scoredPlays = cached.scoredPlays;
+        scoredModules = cached.scoredModules;
+        glossaryMatches = cached.glossaryMatches;
+      } else {
+        // ── Search plays with rich fields (whole-word matching) ──
+        scoredPlays = SOLUTION_PLAYS.map(p => {
+          const fields = [
+            p.id, p.name, p.desc || "", p.infra || "", p.cat || "",
+            p.tagline || "", p.pattern || "",
+          ].join(" ");
+          const matchCount = queryWords.filter(w => wordMatch(fields, w)).length;
+          return { play: p, score: matchCount, ratio: matchCount / queryWords.length };
+        }).filter(s => s.score > 0 && s.ratio >= 0.4)
+          .sort((a, b) => b.ratio - a.ratio || b.score - a.score)
+          .slice(0, 5);
+
+        // ── Search knowledge modules (whole-word, deeper content) ──
+        scoredModules = [];
+        if (knowledge.modules) {
+          for (const [id, mod] of Object.entries(knowledge.modules) as [string, { title?: string; content?: string }][]) {
+            if (id === "F3") continue; // Glossary searched separately
+            const text = `${mod.title || ""} ${(mod.content || "").substring(0, 3000)}`;
+            const matchCount = queryWords.filter((w: string) => wordMatch(text, w)).length;
+            if (matchCount > 0 && matchCount / queryWords.length >= 0.4) {
+              const paras = (mod.content || "").split(/\n\n/).filter((p: string) => p.length > 40);
+              const bestPara = paras.find((p: string) =>
+                queryWords.filter((w: string) => wordMatch(p, w)).length >= Math.max(1, matchCount - 1)
+              ) || paras[0] || (mod.content || "").substring(0, 300);
+              scoredModules.push({ id, name: mod.title || id, snippet: bestPara.substring(0, 400), score: matchCount });
+            }
+          }
+          scoredModules.sort((a, b) => b.score - a.score);
+        }
+
+        // ── Search glossary via pre-built index ──
+        const glossaryData = (knowledge.modules as Record<string, { content?: string }> | undefined)?.F3?.content || "";
+        glossaryMatches = [];
+        if (glossaryData) {
+          const glossaryIndex = getGlossaryIndex(glossaryData);
+          for (const [termLower, definition] of glossaryIndex) {
+            if (queryWords.some(w => wordMatch(termLower, w) || termLower.includes(w))) {
+              const displayTerm = termLower.charAt(0).toUpperCase() + termLower.slice(1);
+              glossaryMatches.push({ term: displayTerm, definition });
+            }
           }
         }
-        scoredModules.sort((a, b) => b.score - a.score);
-      }
 
-      // ── Search glossary (only terms with 3+ chars, whole-word) ──
-      const glossaryData = knowledge.modules?.F3?.content || "";
-      const glossaryMatches: { term: string; definition: string }[] = [];
-      if (glossaryData) {
-        const termRegex = /^##\s+(.{3,})$/gm;
-        let match;
-        const termPositions: { term: string; start: number }[] = [];
-        while ((match = termRegex.exec(glossaryData)) !== null) {
-          termPositions.push({ term: match[1].trim(), start: match.index });
-        }
-        for (let i = 0; i < termPositions.length; i++) {
-          const { term, start } = termPositions[i];
-          const end = i + 1 < termPositions.length ? termPositions[i + 1].start : glossaryData.length;
-          const defText = glossaryData.substring(start, Math.min(end, start + 500));
-          const termLower = term.toLowerCase();
-          // Only match if a query word matches the term name (not deep definition)
-          if (queryWords.some(w => wordMatch(termLower, w) || termLower.includes(w))) {
-            const defLines = defText.split("\n").filter((l: string) => l.trim() && !l.startsWith("#")).slice(0, 3).join(" ");
-            glossaryMatches.push({ term, definition: defLines.substring(0, 200) });
-          }
-        }
+        // Cache computed results
+        setCachedFaiResult(cacheKey, { scoredPlays, scoredModules, glossaryMatches });
       }
 
       // ── Build rich response ──
@@ -861,8 +943,9 @@ ${bodyHtml}
 
     participant.iconPath = vscode.Uri.joinPath(context.extensionUri, "media", "frootai-mark.png");
     context.subscriptions.push(participant);
-  } catch (e: any) {
-    console.warn(`FrootAI: Chat participant not available — ${e.message}`);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn(`FrootAI: Chat participant not available — ${msg}`);
   }
 
   // ─── First Install: Show Welcome panel ───
@@ -969,13 +1052,14 @@ ${bodyHtml}
     const diagnostics: vscode.Diagnostic[] = [];
     const text = doc.getText();
 
-    let json: any;
+    let json: FaiManifest;
     try {
       json = JSON.parse(text);
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : String(e);
       diagnostics.push(new vscode.Diagnostic(
         new vscode.Range(0, 0, 0, 1),
-        `Invalid JSON: ${e.message}`,
+        `Invalid JSON: ${errMsg}`,
         vscode.DiagnosticSeverity.Error
       ));
       diagCollection.set(doc.uri, diagnostics);
@@ -1204,7 +1288,7 @@ class FaiManifestCodeLensProvider implements vscode.CodeLensProvider {
     try {
       const json = JSON.parse(document.getText());
       const playId = json.play || "unknown";
-      const primCount = Object.values(json.primitives || {}).reduce((a: number, v: any) => a + (Array.isArray(v) ? v.length : 0), 0);
+      const primCount = Object.values(json.primitives || {}).reduce((a: number, v: unknown) => a + (Array.isArray(v) ? v.length : 0), 0);
       const wafCount = (json.context?.waf || []).length;
       lenses.push(new vscode.CodeLens(topRange, {
         title: `$(info) Play: ${playId} · ${primCount} primitives · ${wafCount} WAF pillars`,
