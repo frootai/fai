@@ -11,6 +11,7 @@
  */
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 const { parseFrontmatter, parseJson, countLines } = require("./utils/frontmatter");
 
 const REPO_ROOT = process.env.FROOTAI_PUBLIC_REPO || path.resolve(__dirname, "../..");
@@ -348,11 +349,145 @@ function countMcpTools(file) {
 // The order doesn't affect correctness — each scanner is independent —
 // but agents are scanned first because they're the most likely to have
 // issues (frontmatter mistakes) and we want fast feedback.
-// Incremental mode (--incremental flag) is declared in the CLI header
-// but not yet implemented; when added, it will use file mtime to skip
-// unchanged files and merge into the previous harvest.json.
+//
+// Incremental mode (--incremental): only re-harvests primitives from
+// files changed in the current git staging area, then merges results
+// into the previous harvest.json.
 
-function harvest() {
+/**
+ * Get list of files changed in git staging area.
+ * @returns {string[]} Relative paths from repo root
+ */
+function getIncrementalFiles() {
+  try {
+    const output = execSync("git diff --cached --name-only", { cwd: REPO_ROOT, encoding: "utf8" });
+    return output.trim().split("\n").filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Primitive file patterns used to filter incremental changes.
+ * Maps a pattern test to the harvest type it affects.
+ */
+const PRIMITIVE_PATTERNS = [
+  { test: (f) => f.endsWith(".agent.md"), type: "agents" },
+  { test: (f) => f.endsWith("SKILL.md"), type: "skills" },
+  { test: (f) => f.endsWith(".instructions.md"), type: "instructions" },
+  { test: (f) => f.endsWith("hooks.json") && !f.includes("node_modules"), type: "hooks" },
+  { test: (f) => f.endsWith("plugin.json") && !f.includes("node_modules"), type: "plugins" },
+  { test: (f) => f.startsWith("workflows/") && f.endsWith(".md"), type: "workflows" },
+  { test: (f) => f.startsWith("cookbook/") && f.endsWith(".md"), type: "cookbook" },
+  { test: (f) => /^solution-plays\/\d{2,3}-/.test(f), type: "plays" },
+  { test: (f) => f.startsWith("docs/") && f.endsWith(".md"), type: "modules" },
+];
+
+/**
+ * Determine which primitive types are affected by a set of changed files.
+ * @param {string[]} files
+ * @returns {Set<string>}
+ */
+function affectedTypes(files) {
+  const types = new Set();
+  for (const f of files) {
+    // Normalize to forward slashes for pattern matching
+    const normalized = f.replace(/\\/g, "/");
+    for (const pattern of PRIMITIVE_PATTERNS) {
+      if (pattern.test(normalized)) {
+        types.add(pattern.type);
+        break;
+      }
+    }
+  }
+  return types;
+}
+
+function harvest(incremental = false) {
+  const isIncremental = incremental || process.argv.includes("--incremental");
+
+  if (isIncremental) {
+    console.log("🏭 FAI Factory — Harvester (INCREMENTAL)");
+    console.log("══════════════════════════════════════");
+    console.log(`Repo: ${REPO_ROOT}\n`);
+
+    const changedFiles = getIncrementalFiles();
+    const primitiveFiles = changedFiles.filter((f) =>
+      PRIMITIVE_PATTERNS.some((p) => p.test(f.replace(/\\/g, "/")))
+    );
+
+    if (primitiveFiles.length === 0) {
+      console.log("  ℹ️  No primitive files in staging area. Nothing to do.");
+      // Return previous harvest if it exists
+      const prevPath = path.join(REPO_ROOT, ".factory", "harvest.json");
+      if (fs.existsSync(prevPath)) {
+        return JSON.parse(fs.readFileSync(prevPath, "utf8"));
+      }
+      return { agents: [], skills: [], instructions: [], hooks: [], plugins: [], workflows: [], cookbook: [], plays: [], modules: [], mcpTools: 0 };
+    }
+
+    console.log(`  📝 ${changedFiles.length} staged files, ${primitiveFiles.length} are primitives`);
+    const typesToRefresh = affectedTypes(primitiveFiles);
+    console.log(`  🔄 Types to refresh: ${[...typesToRefresh].join(", ")}\n`);
+
+    // Load previous harvest as base
+    const prevPath = path.join(REPO_ROOT, ".factory", "harvest.json");
+    let base = { agents: [], skills: [], instructions: [], hooks: [], plugins: [], workflows: [], cookbook: [], plays: [], modules: [], mcpTools: 0 };
+    if (fs.existsSync(prevPath)) {
+      base = JSON.parse(fs.readFileSync(prevPath, "utf8"));
+    }
+
+    const t0 = Date.now();
+
+    // Re-scan only affected types
+    if (typesToRefresh.has("agents")) {
+      base.agents = scanAgents("agents");
+      console.log(`  ✅ Agents:       ${base.agents.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("skills")) {
+      base.skills = scanSkills("skills");
+      console.log(`  ✅ Skills:       ${base.skills.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("instructions")) {
+      base.instructions = scanInstructions("instructions");
+      console.log(`  ✅ Instructions: ${base.instructions.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("hooks")) {
+      base.hooks = scanHooks("hooks");
+      console.log(`  ✅ Hooks:        ${base.hooks.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("plugins")) {
+      base.plugins = scanPlugins("plugins");
+      console.log(`  ✅ Plugins:      ${base.plugins.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("workflows")) {
+      base.workflows = scanMarkdownFiles("workflows");
+      console.log(`  ✅ Workflows:    ${base.workflows.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("cookbook")) {
+      base.cookbook = scanMarkdownFiles("cookbook");
+      console.log(`  ✅ Cookbook:      ${base.cookbook.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("plays")) {
+      base.plays = scanPlays("solution-plays");
+      console.log(`  ✅ Plays:        ${base.plays.length} (re-scanned)`);
+    }
+    if (typesToRefresh.has("modules")) {
+      base.modules = scanModules("docs");
+      console.log(`  ✅ Modules:      ${base.modules.length} (re-scanned)`);
+    }
+
+    const elapsed = Date.now() - t0;
+    console.log(`\n  Incremental harvest in ${elapsed}ms`);
+
+    const outPath = path.join(REPO_ROOT, ".factory", "harvest.json");
+    fs.writeFileSync(outPath, JSON.stringify(base, null, 2));
+    console.log(`  📦 Written: .factory/harvest.json (${Math.round(fs.statSync(outPath).size / 1024)}KB)`);
+
+    return base;
+  }
+
+  // ─── Full scan ────────────────────────────────────────────────────────
   console.log("🏭 FAI Factory — Harvester");
   console.log("══════════════════════════════════════");
   console.log(`Repo: ${REPO_ROOT}\n`);

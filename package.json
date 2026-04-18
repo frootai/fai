@@ -48,6 +48,8 @@
     "factory:repo-split": "node scripts/factory/repo-split.js",
     "factory:repo-split:classify": "node scripts/factory/repo-split.js --classify",
     "factory:repo-split:dry-run": "node scripts/factory/repo-split.js --dry-run",
+    "factory:test": "node scripts/factory/test.js",
+    "factory:search-quality": "node scripts/factory/golden-queries.js",
     "moonshot:test": "node engine/moonshot/index.js"
   },
   "devDependencies": {

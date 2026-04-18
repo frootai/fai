@@ -130,11 +130,38 @@ function catalog() {
     crossRefs,
   };
 
+  // Inject @generated metadata into the catalog
+  catalog._generated = {
+    tool: "FAI Factory",
+    command: "npm run factory:catalog",
+    warning: "DO NOT EDIT MANUALLY — regenerate with: npm run factory",
+  };
+
   // Write catalog
   const catalogPath = path.join(REPO_ROOT, ".factory", "fai-catalog.json");
 
-  // Backup previous catalog for diff
+  // Snapshot: keep last 3 catalogs before overwriting
   if (fs.existsSync(catalogPath)) {
+    const snapshotDir = path.join(REPO_ROOT, ".factory", "snapshots");
+    if (!fs.existsSync(snapshotDir)) {
+      fs.mkdirSync(snapshotDir, { recursive: true });
+    }
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "_").slice(0, 19);
+    const snapshotPath = path.join(snapshotDir, `fai-catalog-${timestamp}.json`);
+    fs.copyFileSync(catalogPath, snapshotPath);
+    console.log(`  📸 Snapshot saved: snapshots/fai-catalog-${timestamp}.json`);
+
+    // Prune: keep only 3 most recent snapshots
+    const snapshots = fs.readdirSync(snapshotDir)
+      .filter((f) => f.startsWith("fai-catalog-") && f.endsWith(".json"))
+      .sort()
+      .reverse();
+    for (const old of snapshots.slice(3)) {
+      fs.unlinkSync(path.join(snapshotDir, old));
+      console.log(`  🗑️  Pruned old snapshot: ${old}`);
+    }
+
+    // Backup previous catalog for diff
     const prevPath = path.join(REPO_ROOT, ".factory", "fai-catalog.prev.json");
     fs.copyFileSync(catalogPath, prevPath);
     console.log("  📦 Previous catalog backed up to fai-catalog.prev.json");
@@ -170,6 +197,41 @@ function catalog() {
   console.log(`  Modules:      ${stats.modules}`);
   console.log(`  ─────────────────────────────────────`);
   console.log(`  📦 Written: .factory/fai-catalog.json (${sizeKB}KB)`);
+
+  // ── Generate manifest-index.json ────────────────────────────────────────
+  // Scans all solution-plays/*/spec/fai-manifest.json to build a lightweight
+  // index for quick lookups without parsing the full catalog.
+  const manifestIndex = { _generated: { tool: "FAI Factory", command: "npm run factory:catalog", warning: "DO NOT EDIT MANUALLY — regenerate with: npm run factory" }, plays: {} };
+  const playsDir = path.join(REPO_ROOT, "solution-plays");
+  if (fs.existsSync(playsDir)) {
+    const playDirs = fs.readdirSync(playsDir).filter((d) => /^\d{2,3}-/.test(d));
+    for (const d of playDirs) {
+      const manifestPath = path.join(playsDir, d, "spec", "fai-manifest.json");
+      if (!fs.existsSync(manifestPath)) continue;
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+        const prims = manifest.primitives || {};
+        const primCount =
+          (Array.isArray(prims.agents) ? prims.agents.length : 0) +
+          (Array.isArray(prims.skills) ? prims.skills.length : 0) +
+          (Array.isArray(prims.instructions) ? prims.instructions.length : 0) +
+          (Array.isArray(prims.hooks) ? prims.hooks.length : 0);
+        manifestIndex.plays[d] = {
+          version: manifest.version || "0.0.0",
+          manifestPath: `solution-plays/${d}/spec/fai-manifest.json`,
+          primitiveCount: primCount,
+          wafPillars: manifest.context?.waf || [],
+          guardrails: manifest.primitives?.guardrails || null,
+          hasInfra: fs.existsSync(path.join(playsDir, d, "infra")),
+          hasTuneKit: fs.existsSync(path.join(playsDir, d, "config")),
+        };
+      } catch { /* skip malformed manifests */ }
+    }
+  }
+  const manifestIndexPath = path.join(REPO_ROOT, ".factory", "manifest-index.json");
+  fs.writeFileSync(manifestIndexPath, JSON.stringify(manifestIndex, null, 2));
+  const miSizeKB = Math.round(fs.statSync(manifestIndexPath).size / 1024);
+  console.log(`  📦 Written: .factory/manifest-index.json (${miSizeKB}KB, ${Object.keys(manifestIndex.plays).length} plays indexed)`);
 
   return catalog;
 }

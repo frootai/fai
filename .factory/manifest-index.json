@@ -1,0 +1,1838 @@
+{
+  "_generated": {
+    "tool": "FAI Factory",
+    "command": "npm run factory:catalog",
+    "warning": "DO NOT EDIT MANUALLY — regenerate with: npm run factory"
+  },
+  "plays": {
+    "01-enterprise-rag": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/01-enterprise-rag/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.95,
+        "coherence": 0.9,
+        "relevance": 0.85,
+        "safety": 0,
+        "costPerQuery": 0.01
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "02-ai-landing-zone": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/02-ai-landing-zone/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "03-deterministic-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/03-deterministic-agent/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "04-call-center-voice-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/04-call-center-voice-ai/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "05-it-ticket-resolution": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/05-it-ticket-resolution/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "06-document-intelligence": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/06-document-intelligence/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "07-multi-agent-service": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/07-multi-agent-service/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "08-copilot-studio-bot": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/08-copilot-studio-bot/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "09-ai-search-portal": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/09-ai-search-portal/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "10-content-moderation": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/10-content-moderation/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "reliability"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "100-fai-meta-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/100-fai-meta-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "reliability",
+        "security",
+        "responsible-ai",
+        "cost-optimization",
+        "operational-excellence",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "101-pester-test-development": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/101-pester-test-development/spec/fai-manifest.json",
+      "primitiveCount": 9,
+      "wafPillars": [
+        "reliability",
+        "operational-excellence",
+        "security"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "11-ai-landing-zone-advanced": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/11-ai-landing-zone-advanced/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "12-model-serving-aks": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/12-model-serving-aks/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "13-fine-tuning-workflow": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/13-fine-tuning-workflow/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "14-cost-optimized-ai-gateway": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/14-cost-optimized-ai-gateway/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "cost-optimization",
+        "performance-efficiency",
+        "reliability",
+        "security"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "15-multi-modal-docproc": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/15-multi-modal-docproc/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "16-copilot-teams-extension": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/16-copilot-teams-extension/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "17-ai-observability": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/17-ai-observability/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "operational-excellence",
+        "reliability",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "18-prompt-management": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/18-prompt-management/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "security",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "19-edge-ai-phi4": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/19-edge-ai-phi4/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "cost-optimization",
+        "performance-efficiency",
+        "security"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "20-anomaly-detection": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/20-anomaly-detection/spec/fai-manifest.json",
+      "primitiveCount": 12,
+      "wafPillars": [
+        "reliability",
+        "security",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "21-agentic-rag": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/21-agentic-rag/spec/fai-manifest.json",
+      "primitiveCount": 9,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.95,
+        "coherence": 0.9,
+        "relevance": 0.9,
+        "safety": 0,
+        "costPerQuery": 0.02
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "22-multi-agent-swarm": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/22-multi-agent-swarm/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.9,
+        "coherence": 0.92,
+        "relevance": 0.88,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "23-browser-automation-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/23-browser-automation-agent/spec/fai-manifest.json",
+      "primitiveCount": 7,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.9,
+        "safety": 0,
+        "costPerQuery": 0.03
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "24-ai-code-review-pipeline": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/24-ai-code-review-pipeline/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "safety": 0,
+        "costPerQuery": 0.05,
+        "relevance": 0.8,
+        "groundedness": 0.85,
+        "coherence": 0.8
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "25-conversation-memory-layer": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/25-conversation-memory-layer/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "cost-optimization",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "safety": 0,
+        "costPerQuery": 0.05,
+        "relevance": 0.8,
+        "groundedness": 0.85,
+        "coherence": 0.8
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "26-semantic-search-engine": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/26-semantic-search-engine/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "safety": 0,
+        "costPerQuery": 0.05,
+        "relevance": 0.8,
+        "groundedness": 0.85,
+        "coherence": 0.8
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "27-ai-data-pipeline": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/27-ai-data-pipeline/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "safety": 0,
+        "costPerQuery": 0.05,
+        "relevance": 0.8,
+        "groundedness": 0.85,
+        "coherence": 0.8
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "28-knowledge-graph-rag": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/28-knowledge-graph-rag/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "cost-optimization",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "safety": 0,
+        "costPerQuery": 0.05,
+        "relevance": 0.8,
+        "groundedness": 0.85,
+        "coherence": 0.8
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "29-mcp-gateway": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/29-mcp-gateway/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "safety": 0,
+        "costPerQuery": 0.05,
+        "relevance": 0.8,
+        "groundedness": 0.85,
+        "coherence": 0.8
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "30-ai-security-hardening": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/30-ai-security-hardening/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "safety": 0,
+        "costPerQuery": 0.05,
+        "relevance": 0.8,
+        "groundedness": 0.85,
+        "coherence": 0.8
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "31-low-code-ai-builder": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/31-low-code-ai-builder/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "32-ai-powered-testing": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/32-ai-powered-testing/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "33-voice-ai-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/33-voice-ai-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "34-edge-ai-deployment": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/34-edge-ai-deployment/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "35-ai-compliance-engine": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/35-ai-compliance-engine/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "36-multimodal-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/36-multimodal-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "37-ai-powered-devops": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/37-ai-powered-devops/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "38-document-understanding-v2": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/38-document-understanding-v2/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "39-ai-meeting-assistant": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/39-ai-meeting-assistant/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "40-copilot-studio-advanced": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/40-copilot-studio-advanced/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "41-ai-red-teaming": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/41-ai-red-teaming/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "42-computer-use-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/42-computer-use-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "43-ai-video-generation": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/43-ai-video-generation/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "responsible-ai",
+        "performance-efficiency",
+        "reliability"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "44-foundry-local-on-device": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/44-foundry-local-on-device/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "45-realtime-event-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/45-realtime-event-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "performance-efficiency",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "46-healthcare-clinical-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/46-healthcare-clinical-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "reliability",
+        "operational-excellence",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "47-synthetic-data-factory": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/47-synthetic-data-factory/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "48-ai-model-governance": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/48-ai-model-governance/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "operational-excellence",
+        "security",
+        "responsible-ai",
+        "reliability",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "49-creative-ai-studio": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/49-creative-ai-studio/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "responsible-ai",
+        "performance-efficiency",
+        "reliability",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "50-financial-risk-intelligence": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/50-financial-risk-intelligence/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai",
+        "cost-optimization",
+        "operational-excellence",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "51-autonomous-coding-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/51-autonomous-coding-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "52-ai-api-gateway-v2": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/52-ai-api-gateway-v2/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "performance-efficiency",
+        "cost-optimization",
+        "reliability"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "53-legal-document-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/53-legal-document-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "54-ai-customer-support-v2": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/54-ai-customer-support-v2/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "responsible-ai",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "55-supply-chain-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/55-supply-chain-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "reliability",
+        "cost-optimization",
+        "operational-excellence",
+        "security"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "56-semantic-code-search": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/56-semantic-code-search/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "performance-efficiency",
+        "reliability",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "57-ai-translation-engine": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/57-ai-translation-engine/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "performance-efficiency",
+        "cost-optimization",
+        "reliability",
+        "responsible-ai"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "58-digital-twin-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/58-digital-twin-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "reliability",
+        "performance-efficiency",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "59-ai-recruiter-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/59-ai-recruiter-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "reliability",
+        "cost-optimization"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "60-responsible-ai-dashboard": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/60-responsible-ai-dashboard/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "security",
+        "operational-excellence",
+        "reliability"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "61-content-moderation-v2": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/61-content-moderation-v2/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "security",
+        "reliability",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "62-federated-learning-pipeline": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/62-federated-learning-pipeline/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "63-fraud-detection-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/63-fraud-detection-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "64-ai-sales-assistant": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/64-ai-sales-assistant/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "65-ai-training-curriculum": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/65-ai-training-curriculum/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "66-ai-infrastructure-optimizer": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/66-ai-infrastructure-optimizer/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "performance-efficiency",
+        "reliability",
+        "operational-excellence",
+        "security"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "67-ai-knowledge-management": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/67-ai-knowledge-management/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "operational-excellence",
+        "cost-optimization",
+        "performance-efficiency"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "68-predictive-maintenance-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/68-predictive-maintenance-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "reliability",
+        "cost-optimization",
+        "operational-excellence",
+        "performance-efficiency",
+        "security"
+      ],
+      "guardrails": {
+        "groundedness": 0.85,
+        "coherence": 0.8,
+        "relevance": 0.8,
+        "safety": 0,
+        "costPerQuery": 0.05
+      },
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "69-carbon-footprint-tracker": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/69-carbon-footprint-tracker/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "operational-excellence",
+        "responsible-ai",
+        "reliability"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "70-esg-compliance-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/70-esg-compliance-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "security",
+        "operational-excellence",
+        "reliability"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "71-smart-energy-grid-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/71-smart-energy-grid-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "performance-efficiency",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence",
+        "security"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "72-climate-risk-assessor": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/72-climate-risk-assessor/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "security",
+        "cost-optimization"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "73-waste-recycling-optimizer": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/73-waste-recycling-optimizer/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "cost-optimization",
+        "performance-efficiency",
+        "reliability"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "74-ai-tutoring-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/74-ai-tutoring-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "75-exam-generation-engine": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/75-exam-generation-engine/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "76-accessibility-learning-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/76-accessibility-learning-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "performance-efficiency",
+        "security"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "77-research-paper-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/77-research-paper-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "performance-efficiency",
+        "security"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "78-precision-agriculture-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/78-precision-agriculture-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency",
+        "responsible-ai"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "79-food-safety-inspector-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/79-food-safety-inspector-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "responsible-ai",
+        "operational-excellence"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "80-biodiversity-monitor": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/80-biodiversity-monitor/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "cost-optimization",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "81-property-valuation-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/81-property-valuation-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "reliability",
+        "responsible-ai",
+        "security",
+        "cost-optimization"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "82-construction-safety-ai": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/82-construction-safety-ai/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "security",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "83-building-energy-optimizer": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/83-building-energy-optimizer/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "performance-efficiency",
+        "reliability",
+        "responsible-ai"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "84-citizen-services-chatbot": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/84-citizen-services-chatbot/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "security",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "85-policy-impact-analyzer": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/85-policy-impact-analyzer/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "security",
+        "operational-excellence"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "86-public-safety-analytics": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/86-public-safety-analytics/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "security",
+        "reliability",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "87-dynamic-pricing-engine": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/87-dynamic-pricing-engine/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "performance-efficiency",
+        "reliability",
+        "responsible-ai"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "88-visual-product-search": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/88-visual-product-search/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "performance-efficiency",
+        "reliability",
+        "responsible-ai",
+        "cost-optimization"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "89-retail-inventory-predictor": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/89-retail-inventory-predictor/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "reliability",
+        "operational-excellence",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "90-network-optimization-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/90-network-optimization-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "performance-efficiency",
+        "reliability",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "91-customer-churn-predictor": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/91-customer-churn-predictor/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "cost-optimization",
+        "reliability",
+        "responsible-ai",
+        "performance-efficiency"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "92-telecom-fraud-shield": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/92-telecom-fraud-shield/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "reliability",
+        "performance-efficiency",
+        "responsible-ai"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "93-continual-learning-agent": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/93-continual-learning-agent/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "reliability",
+        "responsible-ai",
+        "performance-efficiency",
+        "cost-optimization"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "94-ai-podcast-generator": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/94-ai-podcast-generator/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "performance-efficiency",
+        "cost-optimization",
+        "reliability"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "95-multimodal-search-v2": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/95-multimodal-search-v2/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "performance-efficiency",
+        "reliability",
+        "responsible-ai",
+        "cost-optimization"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "96-realtime-voice-agent-v2": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/96-realtime-voice-agent-v2/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "performance-efficiency",
+        "reliability",
+        "responsible-ai",
+        "security"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "97-ai-data-marketplace": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/97-ai-data-marketplace/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "cost-optimization",
+        "operational-excellence"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "98-agent-evaluation-platform": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/98-agent-evaluation-platform/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "responsible-ai",
+        "reliability",
+        "operational-excellence",
+        "cost-optimization"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    },
+    "99-enterprise-ai-governance-hub": {
+      "version": "1.0.0",
+      "manifestPath": "solution-plays/99-enterprise-ai-governance-hub/spec/fai-manifest.json",
+      "primitiveCount": 10,
+      "wafPillars": [
+        "security",
+        "responsible-ai",
+        "operational-excellence",
+        "reliability",
+        "cost-optimization"
+      ],
+      "guardrails": null,
+      "hasInfra": true,
+      "hasTuneKit": true
+    }
+  }
+}

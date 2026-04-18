@@ -1,0 +1,41 @@
+{
+  "_generated": {
+    "tool": "FAI Factory",
+    "command": "npm run factory (agent-fai adapter)",
+    "timestamp": "2026-04-18T13:57:38.248Z",
+    "warning": "DO NOT EDIT MANUALLY — regenerate with: npm run factory"
+  },
+  "version": "1.0.0",
+  "commit": "abc1234",
+  "stats": {
+    "agents": 200,
+    "skills": 300,
+    "instructions": 150,
+    "hooks": 10,
+    "plugins": 70,
+    "workflows": 12,
+    "cookbook": 16,
+    "plays": 100,
+    "modules": 15,
+    "mcpTools": 25,
+    "totalPrimitives": 800
+  },
+  "embeddedStats": {
+    "agents": 300,
+    "skills": 300,
+    "instructions": 300,
+    "hooks": 100
+  },
+  "crossRefCount": 5,
+  "plays": [],
+  "primitives": {
+    "agents": 200,
+    "skills": 300,
+    "instructions": 150,
+    "hooks": 10,
+    "plugins": 70,
+    "workflows": 12,
+    "cookbook": 16,
+    "total": 800
+  }
+}
