@@ -1,16 +1,37 @@
 name: Unified Release
 
+# ══════════════════════════════════════════════════════════════════
+# Factory-gated release orchestrator.
+#
+# Flow:
+#   1. Run FAI Factory pipeline (harvest → catalog → validate)
+#   2. Run transform to update all channel files (knowledge.json, stats.ts, etc.)
+#   3. Execute release-channel.js to bump versions, commit, tag, push
+#   4. Tags trigger existing per-channel workflows:
+#      - mcp-v* → npm-publish.yml + docker-publish.yml
+#      - ext-v* → vsce-publish.yml
+#      - sdk-v* / pymcp-v* → pypi-publish.yml
+#   5. Create GitHub Release with factory report
+#
+# This workflow does NOT publish directly — it delegates to per-channel
+# workflows via git tags. This avoids duplicating publish logic.
+# ══════════════════════════════════════════════════════════════════
+
 on:
-  push:
-    tags:
-      - 'rel-v*'
   workflow_dispatch:
     inputs:
-      channels:
-        description: 'Channels to release (comma-separated: mcp,ext,sdk,pymcp,docker,all)'
+      channel:
+        description: 'Release channel'
         required: true
         default: 'all'
-        type: string
+        type: choice
+        options:
+          - all
+          - mcp
+          - ext
+          - sdk
+          - pymcp
+          - cli
       bump:
         description: 'Version bump type'
         required: true
@@ -20,151 +41,261 @@ on:
           - patch
           - minor
           - major
+      dry_run:
+        description: 'Dry run (preview only, no publish)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
-  packages: write
-  id-token: write
 
 concurrency:
-  group: release
+  group: unified-release
   cancel-in-progress: false
 
 jobs:
-  # Step 1: Run factory pipeline to ensure everything is in sync
-  factory:
+  # ── Step 1: Factory pre-flight ──
+  preflight:
+    name: 🏭 Factory Pre-flight
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      agents: ${{ steps.stats.outputs.agents }}
+      skills: ${{ steps.stats.outputs.skills }}
+      instructions: ${{ steps.stats.outputs.instructions }}
+      total: ${{ steps.stats.outputs.total }}
+      catalog_size: ${{ steps.stats.outputs.catalog_size }}
+
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
 
-      - name: Run FAI Factory
+      - name: Run FAI Factory pipeline
+        run: |
+          echo "🌾 Harvesting..."
+          node scripts/factory/harvest.js
+          echo ""
+          echo "📦 Cataloging..."
+          node scripts/factory/catalog.js
+          echo ""
+          echo "🔄 Transforming (update channel files)..."
+          node scripts/factory/transform.js
+          echo ""
+          echo "🛡️ Validating..."
+          node scripts/factory/validate.js
+
+      - name: Extract stats
+        id: stats
+        run: |
+          node -e "
+            const fs = require('fs');
+            const c = require('./.factory/fai-catalog.json');
+            const s = c.stats;
+            const size = Math.round(fs.statSync('./.factory/fai-catalog.json').size / 1024);
+            console.log('agents=' + s.agents);
+            console.log('skills=' + s.skills);
+            console.log('instructions=' + s.instructions);
+            console.log('total=' + s.totalPrimitives);
+            console.log('catalog_size=' + size);
+          " >> $GITHUB_OUTPUT
+
+      - name: Pre-flight summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🏭 Factory Pre-flight
+
+          | Check | Status |
+          |-------|--------|
+          | Harvest | ✅ |
+          | Catalog | ✅ |
+          | Transform | ✅ |
+          | Validate | ✅ |
+
+          **Primitives**: ${{ steps.stats.outputs.total }} total
+          (${{ steps.stats.outputs.agents }} agents,
+          ${{ steps.stats.outputs.skills }} skills,
+          ${{ steps.stats.outputs.instructions }} instructions)
+          EOF
+
+  # ── Step 2: Bump versions + tag + push ──
+  release:
+    name: 🚀 Release (${{ inputs.channel }} ${{ inputs.bump }})
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      tags: ${{ steps.bump.outputs.tags }}
+      versions: ${{ steps.bump.outputs.versions }}
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run FAI Factory transform
         run: |
           node scripts/factory/harvest.js
           node scripts/factory/catalog.js
           node scripts/factory/transform.js
-          node scripts/factory/validate.js
 
-      - name: Upload catalog
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: release-catalog
-          path: .factory/fai-catalog.json
-
-  # Step 2: Publish npm MCP server
-  publish-mcp:
-    needs: factory
-    if: contains(github.event.inputs.channels || 'all', 'mcp') || contains(github.event.inputs.channels || 'all', 'all') || startsWith(github.ref, 'refs/tags/rel-v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Publish MCP Server
-        working-directory: npm-mcp
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # Step 3: Publish VS Code extension
-  publish-ext:
-    needs: factory
-    if: contains(github.event.inputs.channels || 'all', 'ext') || contains(github.event.inputs.channels || 'all', 'all') || startsWith(github.ref, 'refs/tags/rel-v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: '22'
-
-      - name: Install vsce
-        run: npm install -g @vscode/vsce
-
-      - name: Publish Extension
-        working-directory: vscode-extension
+      - name: Bump versions via release-channel.js
+        id: bump
         run: |
-          npm ci
-          vsce publish --no-dependencies
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          CHANNEL="${{ inputs.channel }}"
+          BUMP="${{ inputs.bump }}"
+          DRY_FLAG="${{ inputs.dry_run == true && '--dry-run' || '' }}"
 
-  # Step 4: Publish Python packages
-  publish-python:
-    needs: factory
-    if: contains(github.event.inputs.channels || 'all', 'pymcp') || contains(github.event.inputs.channels || 'all', 'sdk') || contains(github.event.inputs.channels || 'all', 'all') || startsWith(github.ref, 'refs/tags/rel-v')
+          echo "📦 Releasing: $CHANNEL ($BUMP) $DRY_FLAG"
+          echo ""
+
+          # Capture release output
+          node scripts/release-channel.js $DRY_FLAG $CHANNEL $BUMP 2>&1 | tee .factory/release-output.txt
+
+          # Extract tags from output
+          TAGS=$(grep -oP '(mcp|ext|cli|sdk|pymcp|rel)-v[\d.]+' .factory/release-output.txt | sort -u | tr '\n' ',' | sed 's/,$//')
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+          # Extract version summary
+          VERSIONS=$(grep '→' .factory/release-output.txt | head -10 || echo "See release output")
+          echo "versions<<EOF" >> $GITHUB_OUTPUT
+          echo "$VERSIONS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Release summary
+        if: always()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🚀 Release Summary
+
+          **Channel**: ${{ inputs.channel }}
+          **Bump**: ${{ inputs.bump }}
+          **Dry run**: ${{ inputs.dry_run }}
+          **Tags**: ${{ steps.bump.outputs.tags }}
+
+          ### Version Changes
+          \`\`\`
+          ${{ steps.bump.outputs.versions }}
+          \`\`\`
+
+          ### Factory Stats
+          | Metric | Count |
+          |--------|------:|
+          | Total Primitives | ${{ needs.preflight.outputs.total }} |
+          | Agents | ${{ needs.preflight.outputs.agents }} |
+          | Skills | ${{ needs.preflight.outputs.skills }} |
+          | Instructions | ${{ needs.preflight.outputs.instructions }} |
+          | Catalog Size | ${{ needs.preflight.outputs.catalog_size }}KB |
+          EOF
+
+  # ── Step 3: Create GitHub Release ──
+  github-release:
+    name: 📋 Create GitHub Release
+    needs: [preflight, release]
+    if: inputs.dry_run == false
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
-          python-version: '3.12'
+          fetch-depth: 0
+          ref: main
 
-      - name: Install build tools
-        run: pip install build twine
-
-      - name: Build & publish Python MCP
-        working-directory: python-mcp
+      - name: Get latest tag
+        id: tag
         run: |
-          python -m build
-          twine upload dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          git fetch --tags
+          # Get the most recent tag created by this release
+          TAG=$(git tag --sort=-creatordate | head -1)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag: $TAG"
 
-      - name: Build & publish Python SDK
-        working-directory: python-sdk
+      - name: Generate release notes
+        id: notes
         run: |
-          python -m build
-          twine upload dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_SDK_TOKEN }}
+          TAG="${{ steps.tag.outputs.tag }}"
 
-  # Step 5: Build & push Docker image
-  publish-docker:
-    needs: factory
-    if: contains(github.event.inputs.channels || 'all', 'docker') || contains(github.event.inputs.channels || 'all', 'all') || startsWith(github.ref, 'refs/tags/rel-v')
+          # Get previous tag of same type for changelog
+          PREFIX=$(echo "$TAG" | sed 's/[0-9].*//')
+          PREV_TAG=$(git tag --sort=-creatordate | grep "^$PREFIX" | sed -n '2p' || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            CHANGELOG=$(git log "$PREV_TAG..$TAG" --pretty=format:"- %s (%h)" --no-merges 2>/dev/null | head -50 || echo "- Initial release")
+          else
+            CHANGELOG="- Initial release for this channel"
+          fi
+
+          cat > .factory/release-notes.md << EOF
+          ## 🍊 FrootAI Release — $TAG
+
+          ### Factory Report
+          | Primitive | Count |
+          |-----------|------:|
+          | 🤖 Agents | ${{ needs.preflight.outputs.agents }} |
+          | ⚡ Skills | ${{ needs.preflight.outputs.skills }} |
+          | 📋 Instructions | ${{ needs.preflight.outputs.instructions }} |
+          | **Total** | **${{ needs.preflight.outputs.total }}** |
+
+          ### Channels Released
+          \`${{ needs.release.outputs.tags }}\`
+
+          ### Changelog
+          $CHANGELOG
+
+          ---
+          *Released via [Unified Release](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow*
+          *FAI Factory verified ${{ needs.preflight.outputs.total }} primitives before release*
+          EOF
+
+      - name: Create release
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+            const tag = '${{ steps.tag.outputs.tag }}';
+            const notes = fs.readFileSync('.factory/release-notes.md', 'utf8');
+
+            try {
+              await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tag,
+                name: `🍊 ${tag}`,
+                body: notes,
+                draft: false,
+                prerelease: tag.includes('alpha') || tag.includes('beta') || tag.includes('rc'),
+              });
+              core.info(`✅ Created GitHub Release: ${tag}`);
+            } catch (err) {
+              // Release may already exist from per-channel workflow
+              core.warning(`Could not create release (may already exist): ${err.message}`);
+            }
+
+  # ── Step 4: Trigger website rebuild ──
+  sync-website:
+    name: 🌐 Sync Website
+    needs: release
+    if: inputs.dry_run == false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Log in to GHCR
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#rel-v}" >> $GITHUB_OUTPUT
-
-      - name: Build and push
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/frootai/mcp-server:${{ steps.version.outputs.version }}
-            ghcr.io/frootai/mcp-server:latest
-
-  # Step 6: Trigger website rebuild
-  notify-website:
-    needs: [publish-mcp, publish-ext, publish-python, publish-docker]
-    if: always() && !cancelled()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger website rebuild
+      - name: Trigger frootai.dev rebuild
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
@@ -174,8 +305,13 @@ jobs:
                 owner: 'frootai',
                 repo: 'frootai.dev',
                 event_type: 'factory-update',
-                client_payload: { commit: context.sha, message: 'Unified release' },
+                client_payload: {
+                  commit: context.sha,
+                  message: 'Unified release: ${{ inputs.channel }} ${{ inputs.bump }}',
+                  tags: '${{ needs.release.outputs.tags }}',
+                },
               });
+              core.info('✅ Website rebuild dispatched');
             } catch (err) {
-              console.log('Cross-repo dispatch skipped:', err.message);
+              core.warning('Cross-repo dispatch failed: ' + err.message);
             }

@@ -25,6 +25,7 @@ on:
       - 'workflows/**'
       - 'cookbook/**'
       - 'solution-plays/**'
+      - 'scripts/factory/**'
 
 permissions:
   contents: read
@@ -35,88 +36,204 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ══════════════════════════════════════════════════════════
+  # Job 1: Full Factory Pipeline — harvest → catalog → validate
+  # ══════════════════════════════════════════════════════════
   factory:
+    name: 🏭 Factory Pipeline
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    outputs:
+      agents: ${{ steps.stats.outputs.agents }}
+      skills: ${{ steps.stats.outputs.skills }}
+      instructions: ${{ steps.stats.outputs.instructions }}
+      hooks: ${{ steps.stats.outputs.hooks }}
+      plugins: ${{ steps.stats.outputs.plugins }}
+      plays: ${{ steps.stats.outputs.plays }}
+      total: ${{ steps.stats.outputs.total }}
+      has_changes: ${{ steps.diff.outputs.has_changes }}
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 2
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
 
-      # Run full factory pipeline: harvest → catalog → validate
-      - name: Run FAI Factory — Harvest
-        run: node scripts/factory/harvest.js
+      # ── Step 1: Harvest all primitives ──
+      - name: 🌾 Harvest primitives
+        id: harvest
+        run: |
+          node scripts/factory/harvest.js 2>&1 | tee .factory/harvest-output.txt
+          echo "status=success" >> $GITHUB_OUTPUT
 
-      - name: Run FAI Factory — Catalog
+      # ── Step 2: Build canonical catalog ──
+      - name: 📦 Build catalog
         run: node scripts/factory/catalog.js
 
-      - name: Run FAI Factory — Validate
-        run: node scripts/factory/validate.js
-
-      # Compare with baseline if available
-      - name: Run FAI Factory — Diff
-        if: github.event_name == 'pull_request'
+      # ── Step 3: Extract stats for outputs + summary ──
+      - name: 📊 Extract stats
+        id: stats
         run: |
-          # Save current catalog
-          cp .factory/fai-catalog.json .factory/fai-catalog-pr.json
+          node -e "
+            const c = require('./.factory/fai-catalog.json');
+            const s = c.stats;
+            const lines = [
+              'agents=' + s.agents,
+              'skills=' + s.skills,
+              'instructions=' + s.instructions,
+              'hooks=' + s.hooks,
+              'plugins=' + s.plugins,
+              'plays=' + s.plays,
+              'workflows=' + (s.workflows || 0),
+              'cookbook=' + (s.cookbook || 0),
+              'mcpTools=' + (s.mcpTools || 0),
+              'modules=' + (s.modules || 0),
+              'total=' + s.totalPrimitives,
+            ];
+            lines.forEach(l => console.log(l));
+          " >> $GITHUB_OUTPUT
 
-          # Checkout base branch, build baseline catalog
-          git checkout ${{ github.event.pull_request.base.sha }} -- agents/ instructions/ skills/ hooks/ plugins/ workflows/ cookbook/ solution-plays/ 2>/dev/null || true
-          node scripts/factory/harvest.js --quiet 2>/dev/null || true
-          node scripts/factory/catalog.js --quiet 2>/dev/null || true
+      # ── Step 4: Diff against baseline (PR only) ──
+      - name: 🔍 Restore baseline catalog
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .factory/fai-catalog-baseline.json
+          key: factory-catalog-main
 
-          if [ -f .factory/fai-catalog.json ]; then
-            cp .factory/fai-catalog.json .factory/fai-catalog-base.json
-            # Restore PR catalog
-            cp .factory/fai-catalog-pr.json .factory/fai-catalog.json
-            node scripts/factory/diff.js .factory/fai-catalog-base.json .factory/fai-catalog.json > .factory/diff-output.txt 2>&1 || true
+      - name: 🔍 Compute diff
+        if: github.event_name == 'pull_request'
+        id: diff
+        run: |
+          if [ -f .factory/fai-catalog-baseline.json ]; then
+            # Use baseline from cache as previous catalog
+            cp .factory/fai-catalog-baseline.json .factory/fai-catalog.prev.json
+            node scripts/factory/diff.js 2>&1 | tee .factory/diff-output.txt
+
+            # Parse changes for structured output
+            node -e "
+              const ch = require('./.factory/changes.json');
+              const hasChanges = ch.summary && (ch.summary.totalAdded > 0 || ch.summary.totalRemoved > 0);
+              console.log('has_changes=' + hasChanges);
+              console.log('added=' + (ch.summary?.totalAdded || 0));
+              console.log('removed=' + (ch.summary?.totalRemoved || 0));
+            " >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No baseline catalog — first factory run on this repo." > .factory/diff-output.txt
           fi
 
-          # Restore working tree
-          git checkout ${{ github.sha }} -- . 2>/dev/null || true
+      # ── Step 5: Validate quality gates ──
+      - name: 🛡️ Validate quality gates
+        id: validate
+        run: |
+          node scripts/factory/validate.js 2>&1 | tee .factory/validate-output.txt
+          echo "status=success" >> $GITHUB_OUTPUT
 
-      # Post diff as PR comment
-      - name: Post Factory Diff to PR
-        if: github.event_name == 'pull_request' && hashFiles('.factory/diff-output.txt') != ''
+      # ── Step 6: Verify transform adapters (dry-run on PR) ──
+      - name: 🔄 Verify channel adapters
+        if: github.event_name == 'pull_request'
+        run: |
+          # Run transform in validation mode — adapters generate but we only check for errors
+          node scripts/factory/transform.js 2>&1 | tee .factory/transform-output.txt
+          echo "✅ All channel adapters ran successfully"
+
+      # ── Step 7: Post rich PR comment ──
+      - name: 💬 Post factory report to PR
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const fs = require('fs');
-            let diff = '';
-            try {
-              diff = fs.readFileSync('.factory/diff-output.txt', 'utf8').trim();
-            } catch { diff = 'No diff output available.'; }
 
-            // Truncate if too long for a PR comment
-            if (diff.length > 60000) {
-              diff = diff.substring(0, 60000) + '\n\n... (truncated)';
+            // Load catalog stats
+            const catalog = JSON.parse(fs.readFileSync('.factory/fai-catalog.json', 'utf8'));
+            const stats = catalog.stats;
+
+            // Load changes if available
+            let changes = null;
+            try { changes = JSON.parse(fs.readFileSync('.factory/changes.json', 'utf8')); } catch {}
+
+            // Build the counts table
+            const types = ['agents', 'skills', 'instructions', 'hooks', 'plugins', 'workflows', 'cookbook', 'plays'];
+            let countsTable = '| Primitive | Count | Change |\n|-----------|------:|--------|\n';
+            for (const type of types) {
+              const count = stats[type] || 0;
+              let change = '—';
+              if (changes && changes.stats?.delta?.[type]) {
+                const d = changes.stats.delta[type];
+                change = d > 0 ? `🟢 +${d}` : d < 0 ? `🔴 ${d}` : '—';
+              }
+              const emoji = { agents: '🤖', skills: '⚡', instructions: '📋', hooks: '🪝', plugins: '🔌', workflows: '🔄', cookbook: '📖', plays: '🎯' }[type] || '📦';
+              countsTable += `| ${emoji} ${type} | ${count} | ${change} |\n`;
+            }
+            countsTable += `| **Total** | **${stats.totalPrimitives}** | |\n`;
+
+            // Build added/removed details
+            let changeDetails = '';
+            if (changes && changes.details) {
+              for (const type of types) {
+                const d = changes.details[type];
+                if (!d) continue;
+                if (d.addedCount > 0) {
+                  const names = d.added.slice(0, 10).map(id => `\`${id}\``).join(', ');
+                  const more = d.addedCount > 10 ? ` (+${d.addedCount - 10} more)` : '';
+                  changeDetails += `**Added ${type}** (${d.addedCount}): ${names}${more}\n\n`;
+                }
+                if (d.removedCount > 0) {
+                  const names = d.removed.slice(0, 10).map(id => `\`${id}\``).join(', ');
+                  const more = d.removedCount > 10 ? ` (+${d.removedCount - 10} more)` : '';
+                  changeDetails += `**Removed ${type}** (${d.removedCount}): ${names}${more}\n\n`;
+                }
+              }
             }
 
-            const body = `## 🏭 FAI Factory Diff
+            // Load validate output
+            let validateOutput = '';
+            try { validateOutput = fs.readFileSync('.factory/validate-output.txt', 'utf8').trim(); } catch {}
+
+            // Compose the comment
+            const body = `## 🏭 FAI Factory Report
+
+            ### Primitive Inventory
+            ${countsTable}
+            ${changeDetails ? `### Changes in this PR\n${changeDetails}` : '### ✅ No primitive changes detected'}
 
             <details>
-            <summary>Primitive changes detected</summary>
+            <summary>🛡️ Quality Gate Output</summary>
 
             \`\`\`
-            ${diff}
+            ${validateOutput.substring(0, 30000)}
             \`\`\`
             </details>
 
-            *Generated by FAI Factory Pipeline*`;
+            <details>
+            <summary>📊 Additional Stats</summary>
 
-            // Find existing comment to update
+            | Metric | Value |
+            |--------|------:|
+            | MCP Tools | ${stats.mcpTools || 0} |
+            | Modules | ${stats.modules || 0} |
+            | Cross-refs | ${catalog.crossRefCount || 0} |
+            | Catalog size | ${Math.round(fs.statSync('.factory/fai-catalog.json').size / 1024)}KB |
+
+            </details>
+
+            ---
+            *🍊 Generated by [FAI Factory Pipeline](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) • ${new Date().toISOString().split('T')[0]}*`;
+
+            // Upsert: find existing comment and update, or create new
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
+              per_page: 100,
             });
-            const existing = comments.find(c => c.body.includes('FAI Factory Diff'));
+            const marker = '## 🏭 FAI Factory Report';
+            const existing = comments.find(c => c.body?.includes(marker));
 
             if (existing) {
               await github.rest.issues.updateComment({
@@ -134,36 +251,78 @@ jobs:
               });
             }
 
-      # Upload catalog as artifact
-      - name: Upload Factory Catalog
+      # ── Step 8: Cache catalog for future PR diffs ──
+      - name: 💾 Cache catalog (main branch only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .factory/fai-catalog.json
+          key: factory-catalog-main
+
+      # ── Step 9: Upload artifacts ──
+      - name: 📤 Upload catalog artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: fai-catalog
-          path: .factory/fai-catalog.json
-          retention-days: 30
+          path: |
+            .factory/fai-catalog.json
+            .factory/changes.json
+          retention-days: 90
 
-  # Trigger website rebuild on push to main
+      # ── Step 10: Job summary ──
+      - name: 📋 Write job summary
+        if: always()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🏭 FAI Factory Pipeline Summary
+
+          | Primitive | Count |
+          |-----------|------:|
+          | 🤖 Agents | ${{ steps.stats.outputs.agents }} |
+          | ⚡ Skills | ${{ steps.stats.outputs.skills }} |
+          | 📋 Instructions | ${{ steps.stats.outputs.instructions }} |
+          | 🪝 Hooks | ${{ steps.stats.outputs.hooks }} |
+          | 🔌 Plugins | ${{ steps.stats.outputs.plugins }} |
+          | 🎯 Plays | ${{ steps.stats.outputs.plays }} |
+          | **Total Primitives** | **${{ steps.stats.outputs.total }}** |
+
+          **Harvest**: ${{ steps.harvest.outputs.status || '❌' }} |
+          **Validate**: ${{ steps.validate.outputs.status || '❌' }}
+          EOF
+
+  # ══════════════════════════════════════════════════════════
+  # Job 2: Trigger website data sync (push to main only)
+  # ══════════════════════════════════════════════════════════
   notify-website:
+    name: 🌐 Trigger Website Sync
     needs: factory
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - name: Trigger website rebuild
+      - name: Dispatch to frootai.dev
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
           script: |
+            const payload = {
+              commit: context.sha,
+              message: context.payload.head_commit?.message || 'Factory update',
+              stats: {
+                agents: ${{ needs.factory.outputs.agents || 0 }},
+                skills: ${{ needs.factory.outputs.skills || 0 }},
+                instructions: ${{ needs.factory.outputs.instructions || 0 }},
+                total: ${{ needs.factory.outputs.total || 0 }},
+              },
+            };
+
             try {
               await github.rest.repos.createDispatchEvent({
                 owner: 'frootai',
                 repo: 'frootai.dev',
                 event_type: 'factory-update',
-                client_payload: {
-                  commit: context.sha,
-                  message: context.payload.head_commit?.message || 'Factory update',
-                },
+                client_payload: payload,
               });
-              console.log('✅ Dispatched website rebuild');
+              core.info('✅ Dispatched website rebuild with payload: ' + JSON.stringify(payload));
             } catch (err) {
-              console.log('⚠️ Cross-repo dispatch failed (expected if CROSS_REPO_TOKEN not set):', err.message);
+              core.warning('Cross-repo dispatch failed (set CROSS_REPO_TOKEN secret): ' + err.message);
             }

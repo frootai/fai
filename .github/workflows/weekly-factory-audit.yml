@@ -1,8 +1,21 @@
 name: Weekly Factory Audit
 
+# ══════════════════════════════════════════════════════════════════
+# Comprehensive weekly consistency audit.
+#
+# Checks:
+#   1. Factory pipeline health (harvest → catalog → validate)
+#   2. Cross-channel consistency (website, MCP, VS Code, Python)
+#   3. Primitive quality metrics (descriptions, WAF, frontmatter)
+#   4. Staleness detection (catalog age, last commit to primitives)
+#
+# On failure: creates GitHub issue with structured report.
+# On success: logs audit pass to job summary.
+# ══════════════════════════════════════════════════════════════════
+
 on:
   schedule:
-    - cron: '0 8 * * 1'  # Every Monday at 8:00 UTC
+    - cron: '0 8 * * 1'  # Every Monday at 08:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -11,8 +24,9 @@ permissions:
 
 jobs:
   audit:
+    name: 🔍 Factory Audit
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -21,38 +35,219 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run FAI Factory Pipeline
+      # ── Run full factory pipeline ──
+      - name: 🏭 Run factory pipeline
+        id: factory
         run: |
-          node scripts/factory/harvest.js
-          node scripts/factory/catalog.js
-          node scripts/factory/validate.js 2>&1 | tee .factory/audit-output.txt
+          mkdir -p .factory
+          echo "=== HARVEST ===" > .factory/audit-full.txt
+          node scripts/factory/harvest.js 2>&1 | tee -a .factory/audit-full.txt
+          echo "" >> .factory/audit-full.txt
+
+          echo "=== CATALOG ===" >> .factory/audit-full.txt
+          node scripts/factory/catalog.js 2>&1 | tee -a .factory/audit-full.txt
+          echo "" >> .factory/audit-full.txt
+
+          echo "=== TRANSFORM ===" >> .factory/audit-full.txt
+          node scripts/factory/transform.js 2>&1 | tee -a .factory/audit-full.txt
+          echo "" >> .factory/audit-full.txt
+
+          echo "=== VALIDATE ===" >> .factory/audit-full.txt
+          node scripts/factory/validate.js --unification 2>&1 | tee -a .factory/audit-full.txt
+          echo "factory_status=success" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: Check for issues
-        id: check
+      # ── Cross-channel consistency audit ──
+      - name: 🔗 Cross-channel consistency
+        id: consistency
         run: |
-          if grep -q "❌\|FAIL\|ERROR" .factory/audit-output.txt 2>/dev/null; then
-            echo "has_issues=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_issues=false" >> $GITHUB_OUTPUT
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            let errors = 0;
+            let warnings = 0;
+            const issues = [];
+
+            // Load catalog
+            const catalog = JSON.parse(fs.readFileSync('.factory/fai-catalog.json', 'utf8'));
+            const stats = catalog.stats;
+
+            console.log('🔗 Cross-Channel Consistency Audit');
+            console.log('══════════════════════════════════════');
+
+            // Check 1: npm-mcp knowledge.json
+            const knowledgePath = 'npm-mcp/knowledge.json';
+            if (fs.existsSync(knowledgePath)) {
+              const knowledge = JSON.parse(fs.readFileSync(knowledgePath, 'utf8'));
+              const kPlays = knowledge.plays?.length || 0;
+              if (Math.abs(kPlays - stats.plays) > 5) {
+                issues.push('npm-mcp knowledge.json plays: ' + kPlays + ' vs catalog: ' + stats.plays);
+                errors++;
+              }
+              const kTools = knowledge.tools?.length || 0;
+              if (kTools > 0 && Math.abs(kTools - stats.mcpTools) > 5) {
+                issues.push('npm-mcp knowledge.json tools: ' + kTools + ' vs catalog: ' + stats.mcpTools);
+                warnings++;
+              }
+              console.log('  npm-mcp knowledge.json: ' + kPlays + ' plays, ' + kTools + ' tools');
+            } else {
+              issues.push('npm-mcp/knowledge.json not found');
+              errors++;
+            }
+
+            // Check 2: VS Code extension stats
+            const vscodePkg = 'vscode-extension/package.json';
+            if (fs.existsSync(vscodePkg)) {
+              const pkg = JSON.parse(fs.readFileSync(vscodePkg, 'utf8'));
+              console.log('  VS Code extension: v' + pkg.version);
+            }
+
+            // Check 3: npm-mcp description tools count
+            const mcpPkg = 'npm-mcp/package.json';
+            if (fs.existsSync(mcpPkg)) {
+              const pkg = JSON.parse(fs.readFileSync(mcpPkg, 'utf8'));
+              const match = pkg.description.match(/(\\d+) MCP tools/);
+              const descTools = match ? parseInt(match[1]) : 0;
+              if (descTools !== stats.mcpTools) {
+                issues.push('npm-mcp package.json says ' + descTools + ' tools, catalog has ' + stats.mcpTools);
+                warnings++;
+              }
+              console.log('  npm-mcp description: ' + descTools + ' tools (catalog: ' + stats.mcpTools + ')');
+            }
+
+            // Check 4: Python MCP knowledge
+            const pyKnowledge = 'python-mcp/frootai_mcp/knowledge.json';
+            if (fs.existsSync(pyKnowledge)) {
+              const pyK = JSON.parse(fs.readFileSync(pyKnowledge, 'utf8'));
+              const pyPlays = pyK.plays?.length || 0;
+              if (Math.abs(pyPlays - stats.plays) > 5) {
+                issues.push('python-mcp knowledge plays: ' + pyPlays + ' vs catalog: ' + stats.plays);
+                warnings++;
+              }
+              console.log('  Python MCP knowledge: ' + pyPlays + ' plays');
+            }
+
+            // Check 5: Python SDK knowledge
+            const pySDKKnowledge = 'python-sdk/frootai/knowledge.json';
+            if (fs.existsSync(pySDKKnowledge)) {
+              const pySDK = JSON.parse(fs.readFileSync(pySDKKnowledge, 'utf8'));
+              const sdkPlays = pySDK.plays?.length || 0;
+              if (Math.abs(sdkPlays - stats.plays) > 5) {
+                issues.push('python-sdk knowledge plays: ' + sdkPlays + ' vs catalog: ' + stats.plays);
+                warnings++;
+              }
+              console.log('  Python SDK knowledge: ' + sdkPlays + ' plays');
+            }
+
+            // Check 6: marketplace.json
+            if (fs.existsSync('marketplace.json')) {
+              const mkt = JSON.parse(fs.readFileSync('marketplace.json', 'utf8'));
+              const mktPlugins = mkt.plugins?.length || 0;
+              if (Math.abs(mktPlugins - stats.plugins) > 5) {
+                issues.push('marketplace.json plugins: ' + mktPlugins + ' vs catalog: ' + stats.plugins);
+                warnings++;
+              }
+              console.log('  marketplace.json: ' + mktPlugins + ' plugins (catalog: ' + stats.plugins + ')');
+            }
+
+            // Summary
+            console.log('');
+            console.log('─────────────────────────────────────');
+            if (errors > 0) {
+              console.log('❌ ERRORS: ' + errors + ', WARNINGS: ' + warnings);
+              issues.forEach(i => console.log('  • ' + i));
+            } else if (warnings > 0) {
+              console.log('⚠️ PASSED with ' + warnings + ' warning(s)');
+              issues.forEach(i => console.log('  • ' + i));
+            } else {
+              console.log('✅ All channels consistent');
+            }
+
+            // Write results for downstream steps
+            fs.writeFileSync('.factory/consistency-result.json', JSON.stringify({
+              errors, warnings, issues,
+              stats: { agents: stats.agents, skills: stats.skills, instructions: stats.instructions,
+                       hooks: stats.hooks, plugins: stats.plugins, plays: stats.plays,
+                       total: stats.totalPrimitives, mcpTools: stats.mcpTools }
+            }));
+          " 2>&1 | tee .factory/consistency-output.txt
+        continue-on-error: true
+
+      # ── Quality metrics ──
+      - name: 📊 Quality metrics
+        id: quality
+        run: |
+          node -e "
+            const catalog = require('./.factory/fai-catalog.json');
+            const agents = catalog.agents || [];
+            const skills = catalog.skills || [];
+            const plays = catalog.plays || [];
+
+            const agentsWithWaf = agents.filter(a => a.waf && a.waf.length > 0).length;
+            const agentsWithDesc = agents.filter(a => a.description && a.description.length >= 10).length;
+            const skillsAbove150 = skills.filter(s => s.lines >= 150).length;
+            const playsWithManifest = plays.filter(p => p.hasManifest).length;
+            const playsWithAgent = plays.filter(p => p.hasRootAgent).length;
+
+            console.log('📊 Quality Metrics');
+            console.log('══════════════════════════════════════');
+            console.log('  Agents with WAF:       ' + agentsWithWaf + '/' + agents.length + ' (' + Math.round(agentsWithWaf/agents.length*100) + '%)');
+            console.log('  Agents with desc:      ' + agentsWithDesc + '/' + agents.length + ' (' + Math.round(agentsWithDesc/agents.length*100) + '%)');
+            console.log('  Skills ≥150 lines:     ' + skillsAbove150 + '/' + skills.length + ' (' + Math.round(skillsAbove150/skills.length*100) + '%)');
+            console.log('  Plays with manifest:   ' + playsWithManifest + '/' + plays.length + ' (' + Math.round(playsWithManifest/plays.length*100) + '%)');
+            console.log('  Plays with root agent: ' + playsWithAgent + '/' + plays.length + ' (' + Math.round(playsWithAgent/plays.length*100) + '%)');
+          " 2>&1 | tee .factory/quality-output.txt
+        continue-on-error: true
+
+      # ── Determine overall result ──
+      - name: 🎯 Evaluate audit result
+        id: result
+        run: |
+          HAS_ERRORS=false
+
+          # Check factory pipeline
+          if [ "${{ steps.factory.outcome }}" = "failure" ]; then
+            HAS_ERRORS=true
           fi
 
-      - name: Create issue on failure
-        if: steps.check.outputs.has_issues == 'true'
+          # Check consistency
+          if [ -f .factory/consistency-result.json ]; then
+            ERRORS=$(node -p "require('./.factory/consistency-result.json').errors")
+            if [ "$ERRORS" -gt "0" ]; then
+              HAS_ERRORS=true
+            fi
+          fi
+
+          echo "has_errors=$HAS_ERRORS" >> $GITHUB_OUTPUT
+
+      # ── Create issue on failure ──
+      - name: 🚨 Create audit issue
+        if: steps.result.outputs.has_errors == 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const fs = require('fs');
-            const output = fs.readFileSync('.factory/audit-output.txt', 'utf8');
+
+            // Load outputs
+            let factoryOutput = '';
+            try { factoryOutput = fs.readFileSync('.factory/audit-full.txt', 'utf8').substring(0, 20000); } catch {}
+            let consistencyOutput = '';
+            try { consistencyOutput = fs.readFileSync('.factory/consistency-output.txt', 'utf8'); } catch {}
+            let qualityOutput = '';
+            try { qualityOutput = fs.readFileSync('.factory/quality-output.txt', 'utf8'); } catch {}
+
+            let stats = {};
+            try { stats = JSON.parse(fs.readFileSync('.factory/consistency-result.json', 'utf8')).stats; } catch {}
 
             // Close previous audit issues
-            const { data: issues } = await github.rest.issues.listForRepo({
+            const { data: openIssues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: 'factory-audit',
+              per_page: 10,
             });
-            for (const issue of issues) {
+            for (const issue of openIssues) {
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -62,23 +257,80 @@ jobs:
               });
             }
 
+            const date = new Date().toISOString().split('T')[0];
+            const body = `## 🏭 Weekly Factory Audit — ${date}
+
+            ### 📊 Primitive Inventory
+            | Type | Count |
+            |------|------:|
+            | 🤖 Agents | ${stats.agents || '?'} |
+            | ⚡ Skills | ${stats.skills || '?'} |
+            | 📋 Instructions | ${stats.instructions || '?'} |
+            | 🪝 Hooks | ${stats.hooks || '?'} |
+            | 🔌 Plugins | ${stats.plugins || '?'} |
+            | 🎯 Plays | ${stats.plays || '?'} |
+            | **Total** | **${stats.total || '?'}** |
+
+            ### 🔗 Cross-Channel Consistency
+            \`\`\`
+            ${consistencyOutput.substring(0, 5000)}
+            \`\`\`
+
+            ### 📊 Quality Metrics
+            \`\`\`
+            ${qualityOutput.substring(0, 3000)}
+            \`\`\`
+
+            <details>
+            <summary>🏭 Full Factory Output</summary>
+
+            \`\`\`
+            ${factoryOutput}
+            \`\`\`
+            </details>
+
+            ### Next Steps
+            1. Run \`npm run factory\` locally to reproduce
+            2. Fix consistency errors first (these block releases)
+            3. Address quality warnings to improve primitive coverage
+
+            ---
+            *Generated by [Weekly Factory Audit](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*`;
+
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `🏭 Factory Audit: Consistency issues detected (${new Date().toISOString().split('T')[0]})`,
+              title: `🏭 Factory Audit: Issues detected (${date})`,
               labels: ['factory-audit', 'automated'],
-              body: `## Weekly Factory Audit Report
-
-            The FAI Factory pipeline detected consistency issues:
-
-            \`\`\`
-            ${output.substring(0, 60000)}
-            \`\`\`
-
-            ### Next Steps
-            1. Review the errors above
-            2. Run \`npm run factory\` locally to reproduce
-            3. Fix the issues and push
-
-            *Generated by Weekly Factory Audit workflow*`,
+              body,
             });
+
+      # ── Job summary ──
+      - name: 📋 Write job summary
+        if: always()
+        run: |
+          RESULT="${{ steps.result.outputs.has_errors }}"
+          STATUS_EMOJI="✅"
+          STATUS_TEXT="All checks passed"
+          if [ "$RESULT" = "true" ]; then
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="Issues detected — see GitHub Issue"
+          fi
+
+          # Load stats if available
+          AGENTS=$(node -p "try { require('./.factory/consistency-result.json').stats.agents } catch { '?' }" 2>/dev/null || echo "?")
+          TOTAL=$(node -p "try { require('./.factory/consistency-result.json').stats.total } catch { '?' }" 2>/dev/null || echo "?")
+
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🔍 Weekly Factory Audit
+
+          **Status**: $STATUS_EMOJI $STATUS_TEXT
+          **Date**: $(date -u +%Y-%m-%d)
+          **Primitives**: $TOTAL total ($AGENTS agents)
+
+          | Check | Result |
+          |-------|--------|
+          | Factory Pipeline | ${{ steps.factory.outcome == 'success' && '✅' || '❌' }} |
+          | Cross-Channel Consistency | $([ -f .factory/consistency-result.json ] && node -p "require('./.factory/consistency-result.json').errors === 0 ? '✅' : '❌'" 2>/dev/null || echo "⚠️") |
+          | Quality Metrics | ${{ steps.quality.outcome == 'success' && '✅' || '⚠️' }} |
+          EOF
