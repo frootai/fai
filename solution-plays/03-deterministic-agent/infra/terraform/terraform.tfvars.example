@@ -1,0 +1,21 @@
+# ─── Deterministic Agent — Example Variables ──────────────────────
+# FrootAI Solution Play 03
+# Copy to terraform.tfvars and customize for your environment
+
+resource_group_name = "rg-frootai-agent-dev"
+location            = "eastus2"
+environment         = "dev"
+project_name        = "frootai-agent"
+
+# Azure OpenAI — deterministic configuration
+gpt4o_capacity    = 30  # TPM in thousands
+openai_temperature = 0  # 0 = fully deterministic
+
+# Container App
+container_image      = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+container_app_cpu    = 0.5
+container_app_memory = "1Gi"
+max_replicas         = 5
+
+# Observability
+log_retention_days = 90

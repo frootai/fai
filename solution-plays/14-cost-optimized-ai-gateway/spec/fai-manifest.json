@@ -45,7 +45,8 @@
   },
   "infrastructure": {
     "bicep": "./infra/main.bicep",
-    "parameters": "./infra/parameters.json"
+    "parameters": "./infra/parameters.json",
+    "terraform": "./infra/terraform/"
   },
   "toolkit": {
     "devkit": ".github/",

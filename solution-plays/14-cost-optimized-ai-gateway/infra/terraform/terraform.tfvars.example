@@ -1,0 +1,27 @@
+# ─── Cost-Optimized AI Gateway — Example Variables ───────────────
+# FrootAI Solution Play 14
+# Copy to terraform.tfvars and customize for your environment
+
+resource_group_name = "rg-frootai-gateway-dev"
+location            = "eastus2"
+environment         = "dev"   # dev | staging | prod — controls SKU, network ACLs, retention
+prefix              = "cost-optimiz"
+
+# Azure OpenAI — capacity varies by environment
+gpt4o_capacity           = 10   # Dev TPM (thousands)
+gpt4o_capacity_prod      = 30   # Prod TPM
+embedding_capacity       = 30   # Dev TPM
+embedding_capacity_prod  = 120  # Prod TPM
+
+# Key Vault
+soft_delete_retention_days_prod = 90
+soft_delete_retention_days_dev  = 7
+
+# Observability
+log_retention_days_prod = 90
+log_retention_days_dev  = 30
+
+# RBAC — set principal_id to your app/user object ID to create role assignments
+# Leave empty to skip RBAC assignments
+rbac_principal_id   = ""
+rbac_principal_type = "ServicePrincipal"  # User | Group | ServicePrincipal

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://smithery.ai/schemas/registry-entry.json",
+  "name": "frootai-mcp",
+  "displayName": "FrootAI MCP Server",
+  "description": "The open glue for the GenAI ecosystem — 25 MCP tools spanning architecture guidance, solution plays, primitive management, model comparison, cost estimation, and AI evaluation. Context-wires 830+ primitives (238 agents, 176 instructions, 322 skills, 77 plugins) across 100 solution plays via the FAI Protocol.",
+  "version": "3.5.0",
+  "author": {
+    "name": "FrootAI",
+    "url": "https://frootai.dev",
+    "github": "frootai"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/frootai/frootai",
+  "homepage": "https://frootai.dev/mcp",
+  "categories": [
+    "AI Architecture",
+    "Developer Tools",
+    "Code Generation",
+    "Knowledge Base",
+    "DevOps"
+  ],
+  "tags": [
+    "ai", "mcp", "agents", "rag", "azure", "architecture",
+    "solution-plays", "primitives", "waf", "evaluation",
+    "semantic-kernel", "langchain", "multi-agent"
+  ],
+  "transport": {
+    "stdio": {
+      "command": "npx",
+      "args": ["frootai-mcp@latest"]
+    },
+    "http": {
+      "url": "https://mcp.frootai.dev",
+      "note": "Streamable HTTP transport"
+    }
+  },
+  "tools": [
+    { "name": "search_knowledge", "description": "BM25 search across 16 FROOT knowledge modules" },
+    { "name": "get_module", "description": "Retrieve full module content by ID (F1-T3)" },
+    { "name": "get_play_detail", "description": "Architecture, services, and config for any of 100 plays" },
+    { "name": "list_community_plays", "description": "Browse all 100 solution plays with filters" },
+    { "name": "semantic_search_plays", "description": "Natural language play discovery with BM25 ranking" },
+    { "name": "compare_plays", "description": "Side-by-side comparison of 2-3 plays" },
+    { "name": "estimate_cost", "description": "Azure cost estimation for any play at dev/prod scale" },
+    { "name": "compare_models", "description": "AI model comparison for specific use cases" },
+    { "name": "get_model_catalog", "description": "Azure OpenAI model catalog with pricing" },
+    { "name": "get_azure_pricing", "description": "Azure AI pricing for RAG/agent/batch/realtime" },
+    { "name": "lookup_term", "description": "AI/ML glossary lookup (200+ terms)" },
+    { "name": "agent_build", "description": "Builder agent for code generation" },
+    { "name": "agent_review", "description": "Reviewer agent for security + quality checks" },
+    { "name": "agent_tune", "description": "Tuner agent for config validation" },
+    { "name": "run_evaluation", "description": "Check AI quality scores against thresholds" },
+    { "name": "validate_config", "description": "Validate TuneKit config files" },
+    { "name": "get_architecture_pattern", "description": "Architecture guidance for 7 scenarios" },
+    { "name": "get_froot_overview", "description": "Complete FROOT framework overview" },
+    { "name": "list_modules", "description": "All 16 modules organized by FROOT layer" },
+    { "name": "list_primitives", "description": "Browse 830+ primitives by type" },
+    { "name": "embedding_playground", "description": "Semantic similarity comparison tool" },
+    { "name": "generate_architecture_diagram", "description": "Mermaid.js diagram for any play" },
+    { "name": "fetch_azure_docs", "description": "Latest Azure documentation retrieval" },
+    { "name": "marketplace_search", "description": "Search 77+ FAI plugins" },
+    { "name": "marketplace_browse", "description": "Browse plugin marketplace with pagination" }
+  ],
+  "requirements": {
+    "runtime": "Node.js >= 18",
+    "install": "npx frootai-mcp@latest"
+  },
+  "screenshots": [
+    {
+      "url": "https://frootai.dev/screenshots/mcp-tools.png",
+      "caption": "25 MCP tools in action"
+    }
+  ]
+}

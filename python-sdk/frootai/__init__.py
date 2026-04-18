@@ -33,11 +33,13 @@ __author__ = "Pavleen Bali"
 from frootai.client import FrootAI
 from frootai.plays import SolutionPlay
 from frootai.evaluation import Evaluator
+from frootai.engine import FAIEngine
 
 __all__ = [
     "FrootAI",
     "SolutionPlay",
     "Evaluator",
+    "FAIEngine",
     "__version__",
     # Copilot SDK patterns (import separately for async usage)
     # from frootai.copilot import CopilotSession, CopilotError, RetryConfig

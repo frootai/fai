@@ -37,7 +37,10 @@
     "factory:status": "node scripts/factory/status.js",
     "factory:watch": "node scripts/factory/watch.js",
     "factory:ship": "node scripts/factory/ship.js",
-    "factory:unify": "node scripts/factory/unify.js"
+    "factory:unify": "node scripts/factory/unify.js",
+    "factory:adapt:sk": "node scripts/factory/adapters/semantic-kernel.js",
+    "factory:adapt:langchain": "node scripts/factory/adapters/langchain.js",
+    "factory:adapt:all": "node scripts/factory/adapters/semantic-kernel.js && node scripts/factory/adapters/langchain.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

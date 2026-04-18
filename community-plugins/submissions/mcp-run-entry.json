@@ -1,0 +1,27 @@
+{
+  "$schema": "https://mcp.run/schemas/entry.json",
+  "name": "frootai-mcp",
+  "displayName": "FrootAI — AI Primitive Unification MCP Server",
+  "description": "The open glue for the GenAI ecosystem. 25 tools for architecture guidance, 100 solution plays, 830+ primitives, model comparison, cost estimation, and AI evaluation. FAI Protocol context-wires agents, instructions, skills, hooks, and plugins into deployable systems.",
+  "version": "3.5.0",
+  "protocol": "mcp",
+  "protocolVersion": "2024-11-05",
+  "author": "FrootAI Contributors",
+  "license": "MIT",
+  "sourceUrl": "https://github.com/frootai/frootai",
+  "documentationUrl": "https://frootai.dev/mcp",
+  "installation": {
+    "npx": "npx frootai-mcp@latest",
+    "docker": "docker run -p 3001:3001 ghcr.io/frootai/mcp-server:latest",
+    "pip": "pip install frootai-mcp && python -m frootai_mcp"
+  },
+  "transports": ["stdio", "streamable-http"],
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "toolCount": 25,
+  "categories": ["developer-tools", "ai-architecture", "code-generation"],
+  "tags": ["ai", "agents", "rag", "azure", "primitives", "architecture", "evaluation"]
+}

@@ -1,0 +1,23 @@
+# ─── Enterprise RAG Q&A — Example Variables ───────────────────────
+# FrootAI Solution Play 01
+# Copy to terraform.tfvars and customize for your environment
+
+resource_group_name = "rg-frootai-rag-dev"
+location            = "eastus2"
+environment         = "dev"
+project_name        = "frootai-rag"
+
+# Azure OpenAI
+gpt4o_capacity = 30 # TPM in thousands
+
+# Azure AI Search
+search_sku = "standard" # free, basic, standard, standard2, standard3
+
+# Container App
+container_image    = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+container_app_cpu  = 0.5
+container_app_memory = "1Gi"
+max_replicas       = 10
+
+# Observability
+log_retention_days = 90
