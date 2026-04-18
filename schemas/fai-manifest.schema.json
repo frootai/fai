@@ -121,23 +121,35 @@
       "properties": {
         "bicep": {
           "type": "string",
-          "description": "Path to main Bicep template (e.g., './infra/main.bicep')."
+          "description": "Azure Bicep template path (e.g., './infra/main.bicep')."
         },
         "parameters": {
           "type": "string",
-          "description": "Path to Bicep parameters file."
+          "description": "Parameter file path (e.g., './infra/parameters.json')."
+        },
+        "terraform": {
+          "type": "string",
+          "description": "Terraform configuration path (e.g., './infra/main.tf')."
+        },
+        "pulumi": {
+          "type": "string",
+          "description": "Pulumi program path (e.g., './infra/index.ts')."
         },
         "docker": {
           "type": "string",
-          "description": "Path to Dockerfile or docker-compose.yml."
+          "description": "Docker Compose path (e.g., './docker-compose.yml')."
         },
         "kubernetes": {
           "type": "string",
-          "description": "Path to K8s manifests folder."
+          "description": "Path to Kubernetes manifests folder (e.g., './k8s/')."
+        },
+        "helm": {
+          "type": "string",
+          "description": "Helm chart path (e.g., './charts/')."
         }
       },
       "additionalProperties": false,
-      "description": "Infrastructure-as-code bindings. The FAI Engine validates and deploys these."
+      "description": "Infrastructure as Code declarations — supports multiple cloud providers and container orchestrators."
     },
     "toolkit": {
       "type": "object",
