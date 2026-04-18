@@ -41,6 +41,7 @@ import { join, dirname, basename, resolve } from "path";
 import { fileURLToPath } from "url";
 
 import { getLatestKnowledge } from "./auto-update.js";
+import { ENDPOINTS } from "./endpoints.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -127,8 +128,15 @@ class RateLimiter {
     bucket.tokens = Math.min(this.maxTokens, bucket.tokens + elapsed * this.refillPerSec);
     bucket.lastRefill = now;
     if (bucket.tokens >= 1) { bucket.tokens -= 1; return true; }
+    mcpLog(null, "warning", "rate-limiter", { message: "Request rate-limited", key, window: `${this.maxTokens} tokens, ${this.refillPerSec}/sec refill` });
     return false;
   }
+}
+
+/** Sanitize user-provided input for live tools that make HTTP requests */
+function sanitizeInput(input, maxLength = 200) {
+  if (!input || typeof input !== "string") return "";
+  return input.replace(/[^a-zA-Z0-9\s\-_.]/g, "").substring(0, maxLength).trim();
 }
 
 /** Standardized MCP error responses */
@@ -167,11 +175,15 @@ function mcpLog(server, level, logger, data) {
   console.error(`[frootai:${logger}] ${level}: ${typeof data === 'string' ? data : JSON.stringify(data)}`);
 }
 
-// Initialize middleware
-const searchCache = new LRUCache(50, 5 * 60_000);       // 5 min TTL
-const azureDocsCache = new LRUCache(30, 60 * 60_000);   // 1 hour TTL
-const mcpRegistryCache = new LRUCache(20, 60 * 60_000); // 1 hour TTL
-const githubPlaysCache = new LRUCache(5, 5 * 60_000);   // 5 min TTL
+// Initialize middleware — cache TTLs are configurable via environment variables
+const CACHE_TTL_SEARCH = parseInt(process.env.FAI_CACHE_TTL_SEARCH || "300000");         // 5 min default
+const CACHE_TTL_AZURE_DOCS = parseInt(process.env.FAI_CACHE_TTL_AZURE_DOCS || "3600000"); // 1 hour default
+const CACHE_TTL_GITHUB = parseInt(process.env.FAI_CACHE_TTL_GITHUB || "300000");         // 5 min default
+
+const searchCache = new LRUCache(50, CACHE_TTL_SEARCH);
+const azureDocsCache = new LRUCache(30, CACHE_TTL_AZURE_DOCS);
+const mcpRegistryCache = new LRUCache(20, CACHE_TTL_AZURE_DOCS);
+const githubPlaysCache = new LRUCache(5, CACHE_TTL_GITHUB);
 
 const liveLimiter = new RateLimiter(10, 1);  // 10 req burst, 1/sec refill
 
@@ -258,9 +270,14 @@ async function loadModulesWithAutoUpdate() {
 }
 
 /**
- * Load modules — tries bundled JSON first (for npx), falls back to local files (for repo)
+ * Load modules — tries bundled JSON first (for npx), falls back to local files (for repo).
+ * Results are cached in-memory to avoid re-reading 18+ markdown files on every call.
  */
+let _cachedModules = null;
+
 function loadModules() {
+  if (_cachedModules) return _cachedModules;
+
   // Mode 1: Bundled knowledge.json (for npm/npx distribution)
   if (existsSync(KNOWLEDGE_BUNDLE)) {
     const bundle = JSON.parse(readFileSync(KNOWLEDGE_BUNDLE, "utf-8"));
@@ -268,6 +285,7 @@ function loadModules() {
     for (const [modId, mod] of Object.entries(bundle.modules)) {
       modules[modId] = { ...mod, sections: parseSections(mod.content) };
     }
+    _cachedModules = modules;
     return modules;
   }
 
@@ -292,6 +310,7 @@ function loadModules() {
       };
     }
   }
+  _cachedModules = modules;
   return modules;
 }
 
@@ -376,7 +395,7 @@ try {
     console.error(`[frootai] BM25 index loaded: ${BM25_INDEX.stats.docs} docs, ${BM25_INDEX.stats.terms} terms`);
   }
 } catch (e) {
-  console.error("[frootai] BM25 index load failed, using Jaccard fallback:", e.message);
+  mcpLog(null, "error", "search", { message: "Failed to load search index", error: e.message });
 }
 
 /**
@@ -1040,7 +1059,10 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
       service: z.string().describe("Azure service name or topic (e.g., 'azure-openai', 'ai-search', 'container-apps', 'ai-foundry', 'content-safety')"),
     },
     { annotations: { readOnlyHint: true, openWorldHint: true } },
-    async ({ service }) => {
+    async ({ service: rawService }) => {
+      const service = sanitizeInput(rawService);
+      if (!service) return mcpError("Invalid input", "Service name must contain alphanumeric characters, hyphens, or spaces.");
+
       // Rate limiting + caching for live tools
       if (!liveLimiter.allow('fetch_azure_docs')) {
         const cached = azureDocsCache.get(`azure:${service}`);
@@ -1052,7 +1074,7 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
       if (cachedResult) return cachedResult;
 
       const searchTerm = encodeURIComponent(`Azure ${service} documentation`);
-      const url = `https://learn.microsoft.com/api/search?search=${searchTerm}&locale=en-us&%24top=5&facet=category`;
+      const url = `${ENDPOINTS.MICROSOFT_LEARN_API}?search=${searchTerm}&locale=en-us&%24top=5&facet=category`;
 
       const body = await safeFetch(url);
       if (body) {
@@ -1100,7 +1122,10 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
       query: z.string().describe("What kind of MCP server you're looking for (e.g., 'github', 'database', 'slack', 'jira', 'azure')"),
     },
     { annotations: { readOnlyHint: true, openWorldHint: true } },
-    async ({ query }) => {
+    async ({ query: rawQuery }) => {
+      const query = sanitizeInput(rawQuery);
+      if (!query) return mcpError("Invalid input", "Search query must contain alphanumeric characters, hyphens, or spaces.");
+
       // Rate limiting + caching
       if (!liveLimiter.allow('fetch_external_mcp')) {
         const cached = mcpRegistryCache.get(`mcp:${query}`);
@@ -1112,7 +1137,7 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
       if (cachedResult) return cachedResult;
 
       // Try mcp.so registry
-      const searchUrl = `https://api.mcp.so/api/servers?q=${encodeURIComponent(query)}&limit=8`;
+      const searchUrl = `${ENDPOINTS.MCP_REGISTRY}/servers?q=${encodeURIComponent(query)}&limit=8`;
       const body = await safeFetch(searchUrl);
 
       if (body) {
@@ -1168,9 +1193,10 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
       filter: z.string().optional().describe("Filter by keyword (e.g., 'rag', 'agent', 'landing-zone')"),
     },
     { annotations: { readOnlyHint: true, openWorldHint: true } },
-    async ({ filter }) => {
+    async ({ filter: rawFilter }) => {
+      const filter = rawFilter ? sanitizeInput(rawFilter) : undefined;
       // Try live from GitHub API
-      const apiUrl = "https://api.github.com/repos/frootai/frootai/contents/solution-plays";
+      const apiUrl = ENDPOINTS.GITHUB_COMMUNITY_PLAYS;
       const body = await safeFetch(apiUrl);
 
       let plays = [];

@@ -89,11 +89,28 @@ function loadBundledKnowledge() {
 }
 
 /**
+ * Fetch with exponential backoff retry — 3 attempts with 1s/2s/4s delays.
+ */
+async function fetchWithRetry(url, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const body = await fetchUrl(url);
+      return body;
+    } catch (err) {
+      if (attempt === maxRetries) throw err;
+      const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
+      console.error(`[auto-update] Attempt ${attempt}/${maxRetries} failed: ${err.message} — retrying in ${delay}ms`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+}
+
+/**
  * Get the latest knowledge, fetching from GitHub if the local copy is stale.
  *
  * Strategy:
  *   - If local knowledge.json is < 7 days old → return it immediately
- *   - If stale → try fetching from GitHub
+ *   - If stale → try fetching from GitHub (with exponential backoff retry)
  *   - If fetch succeeds → write to disk, return fresh data
  *   - If fetch fails → return bundled version (never break the server)
  *
@@ -107,10 +124,10 @@ export async function getLatestKnowledge() {
     return bundled;
   }
 
-  // Slow path: try to fetch from GitHub
+  // Slow path: try to fetch from GitHub with retry
   try {
     console.error("[auto-update] Knowledge is stale — fetching latest from GitHub...");
-    const raw = await fetchUrl(GITHUB_RAW_URL);
+    const raw = await fetchWithRetry(GITHUB_RAW_URL);
     const fresh = JSON.parse(raw);
 
     // Validate the fetched data has expected structure
