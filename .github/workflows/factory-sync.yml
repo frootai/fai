@@ -530,3 +530,36 @@ jobs:
             });
 
             console.log('Created drift alert issue');
+
+  # ══════════════════════════════════════════════════════════
+  # Job 6: Trigger frootai-core factory pipeline
+  # ══════════════════════════════════════════════════════════
+  # After catalog validation passes on main, dispatch to the
+  # private repo so it can sync distribution channel files,
+  # rebuild knowledge.json, and prepare for release.
+  trigger-core:
+    name: 🔗 Trigger Core Sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [catalog-validation, channel-sync]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.catalog-validation.outputs.catalog_valid == 'true' &&
+      needs.catalog-validation.outputs.counts_match == 'true'
+
+    steps:
+      - name: 📡 Dispatch to frootai-core
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          token: ${{ secrets.CORE_REPO_PAT }}
+          repository: frootai/frootai-core
+          event-type: public-repo-updated
+          client-payload: >-
+            {
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "actor": "${{ github.actor }}",
+              "primitives": "${{ needs.catalog-validation.outputs.total_primitives }}",
+              "run_id": "${{ github.run_id }}"
+            }
