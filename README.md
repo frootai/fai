@@ -269,11 +269,11 @@ frootai/frootai
 ├── schemas/              7 JSON schemas validating all primitive types
 ├── engine/               FAI Engine v0.1 (7 modules — manifest reader → evaluator)
 ├── solution-plays/       100 deployable plays with DevKit+TuneKit+SpecKit+Bicep
-├── npm-mcp/              MCP Server — 45 tools + knowledge.json
-├── npm-sdk/              npm SDK & CLI — FrootAI class, 46 commands, 7 modules
+├── npm-mcp/              MCP Server — 0 tools + knowledge.json
+├── npm-sdk/              npm SDK & CLI — FrootAI class, 0 commands, 7 modules
 ├── python-sdk/           Python SDK — offline, zero deps, 7 modules
 ├── python-mcp/           Python MCP Server
-├── vscode-extension/     VS Code extension (46 commands)
+├── vscode-extension/     VS Code extension (0 commands)
 ├── functions/            REST API + Agent FAI chatbot
 ├── docs/                 FROOT knowledge modules (18 modules, 664 KB)
 ├── config/               Configurator data + spec templates
