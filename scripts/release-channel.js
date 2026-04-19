@@ -28,23 +28,81 @@
  *   2. Update functions/server.js refs (for consistency checker)
  *   3. Run validate-consistency.js
  *   4. git add + commit + tag + push (unless --dry-run)
+ *
+ * AUTO-BUMP (how big companies do it):
+ *   If no bump type is specified, the script reads commit messages since the
+ *   last tag for the channel and determines the bump automatically:
+ *     - "feat:" or "feat(scope):" → MINOR (new feature)
+ *     - "fix:", "perf:", "refactor:" → PATCH (bug fix / improvement)
+ *     - "BREAKING CHANGE" in body or "!" after type → MAJOR
+ *     - "docs:", "style:", "test:", "ci:", "chore:" → PATCH (maintenance)
+ *   If no commits found since last tag → exits with "nothing to release"
+ *
+ *   node scripts/release-channel.js mcp          →  auto-detect bump
+ *   node scripts/release-channel.js mcp auto     →  same (explicit)
+ *   node scripts/release-channel.js mcp patch    →  force patch
  */
 
 const fs = require("fs");
 const { execSync } = require("child_process");
 
+// ── Auto-bump detection from conventional commits ──
+function detectBumpType(tagPrefix) {
+  let lastTag;
+  try {
+    lastTag = execSync(
+      `git tag --list "${tagPrefix}*" --sort=-version:refname`,
+      { encoding: "utf8", stdio: "pipe" }
+    ).trim().split("\n")[0];
+  } catch { lastTag = ""; }
+
+  const range = lastTag ? `${lastTag}..HEAD` : "HEAD~50..HEAD";
+  let commits;
+  try {
+    commits = execSync(
+      `git log ${range} --pretty=format:"%s%n%b" --no-merges`,
+      { encoding: "utf8", stdio: "pipe" }
+    ).trim();
+  } catch { commits = ""; }
+
+  if (!commits) {
+    return { bump: null, reason: "No commits since last tag", commits: 0 };
+  }
+
+  const lines = commits.split("\n").filter(Boolean);
+  const subjects = commits.split("\n").filter((_, i) => i % 2 === 0);
+
+  // Check for breaking changes
+  const hasBreaking = lines.some(l =>
+    l.includes("BREAKING CHANGE") ||
+    /^(feat|fix|refactor|perf)(\(.+\))?!:/.test(l)
+  );
+  if (hasBreaking) {
+    return { bump: "major", reason: "BREAKING CHANGE detected", commits: subjects.length };
+  }
+
+  // Check for features
+  const hasFeats = subjects.some(s => /^feat(\(.+\))?:/.test(s));
+  if (hasFeats) {
+    return { bump: "minor", reason: "feat: commits detected", commits: subjects.length };
+  }
+
+  // Everything else is patch
+  return { bump: "patch", reason: "fix/chore/docs commits only", commits: subjects.length };
+}
+
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const filteredArgs = args.filter(a => a !== "--dry-run");
 const channel = filteredArgs[0];
-const bumpType = filteredArgs[1] || "patch";
+let bumpType = filteredArgs[1] || "auto";
 
 if (!channel || !["mcp", "cli", "ext", "sdk", "pymcp", "all"].includes(channel)) {
     console.log(`
 FrootAI Release Manager
 ═══════════════════════
 
-Usage: node scripts/release-channel.js [--dry-run] <channel> <bump>
+Usage: node scripts/release-channel.js [--dry-run] <channel> [bump]
 
 Channels:
   mcp     npm MCP Server + Docker        (tag: mcp-vX.Y.Z)
@@ -55,15 +113,22 @@ Channels:
   all     ALL channels at once           (tag: rel-vYYYY.MM.DD)
 
 Bump types:
+  auto    Detect from commit messages (default — recommended)
   patch   Bug fixes (5.0.1 → 5.0.2)
   minor   New features (5.0.2 → 5.1.0)
   major   Breaking changes (5.1.0 → 6.0.0)
 
+Auto-detection rules (from conventional commits):
+  feat:              → MINOR
+  fix: / perf:       → PATCH
+  BREAKING CHANGE    → MAJOR
+  docs: / chore:     → PATCH
+
 Examples:
-  node scripts/release-channel.js mcp patch        # npm + Docker
-  node scripts/release-channel.js ext minor         # VS Code only
-  node scripts/release-channel.js all patch         # Everything
-  node scripts/release-channel.js --dry-run all patch  # Preview
+  node scripts/release-channel.js mcp              # auto-detect bump
+  node scripts/release-channel.js ext minor         # force minor
+  node scripts/release-channel.js all               # auto-detect all
+  node scripts/release-channel.js --dry-run all     # preview
 `);
     process.exit(0);
 }
@@ -160,6 +225,42 @@ const channels = {
 console.log(`\n🚀 FrootAI Release Manager\n`);
 
 const targets = channel === "all" ? Object.keys(channels) : [channel];
+
+// ── Auto-detect bump type if "auto" ──
+if (bumpType === "auto") {
+  // For "all" channel, use the highest bump detected across all channels
+  const detections = targets.map(ch => {
+    const det = detectBumpType(channels[ch].tagPrefix);
+    return { ch, ...det };
+  });
+
+  const hasAny = detections.some(d => d.bump !== null);
+  if (!hasAny) {
+    console.log("  ℹ️  No commits found since last tags. Nothing to release.");
+    process.exit(0);
+  }
+
+  // Highest bump wins: major > minor > patch
+  const priority = { major: 3, minor: 2, patch: 1 };
+  const highest = detections
+    .filter(d => d.bump)
+    .reduce((max, d) => priority[d.bump] > priority[max.bump] ? d : max);
+
+  bumpType = highest.bump;
+
+  console.log("  📊 Auto-detected bump type from conventional commits:\n");
+  for (const d of detections) {
+    const icon = d.bump === "major" ? "🔴" : d.bump === "minor" ? "🟡" : "🟢";
+    console.log(`     ${icon} ${channels[d.ch].name.padEnd(25)} → ${(d.bump || "none").padEnd(6)} (${d.commits} commits: ${d.reason})`);
+  }
+  console.log(`\n  🎯 Using: ${bumpType.toUpperCase()}\n`);
+}
+
+if (!["patch", "minor", "major"].includes(bumpType)) {
+  console.error(`  ❌ Unknown bump type: ${bumpType}. Options: auto, patch, minor, major`);
+  process.exit(1);
+}
+
 const bumps = {};
 
 for (const ch of targets) {
