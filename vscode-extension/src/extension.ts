@@ -1115,7 +1115,7 @@ ${bodyHtml}
         stream.markdown("- *enterprise RAG pipeline*\n- *multi-agent orchestration*\n- *IoT edge AI*\n- *what is retrieval augmented generation*\n- *cost optimization for AI*\n\n");
       }
 
-      stream.markdown("\n---\n*Agent FAI — 101 plays · 16 modules · 200+ terms · [frootai.dev](https://frootai.dev)*");
+      stream.markdown("\n---\n*Agent FAI — 101 plays · knowledge modules · comprehensive glossary · [frootai.dev](https://frootai.dev)*");
     });
 
     participant.iconPath = vscode.Uri.joinPath(context.extensionUri, "media", "frootai-mark.png");

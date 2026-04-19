@@ -1,6 +1,6 @@
 # FrootAI — From Root to Fruit
 
-> **The open glue that binds infrastructure, platform, and application**
+> **The uniFAIng glue that binds infrastructure, platform, and application**
 > The telescope and the microscope for AI architecture.
 > See the big picture. Master the tiny details. Design with confidence.
 
@@ -114,7 +114,7 @@ graph TB
 |---|--------|----------|-------------------|
 | F1 | [GenAI Foundations](./GenAI-Foundations.md) | 60–90 min | Transformers, attention, tokenization, inference, parameters (temperature, top-k, top-p), context windows, embeddings |
 | F2 | [LLM Landscape & Model Selection](./LLM-Landscape.md) | 45–60 min | GPT, Claude, Llama, Gemini, Phi — benchmarks, open vs proprietary, when to use what |
-| F3 | [AI Glossary A–Z](./F3-AI-Glossary-AZ.md) | Reference | **200+ terms** defined — from "ablation" to "zero-shot". The dictionary you keep open in another tab |
+| F3 | [AI Glossary A–Z](./F3-AI-Glossary-AZ.md) | Reference | Comprehensive glossary defined — from "ablation" to "zero-shot". The dictionary you keep open in another tab |
 
 ---
 
@@ -431,12 +431,12 @@ Ctrl+Shift+X → Search "FrootAI" → Install
 
 **17 commands:** Init DevKit (.github Agentic OS), Init TuneKit, Init SpecKit, Auto-Chain Agents, MCP Install/Start/Configure, Search Knowledge, Look Up AI Term, and more.
 
-**4 sidebar panels:** Solution Plays (20) · MCP Tools (22) · Knowledge Hub (18 modules) · AI Glossary (200+ terms)
+**4 sidebar panels:** Solution Plays (20) · MCP Tools (22) · Knowledge Hub (knowledge modules) · AI Glossary (comprehensive glossary)
 
 See [VS Code Extension →](https://marketplace.visualstudio.com/items?itemName=frootai.frootai-vscode)
 
 ---
 
-> **FrootAI v2.2** — *The open glue for AI architecture. From the roots to the fruits.*
-> 18 modules · 22 MCP tools · 20 solution plays · 200+ AI terms
+> **FrootAI v2.2** — *The uniFAIng glue for AI architecture. From the roots to the fruits.*
+> Knowledge modules · MCP tools · solution plays · comprehensive glossary
 > Built with 🌳 by the [FrootAI community](https://github.com/frootai/frootai) for the Azure community.

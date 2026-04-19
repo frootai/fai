@@ -1,6 +1,6 @@
 # Play 100 — FAI Meta-Agent 🎯
 
-> The capstone play — self-orchestrating agent that routes users to the right play, initializes DevKit/TuneKit/SpecKit, and provides cross-play intelligence across all 101 solution plays.
+> The capstone play — self-orchestrating agent that routes users to the right play, initializes DevKit/TuneKit/SpecKit, and provides cross-play intelligence across all solution plays.
 
 Build the FAI Meta-Agent — FrootAI's master orchestrator. Semantic search over all 101 plays matches user intent to the best solution, cross-play intelligence suggests complementary plays (e.g., RAG + Governance), DevKit initializer scaffolds the complete development environment, and feedback loops continuously improve routing accuracy.
 
@@ -33,7 +33,7 @@ graph TB
     end
 
     subgraph Knowledge Index
-        Search[Azure AI Search<br/>100 Plays · 860+ Primitives · 17 Modules · 200+ Terms · Hybrid Search]
+        Search[Azure AI Search<br/>Plays · Primitives · Modules · Glossary · Hybrid Search]
     end
 
     subgraph Orchestration State

@@ -1,6 +1,6 @@
 """FrootAI MCP Server — FastMCP Python Implementation v5.1.0
 
-45 tools · 4 resources · 6 prompts · BM25 search · 100 solution plays
+MCP tools · 4 resources · 6 prompts · BM25 search · solution plays
 FAI Protocol engine · Scaffold · Marketplace · full MCP protocol
 
 Compatible with Claude Desktop, VS Code Copilot, Cursor, Windsurf, any MCP client.
@@ -119,7 +119,7 @@ COST_DATA = {
 # ─── Server Instance ───
 mcp = FastMCP(
     "frootai",
-    instructions="FrootAI — AI architecture knowledge engine. 45 tools across 8 categories: Knowledge (6), Plays (5), Agent Chain (3), Azure/Live (4), Ecosystem (5), FAI Engine (5), Marketplace (4), Scaffold (5). Plus extra tools (8), 4 resources, and 6 prompts. 100 solution plays, 860+ primitives, BM25 search, FAI Protocol.",
+    instructions="FrootAI — AI architecture knowledge engine. MCP tools across 8 categories: Knowledge (6), Plays (5), Agent Chain (3), Azure/Live (4), Ecosystem (5), FAI Engine (5), Marketplace (4), Scaffold (5). Plus extra tools (8), 4 resources, and 6 prompts. solution plays, AI primitives, BM25 search, FAI Protocol.",
 )
 
 # ─── Data Loading ───
@@ -328,7 +328,7 @@ async def get_architecture_pattern(scenario: str) -> str:
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False})
 async def list_solution_plays(filter: str = "") -> str:
-    """List all 100 solution plays, optionally filtered by keyword."""
+    """List all solution plays, optionally filtered by keyword."""
     if filter:
         q = filter.lower()
         filtered = [p for p in PLAYS if q in (p["name"] + p["desc"] + p["infra"]).lower()]
@@ -1147,7 +1147,7 @@ async def overview_resource() -> str:
 @mcp.prompt()
 async def design_architecture(scenario: str, scale: str = "production") -> str:
     """Guided prompt for designing an AI architecture. Asks about requirements, then recommends plays."""
-    return f"""You are an AI architecture advisor using FrootAI's 100 solution plays.
+    return f"""You are an AI architecture advisor using FrootAI's solution plays.
 
 The user wants to build: {scenario}
 Scale: {scale}
@@ -1241,7 +1241,7 @@ Steps:
 @mcp.prompt()
 async def learn_fai_protocol() -> str:
     """Educational prompt about the FAI Protocol and primitives ecosystem."""
-    return """Teach the user about the FAI Protocol — the open glue for AI primitives.
+    return """Teach the user about the FAI Protocol — the uniFAIng glue for AI primitives.
 
 Steps:
 1. Call `get_froot_overview` for platform context

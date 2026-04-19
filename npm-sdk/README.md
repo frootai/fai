@@ -2,7 +2,7 @@
 
 > **FrootAI™ CLI & SDK** — AI Primitive Unification Ecosystem
 
-The official CLI & SDK for [FrootAI](https://frootai.dev) — 100 solution plays, 860+ AI primitives, and the FAI Protocol.
+The official CLI & SDK for [FrootAI](https://frootai.dev) — solution plays, AI primitives, and the FAI Protocol.
 
 ## Installation
 
@@ -20,10 +20,10 @@ npm i -g frootai
 # Explore
 frootai help                              # Show all 21 commands
 frootai info 01                           # Play details, cost estimate, architecture
-frootai list                              # Browse all 100 solution plays
+frootai list                              # Browse all solution plays
 frootai search "RAG architecture"         # BM25 ranked knowledge search
 frootai cost 01 --scale prod              # Detailed cost breakdown
-frootai primitives                        # Browse 860+ AI primitives catalog
+frootai primitives                        # Browse AI primitives catalog
 
 # Build
 frootai init                              # Interactive project scaffolding
@@ -59,8 +59,8 @@ console.log(play.title);              // "Enterprise Rag"
 const results = searchKnowledge('RAG architecture');
 results.forEach(r => console.log(r.title, r.score));
 
-// Browse all 100 plays
-const plays = getAllPlays();           // 100 plays
+// Browse all plays
+const plays = getAllPlays();
 
 // Look up AI terms
 const def = lookupTerm('embeddings');

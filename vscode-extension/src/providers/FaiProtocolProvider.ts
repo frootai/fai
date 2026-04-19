@@ -111,7 +111,7 @@ const LAYERS: ProtocolLayer[] = [
     children: [
       {
         label: "Harvester",
-        desc: "Scans 860+ primitives across 9 directories in ~250ms",
+        desc: "Scans AI primitives across 9 directories in ~250ms",
         icon: "search",
       },
       {
@@ -149,7 +149,7 @@ const LAYERS: ProtocolLayer[] = [
   {
     label: "FAI Marketplace",
     icon: "store",
-    desc: "77 plugins, 1,008 items",
+    desc: "plugins, 1,008 items",
     children: [
       {
         label: "npx frootai install",
@@ -158,7 +158,7 @@ const LAYERS: ProtocolLayer[] = [
       },
       {
         label: "npx frootai list",
-        desc: "Browse all 77 plugins",
+        desc: "Browse all plugins",
         icon: "list-flat",
       },
       {

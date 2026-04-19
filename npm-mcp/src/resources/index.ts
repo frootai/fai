@@ -20,7 +20,7 @@ export function getStaticResources(): ResourceDefinition[] {
       mimeType: 'text/plain',
       description: 'FrootAI ecosystem overview — layers, modules, tools, plays',
       generate: () => `FrootAI — FAI Engine Runtime Interface
-The open glue that binds infrastructure, platform, and application.
+The uniFAIng glue that binds infrastructure, platform, and application.
 
 🌱 F — Foundations: GenAI Foundations, LLM Landscape, AI Glossary A-Z, .github Agentic OS
 🪵 R — Reasoning: Prompt Engineering, RAG Architecture, Deterministic AI
@@ -28,14 +28,14 @@ The open glue that binds infrastructure, platform, and application.
 🏗️ O — Operations: Azure AI Platform, Infrastructure, Copilot
 🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
-18 modules | 200+ AI terms | 45 tools | 100 solution plays | 860+ primitives | FAI Engine
+Knowledge modules | Comprehensive glossary | MCP tools | Solution plays | AI primitives | FAI Engine
 https://frootai.dev`,
     },
     {
       name: 'fai-tool-catalog',
       uri: 'fai://tools',
       mimeType: 'application/json',
-      description: 'Complete catalog of all 45 MCP tools with categories and descriptions',
+      description: 'Complete catalog of all MCP tools with categories and descriptions',
       generate: () => JSON.stringify({
         version: '5.0.1',
         totalTools: 45,

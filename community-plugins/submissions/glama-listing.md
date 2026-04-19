@@ -4,19 +4,19 @@
 FrootAI MCP Server
 
 ## Tagline
-The open glue for the GenAI ecosystem — 45 MCP tools, 104 solution plays, 860+ AI primitives
+The uniFAIng glue for the GenAI ecosystem — wire AI primitives into reliable systems
 
 ## Description
 
-FrootAI is the missing binding layer for AI development. While MCP handles tool calling, A2A handles delegation, and AG-UI handles rendering, FrootAI handles **wiring** — declaring how AI primitives (agents, instructions, skills, hooks, plugins) connect, share context, and enforce quality gates via the FAI Protocol.
+FrootAI is the uniFAIng layer for AI development. While MCP handles tool calling, A2A handles delegation, and AG-UI handles rendering, FrootAI handles **wiring** — declaring how AI primitives (agents, instructions, skills, hooks, plugins) connect, share context, and enforce quality gates via the FAI Protocol.
 
 ### Key Capabilities
 
-- **45 MCP Tools** — Architecture guidance, solution plays, model comparison, cost estimation, AI evaluation, primitive management, FAI Protocol orchestration, IaC export
-- **104 Solution Plays** — Production-ready AI architectures (Enterprise RAG, Multi-Agent, Voice AI, Document Intelligence, Agentic RAG, Edge AI, and more)
-- **860+ Primitives** — 238 agents, 176 instructions, 333 skills, 10 hooks, 77 plugins, 12 workflows, 16 cookbook recipes
-- **FAI Protocol** — Declarative context-wiring standard (`fai-manifest.json` v2.0) — the Dockerfile for AI systems, with 10 moonshot contract types for cross-platform agent orchestration
-- **24 Knowledge Modules** — Covering GenAI foundations, RAG, agents, infrastructure, responsible AI, and production operations
+- **MCP Tools** — Architecture guidance, solution plays, model comparison, cost estimation, AI evaluation, primitive management, FAI Protocol orchestration, IaC export
+- **Solution Plays** — Production-ready AI architectures (Enterprise RAG, Multi-Agent, Voice AI, Document Intelligence, Agentic RAG, Edge AI, and more)
+- **AI Primitives** — Agents, instructions, skills, hooks, plugins, workflows, and cookbook recipes — all context-wired
+- **FAI Protocol** — Declarative context-wiring standard (`fai-manifest.json` v2.0) — the Dockerfile for AI systems, with moonshot contract types for cross-platform agent orchestration
+- **Knowledge Modules** — Covering GenAI foundations, RAG, agents, infrastructure, responsible AI, and production operations
 - **Infrastructure as Code** — Bicep + Terraform templates for every Azure-based solution play
 
 ### Framework Adapters

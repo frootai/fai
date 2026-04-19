@@ -6,7 +6,7 @@
 <p align="center"><sub>Python SDK</sub></p>
 <p align="center"><strong>From the Roots to the Fruits. It's simply Frootful.</strong></p>
 <p align="center"><em>An open ecosystem where Infra, Platform, and App teams build AI — Frootfully.</em></p>
-<p align="center"><em>An open glue for the GenAI ecosystem, enabling deterministic and reliable AI solutions.</em></p>
+<p align="center"><em>A uniFAIng glue for the GenAI ecosystem, enabling deterministic and reliable AI solutions.</em></p>
 
 <p align="center">
   <a href="https://pypi.org/project/frootai/"><img src="https://img.shields.io/pypi/v/frootai?style=flat-square&logo=python" alt="PyPI"></a>
@@ -78,7 +78,7 @@ results = evaluator.check_thresholds(scores)
 ### CLI
 
 ```bash
-frootai plays                    # List all 101 solution plays
+frootai plays                    # List all solution plays
 frootai search "embeddings"      # BM25 search across knowledge
 frootai modules                  # List FROOT modules
 frootai glossary temperature     # Look up a term
@@ -88,7 +88,7 @@ frootai wire 01                  # Generate fai-manifest.json
 frootai validate manifest.json   # Validate FAI manifest
 frootai evaluate groundedness=4.5 relevance=3.8  # Run quality check
 frootai waf security             # WAF pillar guidance
-frootai primitives               # Browse 860+ primitives
+frootai primitives               # Browse AI primitives
 frootai learning-path rag        # Curated learning path
 ```
 
@@ -99,7 +99,7 @@ frootai learning-path rag        # Curated learning path
 | Feature | Description |
 |---------|-------------|
 | **BM25 Search** | Full-text search (358 docs × 8,627 terms), falls back to keyword |
-| **101 Solution Plays** | Pre-architected Azure AI patterns with filtering |
+| **Solution Plays** | Pre-architected Azure AI patterns with filtering |
 | **FAI Protocol** | Wire, validate, inspect fai-manifest.json |
 | **Scaffold** | Bootstrap projects with DevKit structure |
 | **WAF Guidance** | 6-pillar Well-Architected Framework advice |
@@ -107,7 +107,7 @@ frootai learning-path rag        # Curated learning path
 | **A/B Testing** | Prompt experiment framework with scoring |
 | **Agentic Loop** | Ralph Loop — autonomous task execution |
 | **Cost Estimation** | Itemized Azure cost estimates by play |
-| **AI Glossary** | 200+ terms extracted from knowledge modules |
+| **AI Glossary** | Comprehensive glossary extracted from knowledge modules |
 | **CLI** | 13 commands for browsing, searching, scaffolding |
 | **Zero Dependencies** | Pure Python stdlib, works anywhere |
 

@@ -6,7 +6,7 @@
 <p align="center"><sub>MCP Server (Python)</sub></p>
 <p align="center"><strong>From the Roots to the Fruits. It's simply Frootful.</strong></p>
 <p align="center"><em>An open ecosystem where Infra, Platform, and App teams build AI — Frootfully.</em></p>
-<p align="center"><em>An open glue for the GenAI ecosystem, enabling deterministic and reliable AI solutions.</em></p>
+<p align="center"><em>A uniFAIng glue for the GenAI ecosystem, enabling deterministic and reliable AI solutions.</em></p>
 
 <p align="center">
   <a href="https://pypi.org/project/frootai-mcp/"><img src="https://img.shields.io/pypi/v/frootai-mcp?style=flat-square&logo=python" alt="PyPI"></a>
@@ -120,14 +120,14 @@ print(result)
 | **Prompts** | 6 | Guided workflows for architecture, review, scaffold |
 | **Search** | BM25 | 358 docs × 8,627 terms, Robertson IDF |
 | **Plays** | 100 | Solution architectures from starter to enterprise |
-| **Primitives** | 860+ | Agents, instructions, skills, hooks, plugins |
+| **Primitives** | Growing | Agents, instructions, skills, hooks, plugins |
 
 ### MCP Tools (45)
 
 **Knowledge (6)** — bundled knowledge, works offline
 - `list_modules` — browse FROOT knowledge modules by layer
 - `get_module` — read any module in full
-- `lookup_term` — AI/ML glossary lookup (200+ terms)
+- `lookup_term` — AI/ML glossary lookup (comprehensive glossary)
 - `search_knowledge` — BM25 full-text search across all modules
 - `get_architecture_pattern` — architecture decision guides
 - `get_froot_overview` — complete framework summary
@@ -165,7 +165,7 @@ print(result)
 - `evaluate_quality` — run quality evaluation (groundedness, relevance, etc.)
 
 **Marketplace (4)** — primitive discovery
-- `list_marketplace` — browse 860+ primitives by type
+- `list_marketplace` — browse AI primitives by type
 - `get_primitive_detail` — get detail for a specific primitive
 - `search_marketplace` — keyword search across all primitives
 - `embedding_playground` — text similarity comparison (educational)
@@ -213,14 +213,14 @@ print(result)
 
 | Component | Details |
 |-----------|---------|
-| **FROOT Knowledge** | 16 modules across 5 layers (682KB) |
+| **FROOT Knowledge** | Knowledge modules across 5 layers (682KB) |
 | **BM25 Search Index** | 358 documents × 8,627 terms, pre-computed IDF |
 | **Solution Plays** | 100 pre-architected Azure AI solutions |
-| **AI Glossary** | 200+ terms extracted from modules |
+| **AI Glossary** | Comprehensive glossary extracted from modules |
 | **FAI Protocol** | Manifest schema for play wiring |
 | **Architecture Guides** | RAG, agents, hosting, cost, security |
 
-> **Feature parity** with the Node.js MCP server — same 45 tools, same knowledge, same FAI Engine.
+> **Feature parity** with the Node.js MCP server — same MCP tools, same knowledge, same FAI Engine.
 
 ---
 

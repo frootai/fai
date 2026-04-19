@@ -8,17 +8,17 @@
 
 **Description (short):**
 ```
-The open glue for the GenAI ecosystem — 45 MCP tools, 104 solution plays, 860+ AI primitives
+The uniFAIng glue for the GenAI ecosystem — wire AI primitives into deterministic, reliable solutions
 ```
 
 **Description (full):**
 ```
-The open glue for the GenAI ecosystem — 45 MCP tools spanning architecture guidance, solution plays, primitive management, model comparison, cost estimation, AI evaluation, and FAI Protocol orchestration. Context-wires 860+ primitives (238 agents, 176 instructions, 333 skills, 10 hooks, 77 plugins) across 104 solution plays via the FAI Protocol.
+The uniFAIng glue for the GenAI ecosystem — MCP tools spanning architecture guidance, solution plays, primitive management, model comparison, cost estimation, AI evaluation, and FAI Protocol orchestration. Context-wires agents, skills, instructions, hooks, and plugins into deterministic, reliable AI solutions.
 ```
 
 **Install command:**
 ```
-npx frootai-mcp@5.2.0
+npx frootai-mcp@latest
 ```
 
 **Key URLs:**
@@ -41,7 +41,7 @@ This enables auto-discovery on Glama, mcp.so, and search engines.
 2. **Click the ⚙️ gear icon** next to "About" (top-right of the repo page)
 3. In the **Description** field, type:
    ```
-   The open glue for GenAI — 45 MCP tools, 104 solution plays, 860+ AI primitives, FAI Protocol
+   The uniFAIng glue for GenAI — MCP tools, solution plays, AI primitives, FAI Protocol
    ```
 4. In the **Website** field, type:
    ```
@@ -91,11 +91,11 @@ This is the highest-impact submission. The repo has 30K+ stars and is THE discov
 8. **Add this line** (paste it on a new line):
 
 ```markdown
-- [frootai/frootai](https://github.com/frootai/frootai) 📇 🏠 ☁️ 🍎 🪟 🐧 - The open glue for the GenAI ecosystem — 45 MCP tools for architecture guidance, 104 solution plays, 860+ AI primitives (238 agents, 176 instructions, 333 skills), model comparison, cost estimation, AI evaluation, and FAI Protocol context-wiring. Install: `npx frootai-mcp@5.2.0`.
+- [frootai/frootai](https://github.com/frootai/frootai) 📇 🏠 ☁️ 🍎 🪟 🐧 - The uniFAIng glue for the GenAI ecosystem — MCP tools for architecture guidance, solution plays, AI primitives (agents, instructions, skills), model comparison, cost estimation, AI evaluation, and FAI Protocol context-wiring. Install: `npx frootai-mcp@5.2.0`.
 ```
 
 9. **Scroll down** to the "Commit changes" section
-   - Commit message: `Add FrootAI MCP Server — 45 tools, 104 plays, 860+ primitives`
+   - Commit message: `Add FrootAI MCP Server — MCP tools, solution plays, AI primitives`
    - Select **"Commit directly to the main branch"**
    - Click **Commit changes**
 10. **Click "Contribute"** button (top of page, green bar)
@@ -103,7 +103,7 @@ This is the highest-impact submission. The repo has 30K+ stars and is THE discov
 11. **Fill in the PR:**
     - **Title** (IMPORTANT — include the robot emojis for fast-track merge):
       ```
-      Add FrootAI MCP Server — AI primitive unification (45 tools, 104 plays, 860+ primitives) 🤖🤖🤖
+      Add FrootAI MCP Server — AI primitive unification (MCP tools, solution plays, AI primitives) 🤖🤖🤖
       ```
     - **Body** — paste this:
 
@@ -111,13 +111,13 @@ This is the highest-impact submission. The repo has 30K+ stars and is THE discov
 This PR adds [FrootAI MCP Server](https://frootai.dev) to the awesome-mcp-servers list.
 
 **What it does:**
-- 45 MCP tools for AI architecture guidance, solution play discovery, model comparison, cost estimation, quality evaluation, primitive management, and FAI Protocol orchestration
-- Context-wires 860+ AI primitives (238 agents, 176 instructions, 333 skills, 10 hooks, 77 plugins) via the FAI Protocol into deployable AI systems
-- 104 production-ready solution plays covering Enterprise RAG, Multi-Agent, Voice AI, Document Intelligence, Agentic RAG, Edge AI, Browser Agents, and more
+- MCP tools for AI architecture guidance, solution play discovery, model comparison, cost estimation, quality evaluation, primitive management, and FAI Protocol orchestration
+- Context-wires AI primitives (agents, instructions, skills, hooks, plugins) via the FAI Protocol into deployable AI systems
+- Production-ready solution plays covering Enterprise RAG, Multi-Agent, Voice AI, Document Intelligence, Agentic RAG, Edge AI, Browser Agents, and more
 - Cross-framework adapters for Semantic Kernel and LangChain
 - Infrastructure as Code (Bicep + Terraform) for every Azure-based play
-- 6 distribution channels: npm, PyPI, VS Code Marketplace, Docker, GitHub Actions, CLI
-- FAI Protocol v2.0 with 10 moonshot contract types for declarative agent orchestration
+- Multi-channel distribution: npm, PyPI, VS Code Marketplace, Docker, GitHub Actions, CLI
+- FAI Protocol v2.0 with moonshot contract types for declarative agent orchestration
 
 **Installation:** `npx frootai-mcp@5.2.0` (zero config, Node.js 18+)
 
@@ -149,7 +149,7 @@ Glama auto-indexes from GitHub. After Task 1 (topics), it usually picks up repos
 4. **Search** for `frootai` in the search box
 5. **If NOT found** (likely), email them directly:
    - **To:** hello@glama.ai
-   - **Subject:** `Submit MCP Server: frootai-mcp (45 tools, 860+ primitives)`
+   - **Subject:** `Submit MCP Server: frootai-mcp (MCP tools, AI primitives)`
    - **Body:**
      ```
      Hi Glama team,
@@ -162,8 +162,8 @@ Glama auto-indexes from GitHub. After Task 1 (topics), it usually picks up repos
      Website: https://frootai.dev/mcp
      License: MIT
 
-     Description: The open glue for the GenAI ecosystem — 45 MCP tools
-     spanning architecture guidance, 104 solution plays, and 860+ AI primitives
+     Description: The uniFAIng glue for the GenAI ecosystem — MCP tools
+     spanning architecture guidance, solution plays, and AI primitives
      via the FAI Protocol.
 
      Our repo has the 'mcp' and 'mcp-server' GitHub topics set.
@@ -243,7 +243,7 @@ GitHub has an official MCP registry at https://github.com/mcp.
 2. Look for an **"Add your server"** or **"Submit"** link
 3. If there's a submission form, fill in:
    - **Name:** `frootai-mcp`
-   - **Description:** `The open glue for GenAI — 45 MCP tools, 104 solution plays, 860+ primitives`
+   - **Description:** `The uniFAIng glue for GenAI — MCP tools, solution plays, AI primitives`
    - **Install:** `npx frootai-mcp@5.2.0`
    - **Repository:** `https://github.com/frootai/frootai`
 4. If no direct submission:
@@ -262,22 +262,22 @@ GitHub has an official MCP registry at https://github.com/mcp.
 3. **Tag:** Click "Choose a tag" → type `v5.2.0` → click "Create new tag: v5.2.0 on publish"
 4. **Release title:**
    ```
-   FrootAI v5.2.0 — 45 MCP Tools, 104 Solution Plays, 860+ AI Primitives
+   FrootAI v5.2.0 — MCP Tools, Solution Plays, AI Primitives
    ```
 5. **Description** — paste this:
 
 ```markdown
 ## 🚀 What's New
 
-FrootAI is the **open glue for the GenAI ecosystem** — context-wiring AI primitives into deployable systems via the FAI Protocol.
+FrootAI is the **uniFAIng glue for the GenAI ecosystem** — context-wiring AI primitives into deployable systems via the FAI Protocol.
 
 ### Highlights
 
-🔧 **45 MCP Tools** — Architecture guidance, cost estimation, model comparison, evaluation, primitive orchestration
-📦 **104 Solution Plays** — Production-ready AI architectures (Enterprise RAG, Multi-Agent, Voice AI, Edge AI, and more)
-🧩 **860+ AI Primitives** — 238 agents, 176 instructions, 333 skills, 10 hooks, 77 plugins
-🔌 **FAI Protocol v2.0** — 10 moonshot contract types for declarative agent orchestration
-🌐 **6 Distribution Channels** — npm, PyPI, VS Code, Docker, GitHub Actions, CLI
+🔧 **MCP Tools** — Architecture guidance, cost estimation, model comparison, evaluation, primitive orchestration
+📦 **Solution Plays** — Production-ready AI architectures (Enterprise RAG, Multi-Agent, Voice AI, Edge AI, and more)
+🧩 **AI Primitives** — Agents, instructions, skills, hooks, plugins
+🔌 **FAI Protocol v2.0** — Moonshot contract types for declarative agent orchestration
+🌐 **Multi-Channel Distribution** — npm, PyPI, VS Code, Docker, GitHub Actions, CLI
 🏗️ **Infrastructure as Code** — Bicep + Terraform for every Azure play
 🔄 **Cross-Framework** — Semantic Kernel + LangChain adapters
 
@@ -317,21 +317,21 @@ npx frootai-mcp@5.2.0
 ### Reddit (high-impact communities):
 
 1. **r/MachineLearning** → https://www.reddit.com/r/MachineLearning/submit
-   - Title: `[P] FrootAI — Open-source glue that wires 860+ AI primitives into deployable systems via MCP`
+   - Title: `[P] FrootAI — Open-source glue that wires AI primitives into deployable systems via MCP`
    - Include install command + brief description
 
 2. **r/ChatGPT** → https://www.reddit.com/r/ChatGPT/submit
-   - Title: `Free tool: 45 MCP tools for AI architecture — works with Claude, VS Code, Cursor`
+   - Title: `Free tool: MCP tools for AI architecture — works with Claude, VS Code, Cursor`
 
 3. **r/LocalLLaMA** → https://www.reddit.com/r/LocalLLaMA/submit
-   - Title: `FrootAI MCP Server — 104 AI solution plays, framework-agnostic primitive unification`
+   - Title: `FrootAI MCP Server — AI solution plays, framework-agnostic primitive unification`
 
 ### Twitter/X:
 
 ```
-🚀 Just shipped FrootAI — the open glue for GenAI
+🚀 Just shipped FrootAI — the uniFAIng glue for GenAI
 
-45 MCP tools · 104 solution plays · 860+ primitives
+MCP tools · Solution plays · AI primitives
 Context-wires agents, skills & plugins into deployable systems
 
 Works with VS Code, Claude Desktop, Cursor
@@ -345,15 +345,15 @@ https://github.com/frootai/frootai
 ### LinkedIn:
 
 ```
-Excited to launch FrootAI — the missing binding layer for AI development.
+Excited to launch FrootAI — the uniFAIng layer for AI development.
 
 While MCP handles tool calling, A2A handles delegation, and AG-UI handles rendering, nothing handled the WIRING — how AI primitives share context and deploy as a system.
 
 That's what the FAI Protocol solves.
 
-📦 104 production-ready AI architectures
-🧩 860+ reusable primitives (agents, skills, instructions)
-🔧 45 MCP tools for any AI coding assistant
+📦 Production-ready AI architectures
+🧩 Reusable AI primitives (agents, skills, instructions)
+🔧 MCP tools for any AI coding assistant
 🏗️ Bicep + Terraform IaC included
 
 It's 100% open source (MIT): https://github.com/frootai/frootai

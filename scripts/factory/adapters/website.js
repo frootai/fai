@@ -5,13 +5,13 @@
  * Generates all public/data/*.json files for frootai.dev from fai-catalog.json.
  *
  * Outputs to WEBSITE_ROOT (c:\CodeSpace\frootai.dev by default):
- *   - public/data/agents.json      (238 agents)
- *   - public/data/instructions.json (176 instructions)
- *   - public/data/skills.json      (322 skills)
- *   - public/data/hooks.json       (10 hooks)
- *   - public/data/plugins.json     (77 plugins)
- *   - public/data/workflows.json   (12 workflows)
- *   - public/data/cookbook.json     (16 recipes)
+ *   - public/data/agents.json      (agents)
+ *   - public/data/instructions.json (instructions)
+ *   - public/data/skills.json      (skills)
+ *   - public/data/hooks.json       (hooks)
+ *   - public/data/plugins.json     (plugins)
+ *   - public/data/workflows.json   (workflows)
+ *   - public/data/cookbook.json     (recipes)
  *   - public/data/stats.json       (aggregate counts)
  *   - public/search-index.json     (comprehensive search index)
  *

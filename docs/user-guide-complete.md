@@ -66,9 +66,9 @@ Open Command Palette and type `FROOT:` to see all available commands:
 
 | Command | Description |
 |---|---|
-| **FROOT: Browse Modules** | Open the knowledge hub and browse all 18 modules |
+| **FROOT: Browse Modules** | Open the knowledge hub and browse all knowledge modules |
 | **FROOT: Search Knowledge** | Full-text search across all modules |
-| **FROOT: Lookup Term** | Look up any AI term in the glossary (200+ terms) |
+| **FROOT: Lookup Term** | Look up any AI term in the glossary (comprehensive glossary) |
 | **FROOT: Init DevKit** | Scaffold .github Agentic OS files into your project |
 | **FROOT: Init TuneKit** | Add config and evaluation files |
 | **FROOT: Show Solution Plays** | Browse all 20 solution plays with status |
@@ -123,7 +123,7 @@ Add to your `.vscode/mcp.json`:
 | Tool | What it does | Example query |
 |---|---|---|
 | `get_module` | Retrieve a full knowledge module | "Get the RAG Architecture module" |
-| `list_modules` | List all 18 modules with metadata | "What modules are available?" |
+| `list_modules` | List all knowledge modules with metadata | "What modules are available?" |
 | `search_knowledge` | Full-text search across all content | "Search for vector databases" |
 | `lookup_term` | Look up a term in the AI glossary | "What is LoRA?" |
 
@@ -445,7 +445,7 @@ Make any FROOT module available as a GitHub Copilot skill:
 # Export a single module
 ./scripts/export-skills.sh F1
 
-# Export all 16 modules
+# Export all knowledge modules
 ./scripts/export-skills.sh --all
 ```
 

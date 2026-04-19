@@ -83,7 +83,7 @@ Each match:
 
 #### `lookup_term`
 
-Look up an AI term in the glossary (200+ terms).
+Look up an AI term in the glossary (comprehensive glossary).
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -492,7 +492,7 @@ Export FROOT modules as `.github/skills/` folders for GitHub Copilot.
 **Usage:**
 ```bash
 ./scripts/export-skills.sh <module-id>   # e.g., F1, R2, O3
-./scripts/export-skills.sh --all          # export all 16 modules
+./scripts/export-skills.sh --all          # export all knowledge modules
 ```
 
 ### auto-update.js (MCP Server)

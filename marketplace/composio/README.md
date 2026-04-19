@@ -1,12 +1,12 @@
 # FrootAI — Composio Integration
 
-> Wrap all 45 FrootAI MCP tools as Composio actions for use in any agent framework.
+> Wrap all FrootAI MCP tools as Composio actions for use in any agent framework.
 
 ---
 
 ## Overview
 
-[Composio](https://composio.dev) provides a unified API for connecting AI agents to 250+ tools. This integration wraps FrootAI's 45 MCP tools as native Composio actions, enabling any Composio-connected agent framework (LangChain, CrewAI, AutoGen, LlamaIndex, OpenAI Assistants) to access FrootAI's architecture guidance, solution plays, and primitive management.
+[Composio](https://composio.dev) provides a unified API for connecting AI agents to 250+ tools. This integration wraps FrootAI's MCP tools as native Composio actions, enabling any Composio-connected agent framework (LangChain, CrewAI, AutoGen, LlamaIndex, OpenAI Assistants) to access FrootAI's architecture guidance, solution plays, and primitive management.
 
 ## Tool Metadata Mapping
 
@@ -20,7 +20,7 @@ FrootAI MCP tools map to Composio actions with the following structure:
 | `FROOTAI_GET_MODULE` | `get_module` | `{ module_id: string, section?: string }` | Full module content (F1-T3) |
 | `FROOTAI_GET_ARCHITECTURE_PATTERN` | `get_architecture_pattern` | `{ scenario: enum }` | Architecture guidance for 7 scenarios |
 | `FROOTAI_GET_FROOT_OVERVIEW` | `get_froot_overview` | `{}` | Complete FROOT framework overview |
-| `FROOTAI_LIST_MODULES` | `list_modules` | `{}` | All 24 modules by FROOT layer |
+| `FROOTAI_LIST_MODULES` | `list_modules` | `{}` | All knowledge modules by FROOT layer |
 | `FROOTAI_LOOKUP_TERM` | `lookup_term` | `{ term: string }` | AI/ML glossary definition |
 | `FROOTAI_GET_WAF_GUIDANCE` | `get_waf_guidance` | `{ pillar: string }` | WAF guidance by pillar |
 | `FROOTAI_FETCH_AZURE_DOCS` | `fetch_azure_docs` | `{ service: string }` | Latest Azure documentation |
@@ -30,7 +30,7 @@ FrootAI MCP tools map to Composio actions with the following structure:
 | Composio Action | MCP Tool | Input Schema | Output |
 |----------------|----------|--------------|--------|
 | `FROOTAI_GET_PLAY_DETAIL` | `get_play_detail` | `{ play_number: string }` | Full play architecture and config |
-| `FROOTAI_LIST_PLAYS` | `list_community_plays` | `{ filter?: string }` | All 104 plays with status |
+| `FROOTAI_LIST_PLAYS` | `list_community_plays` | `{ filter?: string }` | All solution plays with status |
 | `FROOTAI_SEARCH_PLAYS` | `semantic_search_plays` | `{ query: string, top_k?: number }` | Ranked play matches |
 | `FROOTAI_COMPARE_PLAYS` | `compare_plays` | `{ plays: string }` | Side-by-side play comparison |
 | `FROOTAI_ESTIMATE_COST` | `estimate_cost` | `{ play: string, scale?: enum }` | Azure cost breakdown |
@@ -69,13 +69,13 @@ FrootAI MCP tools map to Composio actions with the following structure:
 
 | Composio Action | MCP Tool | Input Schema | Output |
 |----------------|----------|--------------|--------|
-| `FROOTAI_LIST_PRIMITIVES` | `list_primitives` | `{ type: enum, limit?: number }` | Browse 860+ primitives by type |
-| `FROOTAI_SEARCH_AGENTS` | `search_agents` | `{ query: string }` | Search 238 agents |
+| `FROOTAI_LIST_PRIMITIVES` | `list_primitives` | `{ type: enum, limit?: number }` | Browse AI primitives by type |
+| `FROOTAI_SEARCH_AGENTS` | `search_agents` | `{ query: string }` | Search agents |
 | `FROOTAI_GET_PRIMITIVE_DETAIL` | `get_primitive_detail` | `{ name: string, type: string }` | Deep-dive into any primitive |
 | `FROOTAI_GET_SKILL_DETAIL` | `get_skill_detail` | `{ name: string }` | Full skill content with examples |
-| `FROOTAI_LIST_WORKFLOWS` | `list_workflows` | `{}` | Browse 12 workflow templates |
-| `FROOTAI_LIST_COOKBOOK` | `list_cookbook` | `{}` | Browse 16 cookbook recipes |
-| `FROOTAI_LIST_HOOKS` | `list_hooks` | `{}` | Browse 10 SessionStart hooks |
+| `FROOTAI_LIST_WORKFLOWS` | `list_workflows` | `{}` | Browse workflow templates |
+| `FROOTAI_LIST_COOKBOOK` | `list_cookbook` | `{}` | Browse cookbook recipes |
+| `FROOTAI_LIST_HOOKS` | `list_hooks` | `{}` | Browse SessionStart hooks |
 | `FROOTAI_COMPARE_PRIMITIVES` | `compare_primitives` | `{ a: string, b: string }` | Side-by-side primitive comparison |
 | `FROOTAI_MARKETPLACE_SEARCH` | `marketplace_search` | `{ query: string }` | Search 77+ FAI plugins |
 | `FROOTAI_MARKETPLACE_BROWSE` | `marketplace_browse` | `{ page?: number }` | Browse plugin marketplace |
@@ -93,7 +93,7 @@ FrootAI MCP tools map to Composio actions with the following structure:
 
 | Composio Action | MCP Tool | Input Schema | Output |
 |----------------|----------|--------------|--------|
-| `FROOTAI_GET_DISTRIBUTION_STATUS` | `get_distribution_status` | `{}` | Sync status across 6 channels |
+| `FROOTAI_GET_DISTRIBUTION_STATUS` | `get_distribution_status` | `{}` | Sync status across distribution channels |
 | `FROOTAI_GET_EVAL_TEMPLATE` | `get_eval_template` | `{ play: string }` | Evaluation pipeline template |
 | `FROOTAI_FETCH_EXTERNAL_MCP` | `fetch_external_mcp` | `{ query: string }` | Search external MCP registries |
 
@@ -125,7 +125,7 @@ toolset.register_local_tool(
     name="frootai",
     command="npx frootai-mcp@5.2.0",
     transport="stdio",
-    description="AI architecture guidance, 104 solution plays, 860+ primitives"
+    description="AI architecture guidance, solution plays, AI primitives"
 )
 ```
 
@@ -203,7 +203,7 @@ assistant = client.beta.assistants.create(
 {
   "name": "frootai",
   "displayName": "FrootAI",
-  "description": "AI architecture guidance with 45 tools, 104 solution plays, and 860+ primitives via the FAI Protocol",
+  "description": "AI architecture guidance with MCP tools, solution plays, and AI primitives via the FAI Protocol",
   "version": "5.2.0",
   "logo": "https://frootai.dev/logo.png",
   "categories": ["developer-tools", "ai-architecture"],

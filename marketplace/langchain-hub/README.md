@@ -6,7 +6,7 @@
 
 ## What to Publish
 
-FrootAI's 104 solution plays contain production-tested patterns that translate directly into LangChain Hub artifacts. The following categories are published:
+FrootAI's solution plays contain production-tested patterns that translate directly into LangChain Hub artifacts. The following categories are published:
 
 ### 1. RAG Chain Templates (15 chains)
 
@@ -215,7 +215,7 @@ LangChain Hub artifacts are versioned in sync with FrootAI releases:
 
 | FrootAI Version | Hub Version | Changes |
 |----------------|-------------|---------|
-| 5.2.0 | 5.2.0 | 45 tools, 104 plays, 860+ primitives |
+| 5.2.0 | 5.2.0 | MCP tools, solution plays, AI primitives |
 
 Artifacts are auto-published via the FrootAI CI/CD pipeline (`npm run release` triggers Hub push).
 

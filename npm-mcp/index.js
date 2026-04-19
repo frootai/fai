@@ -555,7 +555,7 @@ function createConfiguredServer() {
         content: [
           {
             type: "text",
-            text: `FrootAI Knowledge Base — 16 Modules\n${"═".repeat(45)}\n\n${result.join("\n\n")}\n\n📋 Reference\n  REF: Quick Reference Cards\n  QUIZ: Quiz & Assessment\n\nUse get_module to read any module. Use search_knowledge to search across all modules.\n\n🔌 Live tools: fetch_azure_docs, fetch_external_mcp, list_community_plays, get_github_agentic_os`,
+            text: `FrootAI Knowledge Base — Knowledge Modules\n${"═".repeat(45)}\n\n${result.join("\n\n")}\n\n📋 Reference\n  REF: Quick Reference Cards\n  QUIZ: Quiz & Assessment\n\nUse get_module to read any module. Use search_knowledge to search across all modules.\n\n🔌 Live tools: fetch_azure_docs, fetch_external_mcp, list_community_plays, get_github_agentic_os`,
           },
         ],
       };
@@ -655,7 +655,7 @@ function createConfiguredServer() {
 
   server.tool(
     "lookup_term",
-    "Look up an AI/ML term in the FrootAI Glossary (200+ terms). Returns the definition with context. Examples: 'token', 'RAG', 'temperature', 'LoRA', 'MCP', 'hallucination', 'embeddings'.",
+    "Look up an AI/ML term in the FrootAI Glossary (comprehensive glossary). Returns the definition with context. Examples: 'token', 'RAG', 'temperature', 'LoRA', 'MCP', 'hallucination', 'embeddings'.",
     {
       term: z.string().describe("The AI/ML term to look up (e.g., 'transformer', 'top-k', 'fine-tuning')"),
     },
@@ -1066,7 +1066,7 @@ Fine-tuning teaches HOW to respond, not WHAT to know.
         content: [
           {
             type: "text",
-            text: `${pattern.guidance}\n\n---\n*FrootAI — The open glue for AI architecture*`,
+            text: `${pattern.guidance}\n\n---\n*FrootAI — The uniFAIng glue for AI architecture*`,
           },
         ],
       };
@@ -1085,7 +1085,7 @@ Fine-tuning teaches HOW to respond, not WHAT to know.
 
   server.tool(
     "get_froot_overview",
-    "Get a complete overview of the FROOT framework — all 5 layers, 16 modules, what each layer covers, and how they connect. Use when asked 'what is FrootAI' or 'show me the framework'.",
+    "Get a complete overview of the FROOT framework — all 5 layers, knowledge modules, what each layer covers, and how they connect. Use when asked 'what is FrootAI' or 'show me the framework'.",
     {},
     { annotations: { readOnlyHint: true, idempotentHint: true } },
     async () => {
@@ -1100,7 +1100,7 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 ### 🌱 F — FOUNDATIONS (The Roots)
 - **F1**: GenAI Foundations — Transformers, tokens, parameters, attention
 - **F2**: LLM Landscape — GPT, Claude, Llama, model selection
-- **F3**: AI Glossary A–Z — 200+ terms defined
+- **F3**: AI Glossary A–Z — comprehensive glossary defined
 - **F4**: .github Agentic OS — 7 primitives, 4 layers, agent-native repos
 *The vocabulary of AI*
 
@@ -1129,16 +1129,16 @@ AI Landing Zones · GPU Compute · Networking · Security · Identity
 *Turning AI into real-world impact*
 
 ---
-**The Open Glue**: FrootAI removes silos between infrastructure, platform, and application teams.
+**The UniFAIng Glue**: FrootAI removes silos between infrastructure, platform, and application teams.
 
 ## FAI Ecosystem — By The Numbers
-- **101 Solution Plays** — Pre-tuned Azure AI blueprints (DevKit + TuneKit + SpecKit)
-- **860+ FAI Primitives** — 238 agents, 176 instructions, 322 skills, 10 hooks
-- **77 Plugins** — Composable packages (1,008 bundled items) via \`npx frootai install\`
-- **45 MCP Tools** — 6 static + 4 live + 3 chain + 10 ecosystem + 6 engine + 3 scaffold + 13 marketplace
-- **16 Cookbook Recipes** — Step-by-step guides from init to production
+- **Solution Plays** — Pre-tuned Azure AI blueprints (DevKit + TuneKit + SpecKit)
+- **FAI Primitives** — agents, instructions, skills, hooks
+- **Plugins** — Composable packages (1,008 bundled items) via \`npx frootai install\`
+- **MCP Tools** — 6 static + 4 live + 3 chain + 10 ecosystem + 6 engine + 3 scaffold + 13 marketplace
+- **Cookbook Recipes** — Step-by-step guides from init to production
 - **12 Agentic Workflows** — CI/CD with safe-outputs
-- **18 Knowledge Modules** — 200+ terms, 7 architecture patterns
+- **18 Knowledge Modules** — comprehensive glossary, 7 architecture patterns
 - **7 JSON Schemas** — agent, instruction, skill, hook, plugin, manifest, context
 
 ## FAI Protocol — The Binding Glue
@@ -2439,7 +2439,7 @@ ${est.breakdown}
 
   server.tool(
     "list_primitives",
-    "PRIMITIVES CATALOG — Browse all 860+ FrootAI primitives by type: agents (238), instructions (176), skills (322), hooks (10), plugins (77), workflows (13), cookbook (17). Returns name, description, WAF alignment, and compatible plays for each primitive.",
+    "PRIMITIVES CATALOG — Browse all FrootAI primitives by type: agents, instructions, skills, hooks, plugins, workflows, cookbook. Returns name, description, WAF alignment, and compatible plays for each primitive.",
     {
       type: z.enum(["agents", "instructions", "skills", "hooks", "plugins", "workflows", "cookbook"]).describe("Primitive type to list"),
       limit: z.number().optional().default(20).describe("Max results to return (default 20)"),
@@ -2620,7 +2620,7 @@ ${est.breakdown}
         uri: "frootai://overview",
         mimeType: "text/plain",
         text: `FrootAI — FAI Engine Runtime Interface
-The open glue that binds infrastructure, platform, and application.
+The uniFAIng glue that binds infrastructure, platform, and application.
 
 🌱 F — Foundations: GenAI Foundations, LLM Landscape, AI Glossary A-Z, .github Agentic OS
 🪵 R — Reasoning: Prompt Engineering, RAG Architecture, Deterministic AI
@@ -2628,7 +2628,7 @@ The open glue that binds infrastructure, platform, and application.
 🏗️ O — Operations: Azure AI Platform, Infrastructure, Copilot
 🍎 T — Transformation: Fine-Tuning, Responsible AI, Production Patterns
 
-16 modules | 200+ AI terms | 45 tools | 104 solution plays | FAI Engine
+knowledge modules | comprehensive glossary | MCP tools | solution plays | FAI Engine
 Engine: ${faiEngine?.available ? 'connected' : 'not available (npm mode)'}
 https://frootai.dev`,
       }],

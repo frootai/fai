@@ -5,7 +5,7 @@
 
 ## Overview
 
-FrootAI provides **238 specialized AI agents** organized by domain. Each agent is a `.agent.md` file with YAML frontmatter defining its description, tools, model preferences, and WAF (Well-Architected Framework) alignment.
+FrootAI provides **specialized AI agents** organized by domain. Each agent is a `.agent.md` file with YAML frontmatter defining its description, tools, model preferences, and WAF (Well-Architected Framework) alignment.
 
 **Browse the full catalog**: [frootai.dev/primitives/agents](https://frootai.dev/primitives/agents)
 
@@ -17,7 +17,7 @@ agents/
 ├── fai-azure-ai-search-expert.agent.md     # AI Search expert
 ├── fai-security-reviewer.agent.md          # Security reviewer
 ├── fai-play-01-builder.agent.md            # Enterprise RAG Builder
-├── ... (238 agents)
+├── ... (agents)
 └── fai-rag-architect/fai-context.json      # FAI Protocol context
 ```
 
@@ -186,7 +186,7 @@ npx frootai-mcp@latest  # 25 tools including agent_build, agent_review, agent_tu
 
 ### Via CLI
 ```bash
-npx frootai primitives --type agents  # Browse all 238 agents
+npx frootai primitives --type agents  # Browse all agents
 ```
 
 ## Related Resources
@@ -195,5 +195,5 @@ npx frootai primitives --type agents  # Browse all 238 agents
 - **Agent Patterns (L3)**: [frootai.dev/learning-hub/agent-patterns](https://frootai.dev/learning-hub/agent-patterns)
 - **Primitive Primer (L2)**: [frootai.dev/learning-hub/primitive-primer](https://frootai.dev/learning-hub/primitive-primer)
 - **FAI Protocol**: [frootai.dev/fai-protocol](https://frootai.dev/fai-protocol)
-- **100 Solution Plays**: [frootai.dev/solution-plays](https://frootai.dev/solution-plays)
+- **Solution Plays**: [frootai.dev/solution-plays](https://frootai.dev/solution-plays)
 - **GitHub**: [github.com/frootai/frootai/tree/main/agents](https://github.com/frootai/frootai/tree/main/agents)

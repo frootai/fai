@@ -6,7 +6,7 @@
 <p align="center"><sub>MCP Server (npm)</sub></p>
 <p align="center"><strong>From the Roots to the Fruits. It's simply Frootful.</strong></p>
 <p align="center"><em>An open ecosystem where Infra, Platform, and App teams build AI — Frootfully.</em></p>
-<p align="center"><em>The open glue for the GenAI ecosystem — 45 MCP tools · 104 solution plays · 860+ AI primitives via the FAI Protocol.</em></p>
+<p align="center"><em>A uniFAIng glue for the GenAI ecosystem, enabling deterministic and reliable AI solutions.</em></p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/frootai-mcp"><img src="https://img.shields.io/npm/v/frootai-mcp?style=flat-square&logo=npm" alt="npm"></a>
@@ -55,7 +55,7 @@ Other MCP servers are API wrappers (GitHub MCP wraps the GitHub API, Playwright 
 | Wires AI primitives? | No | No | No | **Yes — fai-manifest.json** |
 | Quality gates? | No | No | No | **Yes — guardrails per play** |
 | Scaffolds projects? | No | No | No | **Yes — 24 files, fully wired** |
-| Knowledge base? | No | No | No | **16 modules, BM25 search** |
+| Knowledge base? | No | No | No | **knowledge modules, BM25 search** |
 | Plugin marketplace? | No | No | No | **77+ plugins, install/compose** |
 
 ---
@@ -132,7 +132,7 @@ pip install frootai-mcp                      # Python
 **Static** — bundled knowledge, works offline
 - `list_modules`  browse 18 FROOT knowledge modules by layer
 - `get_module`  read any module in full (F1–T3)
-- `lookup_term`  200+ AI/ML glossary definitions
+- `lookup_term`  AI/ML glossary definitions
 - `search_knowledge`  full-text search across all modules
 - `get_architecture_pattern`  7 pre-built architecture decision guides
 - `get_froot_overview`  complete FROOT framework summary
@@ -140,7 +140,7 @@ pip install frootai-mcp                      # Python
 **Live** — network-enabled, graceful offline fallback
 - `fetch_azure_docs`  search Microsoft Learn for Azure docs
 - `fetch_external_mcp`  discover MCP servers from public registries
-- `list_community_plays`  browse 104 solution plays from GitHub
+- `list_community_plays`  browse solution plays from GitHub
 - `get_github_agentic_os`  .github Agentic OS 7-primitive guide
 
 **Agent Chain** — build → review → tune
@@ -160,12 +160,12 @@ pip install frootai-mcp                      # Python
 - `validate_config`  validate TuneKit configs against best practices
 - `generate_architecture_diagram`  Mermaid.js diagram for any play
 
-**FAI Engine** — the open glue (FAI Protocol runtime)
+**FAI Engine** — the uniFAIng glue (FAI Protocol runtime)
 - `wire_play`  resolve FAI Protocol context, bind primitives, activate guardrails
 - `inspect_wiring`  audit a play's wiring — primitives, context, health score
 - `validate_manifest`  validate `fai-manifest.json` schema + completeness
 - `get_play_detail`  full play spec — services, config, WAF alignment, evaluation
-- `list_primitives`  browse 860+ primitives by type (agents, skills, hooks…)
+- `list_primitives`  browse AI primitives by type (agents, skills, hooks…)
 - `evaluate_quality`  run quality evaluation with configurable pass/fail thresholds
 
 **Scaffold & Create** — generate production-ready plays and primitives
@@ -309,7 +309,7 @@ You get → Itemized Azure pricing: AI Search $X/mo, OpenAI $Y/mo, App Service $
 
 ```
 You ask → search_knowledge(query: "how to reduce hallucination in RAG")
-You get → Top 5 BM25-ranked sections from 16 modules, with 500-char previews
+You get → Top 5 BM25-ranked sections from knowledge modules, with 500-char previews
 ```
 
 **Why it matters:** BM25-ranked search across 358 indexed documents gives you precise, relevant answers from curated architecture knowledge — not generic web results.
@@ -337,7 +337,7 @@ Step 3: install_plugin("enterprise-security", "01")       → Copies primitives,
 ```bash
 npx frootai help                              # Show all 21 commands
 npx frootai info 01                           # Play details + cost estimate
-npx frootai list                              # Browse 104 solution plays
+npx frootai list                              # Browse solution plays
 npx frootai search "RAG architecture"         # BM25 ranked search
 npx frootai scaffold 01                       # Download play + generate templates
 npx frootai install 01 --kit devkit           # Install specific kit
@@ -415,14 +415,14 @@ Health probes (Kubernetes / Container Apps):
 <summary><b>🔎 BM25 Search Engine</b></summary>
 <br>
 
-All search tools use a pre-built BM25 index (Robertson IDF, k1=1.5, b=0.75) over 358 documents. Far more accurate than keyword matching — finds "voice AI call center" → Play 04 with high relevance. The index covers all 104 solution plays, 16 knowledge modules, and the glossary.
+All search tools use a pre-built BM25 index (Robertson IDF, k1=1.5, b=0.75) over 358 documents. Far more accurate than keyword matching — finds "voice AI call center" → Play 04 with high relevance. The index covers all solution plays, knowledge modules, and the glossary.
 </details>
 
 <details>
 <summary><b>🏷️ Tool Annotations</b></summary>
 <br>
 
-All 45 tools have MCP-standard annotations telling clients about their behavior:
+All MCP tools have MCP-standard annotations telling clients about their behavior:
 - `readOnlyHint: true` — safe to call without side effects (knowledge, ecosystem, agent chain tools)
 - `destructiveHint: true` — creates or modifies files (scaffold, install/uninstall)
 - `openWorldHint: true` — makes network requests (live tools)
@@ -522,17 +522,17 @@ Chat with Agent FAI  grounded in FrootAI knowledge: [frootai.dev/chatbot](https:
 
 ### What Ships Inside
 
-- **FROOT Knowledge Modules** — 16 modules across Foundations, Reasoning, Orchestration, Operations, Transformation
-- **AI Glossary** — 200+ AI/ML term definitions
-- **100 Solution Plays** — pre-tuned deployable solutions with .github Agentic OS
-- **860+ Primitives** — agents, instructions, skills, hooks, plugins, workflows
+- **FROOT Knowledge Modules** — knowledge modules across Foundations, Reasoning, Orchestration, Operations, Transformation
+- **AI Glossary** — AI/ML term definitions
+- **Solution Plays** — pre-tuned deployable solutions with .github Agentic OS
+- **AI Primitives** — agents, instructions, skills, hooks, plugins, workflows
 - **FAI Engine** — FAI Protocol runtime: wire, inspect, validate, evaluate
 - **FAI Marketplace** — 77+ plugins searchable and installable via MCP
 - **Architecture Decision Guides** — RAG, agents, hosting, model selection, cost optimization, determinism
 - **BM25 Search Engine** — pre-built index over 358 documents (plays + knowledge), Robertson IDF ranking
 - **Progress Tokens** — real-time progress for scaffold operations
 - **Structured Logging** — RFC 5424 `notifications/message` to connected clients
-- **Tool Annotations** — all 45 tools annotated with `readOnlyHint`/`destructiveHint`/`idempotentHint`
+- **Tool Annotations** — all MCP tools annotated with `readOnlyHint`/`destructiveHint`/`idempotentHint`
 - **SSE Event Stream** — resumable Server-Sent Events in HTTP mode
 - **Subscribable Resources** — live change notifications via `fs.watch`
 - **OpenTelemetry** — opt-in observability (OTEL_EXPORTER_OTLP_ENDPOINT)

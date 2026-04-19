@@ -1,8 +1,8 @@
 """FrootAI Client — Main entry point for the SDK.
 
-Offline-first: queries bundled knowledge base (16 modules, 5 FROOT layers).
-101 solution plays, 860+ FAI primitives (238 agents, 176 instructions, 322 skills, 10 hooks),
-77 plugins, 16 cookbook recipes, 12 workflows, 45 MCP tools.
+Offline-first: queries bundled knowledge base (knowledge modules, 5 FROOT layers).
+Solution plays, FAI primitives (agents, instructions, skills, hooks),
+plugins, cookbook recipes, workflows, MCP tools.
 No network required for search, modules, glossary, or cost estimation.
 """
 
@@ -50,7 +50,7 @@ _PLAY_COSTS = {
 class FrootAI:
     """FrootAI SDK client — offline-first access to AI architecture knowledge.
 
-    101 solution plays, 860+ FAI primitives, 77 plugins, 45 MCP tools.
+    Solution plays, FAI primitives, plugins, MCP tools.
 
     Usage:
         client = FrootAI()
@@ -256,7 +256,7 @@ class FrootAI:
         }
 
     def primitives_catalog(self) -> dict:
-        """Get the FAI primitives catalog — all 860+ LEGO blocks."""
+        """Get the FAI primitives catalog — all the LEGO blocks."""
         return {
             "total": 831,
             "categories": {
@@ -285,7 +285,7 @@ class FrootAI:
         return {
             "name": "FAI Protocol",
             "spec_file": "fai-manifest.json",
-            "description": "The missing binding glue — context-wiring between agents, instructions, skills, hooks, workflows, plugins, tools, prompts, and guardrails.",
+            "description": "The uniFAIng layer — context-wiring between agents, instructions, skills, hooks, workflows, plugins, tools, prompts, and guardrails.",
             "evolution": ["FAI Protocol (spec)", "FAI Layer (concept)", "FAI Engine (runtime)", "FAI Factory (CI/CD)", "FAI Packages (distribution)", "FAI Marketplace (discovery)"],
             "key_concepts": {
                 "context_wiring": "Knowledge modules + WAF pillars + compatible plays propagate to all primitives",

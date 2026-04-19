@@ -7,16 +7,16 @@ export interface McpTool {
 
 export const MCP_TOOLS: McpTool[] = [
   {
-    name: "list_modules", desc: "Browse 18 modules by FROOT layer", type: "static",
+    name: "list_modules", desc: "Browse knowledge modules by FROOT layer", type: "static",
     docs: "Returns all 18 FROOT knowledge modules organized by layer (Foundations, Reasoning, Orchestration, Operations, Transformation). Each module includes ID, name, and description. Use this to discover what knowledge is available.\n\n**Input:** none\n**Output:** Array of layers with modules\n**Example:** `list_modules` → [{layer: 'Foundations', modules: [{id: 'F1', name: 'GenAI Foundations'}, ...]}]"
   },
   {
     name: "get_module", desc: "Read any module (F1–T3, F4)", type: "static",
-    docs: "Returns the full content of any FROOT knowledge module by ID. Supports F1-F4, R1-R3, O1-O3, O4-O6, T1-T3 (18 modules total).\n\n**Input:** `moduleId` (string) — e.g., 'F1', 'R2', 'T3'\n**Output:** Full markdown content of the module\n**Example:** `get_module({moduleId: 'F4'})` → Full GitHub Agentic OS guide"
+    docs: "Returns the full content of any FROOT knowledge module by ID. Supports F1-F4, R1-R3, O1-O3, O4-O6, T1-T3 (knowledge modules total).\n\n**Input:** `moduleId` (string) — e.g., 'F1', 'R2', 'T3'\n**Output:** Full markdown content of the module\n**Example:** `get_module({moduleId: 'F4'})` → Full GitHub Agentic OS guide"
   },
   {
-    name: "lookup_term", desc: "200+ AI/ML term definitions", type: "static",
-    docs: "Searches the AI Glossary (200+ terms) for a specific term or phrase. Returns the definition, related terms, and category. Fuzzy matching supported.\n\n**Input:** `term` (string) — e.g., 'RAG', 'temperature', 'embeddings'\n**Output:** Term definition with metadata\n**Example:** `lookup_term({term: 'RAG'})` → {term: 'RAG', definition: 'Retrieval-Augmented Generation...'}"
+    name: "lookup_term", desc: "AI/ML term definitions from comprehensive glossary", type: "static",
+    docs: "Searches the AI Glossary (comprehensive glossary) for a specific term or phrase. Returns the definition, related terms, and category. Fuzzy matching supported.\n\n**Input:** `term` (string) — e.g., 'RAG', 'temperature', 'embeddings'\n**Output:** Term definition with metadata\n**Example:** `lookup_term({term: 'RAG'})` → {term: 'RAG', definition: 'Retrieval-Augmented Generation...'}"
   },
   {
     name: "search_knowledge", desc: "Full-text search all modules", type: "static",
@@ -28,7 +28,7 @@ export const MCP_TOOLS: McpTool[] = [
   },
   {
     name: "get_froot_overview", desc: "Complete FROOT summary", type: "static",
-    docs: "Returns the complete FrootAI platform overview: mission, 6 layers, 100 solution plays list, DevKit/TuneKit model, and getting started guide.\n\n**Input:** none\n**Output:** Platform overview markdown"
+    docs: "Returns the complete FrootAI platform overview: mission, 6 layers, solution plays list, DevKit/TuneKit model, and getting started guide.\n\n**Input:** none\n**Output:** Platform overview markdown"
   },
   {
     name: "fetch_azure_docs", desc: "⛅ Live — Search Azure docs", type: "live",
@@ -40,7 +40,7 @@ export const MCP_TOOLS: McpTool[] = [
   },
   {
     name: "list_community_plays", desc: "⛅ Live — List plays from GitHub", type: "live",
-    docs: "Fetches the list of solution plays from the FrootAI GitHub repository. Returns play names, statuses, and file counts. Useful for discovering what's available.\n\n**Input:** none\n**Output:** Array of 100 solution plays with metadata"
+    docs: "Fetches the list of solution plays from the FrootAI GitHub repository. Returns play names, statuses, and file counts. Useful for discovering what's available.\n\n**Input:** none\n**Output:** Array of solution plays with metadata"
   },
   {
     name: "get_github_agentic_os", desc: "⛅ Live — .github OS guide", type: "live",
@@ -72,7 +72,7 @@ export const MCP_TOOLS: McpTool[] = [
   },
   {
     name: "semantic_search_plays", desc: "🧮 Compute — Semantic search across 20 plays", type: "compute",
-    docs: "Performs keyword + semantic search across all 100 solution plays. Matches against play names, descriptions, services used, and architecture patterns. Returns ranked results with relevance scores.\n\n**Input:** `query` (string) — what to search for\n**Output:** Ranked matches with play ID, name, relevance, and excerpts\n**Example:** `semantic_search_plays({query: 'voice AI'})` → Play 04 (Call Center Voice AI) ranked first"
+    docs: "Performs keyword + semantic search across all solution plays. Matches against play names, descriptions, services used, and architecture patterns. Returns ranked results with relevance scores.\n\n**Input:** `query` (string) — what to search for\n**Output:** Ranked matches with play ID, name, relevance, and excerpts\n**Example:** `semantic_search_plays({query: 'voice AI'})` → Play 04 (Call Center Voice AI) ranked first"
   },
   {
     name: "estimate_cost", desc: "🧮 Compute — Estimate monthly Azure cost", type: "compute",

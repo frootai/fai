@@ -16,7 +16,7 @@
  *   ├── learning/                 ← 18 FROOT modules (F1-T3)
  *   ├── guides/                   ← How-to guides (tutorials, migration, enterprise)
  *   ├── solution-plays/           ← 100 play reference pages
- *   ├── primitives/               ← 860+ primitive catalog pages
+ *   ├── primitives/               ← AI primitive catalog pages
  *   ├── api-reference/            ← MCP tools, CLI, schemas, Python SDK
  *   ├── specialties/              ← 12 FAI Specialties documentation
  *   ├── changelog/                ← Unified changelog
@@ -661,12 +661,12 @@ npx frootai-mcp@latest
 |------|-------------|
 | \`search_knowledge\` | Search across all 18 FROOT modules for a topic |
 | \`get_module\` | Get full content of a specific module (F1, R2, etc.) |
-| \`lookup_term\` | Look up an AI/ML term in the glossary (200+ terms) |
+| \`lookup_term\` | Look up an AI/ML term in the glossary (comprehensive glossary) |
 
 ### 🎯 Solution Plays
 | Tool | Description |
 |------|-------------|
-| \`list_community_plays\` | List all 100 solution plays with status |
+| \`list_community_plays\` | List all solution plays with status |
 | \`get_play_detail\` | Get detailed architecture for a specific play |
 | \`semantic_search_plays\` | Natural language search across plays |
 | \`compare_plays\` | Side-by-side comparison of 2-3 plays |

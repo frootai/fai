@@ -6,8 +6,8 @@ const https = require("https");
 
 // ════════════════════════════════════════════════════════════════════
 // FrootAI VS Code Extension v1.0 — Standalone Engine
-// From the Roots to the Fruits. The Open Glue for GenAI.
-// 25 MCP tools · 18 modules · 200+ terms · 100 solution plays
+// From the Roots to the Fruits. The UniFAIng Glue for GenAI.
+// MCP tools · knowledge modules · comprehensive glossary · solution plays
 // Works from ANY workspace — no clone needed.
 // ════════════════════════════════════════════════════════════════════
 
@@ -201,16 +201,16 @@ const FROOT_MODULES = [
 
 const MCP_TOOLS = [
   {
-    name: "list_modules", desc: "Browse 18 modules by FROOT layer", type: "static",
+    name: "list_modules", desc: "Browse knowledge modules by FROOT layer", type: "static",
     docs: "Returns all 18 FROOT knowledge modules organized by layer (Foundations, Reasoning, Orchestration, Operations, Transformation). Each module includes ID, name, and description. Use this to discover what knowledge is available.\n\n**Input:** none\n**Output:** Array of layers with modules\n**Example:** `list_modules` → [{layer: 'Foundations', modules: [{id: 'F1', name: 'GenAI Foundations'}, ...]}]"
   },
   {
     name: "get_module", desc: "Read any module (F1–T3, F4)", type: "static",
-    docs: "Returns the full content of any FROOT knowledge module by ID. Supports F1-F4, R1-R3, O1-O3, O4-O6, T1-T3 (18 modules total).\n\n**Input:** `moduleId` (string) — e.g., 'F1', 'R2', 'T3'\n**Output:** Full markdown content of the module\n**Example:** `get_module({moduleId: 'F4'})` → Full GitHub Agentic OS guide"
+    docs: "Returns the full content of any FROOT knowledge module by ID. Supports F1-F4, R1-R3, O1-O3, O4-O6, T1-T3 (knowledge modules total).\n\n**Input:** `moduleId` (string) — e.g., 'F1', 'R2', 'T3'\n**Output:** Full markdown content of the module\n**Example:** `get_module({moduleId: 'F4'})` → Full GitHub Agentic OS guide"
   },
   {
-    name: "lookup_term", desc: "200+ AI/ML term definitions", type: "static",
-    docs: "Searches the AI Glossary (200+ terms) for a specific term or phrase. Returns the definition, related terms, and category. Fuzzy matching supported.\n\n**Input:** `term` (string) — e.g., 'RAG', 'temperature', 'embeddings'\n**Output:** Term definition with metadata\n**Example:** `lookup_term({term: 'RAG'})` → {term: 'RAG', definition: 'Retrieval-Augmented Generation...'}"
+    name: "lookup_term", desc: "AI/ML term definitions", type: "static",
+    docs: "Searches the AI Glossary (comprehensive glossary) for a specific term or phrase. Returns the definition, related terms, and category. Fuzzy matching supported.\n\n**Input:** `term` (string) — e.g., 'RAG', 'temperature', 'embeddings'\n**Output:** Term definition with metadata\n**Example:** `lookup_term({term: 'RAG'})` → {term: 'RAG', definition: 'Retrieval-Augmented Generation...'}"
   },
   {
     name: "search_knowledge", desc: "Full-text search all modules", type: "static",
@@ -222,7 +222,7 @@ const MCP_TOOLS = [
   },
   {
     name: "get_froot_overview", desc: "Complete FROOT summary", type: "static",
-    docs: "Returns the complete FrootAI platform overview: mission, 6 layers, 100 solution plays list, DevKit/TuneKit model, and getting started guide.\n\n**Input:** none\n**Output:** Platform overview markdown"
+    docs: "Returns the complete FrootAI platform overview: mission, 6 layers, solution plays list, DevKit/TuneKit model, and getting started guide.\n\n**Input:** none\n**Output:** Platform overview markdown"
   },
   {
     name: "fetch_azure_docs", desc: "⛅ Live — Search Azure docs", type: "live",
@@ -234,7 +234,7 @@ const MCP_TOOLS = [
   },
   {
     name: "list_community_plays", desc: "⛅ Live — List plays from GitHub", type: "live",
-    docs: "Fetches the list of solution plays from the FrootAI GitHub repository. Returns play names, statuses, and file counts. Useful for discovering what's available.\n\n**Input:** none\n**Output:** Array of 100 solution plays with metadata"
+    docs: "Fetches the list of solution plays from the FrootAI GitHub repository. Returns play names, statuses, and file counts. Useful for discovering what's available.\n\n**Input:** none\n**Output:** Array of solution plays with metadata"
   },
   {
     name: "get_github_agentic_os", desc: "⛅ Live — .github OS guide", type: "live",
@@ -268,7 +268,7 @@ const MCP_TOOLS = [
   // ── Compute Tools (6) ──
   {
     name: "semantic_search_plays", desc: "🧮 Compute — Semantic search across 20 plays", type: "compute",
-    docs: "Performs keyword + semantic search across all 100 solution plays. Matches against play names, descriptions, services used, and architecture patterns. Returns ranked results with relevance scores.\n\n**Input:** `query` (string) — what to search for\n**Output:** Ranked matches with play ID, name, relevance, and excerpts\n**Example:** `semantic_search_plays({query: 'voice AI'})` → Play 04 (Call Center Voice AI) ranked first"
+    docs: "Performs keyword + semantic search across all solution plays. Matches against play names, descriptions, services used, and architecture patterns. Returns ranked results with relevance scores.\n\n**Input:** `query` (string) — what to search for\n**Output:** Ranked matches with play ID, name, relevance, and excerpts\n**Example:** `semantic_search_plays({query: 'voice AI'})` → Play 04 (Call Center Voice AI) ranked first"
   },
   {
     name: "estimate_cost", desc: "🧮 Compute — Estimate monthly Azure cost", type: "compute",
@@ -651,7 +651,7 @@ function getModuleDescription(moduleId) {
   const descriptions = {
     "F1": "Core GenAI concepts & terminology",
     "F2": "GPT-4o, Claude, Llama, Phi — model comparison",
-    "F3": "200+ AI/ML terms with definitions",
+    "F3": "comprehensive glossary with definitions",
     "F4": "7 primitives, 4 layers — .github folder evolution",
     "R1": "System prompts, few-shot, chain-of-thought",
     "R2": "Retrieval-Augmented Generation patterns",
@@ -755,7 +755,7 @@ class FaiProtocolProvider {
 
     const modules = new vscode.TreeItem("FROOT Modules", vscode.TreeItemCollapsibleState.None);
     modules.command = { command: "frootai.openFrootModules", title: "FROOT Modules" };
-    modules.description = "16 knowledge modules across 5 layers";
+    modules.description = "knowledge modules across 5 layers";
     modules.iconPath = new vscode.ThemeIcon("layers", new vscode.ThemeColor("charts.blue"));
 
     const glossary = new vscode.TreeItem("AI Glossary", vscode.TreeItemCollapsibleState.None);
@@ -1041,7 +1041,7 @@ function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand("frootai.lookupTerm", async (prefilledTerm) => {
       const term = prefilledTerm || await vscode.window.showInputBox({
-        prompt: "Enter an AI/ML term to look up (200+ terms available)",
+        prompt: "Enter an AI/ML term to look up (comprehensive glossary available)",
         placeHolder: "e.g., temperature, RAG, LoRA, MCP, embeddings, hallucination"
       });
       if (!term) return;
@@ -1221,7 +1221,7 @@ docker run -i ghcr.io/frootai/frootai-mcp  # Docker</pre>
         <pre>npx frootai scaffold 01 my-rag-project</pre></div>
 
         <div class="step"><h3>Step 6: FAI Primitives Catalog</h3>
-        <p>Browse and install 860+ reusable AI building blocks — agents, instructions, skills, hooks, and plugins. Each primitive is a standalone LEGO block that auto-wires when placed inside a solution play via the FAI Protocol.</p></div>
+        <p>Browse and install reusable AI building blocks — agents, instructions, skills, hooks, and plugins. Each primitive is a standalone LEGO block that auto-wires when placed inside a solution play via the FAI Protocol.</p></div>
 
         <h2>📋 Sidebar Overview</h2>
         <table>
@@ -1256,7 +1256,7 @@ docker run -i ghcr.io/frootai/frootai-mcp  # Docker</pre>
         <h2>🔌 Distribution Channels</h2>
         <div class="section">
           <p><strong>VS Code Extension</strong> — this extension (v9.3.0)</p>
-          <p><strong>MCP Server</strong> — <code>npx frootai-mcp@latest</code> (45 tools)</p>
+          <p><strong>MCP Server</strong> — <code>npx frootai-mcp@latest</code> (MCP tools)</p>
           <p><strong>Python SDK</strong> — <code>pip install frootai-mcp</code></p>
           <p><strong>CLI</strong> — <code>npx frootai &lt;command&gt;</code></p>
           <p><strong>Website</strong> — <a href="https://frootai.dev" style="color:#10b981">frootai.dev</a></p>
@@ -1265,7 +1265,7 @@ docker run -i ghcr.io/frootai/frootai-mcp  # Docker</pre>
 
         <h2>📖 Learn More</h2>
         <p>Use <strong>Ask Agent FAI</strong> in the sidebar to chat about solution plays, architecture patterns, FAI Protocol, or any AI concept.</p>
-        <p style="text-align:center;opacity:0.5;font-size:12px;margin-top:32px">FrootAI — The Open Glue for GenAI Ecosystem</p>
+        <p style="text-align:center;opacity:0.5;font-size:12px;margin-top:32px">FrootAI — The UniFAIng Glue for GenAI Ecosystem</p>
       </body></html>`;
     })
   );
@@ -1823,7 +1823,7 @@ docker run -i ghcr.io/frootai/frootai-mcp  # Docker</pre>
       const terminal = vscode.window.createTerminal("FrootAI MCP Server");
       terminal.sendText("npx --yes frootai-mcp@latest");
       terminal.show();
-      vscode.window.showInformationMessage("🔌 FrootAI MCP Server starting... 45 tools (6 knowledge + 4 live + 3 chain + 10 ecosystem + 6 engine + 3 scaffold + 13 marketplace).");
+      vscode.window.showInformationMessage("🔌 FrootAI MCP Server starting... MCP tools (6 knowledge + 4 live + 3 chain + 10 ecosystem + 6 engine + 3 scaffold + 13 marketplace).");
     })
   );
 
@@ -1887,7 +1887,7 @@ docker run -i ghcr.io/frootai/frootai-mcp  # Docker</pre>
         <div class="install">
           <strong>Install:</strong> <code>npx frootai-mcp@latest</code> | <code>pip install frootai-mcp</code> | <code>docker run -i ghcr.io/frootai/frootai-mcp</code>
         </div>
-        <div class="footer">Part of <strong>frootai-mcp</strong> - 45 tools | <a href="https://frootai.dev/mcp-tooling">frootai.dev/mcp-tooling</a> | <a href="https://www.npmjs.com/package/frootai-mcp">npm</a> | <a href="https://pypi.org/project/frootai-mcp/">PyPI</a></div>
+        <div class="footer">Part of <strong>frootai-mcp</strong> - MCP tools | <a href="https://frootai.dev/mcp-tooling">frootai.dev/mcp-tooling</a> | <a href="https://www.npmjs.com/package/frootai-mcp">npm</a> | <a href="https://pypi.org/project/frootai-mcp/">PyPI</a></div>
       </body></html>`;
     })
   );
@@ -2345,7 +2345,7 @@ docker run -i ghcr.io/frootai/frootai-mcp  # Docker</pre>
 
   // ── Register MCP Server Definition Provider (VS Code @mcp gallery) ──
   // This is what makes FrootAI appear in VS Code's Extensions view under @mcp.
-  // Users can install it with one click and get 45 tools in Copilot Agent mode.
+  // Users can install it with one click and get MCP tools in Copilot Agent mode.
   if (vscode.lm?.registerMcpServerDefinitionProvider) {
     const config = vscode.workspace.getConfiguration("frootai");
     const autoRegister = config.get("mcpAutoRegister", true);

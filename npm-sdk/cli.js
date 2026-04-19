@@ -9,7 +9,7 @@
  *   deploy              Deploy infra/main.bicep to Azure (guided wizard)
  *   info <play>         Show play details, cost, and architecture
  *   list [keyword]      List available plugins
- *   primitives [type]   Browse 860+ FAI primitives catalog
+ *   primitives [type]   Browse FAI primitives catalog
  *   protocol            View FAI Protocol overview
  *   search <query>      Search FrootAI knowledge base
  *   cost <play>         Estimate costs for a solution play
@@ -733,7 +733,7 @@ async function cmdScaffold(playArg) {
   if (!playDir && !interactive) {
     // No play arg and not interactive — show usage
     if (!playArg) {
-      console.log(`${c.cyan}  Scaffold a new FrootAI project from any of 101 solution plays.${c.reset}`);
+      console.log(`${c.cyan}  Scaffold a new FrootAI project from any of solution plays.${c.reset}`);
       console.log(`${c.dim}  Downloads real play files from GitHub, generates templates for the rest.\n${c.reset}`);
       console.log(`${c.bold}  Usage:${c.reset}`);
       console.log(`    ${c.green}frootai scaffold <play>${c.reset}                    Full scaffold`);
@@ -1760,7 +1760,7 @@ function cmdHelp() {
   console.log(`    ${c.green}install${c.reset} <play>     Download play files into current directory`);
   console.log(`    ${c.green}deploy${c.reset}             Deploy infra/main.bicep to Azure (guided wizard)`);
   console.log(`    ${c.green}info${c.reset} <play>        Show play details, cost, services, links`);
-  console.log(`    ${c.green}list${c.reset} [keyword]     Browse all 77 plugins in the FAI Marketplace`);
+  console.log(`    ${c.green}list${c.reset} [keyword]     Browse all plugins in the FAI Marketplace`);
   console.log(`    ${c.green}search${c.reset} <query>     Search FrootAI knowledge base`);
   console.log(`    ${c.green}cost${c.reset} [play]        Cost estimate (--scale dev|prod)`);
   console.log(`    ${c.green}validate${c.reset}           Check project structure + configs`);
@@ -1791,7 +1791,7 @@ function cmdHelp() {
 }
 
 // ═══════════════════════════════════════════════════
-// PRIMITIVES — Browse the 860+ LEGO blocks catalog
+// PRIMITIVES — Browse the LEGO blocks catalog
 // ═══════════════════════════════════════════════════
 function cmdPrimitivesCatalog(filter) {
   banner();
@@ -1836,7 +1836,7 @@ function cmdProtocol() {
     { name: "FAI Engine", desc: "Runtime: 7 modules, 42 tests, 12ms load", icon: "⚙️" },
     { name: "FAI Factory", desc: "CI/CD: validate → build → test → publish", icon: "🏭" },
     { name: "FAI Packages", desc: "npm + PyPI + VS Code + Docker", icon: "📦" },
-    { name: "FAI Marketplace", desc: "77 plugins, 1,008 items, npx frootai install", icon: "🏪" },
+    { name: "FAI Marketplace", desc: "plugins, 1,008 items, npx frootai install", icon: "🏪" },
   ];
 
   for (const layer of layers) {

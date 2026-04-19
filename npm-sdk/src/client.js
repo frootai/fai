@@ -1,8 +1,8 @@
 /**
  * FrootAI Client — Main SDK entry point
  *
- * Offline-first: queries bundled knowledge base (16 modules, 5 FROOT layers).
- * 100 solution plays, 860+ FAI primitives, 77 plugins, 45 MCP tools.
+ * Offline-first: queries bundled knowledge base (knowledge modules, 5 FROOT layers).
+ * Solution plays, FAI primitives, plugins, MCP tools.
  *
  * Usage:
  *   import { FrootAI } from 'frootai';
@@ -259,7 +259,7 @@ export class FrootAI {
     return {
       name: 'FAI Protocol',
       specFile: 'fai-manifest.json',
-      description: 'The missing binding glue — context-wiring between agents, instructions, skills, hooks, workflows, plugins, tools, prompts, and guardrails.',
+      description: 'The uniFAIng layer — context-wiring between agents, instructions, skills, hooks, workflows, plugins, tools, prompts, and guardrails.',
       schemas: ['agent.schema.json', 'instruction.schema.json', 'skill.schema.json', 'hook.schema.json', 'plugin.schema.json', 'fai-manifest.schema.json', 'fai-context.schema.json'],
     };
   }

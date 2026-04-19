@@ -13,7 +13,7 @@ FrootAI is an **AI architecture knowledge engine** that exposes:
 
 - **16 MCP tools** — callable by any MCP-compatible agent
 - **18 knowledge modules** — covering the full AI stack (tokens → production)
-- **200+ AI terms** — precise glossary with definitions and context
+- **Comprehensive glossary** — precise glossary with definitions and context
 - **7 architecture patterns** — decision guides for RAG, agents, models, cost
 - **20 solution plays** — pre-tuned, deployable AI solution templates
 
@@ -232,7 +232,7 @@ Contact: [pavleen.bali@microsoft.com](mailto:pavleen.bali@microsoft.com) for lic
 
 | Asset | Format | Size | Description |
 |-------|--------|------|-------------|
-| `knowledge.json` | JSON | 682 KB | All 18 modules + 200+ terms, bundled |
+| `knowledge.json` | JSON | 682 KB | All knowledge modules + comprehensive glossary, bundled |
 | `agent-card.json` | JSON (A2A) | 3 KB | Agent Card for A2A protocol interop |
 | `registry-entry.json` | JSON | 4 KB | MCP registry entry for discoverability |
 
@@ -300,5 +300,5 @@ MCP tool implementations — one source of truth, multiple delivery mechanisms.
 
 MIT — use it, embed it, extend it, ship it.
 
-> **FrootAI v2.2** — *The open glue for AI architecture.*
-> 18 modules · 16 MCP tools · 20 solution plays · 200+ AI terms
+> **FrootAI v2.2** — *The uniFAIng glue for AI architecture.*
+> Knowledge modules · MCP tools · solution plays · comprehensive glossary
