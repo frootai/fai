@@ -326,11 +326,10 @@ section('⚙️  GITHUB ACTIONS');
 
 const expectedWorkflows = [
   'consistency-check.yml',
-  'deploy-chatbot.yml',
-  'docker-publish.yml',
-  'npm-publish.yml',
-  'vsce-publish.yml',
   'validate-plays.yml',
+  'validate-primitives.yml',
+  'factory-sync.yml',
+  'factory.yml',
 ];
 
 const workflowDir = join(ROOT, '.github/workflows');
