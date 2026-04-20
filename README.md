@@ -240,13 +240,13 @@ Every play ships with: `fai-manifest.json` + `.github` Agentic OS (agents, instr
 
 | Channel | Install | Version | Links |
 |---------|---------|:-------:|-------|
-| **npm MCP** | `npm install frootai-mcp` | 5.2.0 | [Website](https://frootai.dev/mcp-tooling) · [npmjs.com](https://www.npmjs.com/package/frootai-mcp) |
-| **npm SDK** | `npm install frootai` | 5.4.0 | [npmjs.com](https://www.npmjs.com/package/frootai) |
-| **PyPI SDK** | `pip install frootai` | 3.3.0 | [PyPI](https://pypi.org/project/frootai/) |
-| **PyPI MCP** | `pip install frootai-mcp` | 3.2.0 | [PyPI](https://pypi.org/project/frootai-mcp/) |
+| **npm MCP** | `npm install frootai-mcp` | 6.0.0 | [Website](https://frootai.dev/mcp-tooling) · [npmjs.com](https://www.npmjs.com/package/frootai-mcp) |
+| **npm SDK** | `npm install frootai` | 6.0.0 | [npmjs.com](https://www.npmjs.com/package/frootai) |
+| **PyPI SDK** | `pip install frootai` | 6.0.0 | [PyPI](https://pypi.org/project/frootai/) |
+| **PyPI MCP** | `pip install frootai-mcp` | 6.0.0 | [PyPI](https://pypi.org/project/frootai-mcp/) |
 | **Docker** | `docker run -i ghcr.io/frootai/frootai-mcp` | latest | [Website](https://frootai.dev/docker) · [GHCR](https://github.com/frootai/frootai/pkgs/container/frootai-mcp) |
-| **VS Code** | `code --install-extension frootai.frootai-vscode` | 1.4.0 | [Website](https://frootai.dev/vscode-extension) · [Marketplace](https://marketplace.visualstudio.com/items?itemName=frootai.frootai-vscode) |
-| **CLI** | `npx frootai <command>` | 5.4.0 | [Website](https://frootai.dev/cli) |
+| **VS Code** | `code --install-extension frootai.frootai-vscode` | 6.0.0 | [Website](https://frootai.dev/vscode-extension) · [Marketplace](https://marketplace.visualstudio.com/items?itemName=frootai.frootai-vscode) |
+| **CLI** | `npx frootai <command>` | 6.0.0 | [Website](https://frootai.dev/cli) |
 | **GitHub** | — | latest | [github.com/frootai/frootai](https://github.com/frootai/frootai) |
 
 </details>
