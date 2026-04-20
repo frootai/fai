@@ -1,7 +1,9 @@
+---
 name: fai-playwright-dotnet-test
 description: "Generate C# Playwright tests with page objects, fixtures, visual regression, and parallel test runners."
 waf: ["Reliability", "Operational Excellence"]
 plays: ["32-test-generation", "24-code-assistant"]
+---
 
 # Fai Playwright Dotnet Test
 

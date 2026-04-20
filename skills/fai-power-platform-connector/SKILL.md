@@ -1,7 +1,9 @@
+---
 name: fai-power-platform-connector
 description: "Create custom Power Platform connectors for REST/GraphQL APIs with OAuth, pagination, and error handling."
 waf: ["Security", "Reliability", "Operational Excellence"]
 plays: []
+---
 
 # Fai Power Platform Connector
 

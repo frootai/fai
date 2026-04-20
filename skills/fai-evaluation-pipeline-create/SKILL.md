@@ -1,5 +1,5 @@
 ---
-name: evaluation-pipeline-create
+name: fai-evaluation-pipeline-create
 description: "Create evaluation pipelines, CI gates, and regression checks for AI systems - score groundedness, block regressions, and publish release verdicts"
 ---
 

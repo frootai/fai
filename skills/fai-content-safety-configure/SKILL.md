@@ -1,5 +1,5 @@
 ---
-name: content-safety-configure
+name: fai-content-safety-configure
 description: "Configure Azure Content Safety thresholds, blocklists, and prompt shields for AI apps - block unsafe inputs, detect jailbreaks, and monitor moderation drift"
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: docker-containerize
+name: fai-docker-containerize
 description: "Containerize AI applications with multi-stage images, health probes, and secure runtime settings - ship smaller containers and safer deployments"
 ---
 

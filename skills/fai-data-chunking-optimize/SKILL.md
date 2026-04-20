@@ -1,5 +1,5 @@
 ---
-name: data-chunking-optimize
+name: fai-data-chunking-optimize
 description: "Optimize RAG chunking, overlap, and metadata boundaries - improve retrieval recall, reduce noisy context, and preserve citation quality"
 ---
 

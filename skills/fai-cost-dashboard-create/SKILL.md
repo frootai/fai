@@ -1,5 +1,5 @@
 ---
-name: cost-dashboard-create
+name: fai-cost-dashboard-create
 description: "Create cost dashboards, budget alerts, and attribution views for AI workloads - track token spend by model, team, and tenant before overruns hit production"
 ---
 

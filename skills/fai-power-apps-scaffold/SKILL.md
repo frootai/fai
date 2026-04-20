@@ -1,7 +1,9 @@
+---
 name: fai-power-apps-scaffold
 description: "Scaffold a Microsoft Power Apps component with galleries, forms, formulas, and Dataverse connector wiring."
 waf: ["Operational Excellence", "Security"]
 plays: []
+---
 
 # Fai Power Apps Scaffold
 

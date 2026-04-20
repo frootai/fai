@@ -1,5 +1,5 @@
 ---
-name: database-migrate-ai
+name: fai-database-migrate-ai
 description: "Migrate AI data, embeddings, and index schemas with zero-downtime cutovers - preserve compatibility, validate every step, and keep rollback ready"
 ---
 
