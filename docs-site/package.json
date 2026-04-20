@@ -5,7 +5,9 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "node ../scripts/factory/adapters/docs-site.js && docusaurus build",
+    "build:docs-only": "docusaurus build",
+    "generate": "node ../scripts/factory/adapters/docs-site.js",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",

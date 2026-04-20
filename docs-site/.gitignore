@@ -8,6 +8,9 @@
 .docusaurus
 .cache-loader
 
+# Auto-generated primitive catalog pages (regenerated from fai-catalog.json)
+/docs/generated
+
 # Misc
 .DS_Store
 .env.local
