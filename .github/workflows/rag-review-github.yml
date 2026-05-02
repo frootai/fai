@@ -1,0 +1,38 @@
+# AI-Powered Code Review Workflow
+# Layer 3 — Agentic Workflow. Compiles to GitHub Actions for automated AI code review.
+
+name: AI Code Review
+on:
+  pull_request:
+    branches: [main]
+    paths: ['solution-plays/01-enterprise-rag/**']
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Validate TuneKit configs
+        run: |
+          cd solution-plays/01-enterprise-rag
+          bash .github/skills/tune/tune-config.sh
+      - name: Run evaluation
+        run: |
+          cd solution-plays/01-enterprise-rag
+          pip install -q openai azure-search-documents
+          python evaluation/eval.py --test-set evaluation/test-set.jsonl
+      - name: Post review summary
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ FrootAI AI Review passed. Configs valid, evaluation metrics within thresholds.'
+            })

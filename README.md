@@ -93,7 +93,7 @@ const fai = new FrootAI();
 // Search, plays, modules
 fai.search('RAG architecture');          // BM25-ranked results
 fai.plays.get('01');                     // Play details
-fai.listModules();                       // 16 FROOT modules
+fai.listModules();                       // 17 FROOT modules (incl. V1 Voice & Speech AI)
 
 // Evaluation quality gates
 fai.evaluation.run({ groundedness: 0.95, relevance: 0.88 });
@@ -157,15 +157,18 @@ node engine/index.js <manifest> # Load a play with the FAI Engine
 
 ---
 
-### MCP Server — 45 Tools
+### MCP Server — 51 Tools
 
 | Category | # | Tools |
 |----------|:-:|-------|
-| **Static** | 6 | `list_modules`  `get_module`  `lookup_term`  `search_knowledge`  `get_architecture_pattern`  `get_froot_overview` |
+| **Knowledge** | 6 | `list_modules`  `get_module`  `lookup_term`  `search_knowledge`  `get_architecture_pattern`  `get_froot_overview` |
 | **Live** | 4 | `fetch_azure_docs`  `fetch_external_mcp`  `list_community_plays`  `get_github_agentic_os` |
-| **Agent Chain** | 3 | `agent_build`  `agent_review`  `agent_tune` |
-| **AI Ecosystem** | 4 | `get_model_catalog`  `get_azure_pricing`  `compare_models`  `compare_plays` |
-| **Compute** | 6 | `estimate_cost`  `embedding_playground`  `generate_architecture_diagram`  `run_evaluation` + 2 more |
+| **Agent Chain** | 3 | `agent_build`  `agent_review`  `agent_tune` _(code-aware in v6.3+)_ |
+| **Ecosystem** | 10 | model catalog, Azure pricing, model/play comparisons, embedding playground (azure-openai · char-ngram · jaccard), config validation, architecture diagrams |
+| **FAI Engine** | 7 | wire/inspect/validate plays, evaluate quality, plus `run_eval_live` _(v6.6+)_ |
+| **Scaffold** | 7 | `scaffold_play`  `create_primitive`  `smart_scaffold` + `scaffold_component` _(v6.4+)_ + `get_play_config` _(v6.4+)_ + `get_dependencies` _(v6.4+)_ + `generate_bicep` _(v6.5+)_ |
+| **Workspace** | 1 | `analyze_workspace` _(v6.2+)_ |
+| **Marketplace** | 13 | search, install, uninstall, compose, publish, dependency resolution, stats |
 
 ---
 
@@ -269,13 +272,13 @@ frootai/frootai
 ├── schemas/              7 JSON schemas validating all primitive types
 ├── engine/               FAI Engine v0.1 (7 modules — manifest reader → evaluator)
 ├── solution-plays/       100 deployable plays with DevKit+TuneKit+SpecKit+Bicep
-├── npm-mcp/              MCP Server — 45 tools + knowledge.json
+├── npm-mcp/              MCP Server — 51 tools + knowledge.json
 ├── npm-sdk/              npm SDK & CLI — FrootAI class, 8 commands, 7 modules
 ├── python-sdk/           Python SDK — offline, zero deps, 7 modules
 ├── python-mcp/           Python MCP Server
 ├── vscode-extension/     VS Code extension (4 commands, play browser)
 ├── functions/            REST API + Agent FAI chatbot
-├── docs/                 FROOT knowledge modules (18 modules, 664 KB)
+├── docs/                 FROOT knowledge modules (17 modules, ~720 KB)
 ├── config/               Configurator data + spec templates
 ├── scripts/              21 build/validate/generate scripts
 ├── marketplace.json      Auto-generated plugin registry

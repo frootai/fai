@@ -181,7 +181,7 @@ Agents are wired via `fai-manifest.json`:
 
 ### Via MCP Server
 ```bash
-npx frootai-mcp@latest  # 25 tools including agent_build, agent_review, agent_tune
+npx frootai-mcp@latest  # 51 tools incl. agent_build/agent_review/agent_tune (code-aware), analyze_workspace, scaffold_component, generate_bicep, run_eval_live
 ```
 
 ### Via CLI

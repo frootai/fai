@@ -1,0 +1,141 @@
+name: AI Eval Quality Gate
+
+# v6.8+ — Runs run_eval_live against an endpoint and fails the build when
+# any aggregate metric falls below threshold. Posts a summary to the PR.
+#
+# Inputs (set as repo variables or pass via workflow_dispatch):
+#   - EVAL_ENDPOINT      The HTTPS endpoint to evaluate
+#   - EVAL_TEST_SET      Path to a JSONL file in the repo (default evaluation/test-set.jsonl)
+#   - EVAL_THRESHOLDS    JSON string, e.g. {"groundedness":4.5,"relevance":4.0,"fluency":4.0}
+#   - EVAL_EVALUATOR     simple | llm | azure-ai-evaluation (default simple)
+#
+# Optional secrets (only when evaluator is llm or azure-ai-evaluation):
+#   - AZURE_OPENAI_ENDPOINT
+#   - AZURE_OPENAI_API_KEY
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'config/**'
+      - 'evaluation/**'
+  workflow_dispatch:
+    inputs:
+      endpoint:
+        description: 'Endpoint URL to evaluate'
+        required: true
+      evaluator:
+        description: 'Backend (simple | llm | azure-ai-evaluation)'
+        default: 'simple'
+        type: choice
+        options: [simple, llm, azure-ai-evaluation]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Resolve inputs
+        id: cfg
+        run: |
+          set -e
+          ENDPOINT="${{ inputs.endpoint || vars.EVAL_ENDPOINT }}"
+          EVALUATOR="${{ inputs.evaluator || vars.EVAL_EVALUATOR || 'simple' }}"
+          TEST_SET="${{ vars.EVAL_TEST_SET || 'evaluation/test-set.jsonl' }}"
+          THRESHOLDS='${{ vars.EVAL_THRESHOLDS || ''{"groundedness":4.0,"relevance":4.0,"fluency":4.0}'' }}'
+          if [ -z "$ENDPOINT" ]; then
+            echo "::error::EVAL_ENDPOINT not set (variable or workflow input)."
+            exit 1
+          fi
+          echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
+          echo "evaluator=$EVALUATOR" >> $GITHUB_OUTPUT
+          echo "test_set=$TEST_SET" >> $GITHUB_OUTPUT
+          echo "thresholds=$THRESHOLDS" >> $GITHUB_OUTPUT
+
+      - name: Run live evaluation
+        id: eval
+        env:
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+        run: |
+          set -e
+          mkdir -p reports
+          npx -y frootai-mcp@latest --once \
+            --tool run_eval_live \
+            --args "$(cat <<JSON
+          {
+            "endpoint": "${{ steps.cfg.outputs.endpoint }}",
+            "testSetPath": "${{ steps.cfg.outputs.test_set }}",
+            "workspaceRoot": "${{ github.workspace }}",
+            "outputPath": "reports/eval-${{ github.run_id }}.json",
+            "historyPath": "reports/eval-history.jsonl",
+            "evaluator": "${{ steps.cfg.outputs.evaluator }}",
+            "thresholds": ${{ steps.cfg.outputs.thresholds }},
+            "format": "json"
+          }
+          JSON
+          )" > reports/eval-output.json
+          # Extract pass/fail
+          FAIL=$(node -e "const r=require('./reports/eval-${{ github.run_id }}.json'); console.log(r.failCount)")
+          ERR=$(node -e "const r=require('./reports/eval-${{ github.run_id }}.json'); console.log(r.errorCount)")
+          echo "fail_count=$FAIL" >> $GITHUB_OUTPUT
+          echo "error_count=$ERR" >> $GITHUB_OUTPUT
+
+      - name: Upload eval artefact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report-${{ github.run_id }}
+          path: reports/
+
+      - name: Post summary to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const r = JSON.parse(fs.readFileSync(`reports/eval-${{ github.run_id }}.json`, 'utf-8'));
+            const rows = r.aggregate
+              .map((a) => `| ${a.metric} | ${a.mean.toFixed(2)} | ${a.p95.toFixed(2)} | ${a.threshold.toFixed(2)} | ${a.pass ? '✅' : '🔴'} |`)
+              .join('\n');
+            const body = [
+              `## 📊 AI Eval Quality Gate`,
+              ``,
+              `**Endpoint:** \`${r.endpoint}\``,
+              `**Evaluator:** \`${r.evaluator}\``,
+              `**Cases:** ${r.cases.length} · **Errors:** ${r.errorCount}`,
+              ``,
+              `| Metric | Mean | p95 | Threshold | Pass |`,
+              `|--------|------|-----|-----------|------|`,
+              rows,
+              ``,
+              r.failCount === 0 && r.errorCount === 0
+                ? `✅ All ${r.aggregate.length} metrics pass.`
+                : `🔴 ${r.failCount} metric(s) below threshold · ${r.errorCount} request error(s).`,
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail when any metric below threshold
+        if: steps.eval.outputs.fail_count != '0' || steps.eval.outputs.error_count != '0'
+        run: |
+          echo "::error::Quality gate failed: ${{ steps.eval.outputs.fail_count }} metric(s) below threshold, ${{ steps.eval.outputs.error_count }} request error(s)."
+          exit 1

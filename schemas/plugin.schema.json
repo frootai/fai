@@ -4,7 +4,13 @@
   "title": "FrootAI Plugin Schema",
   "description": "Validates plugin.json — themed bundles of agents, skills, instructions, and hooks that ship as installable packages.",
   "type": "object",
-  "required": ["name", "description", "version", "author", "license"],
+  "required": [
+    "name",
+    "description",
+    "version",
+    "author",
+    "license"
+  ],
   "properties": {
     "name": {
       "type": "string",
@@ -26,7 +32,9 @@
     },
     "author": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -49,7 +57,10 @@
     "license": {
       "type": "string",
       "description": "SPDX license identifier (e.g., MIT, Apache-2.0).",
-      "examples": ["MIT", "Apache-2.0"]
+      "examples": [
+        "MIT",
+        "Apache-2.0"
+      ]
     },
     "repository": {
       "type": "string",
@@ -111,6 +122,38 @@
         "pattern": "^[0-9]{2}(-[a-z0-9-]+)?$"
       },
       "description": "Solution play IDs this plugin is designed for. FAI Layer auto-wires all bundled primitives when used inside a play."
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Paths (relative to plugin root) to JSON files describing custom scaffold_component templates. v6.8+. Each file must conform to ComponentDefinition (id, name, languages, description, waf, plays?, templates)."
+    },
+    "playTemplates": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Paths (relative to plugin root) to JSON files describing custom solution-play templates surfaced by get_play_config / get_dependencies / agent_build. v6.8+."
+    },
+    "bicepTemplates": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Paths (relative to plugin root) to JSON files describing custom Bicep play infra mappings (PlayInfra) used by generate_bicep. v6.8+."
+    },
+    "reviewRules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Paths (relative to plugin root) to .js modules exporting Rule objects for the agent_review engine. v6.8+. SECURITY: review-rule modules execute JavaScript — only install plugins you trust. Disable via FAI_PLUGIN_LOAD_DISABLED=1."
     }
   },
   "additionalProperties": false
