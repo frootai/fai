@@ -1,7 +1,7 @@
 {
-  "version": "5.2.0",
-  "generated": "2026-04-18T20:51:39.890Z",
-  "commit": "51a66632",
+  "version": "0.0.0",
+  "generated": "2026-05-02T18:32:50.114Z",
+  "commit": "445670e1",
   "stats": {
     "agents": 238,
     "skills": 333,
@@ -10,9 +10,9 @@
     "plugins": 77,
     "workflows": 12,
     "cookbook": 16,
-    "plays": 104,
-    "modules": 24,
-    "mcpTools": 45,
+    "plays": 101,
+    "modules": 25,
+    "mcpTools": 0,
     "totalPrimitives": 862
   },
   "embeddedStats": {
@@ -6285,7 +6285,7 @@
     {
       "id": "fai-content-safety-configure",
       "folder": "skills/fai-content-safety-configure",
-      "name": "content-safety-configure",
+      "name": "fai-content-safety-configure",
       "description": "Configure Azure Content Safety thresholds, blocklists, and prompt shields for AI apps - block unsafe inputs, detect jailbreaks, and monitor moderation drift",
       "waf": [],
       "plays": [],
@@ -6384,7 +6384,7 @@
     {
       "id": "fai-cost-dashboard-create",
       "folder": "skills/fai-cost-dashboard-create",
-      "name": "cost-dashboard-create",
+      "name": "fai-cost-dashboard-create",
       "description": "Create cost dashboards, budget alerts, and attribution views for AI workloads - track token spend by model, team, and tenant before overruns hit production",
       "waf": [],
       "plays": [],
@@ -6411,7 +6411,7 @@
     {
       "id": "fai-data-chunking-optimize",
       "folder": "skills/fai-data-chunking-optimize",
-      "name": "data-chunking-optimize",
+      "name": "fai-data-chunking-optimize",
       "description": "Optimize RAG chunking, overlap, and metadata boundaries - improve retrieval recall, reduce noisy context, and preserve citation quality",
       "waf": [],
       "plays": [],
@@ -6420,7 +6420,7 @@
     {
       "id": "fai-database-migrate-ai",
       "folder": "skills/fai-database-migrate-ai",
-      "name": "database-migrate-ai",
+      "name": "fai-database-migrate-ai",
       "description": "Migrate AI data, embeddings, and index schemas with zero-downtime cutovers - preserve compatibility, validate every step, and keep rollback ready",
       "waf": [],
       "plays": [],
@@ -6807,7 +6807,7 @@
     {
       "id": "fai-docker-containerize",
       "folder": "skills/fai-docker-containerize",
-      "name": "docker-containerize",
+      "name": "fai-docker-containerize",
       "description": "Containerize AI applications with multi-stage images, health probes, and secure runtime settings - ship smaller containers and safer deployments",
       "waf": [],
       "plays": [],
@@ -7131,7 +7131,7 @@
     {
       "id": "fai-evaluation-pipeline-create",
       "folder": "skills/fai-evaluation-pipeline-create",
-      "name": "evaluation-pipeline-create",
+      "name": "fai-evaluation-pipeline-create",
       "description": "Create evaluation pipelines, CI gates, and regression checks for AI systems - score groundedness, block regressions, and publish release verdicts",
       "waf": [],
       "plays": [],
@@ -7864,10 +7864,16 @@
       "id": "fai-playwright-dotnet-test",
       "folder": "skills/fai-playwright-dotnet-test",
       "name": "fai-playwright-dotnet-test",
-      "description": "",
-      "waf": [],
-      "plays": [],
-      "lines": 160
+      "description": "Generate C# Playwright tests with page objects, fixtures, visual regression, and parallel test runners.",
+      "waf": [
+        "Reliability",
+        "Operational Excellence"
+      ],
+      "plays": [
+        "32-test-generation",
+        "24-code-assistant"
+      ],
+      "lines": 162
     },
     {
       "id": "fai-playwright-python-test",
@@ -7918,10 +7924,13 @@
       "id": "fai-power-apps-scaffold",
       "folder": "skills/fai-power-apps-scaffold",
       "name": "fai-power-apps-scaffold",
-      "description": "",
-      "waf": [],
+      "description": "Scaffold a Microsoft Power Apps component with galleries, forms, formulas, and Dataverse connector wiring.",
+      "waf": [
+        "Operational Excellence",
+        "Security"
+      ],
       "plays": [],
-      "lines": 156
+      "lines": 158
     },
     {
       "id": "fai-power-automate-flow",
@@ -7960,10 +7969,14 @@
       "id": "fai-power-platform-connector",
       "folder": "skills/fai-power-platform-connector",
       "name": "fai-power-platform-connector",
-      "description": "",
-      "waf": [],
+      "description": "Create custom Power Platform connectors for REST/GraphQL APIs with OAuth, pagination, and error handling.",
+      "waf": [
+        "Security",
+        "Reliability",
+        "Operational Excellence"
+      ],
       "plays": [],
-      "lines": 156
+      "lines": 158
     },
     {
       "id": "fai-powerbi-modeling",
@@ -13401,32 +13414,6 @@
     },
     {
       "id": "24",
-      "slug": "24-ai-code-review",
-      "name": "Optimize Ai Code Review configuration, thresholds, and performance",
-      "description": "Optimize Ai Code Review configuration, thresholds, and performance",
-      "hasManifest": false,
-      "hasRootAgent": true,
-      "devkit": {
-        "agents": 0,
-        "skills": 0,
-        "instructions": 0,
-        "hooks": 0
-      },
-      "tunekit": null,
-      "speckit": {
-        "waf": [],
-        "guardrails": null,
-        "scope": null,
-        "knowledge": []
-      },
-      "infrastructure": {
-        "bicep": false,
-        "config": false,
-        "evaluation": false
-      }
-    },
-    {
-      "id": "24",
       "slug": "24-ai-code-review-pipeline",
       "name": "Optimize review prompts, reduce noise/false positives, tune severity thresholds, model routing for cost",
       "description": "Optimize review prompts, reduce noise/false positives, tune severity thresholds, model routing for cost",
@@ -13468,32 +13455,6 @@
         "bicep": true,
         "config": true,
         "evaluation": true
-      }
-    },
-    {
-      "id": "25",
-      "slug": "25-conversation-memory",
-      "name": "Optimize Conversation Memory configuration, thresholds, and performance",
-      "description": "Optimize Conversation Memory configuration, thresholds, and performance",
-      "hasManifest": false,
-      "hasRootAgent": true,
-      "devkit": {
-        "agents": 0,
-        "skills": 0,
-        "instructions": 0,
-        "hooks": 0
-      },
-      "tunekit": null,
-      "speckit": {
-        "waf": [],
-        "guardrails": null,
-        "scope": null,
-        "knowledge": []
-      },
-      "infrastructure": {
-        "bicep": false,
-        "config": false,
-        "evaluation": false
       }
     },
     {
@@ -14407,32 +14368,6 @@
         "bicep": true,
         "config": true,
         "evaluation": true
-      }
-    },
-    {
-      "id": "45",
-      "slug": "45-real-time-event-ai",
-      "name": "Optimize Real Time Event Ai configuration, thresholds, and performance",
-      "description": "Optimize Real Time Event Ai configuration, thresholds, and performance",
-      "hasManifest": false,
-      "hasRootAgent": true,
-      "devkit": {
-        "agents": 0,
-        "skills": 0,
-        "instructions": 0,
-        "hooks": 0
-      },
-      "tunekit": null,
-      "speckit": {
-        "waf": [],
-        "guardrails": null,
-        "scope": null,
-        "knowledge": []
-      },
-      "infrastructure": {
-        "bicep": false,
-        "config": false,
-        "evaluation": false
       }
     },
     {
@@ -18079,9 +18014,16 @@
       "name": "user-guide-complete",
       "lines": 491,
       "wordCount": 2434
+    },
+    {
+      "id": "V1-Voice-Speech-AI",
+      "file": "docs/V1-Voice-Speech-AI.md",
+      "name": "V1-Voice-Speech-AI",
+      "lines": 707,
+      "wordCount": 3573
     }
   ],
-  "mcpTools": 45,
+  "mcpTools": 0,
   "crossRefs": {
     "instructions/python-waf.instructions.md": {
       "usedBy": [

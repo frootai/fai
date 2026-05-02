@@ -12,6 +12,73 @@ code .  # Use @builder for memory tiers, @reviewer for privacy audit, @tuner for
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph User Layer
+        User[User / Chat Client]
+    end
+
+    subgraph Memory Orchestrator
+        API[Container Apps<br/>Memory Manager · Tiered Retrieval]
+    end
+
+    subgraph Hot Memory — Milliseconds
+        Redis[Azure Cache for Redis<br/>Last 5 Turns · Active Session · Entities]
+    end
+
+    subgraph Warm Memory — Sub-Second
+        CosmosDB[Cosmos DB<br/>Full Session History · User Profile · Entity Store]
+    end
+
+    subgraph Cold Memory — Semantic Search
+        AISearch[Azure AI Search<br/>Vector Index · Conversation Summaries · Facts]
+    end
+
+    subgraph AI Engine
+        OpenAI[Azure OpenAI — GPT-4o<br/>Response Generation · Memory-Augmented Context]
+        Summarizer[Azure OpenAI — GPT-4o-mini<br/>Summarization · Entity Extraction]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>Encryption Keys · API Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Cache Hits · Memory Latency · Retrieval Quality]
+        LogAnalytics[Log Analytics<br/>Memory Operations · Cache Evictions]
+    end
+
+    User -->|Message| API
+    API -->|Check Hot| Redis
+    Redis -->|Miss| API
+    API -->|Check Warm| CosmosDB
+    API -->|Semantic Recall| AISearch
+    API -->|Context + Memory| OpenAI
+    OpenAI -->|Response| API
+    API -->|Store Turn| Redis
+    API -->|Persist| CosmosDB
+    API -->|Background| Summarizer
+    Summarizer -->|Summary + Entities| AISearch
+    API -->|Response| User
+    MI -->|Secrets| KV
+    API -->|Traces| AppInsights
+    API -->|Logs| LogAnalytics
+
+    style User fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#3b82f6,color:#fff,stroke:#2563eb
+    style Redis fill:#f59e0b,color:#fff,stroke:#d97706
+    style CosmosDB fill:#f59e0b,color:#fff,stroke:#d97706
+    style AISearch fill:#10b981,color:#fff,stroke:#059669
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Summarizer fill:#10b981,color:#fff,stroke:#059669
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+    style LogAnalytics fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
 | Service | Purpose |
 |---------|---------|
 | Redis Cache | Short-term memory (session state, 15-min TTL) |
