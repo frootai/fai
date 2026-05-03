@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Citizen Services Chatbot — > Multi-language municipal services AI assistant with form filling guidance, appointment scheduling,"}
-{"query":"Azure services?","expected":"Chatbot"}
+{"id":"84-citizen-services-chatbot-q001","category":"overview","question":"What is the primary use case for the Citizen Services Chatbot solution play?","ground_truth":"TODO — customer-specific. See solution-plays/84-citizen-services-chatbot/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"84-citizen-services-chatbot-q002","category":"architecture","question":"Which Azure services does Citizen Services Chatbot typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"84-citizen-services-chatbot-q003","category":"cost","question":"What is the recommended cost tier for Citizen Services Chatbot in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"84-citizen-services-chatbot-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Citizen Services Chatbot?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"84-citizen-services-chatbot-q005","category":"failure-mode","question":"What is a common failure mode in a Citizen Services Chatbot deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

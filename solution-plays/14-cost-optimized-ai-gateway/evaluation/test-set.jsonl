@@ -1,1 +1,5 @@
-{"questions":[{"id":"q001","question":"Sample","ground_truth":"Sample"}]}
+{"id":"14-cost-optimized-ai-gateway-q001","category":"overview","question":"What is the primary use case for the Cost Optimized AI Gateway solution play?","ground_truth":"TODO — customer-specific. See solution-plays/14-cost-optimized-ai-gateway/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"14-cost-optimized-ai-gateway-q002","category":"architecture","question":"Which Azure services does Cost Optimized AI Gateway typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"14-cost-optimized-ai-gateway-q003","category":"cost","question":"What is the recommended cost tier for Cost Optimized AI Gateway in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"14-cost-optimized-ai-gateway-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Cost Optimized AI Gateway?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"14-cost-optimized-ai-gateway-q005","category":"failure-mode","question":"What is a common failure mode in a Cost Optimized AI Gateway deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

@@ -1,1 +1,5 @@
-{"questions":[{"id":"q001","question":"Sample","ground_truth":"Sample"}]}
+{"id":"19-edge-ai-phi4-q001","category":"overview","question":"What is the primary use case for the Edge AI Phi4 solution play?","ground_truth":"TODO — customer-specific. See solution-plays/19-edge-ai-phi4/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"19-edge-ai-phi4-q002","category":"architecture","question":"Which Azure services does Edge AI Phi4 typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"19-edge-ai-phi4-q003","category":"cost","question":"What is the recommended cost tier for Edge AI Phi4 in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"19-edge-ai-phi4-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Edge AI Phi4?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"19-edge-ai-phi4-q005","category":"failure-mode","question":"What is a common failure mode in a Edge AI Phi4 deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Responsible AI Dashboard — Enterprise RAI governance platform — model fairness metrics, bias detection acro..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Machine Learning, Azure Monitor, Azure Cosmos DB, Azure Static Web Apps"}
+{"id":"60-responsible-ai-dashboard-q001","category":"overview","question":"What is the primary use case for the Responsible AI Dashboard solution play?","ground_truth":"TODO — customer-specific. See solution-plays/60-responsible-ai-dashboard/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"60-responsible-ai-dashboard-q002","category":"architecture","question":"Which Azure services does Responsible AI Dashboard typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"60-responsible-ai-dashboard-q003","category":"cost","question":"What is the recommended cost tier for Responsible AI Dashboard in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"60-responsible-ai-dashboard-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Responsible AI Dashboard?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"60-responsible-ai-dashboard-q005","category":"failure-mode","question":"What is a common failure mode in a Responsible AI Dashboard deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

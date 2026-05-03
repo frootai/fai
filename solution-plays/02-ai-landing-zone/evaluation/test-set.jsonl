@@ -1,1 +1,5 @@
-{"checks":[{"id":"c001","check":"Private endpoints exist","expect":"all_services"}]}
+{"id":"02-ai-landing-zone-q001","category":"overview","question":"What is the primary use case for the AI Landing Zone solution play?","ground_truth":"TODO — customer-specific. See solution-plays/02-ai-landing-zone/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"02-ai-landing-zone-q002","category":"architecture","question":"Which Azure services does AI Landing Zone typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"02-ai-landing-zone-q003","category":"cost","question":"What is the recommended cost tier for AI Landing Zone in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"02-ai-landing-zone-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Landing Zone?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"02-ai-landing-zone-q005","category":"failure-mode","question":"What is a common failure mode in a AI Landing Zone deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

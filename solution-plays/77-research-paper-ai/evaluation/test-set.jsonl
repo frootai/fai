@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Research Paper Ai — > AI-powered academic research assistant — literature review, citation network analysis, methodology"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"77-research-paper-ai-q001","category":"overview","question":"What is the primary use case for the Research Paper AI solution play?","ground_truth":"TODO — customer-specific. See solution-plays/77-research-paper-ai/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"77-research-paper-ai-q002","category":"architecture","question":"Which Azure services does Research Paper AI typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"77-research-paper-ai-q003","category":"cost","question":"What is the recommended cost tier for Research Paper AI in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"77-research-paper-ai-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Research Paper AI?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"77-research-paper-ai-q005","category":"failure-mode","question":"What is a common failure mode in a Research Paper AI deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

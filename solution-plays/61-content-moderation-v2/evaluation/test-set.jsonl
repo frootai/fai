@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Content Moderation v2 — Advanced content moderation with cultural context awareness, multi-modal analysi..."}
-{"query":"Azure services?","expected":"Azure AI Content Safety, Azure OpenAI, Azure Cosmos DB, Azure Functions, Azure Service Bus"}
+{"id":"61-content-moderation-v2-q001","category":"overview","question":"What is the primary use case for the Content Moderation V2 solution play?","ground_truth":"TODO — customer-specific. See solution-plays/61-content-moderation-v2/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"61-content-moderation-v2-q002","category":"architecture","question":"Which Azure services does Content Moderation V2 typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"61-content-moderation-v2-q003","category":"cost","question":"What is the recommended cost tier for Content Moderation V2 in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"61-content-moderation-v2-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Content Moderation V2?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"61-content-moderation-v2-q005","category":"failure-mode","question":"What is a common failure mode in a Content Moderation V2 deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

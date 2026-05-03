@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Waste Recycling Optimizer — > AI-powered waste management — material classification via computer vision, collection route optimi"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"73-waste-recycling-optimizer-q001","category":"overview","question":"What is the primary use case for the Waste Recycling Optimizer solution play?","ground_truth":"TODO — customer-specific. See solution-plays/73-waste-recycling-optimizer/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"73-waste-recycling-optimizer-q002","category":"architecture","question":"Which Azure services does Waste Recycling Optimizer typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"73-waste-recycling-optimizer-q003","category":"cost","question":"What is the recommended cost tier for Waste Recycling Optimizer in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"73-waste-recycling-optimizer-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Waste Recycling Optimizer?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"73-waste-recycling-optimizer-q005","category":"failure-mode","question":"What is a common failure mode in a Waste Recycling Optimizer deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

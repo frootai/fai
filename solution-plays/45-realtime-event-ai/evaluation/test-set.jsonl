@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Real-Time Event-Driven AI Processing — Streaming AI pipeline for continuous event processing — fraud alerts, IoT anomal..."}
-{"query":"Azure services?","expected":"Azure Event Hubs, Azure Functions, Azure OpenAI, Azure Cosmos DB, Azure SignalR Service, Azure Monitor"}
+{"id":"45-realtime-event-ai-q001","category":"overview","question":"What is the primary use case for the Realtime Event AI solution play?","ground_truth":"TODO — customer-specific. See solution-plays/45-realtime-event-ai/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"45-realtime-event-ai-q002","category":"architecture","question":"Which Azure services does Realtime Event AI typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"45-realtime-event-ai-q003","category":"cost","question":"What is the recommended cost tier for Realtime Event AI in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"45-realtime-event-ai-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Realtime Event AI?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"45-realtime-event-ai-q005","category":"failure-mode","question":"What is a common failure mode in a Realtime Event AI deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

@@ -27,7 +27,7 @@ The implementation plan `.internal/improvisation/implementation-plan.md` has **2
 ## Current Website Stats (April 6, 2026)
 - **145 HTML pages** in frootai.dev static output
 - **solution plays** with View Play + User Guide pages
-- **4 primitive sub-pages** (agents 238, instructions 176, skills 322, hooks 10)
+- **4 primitive sub-pages** (agents 238, instructions 176, skills 333, hooks 11)
 - **plugins** with pagination (20/page), click-to-view modals, download/copy/share
 - **15 learning hub pages** (L1-L15) with avg 340 lines, CodeBlock, prev/next nav
 - **cookbook recipes** + **workflows** with modals

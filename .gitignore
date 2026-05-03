@@ -42,3 +42,7 @@ docs-site/.docusaurus/
 app-site/node_modules/
 app-site/.next/
 app-site/out/
+
+# Test-set expansion script side-effects
+*.bak
+

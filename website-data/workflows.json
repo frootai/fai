@@ -1,49 +1,49 @@
 [
   {
     "id": "fai-contributors-report",
-    "name": "FAI-contributors-report",
+    "name": "fai-contributors-report",
     "description": "Include FAI.dev repo stats",
     "steps": 12,
     "file": "workflows/fai-contributors-report.md"
   },
   {
     "id": "fai-daily-ecosystem-report",
-    "name": "FAI-daily-ecosystem-report",
+    "name": "fai-daily-ecosystem-report",
     "description": "Daily ecosystem health summary — primitive counts, marketplace stats, validation status, and recent changes across agents, instructions, skills, hooks, and plugins. The morning briefing for the FAI team.",
     "steps": 10,
     "file": "workflows/fai-daily-ecosystem-report.md"
   },
   {
     "id": "fai-evaluation-regression",
-    "name": "FAI-evaluation-regression",
+    "name": "fai-evaluation-regression",
     "description": "Number of previous evaluations for moving average",
     "steps": 12,
     "file": "workflows/fai-evaluation-regression.md"
   },
   {
     "id": "fai-knowledge-staleness",
-    "name": "FAI-knowledge-staleness",
+    "name": "fai-knowledge-staleness",
     "description": "Monthly check for stale FROOT knowledge modules — scores staleness across docs, plays, primitives, and schemas using a weighted multi-signal algorithm. Generates a freshness dashboard with automated update suggestions.",
     "steps": 9,
     "file": "workflows/fai-knowledge-staleness.md"
   },
   {
     "id": "fai-marketplace-health",
-    "name": "FAI-marketplace-health",
+    "name": "fai-marketplace-health",
     "description": "Weekly marketplace integrity check — validates all plugin.json files, verifies referenced primitives exist, detects orphaned plugins, and regenerates marketplace.json if needed.",
     "steps": 10,
     "file": "workflows/fai-marketplace-health.md"
   },
   {
     "id": "fai-play-portfolio-summary",
-    "name": "FAI-play-portfolio-summary",
-    "description": "Aggregated portfolio assessment across all 68 solution plays — dashboard of play health, WAF coverage, technology stack analysis, cost estimation, and ecosystem maturity. Auto-closes previous summary.",
+    "name": "fai-play-portfolio-summary",
+    "description": "Aggregated portfolio assessment across all solution plays — dashboard of play health, WAF coverage, technology stack analysis, cost estimation, and ecosystem maturity. Auto-closes previous summary.",
     "steps": 12,
     "file": "workflows/fai-play-portfolio-summary.md"
   },
   {
     "id": "fai-play-quality-report",
-    "name": "FAI-play-quality-report",
+    "name": "fai-play-quality-report",
     "description": "Minimum passing grade (A-F)",
     "steps": 13,
     "file": "workflows/fai-play-quality-report.md"
@@ -57,28 +57,28 @@
   },
   {
     "id": "fai-primitive-pr-review",
-    "name": "FAI-primitive-pr-review",
+    "name": "fai-primitive-pr-review",
     "description": "Automated review of PRs that add or modify primitives — validates naming, frontmatter, schema, WAF alignment, duplicate detection, and file size. Posts structured review comment with verdict.",
     "steps": 14,
     "file": "workflows/fai-primitive-pr-review.md"
   },
   {
     "id": "fai-release-readiness",
-    "name": "FAI-release-readiness",
+    "name": "fai-release-readiness",
     "description": "Preview only — do not create issue",
     "steps": 13,
     "file": "workflows/fai-release-readiness.md"
   },
   {
     "id": "fai-stale-plays-detector",
-    "name": "FAI-stale-plays-detector",
+    "name": "fai-stale-plays-detector",
     "description": "Comma-separated play numbers to exempt (e.g., 01,02)",
     "steps": 10,
     "file": "workflows/fai-stale-plays-detector.md"
   },
   {
     "id": "fai-waf-compliance-check",
-    "name": "FAI-waf-compliance-check",
+    "name": "fai-waf-compliance-check",
     "description": "Per-PR WAF pillar validation — scans changed files for security anti-patterns, reliability gaps, cost waste, operational issues, performance bottlenecks, and responsible AI violations. Produces per-pillar scores (0-100) and compliance matrix.",
     "steps": 10,
     "file": "workflows/fai-waf-compliance-check.md"

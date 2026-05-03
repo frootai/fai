@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Foundry Local On-Device AI — On-device LLM inference for air-gapped and data-sovereign environments — local m..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure IoT Hub, Azure Monitor, Azure Key Vault"}
+{"id":"44-foundry-local-on-device-q001","category":"overview","question":"What is the primary use case for the Foundry Local On Device solution play?","ground_truth":"TODO — customer-specific. See solution-plays/44-foundry-local-on-device/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"44-foundry-local-on-device-q002","category":"architecture","question":"Which Azure services does Foundry Local On Device typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"44-foundry-local-on-device-q003","category":"cost","question":"What is the recommended cost tier for Foundry Local On Device in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"44-foundry-local-on-device-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Foundry Local On Device?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"44-foundry-local-on-device-q005","category":"failure-mode","question":"What is a common failure mode in a Foundry Local On Device deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

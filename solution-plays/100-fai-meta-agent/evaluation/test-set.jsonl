@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Fai Meta Agent — > The crown jewel — a self-orchestrating super-agent that understands user goals, selects and chains"}
-{"query":"Azure services?","expected":", configures primitives, runs evaluation, and delivers production-ready AI systems. It is the FAI Protocol made autonomous — the agent that builds agents."}
+{"id":"100-fai-meta-agent-q001","category":"overview","question":"What is the primary use case for the Fai Meta Agent solution play?","ground_truth":"TODO — customer-specific. See solution-plays/100-fai-meta-agent/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"100-fai-meta-agent-q002","category":"architecture","question":"Which Azure services does Fai Meta Agent typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"100-fai-meta-agent-q003","category":"cost","question":"What is the recommended cost tier for Fai Meta Agent in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"100-fai-meta-agent-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Fai Meta Agent?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"100-fai-meta-agent-q005","category":"failure-mode","question":"What is a common failure mode in a Fai Meta Agent deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

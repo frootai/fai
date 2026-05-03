@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Healthcare Clinical AI Agent — HIPAA-compliant clinical decision support — medical coding (ICD-10/CPT), clinica..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Health Data Services, Azure AI Search, Azure Content Safety, Azure Key Vault, Azure Monitor"}
+{"id":"46-healthcare-clinical-ai-q001","category":"overview","question":"What is the primary use case for the Healthcare Clinical AI solution play?","ground_truth":"TODO — customer-specific. See solution-plays/46-healthcare-clinical-ai/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"46-healthcare-clinical-ai-q002","category":"architecture","question":"Which Azure services does Healthcare Clinical AI typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"46-healthcare-clinical-ai-q003","category":"cost","question":"What is the recommended cost tier for Healthcare Clinical AI in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"46-healthcare-clinical-ai-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Healthcare Clinical AI?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"46-healthcare-clinical-ai-q005","category":"failure-mode","question":"What is a common failure mode in a Healthcare Clinical AI deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

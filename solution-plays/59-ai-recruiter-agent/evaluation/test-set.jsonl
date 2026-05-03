@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"AI Recruiter Agent — AI recruitment assistant — resume screening with bias detection, job-candidate m..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure AI Search, Azure Cosmos DB, Azure Functions, Microsoft Graph"}
+{"id":"59-ai-recruiter-agent-q001","category":"overview","question":"What is the primary use case for the AI Recruiter Agent solution play?","ground_truth":"TODO — customer-specific. See solution-plays/59-ai-recruiter-agent/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"59-ai-recruiter-agent-q002","category":"architecture","question":"Which Azure services does AI Recruiter Agent typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"59-ai-recruiter-agent-q003","category":"cost","question":"What is the recommended cost tier for AI Recruiter Agent in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"59-ai-recruiter-agent-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Recruiter Agent?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"59-ai-recruiter-agent-q005","category":"failure-mode","question":"What is a common failure mode in a AI Recruiter Agent deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

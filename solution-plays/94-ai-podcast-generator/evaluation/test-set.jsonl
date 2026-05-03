@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Ai Podcast Generator — > Text-to-podcast pipeline with multi-speaker voice synthesis, music transitions, chapter markers, a"}
-{"query":"Azure services?","expected":"AI Voice Live SDK."}
+{"id":"94-ai-podcast-generator-q001","category":"overview","question":"What is the primary use case for the AI Podcast Generator solution play?","ground_truth":"TODO — customer-specific. See solution-plays/94-ai-podcast-generator/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"94-ai-podcast-generator-q002","category":"architecture","question":"Which Azure services does AI Podcast Generator typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"94-ai-podcast-generator-q003","category":"cost","question":"What is the recommended cost tier for AI Podcast Generator in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"94-ai-podcast-generator-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Podcast Generator?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"94-ai-podcast-generator-q005","category":"failure-mode","question":"What is a common failure mode in a AI Podcast Generator deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

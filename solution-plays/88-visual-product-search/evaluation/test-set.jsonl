@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Visual Product Search — > Image-based product discovery combining reverse image search, visual similarity matching, style re"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"88-visual-product-search-q001","category":"overview","question":"What is the primary use case for the Visual Product Search solution play?","ground_truth":"TODO — customer-specific. See solution-plays/88-visual-product-search/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"88-visual-product-search-q002","category":"architecture","question":"Which Azure services does Visual Product Search typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"88-visual-product-search-q003","category":"cost","question":"What is the recommended cost tier for Visual Product Search in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"88-visual-product-search-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Visual Product Search?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"88-visual-product-search-q005","category":"failure-mode","question":"What is a common failure mode in a Visual Product Search deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

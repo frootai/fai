@@ -248,7 +248,7 @@ test('loadHookConfig — returns structured result for non-existent hook', () =>
   assertEqual(config, null, 'config should be null for missing hook');
 });
 
-test('loadHookConfig — all 10 hooks have valid config', () => {
+test('loadHookConfig — all hooks have valid config', () => {
   const hooksDir = path.join(ROOT, 'hooks');
   const hooks = fs.readdirSync(hooksDir).filter(f => fs.statSync(path.join(hooksDir, f)).isDirectory());
   let failures = [];

@@ -9,7 +9,7 @@
  *   - agents.json      — All 201+ agents with metadata
  *   - instructions.json — All 176+ instructions with metadata
  *   - skills.json       — All 282+ skills with metadata
- *   - hooks.json        — All 10 hooks with metadata
+ *   - hooks.json        — All hooks with metadata
  *   - plugins.json      — All 77+ plugins with item counts
  *   - workflows.json    — All 12 workflows with metadata
  *   - cookbook.json      — All 16 recipes with metadata
@@ -137,7 +137,7 @@ function extractHooks() {
         try {
           const data = JSON.parse(fs.readFileSync(hooksFile, 'utf8'));
           events = Object.keys(data.hooks || {});
-        } catch {}
+        } catch { }
       }
       const readmeFile = path.join(dir, f, 'README.md');
       const readme = fs.existsSync(readmeFile)
@@ -167,7 +167,7 @@ function extractPlugins() {
     .map(f => {
       const data = JSON.parse(fs.readFileSync(path.join(dir, f, 'plugin.json'), 'utf8'));
       const items = (data.agents || []).length + (data.instructions || []).length +
-                    (data.skills || []).length + (data.hooks || []).length;
+        (data.skills || []).length + (data.hooks || []).length;
       return {
         id: data.name,
         description: data.description || '',

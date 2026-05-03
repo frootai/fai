@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Carbon Footprint Tracker — > Real-time carbon accounting across cloud resources and supply chain with automated ESG reporting a"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"69-carbon-footprint-tracker-q001","category":"overview","question":"What is the primary use case for the Carbon Footprint Tracker solution play?","ground_truth":"TODO — customer-specific. See solution-plays/69-carbon-footprint-tracker/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"69-carbon-footprint-tracker-q002","category":"architecture","question":"Which Azure services does Carbon Footprint Tracker typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"69-carbon-footprint-tracker-q003","category":"cost","question":"What is the recommended cost tier for Carbon Footprint Tracker in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"69-carbon-footprint-tracker-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Carbon Footprint Tracker?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"69-carbon-footprint-tracker-q005","category":"failure-mode","question":"What is a common failure mode in a Carbon Footprint Tracker deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

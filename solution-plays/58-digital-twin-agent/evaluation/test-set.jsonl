@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Digital Twin Agent — AI-powered digital twins — physical system simulation, predictive modeling, anom..."}
-{"query":"Azure services?","expected":"Azure IoT Hub, Azure Digital Twins, Azure OpenAI, Azure Functions, Azure Cosmos DB"}
+{"id":"58-digital-twin-agent-q001","category":"overview","question":"What is the primary use case for the Digital Twin Agent solution play?","ground_truth":"TODO — customer-specific. See solution-plays/58-digital-twin-agent/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"58-digital-twin-agent-q002","category":"architecture","question":"Which Azure services does Digital Twin Agent typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"58-digital-twin-agent-q003","category":"cost","question":"What is the recommended cost tier for Digital Twin Agent in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"58-digital-twin-agent-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Digital Twin Agent?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"58-digital-twin-agent-q005","category":"failure-mode","question":"What is a common failure mode in a Digital Twin Agent deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

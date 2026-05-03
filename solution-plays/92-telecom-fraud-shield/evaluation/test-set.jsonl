@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Telecom Fraud Shield — > Real-time telecom fraud detection covering SIM swap attacks, international revenue share fraud, su"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"92-telecom-fraud-shield-q001","category":"overview","question":"What is the primary use case for the Telecom Fraud Shield solution play?","ground_truth":"TODO — customer-specific. See solution-plays/92-telecom-fraud-shield/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"92-telecom-fraud-shield-q002","category":"architecture","question":"Which Azure services does Telecom Fraud Shield typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"92-telecom-fraud-shield-q003","category":"cost","question":"What is the recommended cost tier for Telecom Fraud Shield in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"92-telecom-fraud-shield-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Telecom Fraud Shield?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"92-telecom-fraud-shield-q005","category":"failure-mode","question":"What is a common failure mode in a Telecom Fraud Shield deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

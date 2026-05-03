@@ -76,6 +76,14 @@
     "folder": "hooks/fai-tool-guardian/"
   },
   {
+    "id": "fai-tool-observer",
+    "name": "FAI Tool Observer\r",
+    "events": [
+      "PostToolUse"
+    ],
+    "folder": "hooks/fai-tool-observer/"
+  },
+  {
     "id": "fai-waf-compliance",
     "name": "FAI WAF Compliance\r",
     "events": [

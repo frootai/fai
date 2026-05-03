@@ -1,0 +1,21 @@
+{
+    "version": 1,
+    "hooks": {
+        "PostToolUse": [
+            {
+                "type": "command",
+                "command": "bash hooks/fai-tool-observer/observe-tool.sh",
+                "windows": "powershell -NoProfile -ExecutionPolicy Bypass -File hooks/fai-tool-observer/observe-tool.ps1",
+                "cwd": ".",
+                "env": {
+                    "OBSERVE_LOG_DIR": "logs/copilot",
+                    "OBSERVE_LOG_FILE": "tool-trace.jsonl",
+                    "OBSERVE_REDACT_KEYS": "password,token,secret,apiKey,authorization,connectionString",
+                    "OBSERVE_MAX_INPUT_BYTES": "2048",
+                    "OBSERVE_MAX_OUTPUT_BYTES": "2048"
+                },
+                "timeout": 5
+            }
+        ]
+    }
+}

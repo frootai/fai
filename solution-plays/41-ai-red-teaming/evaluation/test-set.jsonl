@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"AI Red Teaming & Safety Evaluation — Automated adversarial testing of AI systems — prompt injection attacks, jailbrea..."}
-{"query":"Azure services?","expected":"Azure AI Foundry, Azure Content Safety, Azure OpenAI, Azure Monitor, Azure Key Vault"}
+{"id":"41-ai-red-teaming-q001","category":"overview","question":"What is the primary use case for the AI Red Teaming solution play?","ground_truth":"TODO — customer-specific. See solution-plays/41-ai-red-teaming/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"41-ai-red-teaming-q002","category":"architecture","question":"Which Azure services does AI Red Teaming typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"41-ai-red-teaming-q003","category":"cost","question":"What is the recommended cost tier for AI Red Teaming in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"41-ai-red-teaming-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Red Teaming?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"41-ai-red-teaming-q005","category":"failure-mode","question":"What is a common failure mode in a AI Red Teaming deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

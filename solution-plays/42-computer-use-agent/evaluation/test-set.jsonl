@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Computer Use Autonomous Agent — Vision-based desktop and web automation — AI agent controls applications via scr..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Container Apps, Azure Key Vault, Azure Monitor, Azure Blob Storage"}
+{"id":"42-computer-use-agent-q001","category":"overview","question":"What is the primary use case for the Computer Use Agent solution play?","ground_truth":"TODO — customer-specific. See solution-plays/42-computer-use-agent/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"42-computer-use-agent-q002","category":"architecture","question":"Which Azure services does Computer Use Agent typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"42-computer-use-agent-q003","category":"cost","question":"What is the recommended cost tier for Computer Use Agent in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"42-computer-use-agent-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Computer Use Agent?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"42-computer-use-agent-q005","category":"failure-mode","question":"What is a common failure mode in a Computer Use Agent deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

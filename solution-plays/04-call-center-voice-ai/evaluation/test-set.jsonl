@@ -1,1 +1,5 @@
-{"questions":[{"id":"q001","question":"Sample test","ground_truth":"Sample answer"}]}
+{"id":"04-call-center-voice-ai-q001","category":"overview","question":"What is the primary use case for the Call Center Voice AI solution play?","ground_truth":"TODO — customer-specific. See solution-plays/04-call-center-voice-ai/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"04-call-center-voice-ai-q002","category":"architecture","question":"Which Azure services does Call Center Voice AI typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"04-call-center-voice-ai-q003","category":"cost","question":"What is the recommended cost tier for Call Center Voice AI in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"04-call-center-voice-ai-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Call Center Voice AI?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"04-call-center-voice-ai-q005","category":"failure-mode","question":"What is a common failure mode in a Call Center Voice AI deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

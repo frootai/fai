@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Creative AI Multi-Modal Content Studio — Unified content creation platform — orchestrate text, image, audio from a single..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Blob Storage, Azure Content Safety, Azure Functions, Azure CDN, Azure Cosmos DB"}
+{"id":"49-creative-ai-studio-q001","category":"overview","question":"What is the primary use case for the Creative AI Studio solution play?","ground_truth":"TODO — customer-specific. See solution-plays/49-creative-ai-studio/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"49-creative-ai-studio-q002","category":"architecture","question":"Which Azure services does Creative AI Studio typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"49-creative-ai-studio-q003","category":"cost","question":"What is the recommended cost tier for Creative AI Studio in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"49-creative-ai-studio-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Creative AI Studio?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"49-creative-ai-studio-q005","category":"failure-mode","question":"What is a common failure mode in a Creative AI Studio deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

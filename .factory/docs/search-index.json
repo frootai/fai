@@ -18,21 +18,21 @@
     "description": "The FrootAI MCP Server exposes 25+ tools for AI architecture guidance, knowledge retrieval, and evaluation.",
     "route": "/api-reference/mcp-tools",
     "section": "api-reference",
-    "words": 339
+    "words": 338
   },
   {
     "title": "JSON Schemas",
     "description": "FAI Protocol schemas that validate manifest files, context references, and plugin packages.",
     "route": "/api-reference/schemas",
     "section": "api-reference",
-    "words": 2145
+    "words": 3172
   },
   {
     "title": "FAI Protocol — v0.1 Specification",
     "description": "The FAI Protocol defines a JSON-based manifest format (`fai-manifest.json`) for declaring how AI primitives — agents, instructions, skills, hooks, workflows, plugins, tools, prompts, and guardrails — ",
     "route": "/concepts/fai-protocol",
     "section": "concepts",
-    "words": 3509
+    "words": 3503
   },
   {
     "title": "FAI Primitives",
@@ -54,6 +54,48 @@
     "route": "/getting-started",
     "section": "getting-started",
     "words": 277
+  },
+  {
+    "title": "Create a Custom Agent",
+    "description": "Agents are the most powerful primitive in FrootAI. This guide shows you how to create production-grade agents.",
+    "route": "/guides/create-agent",
+    "section": "guides",
+    "words": 222
+  },
+  {
+    "title": "Deploy Your First Play",
+    "description": "This guide walks you through deploying Play 01 (Enterprise RAG) from scratch.",
+    "route": "/guides/deploy-first-play",
+    "section": "guides",
+    "words": 205
+  },
+  {
+    "title": "Enterprise Deployment",
+    "description": "Deploy FrootAI in production with enterprise-grade security, compliance, and governance.",
+    "route": "/guides/enterprise-deployment",
+    "section": "guides",
+    "words": 243
+  },
+  {
+    "title": "Guides",
+    "description": "Step-by-step tutorials for common FrootAI tasks.",
+    "route": "/guides",
+    "section": "guides",
+    "words": 98
+  },
+  {
+    "title": "Migrate from LangChain",
+    "description": "FrootAI doesn't replace LangChain — it wraps and enhances it. The FAI LangChain adapter translates your manifest into LCEL chain config.",
+    "route": "/guides/migrate-from-langchain",
+    "section": "guides",
+    "words": 219
+  },
+  {
+    "title": "Troubleshooting",
+    "description": "Solutions to common issues when working with FrootAI.",
+    "route": "/guides/troubleshooting",
+    "section": "guides",
+    "words": 184
   },
   {
     "title": "FrootAI Documentation",
@@ -190,10 +232,10 @@
   },
   {
     "title": "Hooks",
-    "description": "10 hooks available in the FrootAI ecosystem.",
+    "description": "11 hooks available in the FrootAI ecosystem.",
     "route": "/primitives/hooks",
     "section": "primitives",
-    "words": 59
+    "words": 61
   },
   {
     "title": "Primitives Catalog",
@@ -305,7 +347,7 @@
     "description": "Build the FAI Meta-Agent — FrootAI's master orchestrator. Semantic search over all 101 plays matches user intent to the best solution, cross-play intelligence suggests complementary plays (e.g., RAG +",
     "route": "/solution-plays/100-fai-meta-agent",
     "section": "solution-plays",
-    "words": 776
+    "words": 771
   },
   {
     "title": "Play 101 — Pester Test Development 🧪",
@@ -410,7 +452,7 @@
     "description": "AI reviews every pull request automatically. Static analysis catches syntax and style, GPT-4o reviews for security vulnerabilities and logic errors, OWASP scanning catches dependency issues. Actionabl",
     "route": "/solution-plays/24-ai-code-review-pipeline",
     "section": "solution-plays",
-    "words": 438
+    "words": 595
   },
   {
     "title": "24-ai-code-review",
@@ -424,7 +466,7 @@
     "description": "Give your AI agent persistent memory across conversations. Redis handles short-term session state, Cosmos DB stores compressed long-term summaries, and a vector store enables episodic recall of key fa",
     "route": "/solution-plays/25-conversation-memory-layer",
     "section": "solution-plays",
-    "words": 425
+    "words": 631
   },
   {
     "title": "25-conversation-memory",
@@ -964,5 +1006,96 @@
     "route": "/solution-plays",
     "section": "solution-plays",
     "words": 177
+  },
+  {
+    "title": "FAI Agentic Coding",
+    "description": "💻 S-9 — Protocol-level agentic coding.",
+    "route": "/specialties/coding",
+    "section": "specialties",
+    "words": 276
+  },
+  {
+    "title": "FAI Context",
+    "description": "🔗 S-2 — Protocol-level context.",
+    "route": "/specialties/context",
+    "section": "specialties",
+    "words": 406
+  },
+  {
+    "title": "FAI Federation",
+    "description": "🌐 S-12 — Protocol-level federation.",
+    "route": "/specialties/federation",
+    "section": "specialties",
+    "words": 382
+  },
+  {
+    "title": "FAI Knowledge Graphs",
+    "description": "📊 S-8 — Protocol-level knowledge graphs.",
+    "route": "/specialties/graphs",
+    "section": "specialties",
+    "words": 261
+  },
+  {
+    "title": "FAI Human-in-the-Loop",
+    "description": "👤 S-6 — Protocol-level human-in-the-loop.",
+    "route": "/specialties/hitl",
+    "section": "specialties",
+    "words": 327
+  },
+  {
+    "title": "FAI Specialties",
+    "description": "12 advanced capabilities declared at the protocol level — things no competitor offers as a standard.",
+    "route": "/specialties",
+    "section": "specialties",
+    "words": 251
+  },
+  {
+    "title": "FAI Memory",
+    "description": "🧠 S-1 — Protocol-level memory.",
+    "route": "/specialties/memory",
+    "section": "specialties",
+    "words": 441
+  },
+  {
+    "title": "FAI Planning",
+    "description": "📋 S-5 — Protocol-level planning.",
+    "route": "/specialties/planning",
+    "section": "specialties",
+    "words": 265
+  },
+  {
+    "title": "FAI Reasoning",
+    "description": "🤔 S-4 — Protocol-level reasoning.",
+    "route": "/specialties/reasoning",
+    "section": "specialties",
+    "words": 327
+  },
+  {
+    "title": "FAI Replay",
+    "description": "🔁 S-7 — Protocol-level replay.",
+    "route": "/specialties/replay",
+    "section": "specialties",
+    "words": 242
+  },
+  {
+    "title": "FAI Sessions",
+    "description": "🔄 S-3 — Protocol-level sessions.",
+    "route": "/specialties/sessions",
+    "section": "specialties",
+    "words": 325
+  },
+  {
+    "title": "FAI Trust",
+    "description": "🔐 S-11 — Protocol-level trust.",
+    "route": "/specialties/trust",
+    "section": "specialties",
+    "words": 377
+  },
+  {
+    "title": "FAI Voice",
+    "description": "🎤 S-10 — Protocol-level voice.",
+    "route": "/specialties/voice",
+    "section": "specialties",
+    "words": 411
   }
 ]

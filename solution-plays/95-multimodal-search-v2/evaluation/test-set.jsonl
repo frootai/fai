@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Multimodal Search V2 — > Unified search across images, text, code, and audio with cross-modal reasoning. A user can search "}
-{"query":"Azure services?","expected":"AI Search vector indexes across modalities with GPT-4o for cross-modal synthesis."}
+{"id":"95-multimodal-search-v2-q001","category":"overview","question":"What is the primary use case for the Multimodal Search V2 solution play?","ground_truth":"TODO — customer-specific. See solution-plays/95-multimodal-search-v2/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"95-multimodal-search-v2-q002","category":"architecture","question":"Which Azure services does Multimodal Search V2 typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"95-multimodal-search-v2-q003","category":"cost","question":"What is the recommended cost tier for Multimodal Search V2 in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"95-multimodal-search-v2-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Multimodal Search V2?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"95-multimodal-search-v2-q005","category":"failure-mode","question":"What is a common failure mode in a Multimodal Search V2 deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

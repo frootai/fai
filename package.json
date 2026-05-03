@@ -10,6 +10,7 @@
     "generate:marketplace": "node scripts/generate-marketplace.js",
     "generate:website-data": "node scripts/generate-website-data.js",
     "update:readme": "node scripts/update-readme.js",
+    "generate:agents-md": "node scripts/generate-agents-md.js",
     "materialize": "node scripts/materialize-plugins.js",
     "materialize:dry": "node scripts/materialize-plugins.js --dry-run",
     "scaffold": "node scripts/scaffold-primitive.js",

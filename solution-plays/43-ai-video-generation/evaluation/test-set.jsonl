@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"AI Video Generation Pipeline — Text-to-video content creation pipeline — prompt-driven video generation with co..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Blob Storage, Azure Content Safety, Azure Functions, Azure Service Bus, Azure CDN"}
+{"id":"43-ai-video-generation-q001","category":"overview","question":"What is the primary use case for the AI Video Generation solution play?","ground_truth":"TODO — customer-specific. See solution-plays/43-ai-video-generation/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"43-ai-video-generation-q002","category":"architecture","question":"Which Azure services does AI Video Generation typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"43-ai-video-generation-q003","category":"cost","question":"What is the recommended cost tier for AI Video Generation in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"43-ai-video-generation-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Video Generation?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"43-ai-video-generation-q005","category":"failure-mode","question":"What is a common failure mode in a AI Video Generation deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Retail Inventory Predictor — > Demand forecasting and inventory optimization combining historical sales data, weather patterns, s"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"89-retail-inventory-predictor-q001","category":"overview","question":"What is the primary use case for the Retail Inventory Predictor solution play?","ground_truth":"TODO — customer-specific. See solution-plays/89-retail-inventory-predictor/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"89-retail-inventory-predictor-q002","category":"architecture","question":"Which Azure services does Retail Inventory Predictor typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"89-retail-inventory-predictor-q003","category":"cost","question":"What is the recommended cost tier for Retail Inventory Predictor in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"89-retail-inventory-predictor-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Retail Inventory Predictor?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"89-retail-inventory-predictor-q005","category":"failure-mode","question":"What is a common failure mode in a Retail Inventory Predictor deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

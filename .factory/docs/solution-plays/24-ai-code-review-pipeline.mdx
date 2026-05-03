@@ -21,6 +21,62 @@ code .  # Use @builder for pipeline, @reviewer for quality audit, @tuner for FP 
 ```
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Developer Layer
+        Dev[Developer<br/>Pull Request]
+        GitHub[GitHub<br/>PR Webhook · Review Comments]
+    end
+
+    subgraph Review Orchestrator
+        API[Container Apps<br/>Webhook Handler · Review Pipeline]
+        CodeQL[GitHub Actions<br/>CodeQL Static Analysis]
+    end
+
+    subgraph AI Analysis
+        OpenAI[Azure OpenAI — GPT-4o<br/>Contextual Code Review · Bug Detection]
+        Triage[Azure OpenAI — GPT-4o-mini<br/>Diff Triage · Severity Classification]
+    end
+
+    subgraph Data Layer
+        CosmosDB[Cosmos DB<br/>Review History · Patterns · Feedback]
+    end
+
+    subgraph Security
+        KV[Key Vault<br/>GitHub Tokens · API Keys]
+        MI[Managed Identity<br/>Zero-secret Auth]
+    end
+
+    subgraph Monitoring
+        AppInsights[Application Insights<br/>Review Latency · Token Usage · Accuracy]
+    end
+
+    Dev -->|Open/Update PR| GitHub
+    GitHub -->|Webhook| API
+    API -->|Trigger| CodeQL
+    API -->|Diff + Context| Triage
+    Triage -->|Complex files| OpenAI
+    OpenAI -->|Review Findings| API
+    CodeQL -->|Security Findings| API
+    API -->|Inline Comments| GitHub
+    GitHub -->|Review| Dev
+    API <-->|History| CosmosDB
+    MI -->|Secrets| KV
+    API -->|Traces| AppInsights
+
+    style Dev fill:#3b82f6,color:#fff,stroke:#2563eb
+    style GitHub fill:#3b82f6,color:#fff,stroke:#2563eb
+    style API fill:#3b82f6,color:#fff,stroke:#2563eb
+    style CodeQL fill:#3b82f6,color:#fff,stroke:#2563eb
+    style OpenAI fill:#10b981,color:#fff,stroke:#059669
+    style Triage fill:#10b981,color:#fff,stroke:#059669
+    style CosmosDB fill:#f59e0b,color:#fff,stroke:#d97706
+    style KV fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style MI fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style AppInsights fill:#0ea5e9,color:#fff,stroke:#0284c7
+```
+
 | Service | Purpose |
 |---------|---------|
 | GitHub Actions | CI/CD pipeline trigger on PR events |

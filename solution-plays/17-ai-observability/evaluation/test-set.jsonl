@@ -1,1 +1,5 @@
-{"questions":[{"id":"q001","question":"Sample","ground_truth":"Sample"}]}
+{"id":"17-ai-observability-q001","category":"overview","question":"What is the primary use case for the AI Observability solution play?","ground_truth":"TODO — customer-specific. See solution-plays/17-ai-observability/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"17-ai-observability-q002","category":"architecture","question":"Which Azure services does AI Observability typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"17-ai-observability-q003","category":"cost","question":"What is the recommended cost tier for AI Observability in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"17-ai-observability-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Observability?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"17-ai-observability-q005","category":"failure-mode","question":"What is a common failure mode in a AI Observability deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

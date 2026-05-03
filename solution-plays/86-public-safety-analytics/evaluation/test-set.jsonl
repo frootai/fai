@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Public Safety Analytics — > Crime pattern prediction with resource allocation optimization, community sentiment analysis from "}
-{"query":"Azure services?","expected":"Services"}
+{"id":"86-public-safety-analytics-q001","category":"overview","question":"What is the primary use case for the Public Safety Analytics solution play?","ground_truth":"TODO — customer-specific. See solution-plays/86-public-safety-analytics/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"86-public-safety-analytics-q002","category":"architecture","question":"Which Azure services does Public Safety Analytics typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"86-public-safety-analytics-q003","category":"cost","question":"What is the recommended cost tier for Public Safety Analytics in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"86-public-safety-analytics-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Public Safety Analytics?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"86-public-safety-analytics-q005","category":"failure-mode","question":"What is a common failure mode in a Public Safety Analytics deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

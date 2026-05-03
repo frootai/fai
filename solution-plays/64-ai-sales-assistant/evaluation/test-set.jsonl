@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"AI Sales Assistant — AI-powered sales enablement — CRM integration, lead scoring with behavioral sign..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Cosmos DB, Microsoft Graph, Azure AI Search, Azure Functions"}
+{"id":"64-ai-sales-assistant-q001","category":"overview","question":"What is the primary use case for the AI Sales Assistant solution play?","ground_truth":"TODO — customer-specific. See solution-plays/64-ai-sales-assistant/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"64-ai-sales-assistant-q002","category":"architecture","question":"Which Azure services does AI Sales Assistant typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"64-ai-sales-assistant-q003","category":"cost","question":"What is the recommended cost tier for AI Sales Assistant in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"64-ai-sales-assistant-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Sales Assistant?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"64-ai-sales-assistant-q005","category":"failure-mode","question":"What is a common failure mode in a AI Sales Assistant deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

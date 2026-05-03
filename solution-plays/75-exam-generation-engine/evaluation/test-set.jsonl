@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Exam Generation Engine — > Auto-generate exams from curriculum with difficulty calibration, rubric generation, answer key cre"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"75-exam-generation-engine-q001","category":"overview","question":"What is the primary use case for the Exam Generation Engine solution play?","ground_truth":"TODO — customer-specific. See solution-plays/75-exam-generation-engine/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"75-exam-generation-engine-q002","category":"architecture","question":"Which Azure services does Exam Generation Engine typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"75-exam-generation-engine-q003","category":"cost","question":"What is the recommended cost tier for Exam Generation Engine in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"75-exam-generation-engine-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Exam Generation Engine?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"75-exam-generation-engine-q005","category":"failure-mode","question":"What is a common failure mode in a Exam Generation Engine deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

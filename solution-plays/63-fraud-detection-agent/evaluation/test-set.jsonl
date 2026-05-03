@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Fraud Detection Agent — Real-time fraud detection — transaction-level analysis with pattern recognition,..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Event Hubs, Azure Stream Analytics, Azure Cosmos DB, Azure Functions, Azure Monitor"}
+{"id":"63-fraud-detection-agent-q001","category":"overview","question":"What is the primary use case for the Fraud Detection Agent solution play?","ground_truth":"TODO — customer-specific. See solution-plays/63-fraud-detection-agent/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"63-fraud-detection-agent-q002","category":"architecture","question":"Which Azure services does Fraud Detection Agent typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"63-fraud-detection-agent-q003","category":"cost","question":"What is the recommended cost tier for Fraud Detection Agent in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"63-fraud-detection-agent-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Fraud Detection Agent?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"63-fraud-detection-agent-q005","category":"failure-mode","question":"What is a common failure mode in a Fraud Detection Agent deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

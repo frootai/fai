@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Dynamic Pricing Engine — > Real-time price optimization engine analyzing demand signals, competitor pricing, inventory levels"}
-{"query":"Azure services?","expected":"Services"}
+{"id":"87-dynamic-pricing-engine-q001","category":"overview","question":"What is the primary use case for the Dynamic Pricing Engine solution play?","ground_truth":"TODO — customer-specific. See solution-plays/87-dynamic-pricing-engine/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"87-dynamic-pricing-engine-q002","category":"architecture","question":"Which Azure services does Dynamic Pricing Engine typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"87-dynamic-pricing-engine-q003","category":"cost","question":"What is the recommended cost tier for Dynamic Pricing Engine in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"87-dynamic-pricing-engine-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Dynamic Pricing Engine?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"87-dynamic-pricing-engine-q005","category":"failure-mode","question":"What is a common failure mode in a Dynamic Pricing Engine deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

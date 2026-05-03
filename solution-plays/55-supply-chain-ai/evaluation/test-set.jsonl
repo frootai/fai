@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"Supply Chain AI — AI-powered supply chain management — demand forecasting, inventory optimization,..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Cosmos DB, Azure Event Hubs, Azure Functions, Azure Machine Learning"}
+{"id":"55-supply-chain-ai-q001","category":"overview","question":"What is the primary use case for the Supply Chain AI solution play?","ground_truth":"TODO — customer-specific. See solution-plays/55-supply-chain-ai/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"55-supply-chain-ai-q002","category":"architecture","question":"Which Azure services does Supply Chain AI typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"55-supply-chain-ai-q003","category":"cost","question":"What is the recommended cost tier for Supply Chain AI in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"55-supply-chain-ai-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for Supply Chain AI?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"55-supply-chain-ai-q005","category":"failure-mode","question":"What is a common failure mode in a Supply Chain AI deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

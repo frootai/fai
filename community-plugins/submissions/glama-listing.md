@@ -47,13 +47,13 @@ The FAI Protocol v2.0 introduces 10 contract types in `fai-manifest.json` for de
 
 ```bash
 # stdio transport (recommended)
-npx frootai-mcp@5.2.0
+npx frootai-mcp@latest
 
 # Streamable HTTP transport
-npx frootai-mcp@5.2.0 --transport http --port 3001
+npx frootai-mcp@latest --transport http --port 3001
 
 # Docker
-docker run -p 3001:3001 ghcr.io/frootai/mcp-server:5.2.0
+docker run -p 3001:3001 ghcr.io/frootai/frootai-mcp:latest
 
 # Python
 pip install frootai-mcp
@@ -69,12 +69,12 @@ python -m frootai_mcp
 
 | Channel | Package | Install |
 |---------|---------|---------|
-| npm | `frootai-mcp` | `npx frootai-mcp@5.2.0` |
-| PyPI | `frootai-mcp` | `pip install frootai-mcp` |
-| VS Code | `frootai.frootai` | Search "FrootAI" in Extensions |
-| Docker | `ghcr.io/frootai/mcp-server` | `docker pull ghcr.io/frootai/mcp-server:5.2.0` |
+| npm | `frootai-mcp` (5.2.1) | `npx frootai-mcp@latest` |
+| PyPI | `frootai-mcp` (5.0.2) | `pip install frootai-mcp` |
+| VS Code | `frootai.frootai-vscode` (5.1.6) | Search "FrootAI" in Extensions |
+| Docker | `ghcr.io/frootai/frootai-mcp` | `docker pull ghcr.io/frootai/frootai-mcp:latest` |
 | GitHub Actions | `frootai/frootai@v5` | Add to workflow YAML |
-| CLI | `frootai` | `npx frootai` |
+| CLI | `frootai` (5.4.2) | `npx frootai@latest` |
 
 ### Links
 

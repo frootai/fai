@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"AI Translation Engine — Real-time multilingual AI translation — context-aware, domain-specific glossarie..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure AI Translator, Azure Cosmos DB, Azure Container Apps, Azure CDN"}
+{"id":"57-ai-translation-engine-q001","category":"overview","question":"What is the primary use case for the AI Translation Engine solution play?","ground_truth":"TODO — customer-specific. See solution-plays/57-ai-translation-engine/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"57-ai-translation-engine-q002","category":"architecture","question":"Which Azure services does AI Translation Engine typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"57-ai-translation-engine-q003","category":"cost","question":"What is the recommended cost tier for AI Translation Engine in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"57-ai-translation-engine-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Translation Engine?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"57-ai-translation-engine-q005","category":"failure-mode","question":"What is a common failure mode in a AI Translation Engine deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}

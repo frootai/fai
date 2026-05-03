@@ -1,19 +1,19 @@
 {
   "version": "0.0.0",
-  "generated": "2026-05-02T18:32:50.114Z",
-  "commit": "445670e1",
+  "generated": "2026-05-02T19:18:48.754Z",
+  "commit": "0bb28d3e",
   "stats": {
     "agents": 238,
     "skills": 333,
     "instructions": 176,
-    "hooks": 10,
+    "hooks": 11,
     "plugins": 77,
     "workflows": 12,
     "cookbook": 16,
     "plays": 101,
     "modules": 25,
     "mcpTools": 0,
-    "totalPrimitives": 862
+    "totalPrimitives": 863
   },
   "embeddedStats": {
     "agents": 306,
@@ -10704,6 +10704,14 @@
       "folder": "hooks/fai-tool-guardian",
       "events": [
         "PreToolUse"
+      ],
+      "scriptCount": 1
+    },
+    {
+      "id": "fai-tool-observer",
+      "folder": "hooks/fai-tool-observer",
+      "events": [
+        "PostToolUse"
       ],
       "scriptCount": 1
     },

@@ -1,2 +1,5 @@
-{"query":"What does this play do?","expected":"AI Training Curriculum — Personalized AI learning platform — adaptive curriculum that assesses learner kn..."}
-{"query":"Azure services?","expected":"Azure OpenAI, Azure Cosmos DB, Azure Static Web Apps, Azure Blob Storage, Azure Functions"}
+{"id":"65-ai-training-curriculum-q001","category":"overview","question":"What is the primary use case for the AI Training Curriculum solution play?","ground_truth":"TODO — customer-specific. See solution-plays/65-ai-training-curriculum/README.md, config/, and infra/main.bicep for play-specific ground truth."}
+{"id":"65-ai-training-curriculum-q002","category":"architecture","question":"Which Azure services does AI Training Curriculum typically deploy?","ground_truth":"TODO — see infra/main.bicep for the canonical service list."}
+{"id":"65-ai-training-curriculum-q003","category":"cost","question":"What is the recommended cost tier for AI Training Curriculum in production?","ground_truth":"TODO — see config/cost.json or play README for current dev/prod estimates."}
+{"id":"65-ai-training-curriculum-q004","category":"waf","question":"Which Well-Architected Framework pillars are most critical for AI Training Curriculum?","ground_truth":"TODO — see fai-manifest.json context.waf and play README WAF table."}
+{"id":"65-ai-training-curriculum-q005","category":"failure-mode","question":"What is a common failure mode in a AI Training Curriculum deployment?","ground_truth":"TODO — see play README \"Common Pitfalls\" section and reviewer agent."}
